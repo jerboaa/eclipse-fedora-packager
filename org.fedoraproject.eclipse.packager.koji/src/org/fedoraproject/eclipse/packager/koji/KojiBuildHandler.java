@@ -144,7 +144,7 @@ public class KojiBuildHandler extends CommonHandler {
 			}
 			// push build
 			monitor.subTask(Messages.getString("KojiBuildHandler.6")); //$NON-NLS-1$
-			result = koji.build(branches.get(dist).get("target"), scmURL); //$NON-NLS-1$
+			result = koji.build(branches.get(dist).get("target"), scmURL, isScratch()); //$NON-NLS-1$
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -209,4 +209,7 @@ public class KojiBuildHandler extends CommonHandler {
 		return Messages.getString("KojiBuildHandler.12"); //$NON-NLS-1$
 	}
 
+	protected boolean isScratch() {
+		return false;
+	}
 }

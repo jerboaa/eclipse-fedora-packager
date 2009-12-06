@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -100,10 +101,15 @@ public class KojiHubClient implements IKojiHubClient {
 	 * org.fedoraproject.eclipse.packager.IKojiHubClient#build(java.lang.String,
 	 * java.lang.String)
 	 */
-	public String build(String target, String scmURL) throws XmlRpcException {
+	public String build(String target, String scmURL, boolean scratch) throws XmlRpcException {
 		ArrayList<Object> params = new ArrayList<Object>();
-		params.add(target);
 		params.add(scmURL);
+		params.add(target);
+		if (scratch) {
+			Map<String, Boolean> scratchParam = new HashMap<String, Boolean>();
+			scratchParam.put("scratch", true);
+			params.add(scratchParam);
+		}
 		Object result = client.execute("build", params); //$NON-NLS-1$
 		return result.toString();
 	}

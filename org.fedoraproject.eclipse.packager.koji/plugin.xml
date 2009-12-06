@@ -23,6 +23,30 @@
             </visibleWhen>
 
                   </command>
+                     <command
+                           commandId="org.fedoraproject.eclipse.packager.koji.ScratchBuildCommand"
+                           icon="icons/Artwork_DesignService_koji-icon-16.png"
+                           label="%command.label.1"
+                           mnemonic="%command.mnemonic.1"
+                           style="push">
+                        <visibleWhen
+                              checkEnabled="false">
+                           <or>
+                              <with
+                                    variable="activeMenuSelection">
+                                 <reference
+                                       definitionId="org.fedoraproject.eclipse.packager.cvsproject">
+                                 </reference>
+                              </with>
+                              <with
+                                    variable="activeMenuEditorInput">
+                                 <reference
+                                       definitionId="org.fedoraproject.eclipse.packager.cvsproject">
+                                 </reference>
+                              </with>
+                           </or>
+                        </visibleWhen>
+                     </command>
       </menuContribution>
    </extension>
    <extension
@@ -31,6 +55,11 @@
             defaultHandler="org.fedoraproject.eclipse.packager.koji.KojiBuildHandler"
             id="org.fedoraproject.eclipse.packager.koji.BuildCommand"
             name="%command.name.0">
+      </command>
+      <command
+            defaultHandler="org.fedoraproject.eclipse.packager.koji.KojiScratchBuildHandler"
+            id="org.fedoraproject.eclipse.packager.koji.ScratchBuildCommand"
+            name="%command.name.1">
       </command>
    </extension>
 

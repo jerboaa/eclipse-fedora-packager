@@ -11,7 +11,7 @@ public interface IKojiHubClient {
 
 	public abstract void logout() throws MalformedURLException, XmlRpcException;
 
-	public abstract String build(String target, String scmURL)
+	public abstract String build(String target, String scmURL, boolean scratch)
 			throws XmlRpcException;
 
 }
