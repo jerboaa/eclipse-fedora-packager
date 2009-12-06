@@ -120,7 +120,9 @@ public abstract class CommonHandler extends AbstractHandler implements IHandler 
 				"F-8:dist-f8-updates-candidate:.fc8:fedora:8",
 				"F-9:dist-f9-updates-candidate:.fc9:fedora:9",
 				"F-10:dist-f10:.fc10:fedora:10",
-		"devel:dist-f10:.fc10:fedora:10" };
+				"F-11:dist-f11:.fc11:fedora:11",
+				"F-12:dist-f12:.fc12:fedora:12",
+				"devel:dist-f13:.fc13:fedora:13" };
 
 		for (String branch : branches) {
 			HashMap<String, String> temp = new HashMap<String, String>();
