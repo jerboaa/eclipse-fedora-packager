@@ -40,15 +40,23 @@ public class FedoraCheckoutWizard extends CheckoutWizard implements
 		}
 
 		// get Fedora CVS username from cert
-		String file = System.getProperty("user.home") + Path.SEPARATOR
-				+ ".fedora.cert";
+		String file = System.getProperty("user.home") + Path.SEPARATOR //$NON-NLS-1$
+				+ ".fedora.cert"; //$NON-NLS-1$
 		try {
-			KeyMaterial kmat = new KeyMaterial(new File(file), new File(file),
-					new char[0]);
-
-			// create location string and add to known repositories
-			String location = ":ext;username=" + getCN(kmat)
-					+ ";hostname=cvs.fedoraproject.org:/cvs/pkgs";
+			File cert = new File(file);
+			String location = null;
+			if (cert.exists()) {
+				KeyMaterial kmat = new KeyMaterial(cert, cert,
+						new char[0]);
+				
+				// create location string and add to known repositories
+				location = ":ext;username=" + getCN(kmat) //$NON-NLS-1$
+				+ ";hostname=cvs.fedoraproject.org:/cvs/pkgs"; //$NON-NLS-1$
+			} else {
+				location = ":pserver;username=anonymous;hostname=cvs.fedoraproject.org:/cvs/pkgs"; //$NON-NLS-1$
+				MessageDialog.openWarning(getShell(), Messages.getString("FedoraCheckoutWizard.5"), Messages.getString("FedoraCheckoutWizard.6")); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			assert location != null;
 
 			if (!KnownRepositories.getInstance().isKnownRepository(location)) {
 				ICVSRepositoryLocation repository = CVSRepositoryLocation
@@ -64,12 +72,12 @@ public class FedoraCheckoutWizard extends CheckoutWizard implements
 			e.printStackTrace();
 		} catch (GeneralSecurityException e1) {
 			e1.printStackTrace();
-			MessageDialog.openError(getShell(), "Fedora CVS problem",
-					"Couldn't retrieve your SSL certificate (~/.fedora.cert)");
+			MessageDialog.openError(getShell(), Messages.getString("FedoraCheckoutWizard.7"), //$NON-NLS-1$
+					Messages.getString("FedoraCheckoutWizard.8")); //$NON-NLS-1$
 		} catch (IOException e1) {
 			e1.printStackTrace();
-			MessageDialog.openError(getShell(), "Fedora CVS problem",
-					"Couldn't retrieve your SSL certificate (~/.fedora.cert)");
+			MessageDialog.openError(getShell(), Messages.getString("FedoraCheckoutWizard.9"), //$NON-NLS-1$
+					Messages.getString("FedoraCheckoutWizard.10")); //$NON-NLS-1$
 		}
 	}
 
