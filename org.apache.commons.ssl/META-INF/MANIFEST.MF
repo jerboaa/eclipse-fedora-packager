@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %bundleName
+Bundle-SymbolicName: org.apache.commons.ssl
+Bundle-Version: 0.3.10.qualifier
+Export-Package: org.apache.commons.httpclient.contrib.ssl,
+ org.apache.commons.ssl,
+ org.apache.commons.ssl.asn1,
+ org.apache.commons.ssl.rmi,
+ org.apache.commons.ssl.util
+Bundle-Vendor: %bundleProvider
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Import-Package: org.apache.commons.httpclient;version="3.1.0",
+ org.apache.commons.httpclient.params;version="3.1.0",
+ org.apache.commons.httpclient.protocol;version="3.1.0"

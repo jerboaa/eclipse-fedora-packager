@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.fedoraproject.packager.main?before=org.fedoraproject.eclipse.packager.kojisep">
+                     <command
+                  commandId="org.fedoraproject.eclipse.packager.koji.BuildCommand"
+                  icon="icons/Artwork_DesignService_koji-icon-16.png"
+                  label="%command.label.0"
+                  mnemonic="%command.mnemonic.0"
+                  style="push">
+               <visibleWhen checkEnabled="false">
+               <or>
+                  <with variable="activeMenuSelection">
+                     <reference definitionId="org.fedoraproject.eclipse.packager.cvsproject"/>
+                  </with>
+                  <with variable="activeMenuEditorInput">
+                     <reference definitionId="org.fedoraproject.eclipse.packager.cvsproject"/>
+                  </with>
+               </or>
+            </visibleWhen>
+
+                  </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.fedoraproject.eclipse.packager.koji.KojiBuildHandler"
+            id="org.fedoraproject.eclipse.packager.koji.BuildCommand"
+            name="%command.name.0">
+      </command>
+   </extension>
+
+</plugin>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension point="org.eclipse.core.expressions.definitions">
+      <definition id="org.fedoraproject.eclipse.packager.cvsproject">
+         <iterate ifEmpty="false">
+            <adapt type="org.eclipse.core.resources.IResource">
+               <test
+                  args="org.eclipse.team.core.repository,org.eclipse.team.cvs.core.cvsnature"
+                  property="org.eclipse.core.resources.projectPersistentProperty">
+               </test>
+            </adapt>
+         </iterate>
+      </definition>
+   </extension>
+
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?before=additions">
+         <menu
+               icon="icons/fedora16x16.png"
+               id="org.eclipse.fedoraproject.packager.main"
+               label="%menu.label.0">
+            <separator
+                  name="org.fedoraproject.eclipse.packager.kojisep"
+                  visible="false">
+            </separator>
+            <separator
+                  name="org.fedoraproject.eclipse.packager.bodhisep"
+                  visible="true">
+            </separator>
+            
+            <separator
+                  name="org.fedoraproject.eclipse.packager.cvssep"
+                  visible="true">
+            </separator>
+            
+         </menu>
+      </menuContribution>
+    </extension>
+
+</plugin>

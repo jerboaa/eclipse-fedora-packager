@@ -1,0 +1,43 @@
+package org.fedoraproject.eclipse.packager.tests;
+
+import java.io.IOException;
+import java.text.ParseException;
+
+import org.apache.commons.httpclient.HttpException;
+import org.fedoraproject.eclipse.packager.bodhi.IBodhiClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class BodhiClientStub implements IBodhiClient {
+	public String username;
+	public String password;
+	public String buildName;
+	public String release;
+	public String type;
+	public String request;
+	public String bugs;
+	public String notes;
+	
+	public JSONObject login(String username, String password)
+			throws IOException, HttpException, ParseException, JSONException {
+		this.username = username;
+		this.password = password;
+		return new JSONObject();
+	}
+
+	public JSONObject newUpdate(String buildName, String release, String type,
+			String request, String bugs, String notes) throws IOException,
+			HttpException, ParseException, JSONException {
+		this.buildName = buildName;
+		this.release = release;
+		this.type = type;
+		this.request = request;
+		this.bugs = bugs;
+		this.notes = notes;
+		return new JSONObject("{\"tg_flash\": \"1337\", \"update\": \"7331\"}");
+	}
+
+	public void logout() throws IOException, HttpException, ParseException {
+	}
+
+}

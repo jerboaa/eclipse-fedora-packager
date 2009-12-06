@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.fedoraproject.packager.main?before=org.fedoraproject.eclipse.packager.bodhisep">
+         <command
+                  commandId="org.fedoraproject.eclipse.packager.bodhi.BodhiNew"
+                  icon="icons/Artwork_DesignService_bodhi-icon-16.png"
+                  label="%command.label.1"
+                  mnemonic="%command.mnemonic.1"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <with
+                           variable="activeMenuSelection">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.cvsproject">
+                        </reference>
+                     </with>
+                     <with
+                           variable="activeMenuEditorInput">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.cvsproject">
+                        </reference>
+                     </with>
+                  </or>
+               </visibleWhen>
+            </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+         <command
+            defaultHandler="org.fedoraproject.eclipse.packager.bodhi.BodhiNewHandler"
+            id="org.fedoraproject.eclipse.packager.bodhi.BodhiNew"
+            name="%command.name.8">
+      </command>
+   </extension>
+
+</plugin>
