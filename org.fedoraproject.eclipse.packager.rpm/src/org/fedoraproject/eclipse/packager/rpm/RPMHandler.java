@@ -385,7 +385,7 @@ public abstract class RPMHandler extends CommonHandler {
 			// finish reading whatever's left in the buffers
 			outThread.join();
 			errThread.join();
-
+			
 			status = returnCode == 0 ? Status.OK_STATUS : handleError(NLS.bind(Messages.getString("RPMHandler.23"), //$NON-NLS-1$
 					cmdName, returnCode));
 		} catch (InterruptedException e) {
