@@ -40,14 +40,14 @@ public class MockBuildHandler extends RPMHandler implements IHandler {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			return mockBuild(mockcfg);
+			return mockBuild(mockcfg, monitor);
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return handleError(e);
 		}
 	}
 
-	protected IStatus mockBuild(String mockcfg) {
+	protected IStatus mockBuild(String mockcfg, IProgressMonitor monitor) {
 		IStatus status;
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
@@ -61,7 +61,7 @@ public class MockBuildHandler extends RPMHandler implements IHandler {
 
 			String script = createShellScript(cmd);
 
-			status = runShellCommand("sh " + script); //$NON-NLS-1$
+			status = runShellCommand("sh " + script, monitor); //$NON-NLS-1$
 
 			// refresh containing folder
 			parent.refreshLocal(IResource.DEPTH_INFINITE,

@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import javax.swing.ProgressMonitor;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -31,9 +33,11 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -290,7 +294,7 @@ public abstract class RPMHandler extends CommonHandler {
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		IStatus status = runShellCommand("sh " + script); //$NON-NLS-1$
+		IStatus status = runShellCommand("sh " + script, monitor); //$NON-NLS-1$
 
 		// refresh containing folder
 		try {
@@ -303,7 +307,13 @@ public abstract class RPMHandler extends CommonHandler {
 		return status;
 	}
 
-	protected IStatus runShellCommand(String cmd) {
+	protected IStatus runShellCommand(String cmd, IProgressMonitor mon) {
+		boolean terminateMonitor = false;
+		if (mon == null) {
+			terminateMonitor=true;
+			mon = new NullProgressMonitor();
+			mon.beginTask(Messages.getString("RPMHandlerMockBuild"), 1); //$NON-NLS-1$
+		}
 		IStatus status;
 		String cmdName = cmd.substring(0, cmd.indexOf(' '));
 		IResource parent = specfile.getParent();
@@ -339,9 +349,39 @@ public abstract class RPMHandler extends CommonHandler {
 			// start both threads
 			outThread.start();
 			errThread.start();
+			
+			int returnCode = -1;
+			while (!mon.isCanceled()) {
+				try {
+					returnCode = proc.exitValue();
+					//Don't waste system resources
+					Thread.sleep(300);
+					break;
+				} catch (IllegalThreadStateException e) {
+					//Do nothing
+				}
+			}
+			
+			if (mon.isCanceled()) {
+				proc.destroy();
+				outThread.close();
+				errThread.close();
+				Display.getDefault().asyncExec(new Runnable() {
 
-			// wait for process to end
-			int returnCode = proc.waitFor();
+					@Override
+					public void run() {
+						MessageDialog.openError(new Shell(), Messages.getString("RPMHandlerScriptCancelled"), //$NON-NLS-1$
+								Messages.getString("RPMHandlerUserWarning")); //$NON-NLS-1$
+					}
+					
+				});
+				handleError(Messages.getString("RPMHandlerTerminationErrorHandling")); //$NON-NLS-1$
+				return Status.CANCEL_STATUS;
+			}
+			
+			if (terminateMonitor)
+				mon.done();
+			
 			// finish reading whatever's left in the buffers
 			outThread.join();
 			errThread.join();
