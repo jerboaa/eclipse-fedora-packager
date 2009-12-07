@@ -1,5 +1,6 @@
 package org.fedoraproject.eclipse.packager.rpm;
 
+import java.io.File;
 import java.util.HashMap;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -96,8 +97,17 @@ public class MockBuildHandler extends RPMHandler implements IHandler {
 					|| distval.equals("6")) { //$NON-NLS-1$
 				mockcfg += "-core"; //$NON-NLS-1$
 			}
+			
 			if (getBranchName(specfile.getParent().getName()).equals("devel")) { //$NON-NLS-1$
 				mockcfg = "fedora-devel-" + buildarch; //$NON-NLS-1$
+			}
+			
+			if (specfile.getParent().getName().equals("devel")) {
+				//If the specified mockcfg does not exist...
+				File file = new File("/etc/mock/" + mockcfg); //$NON-NLS-1$
+				if (!file.exists()){ 
+					mockcfg = "fedora-devel-" + buildarch; 
+				}
 			}
 		}
 		return mockcfg;
