@@ -17,11 +17,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-import javax.swing.ProgressMonitor;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -57,8 +54,7 @@ public abstract class RPMHandler extends CommonHandler {
 
 	protected static final String repo = "http://cvs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
 
-	protected IStatus retrieveSources(ExecutionEvent event, IProgressMonitor monitor)
-	throws ExecutionException {
+	protected IStatus retrieveSources(ExecutionEvent event, IProgressMonitor monitor) {
 		try {
 			sources = getSources();
 		} catch (IOException e) {
@@ -446,8 +442,7 @@ public abstract class RPMHandler extends CommonHandler {
 		return result.substring(0, result.indexOf('\n'));
 	}
 
-	protected IStatus makeSRPM(ExecutionEvent event, IProgressMonitor monitor)
-			throws ExecutionException {
+	protected IStatus makeSRPM(ExecutionEvent event, IProgressMonitor monitor) {
 				IStatus result = retrieveSources(event, monitor);
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {

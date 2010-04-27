@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -15,7 +14,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.osgi.util.NLS;
 
-public class MockBuildHandler extends RPMHandler implements IHandler {
+public class MockBuildHandler extends RPMHandler {
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
 		// build fresh SRPM
@@ -75,6 +74,7 @@ public class MockBuildHandler extends RPMHandler implements IHandler {
 	}
 
 	// USED FOR TESTING
+	@Override
 	public int getExitStatus() throws Exception {
 		if (proc != null) {
 			return proc.exitValue();
