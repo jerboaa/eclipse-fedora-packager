@@ -20,6 +20,7 @@ public class ConsoleWriterThread extends Thread {
 		terminate=false;
 	}
 
+	@Override
 	public void run() {
 		int ch;
 		try {

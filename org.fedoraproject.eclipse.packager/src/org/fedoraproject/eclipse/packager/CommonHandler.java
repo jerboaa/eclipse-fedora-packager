@@ -10,7 +10,6 @@ import java.util.StringTokenizer;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -54,7 +53,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.EditorPart;
 
 @SuppressWarnings("restriction")
-public abstract class CommonHandler extends AbstractHandler implements IHandler {
+public abstract class CommonHandler extends AbstractHandler {
 	protected boolean debug = false;
 	protected IResource resource;
 	protected IResource specfile;

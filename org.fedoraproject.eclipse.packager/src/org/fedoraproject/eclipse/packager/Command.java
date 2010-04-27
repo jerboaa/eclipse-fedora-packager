@@ -38,7 +38,7 @@ public class Command {
         StringBuffer out = new StringBuffer();
 
         try {
-			p = r.exec((String) command);
+			p = r.exec(command);
             // create thread for reading inputStream (process' stdout)
             StreamReaderThread outThread = new StreamReaderThread(p
                     .getInputStream(), out);
