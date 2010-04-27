@@ -33,7 +33,6 @@ import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,7 +56,7 @@ import org.fedoraproject.eclipse.packager.SSLUtils;
 import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
 
 @SuppressWarnings("restriction")
-public class UploadHandler extends RPMHandler implements IHandler {
+public class UploadHandler extends RPMHandler {
 	public static String uploadURL = "https://cvs.fedoraproject.org/repo/pkgs/upload.cgi"; //$NON-NLS-1$
 	protected HashMap<String, String> existing;
 	@Override

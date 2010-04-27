@@ -56,7 +56,6 @@ public class FedoraCheckoutWizard extends CheckoutWizard implements
 				location = ":pserver;username=anonymous;hostname=cvs.fedoraproject.org:/cvs/pkgs"; //$NON-NLS-1$
 				MessageDialog.openWarning(getShell(), Messages.getString("FedoraCheckoutWizard.5"), Messages.getString("FedoraCheckoutWizard.6")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			assert location != null;
 
 			if (!KnownRepositories.getInstance().isKnownRepository(location)) {
 				ICVSRepositoryLocation repository = CVSRepositoryLocation

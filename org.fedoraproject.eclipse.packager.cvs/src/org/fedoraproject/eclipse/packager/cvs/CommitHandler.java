@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -28,7 +27,7 @@ import org.eclipse.team.internal.core.subscribers.ActiveChangeSetManager;
 import org.fedoraproject.eclipse.packager.CommonHandler;
 
 @SuppressWarnings("restriction")
-public class CommitHandler extends CommonHandler implements IHandler {
+public class CommitHandler extends CommonHandler {
 
 	@Override
 	public IStatus doExecute(final ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
@@ -46,7 +45,7 @@ public class CommitHandler extends CommonHandler implements IHandler {
 		final ActiveChangeSetManager manager = CVSUIPlugin.getPlugin()
 		.getChangeSetManager();
 		final ActiveChangeSet cs = new ActiveChangeSet(
-				(ActiveChangeSetManager) manager, "FedoraCVS"); //$NON-NLS-1$
+				manager, "FedoraCVS"); //$NON-NLS-1$
 
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();

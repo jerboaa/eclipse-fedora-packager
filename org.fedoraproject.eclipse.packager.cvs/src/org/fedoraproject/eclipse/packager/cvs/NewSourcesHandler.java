@@ -5,12 +5,11 @@ import java.io.IOException;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-public class NewSourcesHandler extends UploadHandler implements IHandler {
+public class NewSourcesHandler extends UploadHandler {
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
 		monitor.subTask("Examining resources");
