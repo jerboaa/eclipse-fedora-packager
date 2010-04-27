@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -25,7 +24,7 @@ import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class BodhiNewHandler extends RPMHandler implements IHandler {
+public class BodhiNewHandler extends RPMHandler {
 
 	protected IBodhiNewDialog dialog;
 	protected IUserValidationDialog authDialog;

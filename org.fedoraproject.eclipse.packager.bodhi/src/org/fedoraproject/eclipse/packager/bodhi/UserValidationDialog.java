@@ -100,6 +100,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	/**
 	 * @see Window#configureShell
 	 */
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText(Messages.getString("UserValidationDialog.0")); //$NON-NLS-1$
@@ -108,6 +109,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	/**
 	 * @see Window#create
 	 */
+	@Override
 	public void create() {
 		super.create();
 		// add some default values
@@ -127,6 +129,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	/**
 	 * @see Dialog#createDialogArea
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite top = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -196,6 +199,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 			data.horizontalSpan = 3;
 			allowCachingButton.setLayoutData(data);
 			allowCachingButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					allowCaching = allowCachingButton.getSelection();
 				}
@@ -268,6 +272,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	 * may override.
 	 * </p>
 	 */
+	@Override
 	protected void okPressed() {
 		password = passwordField.getText();
 		username = usernameField.getText();
@@ -291,6 +296,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	 * 
 	 * @see org.eclipse.jface.dialogs.Dialog#close()
 	 */
+	@Override
 	public boolean close() {
 		if (keyLockImage != null) {
 			keyLockImage.dispose();
