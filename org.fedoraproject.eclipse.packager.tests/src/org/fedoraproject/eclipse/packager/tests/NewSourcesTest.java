@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.cvs.NewSourcesHandler;
@@ -27,7 +27,7 @@ public class NewSourcesTest extends AbstractTest {
 	}
 	
 	protected IResource makeFile(String name, Integer contents) throws IOException, CoreException {
-		File newSource = new File(branch.getLocation().toOSString() + Path.SEPARATOR + name);
+		File newSource = new File(branch.getLocation().toOSString() + IPath.SEPARATOR + name);
 		newSource.createNewFile();
 		if (contents != null) {
 			FileWriter out = new FileWriter(newSource);

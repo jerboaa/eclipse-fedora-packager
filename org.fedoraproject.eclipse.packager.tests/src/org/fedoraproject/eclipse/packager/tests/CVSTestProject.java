@@ -7,7 +7,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.core.ICVSRemoteFolder;
@@ -24,7 +24,7 @@ public class CVSTestProject {
 	
 	public CVSTestProject(String name, String tag) throws CoreException, InvocationTargetException, InterruptedException {
 		ICVSRepositoryLocation repo = CVSRepositoryLocation.fromString(SCM_URL);
-		ICVSRemoteFolder remoteFolder = repo.getRemoteFolder("rpms" + Path.SEPARATOR + name, new CVSTag(tag, CVSTag.VERSION));
+		ICVSRemoteFolder remoteFolder = repo.getRemoteFolder("rpms" + IPath.SEPARATOR + name, new CVSTag(tag, CVSTag.VERSION));
 		
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		project = root.getProject(name);
