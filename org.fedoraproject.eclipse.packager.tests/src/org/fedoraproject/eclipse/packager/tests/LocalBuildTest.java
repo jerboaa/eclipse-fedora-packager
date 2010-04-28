@@ -5,7 +5,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.rpm.LocalBuildHandler;
-import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
 
 public class LocalBuildTest extends AbstractTest {
 	String[] arches = {"noarch", "i386", "i586", "i686", "x86_64", "ia64", "s390", "s390x", "ppc", "ppc64", "pseries", "ppc64pseries", "iseries", "ppc64iseries", "athlon", "alpha", "alphaev6", "sparc", "sparc64", "sparcv9", "sparcv9v", "sparc64v", "i164", "mac", "sh", "mips", "geode"};
@@ -32,12 +31,6 @@ public class LocalBuildTest extends AbstractTest {
 		System.out.println("TEARDOWN START");
 		super.tearDown();
 		System.out.println("TEARDOWN END");
-	}
-
-	public void testExitStatus() throws Exception {
-		System.out.println("TESTEXITSTATUS START");
-		assertEquals(0, ((RPMHandler) handler).getExitStatus());
-		System.out.println("TESTEXITSTATUS END");
 	}
 
 	public void testBuildFolder() throws Exception {

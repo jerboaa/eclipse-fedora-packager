@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -26,6 +28,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileSection;
@@ -61,7 +64,6 @@ public abstract class CommonHandler extends AbstractHandler {
 	protected HashMap<String, HashMap<String, String>> branches;
 	protected Job job;
 	protected ExecutionEvent event;
-	protected Process proc = null;
 
 	public IResource getSpecfile() {
 		return specfile;
@@ -196,12 +198,6 @@ public abstract class CommonHandler extends AbstractHandler {
 				return result;
 			}
 			
-			@Override
-			protected void canceling() {
-				if (proc != null) {
-					proc.destroy();
-				}
-			}
 		};
 		
 		job.setUser(true);
@@ -308,35 +304,6 @@ public abstract class CommonHandler extends AbstractHandler {
 		}
 	}
 
-	//	protected Specfile parseSpec() {
-	//		// Read spec file
-	//		Specfile spec = null;
-	//		SpecfileParser parser = new SpecfileParser();
-	//		String buf = "";
-	//
-	//		try {
-	//			BufferedReader br = new BufferedReader(new InputStreamReader(
-	//					((IFile) resource).getContents()));
-	//			String line = br.readLine();
-	//
-	//			int count = 0;
-	//			while (line != null) {
-	//				buf += line + '\n';
-	//				line = br.readLine();
-	//				count++;
-	//			}
-	//			spec = parser.parse(buf);
-	//		} catch (CoreException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		} catch (IOException e) {
-	//			// TODO Auto-generated catch block
-	//			e.printStackTrace();
-	//		}
-	//
-	//		return spec;
-	//	}
-
 	protected String makeTagName() throws CoreException {
 		String name = rpmQuery(specfile, "NAME").replaceAll("^[0-9]+", "");
 		String version = rpmQuery(specfile, "VERSION");
@@ -404,36 +371,54 @@ public abstract class CommonHandler extends AbstractHandler {
 	protected String rpmQuery(IResource specfile, String format) throws CoreException {
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
-		String defines = getRPMDefines(dir);
+		List<String> defines = getRPMDefines(dir);
 
 		HashMap<String, String> branch = branches.get(parent.getName());
-		String distDefines = getDistDefines(branch);
-
-		String cmd = "rpm " + defines + " " + distDefines + " -q --qf \"%{"
-		+ format + "}\\n\" --specfile "
-		+ specfile.getLocation().toString();
+		List<String> distDefines = getDistDefines(branch);
 
 		String result = null;
+		defines.add(0, "rpm");
+		defines.addAll(distDefines);
+		defines.add("-q");
+		defines.add("--qf");
+	    defines.add("%{"+ format + "}\\n");
+		defines.add("--specfile");
+		defines.add(specfile
+				.getLocation().toString());
 
-		ShellScript script = new ShellScript(cmd, 0);
-		result = script.execNoLog();
+		try {
+			result = Utils.runCommandToString(defines.toArray(new String[0]));
+		} catch (IOException e) {
+			throw new CoreException(new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, e.getMessage(), e));
+		}
 
 		return result.substring(0, result.indexOf('\n'));
 	}
 
-	protected String getDistDefines(HashMap<String, String> branch) {
+	protected List<String> getDistDefines(HashMap<String, String> branch) {
 		// substitution for rhel
 		String distvar = branch.get("distvar").equals("epel") ? "rhel" : branch
 				.get("distvar");
-		return "--define \"dist " + branch.get("dist") + "\" " + "--define \""
-		+ distvar + " " + branch.get("distval") + "\"";
+		ArrayList<String> distDefines = new ArrayList<String>();
+		distDefines.add("--define");
+		distDefines.add("dist " + branch.get("dist"));
+		distDefines.add("--define");
+		distDefines.add(distvar + branch.get("dist"));
+		return distDefines;
 	}
 
-	protected String getRPMDefines(String dir) {
-		return "--define \"_sourcedir " + dir + "\" " + "--define \"_specdir "
-		+ dir + "\" " + "--define \"_builddir " + dir + "\" "
-		+ "--define \"_srcrpmdir " + dir + "\" "
-		+ "--define \"_rpmdir " + dir + "\"";
+	protected List<String> getRPMDefines(String dir) {
+		ArrayList<String> rpmDefines = new ArrayList<String>();
+		rpmDefines.add("--define");
+		rpmDefines.add("_sourcedir " + dir);
+		rpmDefines.add("--define");
+		rpmDefines.add("_builddir " + dir);
+		rpmDefines.add("--define");
+		rpmDefines.add("_srcrpmdir " + dir);
+		rpmDefines.add("--define");
+		rpmDefines.add("_rpmdir " + dir);
+
+		return rpmDefines;
 	}
 
 	protected boolean isTagged() throws CoreException {

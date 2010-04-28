@@ -1,5 +1,7 @@
 package org.fedoraproject.eclipse.packager.rpm;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -15,7 +17,10 @@ public class PrepHandler extends RPMHandler {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			result = rpmBuild("--nodeps -bp", null, monitor); //$NON-NLS-1$
+			ArrayList<String> flags = new ArrayList<String>();
+			flags.add("--nodeps");
+			flags.add("-bp");
+			result = rpmBuild(flags, null, monitor); //$NON-NLS-1$
 		}	
 		
 		return result;

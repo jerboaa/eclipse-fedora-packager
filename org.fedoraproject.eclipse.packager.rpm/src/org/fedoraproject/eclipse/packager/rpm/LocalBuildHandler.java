@@ -1,6 +1,7 @@
 package org.fedoraproject.eclipse.packager.rpm;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -33,7 +34,11 @@ public class LocalBuildHandler extends RPMHandler {
 					throw new OperationCanceledException();
 				}
 				// perform rpmbuild
-				result = rpmBuild("--target " + arch + " -ba", //$NON-NLS-1$ //$NON-NLS-2$
+				ArrayList<String> flags = new ArrayList<String>();
+				flags.add("--target");
+				flags.add(arch);
+				flags.add("-ba");
+				result = rpmBuild(flags, //$NON-NLS-1$ //$NON-NLS-2$
 						new File(log), monitor);
 
 			} catch (CoreException e) {

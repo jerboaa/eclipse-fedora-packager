@@ -1,6 +1,8 @@
 package org.fedoraproject.eclipse.packager.rpm;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -12,6 +14,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.osgi.util.NLS;
 
 public class MockBuildHandler extends RPMHandler {
@@ -53,15 +56,13 @@ public class MockBuildHandler extends RPMHandler {
 		String dir = parent.getLocation().toString();
 
 		try {
-			String cmd = "mock -r " + mockcfg + " --resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$
-			+ Path.SEPARATOR + makeTagName() + " rebuild " + dir //$NON-NLS-1$
-			+ Path.SEPARATOR + rpmQuery(specfile, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-			+ rpmQuery(specfile, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-			+ rpmQuery(specfile, "RELEASE") + ".src.rpm"; //$NON-NLS-1$ //$NON-NLS-2$
-
-			String script = createShellScript(cmd);
-
-			status = runShellCommand("sh " + script, monitor); //$NON-NLS-1$
+			String[] cmd = { "mock", "-r", mockcfg + "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$
+					+ Path.SEPARATOR + makeTagName(), "rebuild", dir //$NON-NLS-1$
+					+ Path.SEPARATOR + rpmQuery(specfile, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
+					+ rpmQuery(specfile, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
+					+ rpmQuery(specfile, "RELEASE") + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
+			InputStream is = Utils.runCommandToInputStream(cmd);
+			status = runShellCommand(is, monitor); //$NON-NLS-1$
 
 			// refresh containing folder
 			parent.refreshLocal(IResource.DEPTH_INFINITE,
@@ -69,18 +70,11 @@ public class MockBuildHandler extends RPMHandler {
 		} catch (CoreException e) {
 			e.printStackTrace();
 			status = handleError(e);
+		} catch (IOException e) {
+			e.printStackTrace();
+			status = handleError(e);
 		}
 		return status;
-	}
-
-	// USED FOR TESTING
-	@Override
-	public int getExitStatus() throws Exception {
-		if (proc != null) {
-			return proc.exitValue();
-		} else {
-			throw new Exception(Messages.getString("MockBuildHandler.12")); //$NON-NLS-1$
-		}
 	}
 
 	private String getMockcfg(String buildarch) throws CoreException {

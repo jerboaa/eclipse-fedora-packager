@@ -4,7 +4,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.rpm.MockBuildHandler;
-import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
 
 public class MockTest extends AbstractTest {
 	@Override
@@ -19,10 +18,6 @@ public class MockTest extends AbstractTest {
 		handler.execute(null);
 		
 		handler.waitForJob();
-	}
-	
-	public void testExitStatus() throws Exception {	
-		assertEquals(0, ((RPMHandler) handler).getExitStatus());
 	}
 	
 	public void testMockFolder() throws Exception {

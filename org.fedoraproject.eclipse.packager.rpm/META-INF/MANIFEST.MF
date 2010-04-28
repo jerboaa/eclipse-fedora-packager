@@ -6,7 +6,8 @@ Bundle-Version: 0.0.1.qualifier
 Bundle-Activator: org.fedoraproject.eclipse.packager.rpm.RPMPlugin
 Bundle-Vendor: %Bundle-Vendor.0
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.eclipse.linuxtools.rpm.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

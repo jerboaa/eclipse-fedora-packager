@@ -15,6 +15,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -31,6 +32,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -40,7 +42,6 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
-import org.fedoraproject.eclipse.packager.Command;
 import org.fedoraproject.eclipse.packager.CommonHandler;
 import org.fedoraproject.eclipse.packager.ConsoleWriterThread;
 
@@ -273,24 +274,32 @@ public abstract class RPMHandler extends CommonHandler {
 		return ret;
 	}
 
-	protected IStatus rpmBuild(String flags, File log, IProgressMonitor monitor) {		
+	protected IStatus rpmBuild(List<String> flags, File log, IProgressMonitor monitor) {		
 		monitor.subTask(NLS.bind(Messages.getString("RPMHandler.17"), specfile.getName())); //$NON-NLS-1$
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
-		String defines = getRPMDefines(dir);
+		List<String> defines = getRPMDefines(dir);
 
 		HashMap<String, String> branch = branches.get(parent.getName());
-		String distDefines = getDistDefines(branch);
+		List<String> distDefines = getDistDefines(branch);
 
-		String cmd = "rpmbuild " + defines + " " + distDefines + " " + flags //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		+ " " + specfile.getLocation().toString(); //$NON-NLS-1$
+		defines.add(0, "rpmbuild");
+		defines.addAll(distDefines);
+		defines.addAll(flags);
+		defines.add(specfile.getLocation().toString());
 
-		String script = createShellScript(cmd);
-
+		InputStream is;
+		IStatus status = null;
+		try {
+			is = Utils.runCommandToInputStream(defines.toArray(new String[0]));
+			status = runShellCommand(is, monitor); //$NON-NLS-1$
+		} catch (IOException e) {
+			e.printStackTrace();
+			handleError(e);
+		}
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		IStatus status = runShellCommand("sh " + script, monitor); //$NON-NLS-1$
 
 		// refresh containing folder
 		try {
@@ -303,7 +312,7 @@ public abstract class RPMHandler extends CommonHandler {
 		return status;
 	}
 
-	protected IStatus runShellCommand(String cmd, IProgressMonitor mon) {
+	protected IStatus runShellCommand(InputStream is, IProgressMonitor mon) {
 		boolean terminateMonitor = false;
 		if (mon == null) {
 			terminateMonitor=true;
@@ -311,9 +320,6 @@ public abstract class RPMHandler extends CommonHandler {
 			mon.beginTask(Messages.getString("RPMHandlerMockBuild"), 1); //$NON-NLS-1$
 		}
 		IStatus status;
-		String cmdName = cmd.substring(0, cmd.indexOf(' '));
-		IResource parent = specfile.getParent();
-
 		final MessageConsole console = getConsole(CONSOLE_NAME);
 		IConsoleManager manager = ConsolePlugin.getDefault()
 		.getConsoleManager();
@@ -333,15 +339,10 @@ public abstract class RPMHandler extends CommonHandler {
 		});
 
 		try {
-			proc = Runtime.getRuntime().exec(cmd, null,
-					parent.getLocation().toFile());
-
 			// create thread for reading inputStream (process' stdout)
-			ConsoleWriterThread outThread = new ConsoleWriterThread(proc
-					.getInputStream(), outStream);
+			ConsoleWriterThread outThread = new ConsoleWriterThread(is, outStream);
 			// create thread for reading errorStream (process' stderr)
-			ConsoleWriterThread errThread = new ConsoleWriterThread(proc
-					.getErrorStream(), errStream);
+			ConsoleWriterThread errThread = new ConsoleWriterThread(is, errStream);
 			// start both threads
 			outThread.start();
 			errThread.start();
@@ -349,7 +350,6 @@ public abstract class RPMHandler extends CommonHandler {
 			int returnCode = -1;
 			while (!mon.isCanceled()) {
 				try {
-					returnCode = proc.exitValue();
 					//Don't waste system resources
 					Thread.sleep(300);
 					break;
@@ -359,7 +359,6 @@ public abstract class RPMHandler extends CommonHandler {
 			}
 			
 			if (mon.isCanceled()) {
-				proc.destroy();
 				outThread.close();
 				errThread.close();
 				Display.getDefault().asyncExec(new Runnable() {
@@ -383,61 +382,23 @@ public abstract class RPMHandler extends CommonHandler {
 			errThread.join();
 			
 			status = returnCode == 0 ? Status.OK_STATUS : handleError(NLS.bind(Messages.getString("RPMHandler.23"), //$NON-NLS-1$
-					cmdName, returnCode));
+					 returnCode));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			status = Status.OK_STATUS;
-		} catch (IOException e) {
-			e.printStackTrace();
-			status = handleError(e);
 		}
-
 		return status;
-	}
-
-	// USED FOR TESTING
-	public int getExitStatus() throws Exception {
-		if (proc != null) {
-			return proc.exitValue();
-		} else {
-			throw new Exception(Messages.getString("RPMHandler.24")); //$NON-NLS-1$
-		}
-	}
-
-	protected String createShellScript(String cmd) {
-		File script;
-		String retval = null;
-		FileOutputStream out = null;
-		try {
-			script = File.createTempFile(RPMPlugin.PLUGIN_ID, ".sh"); //$NON-NLS-1$
-
-			script.setExecutable(true);
-
-			String data = "#!/bin/sh\nexec " + cmd; //$NON-NLS-1$
-			out = new FileOutputStream(script);
-
-			out.write(data.getBytes());
-			retval = script.getAbsolutePath();
-		} catch (IOException e) {
-			e.printStackTrace();
-			handleError(e);
-		} finally {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-					handleError(e);
-				}
-			}
-		}
-		return retval;
 	}
 
 	protected String rpmEval(String format) throws CoreException {
 		String cmd = "rpm --eval %{" + format + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 
-		String result = Command.exec(cmd, 0);
+		String result;
+		try {
+			result = Utils.runCommandToString(cmd);
+		} catch (IOException e) {
+			throw new CoreException(new Status(IStatus.ERROR, RPMPlugin.PLUGIN_ID, e.getMessage(), e));
+		}
 
 		return result.substring(0, result.indexOf('\n'));
 	}
@@ -448,7 +409,10 @@ public abstract class RPMHandler extends CommonHandler {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-					result = rpmBuild("--nodeps -bs", null, monitor); //$NON-NLS-1$
+					ArrayList<String> flags = new ArrayList<String>();
+					flags.add("--nodeps");
+					flags.add("-bs");
+					result = rpmBuild(flags, null, monitor); //$NON-NLS-1$
 				}
 				return result;
 			}

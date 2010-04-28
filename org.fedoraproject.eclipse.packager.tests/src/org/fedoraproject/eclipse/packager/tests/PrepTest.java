@@ -5,7 +5,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.rpm.PrepHandler;
-import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
 
 public class PrepTest extends AbstractTest {
 	@Override
@@ -19,10 +18,6 @@ public class PrepTest extends AbstractTest {
 		handler.setShell(aShell);
 		handler.execute(null);		
 		handler.waitForJob();
-	}
-	
-	public void testExitStatus() throws Exception {	
-		assertEquals(0, ((RPMHandler) handler).getExitStatus());
 	}
 	
 	public void testSourceFolder() throws Exception {
