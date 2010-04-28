@@ -10,11 +10,7 @@ public class BodhiNewTest extends AbstractTest {
 
 	@Override
 	protected void setUp() throws Exception {
-		System.out.println("SETUP1 START");
 		super.setUp();
-		System.out.println("SETUP1 END");
-		
-		System.out.println("SETUP2 START");
 		handler = new BodhiNewHandler();
 		bodhi = new BodhiClientStub();
 		handler.setDebug(true);
@@ -27,43 +23,29 @@ public class BodhiNewTest extends AbstractTest {
 		handler.execute(null);
 		handler.waitForJob();
 
-		System.out.println("SETUP2 END");
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		System.out.println("TEARDOWN START");
-		super.tearDown();
-		System.out.println("TEARDOWN END");
 	}
 
 	public void testUpdate() throws Exception {
-		System.out.println("TESTBUILD START");
 		IStatus result = handler.waitForJob();
 		String tgflash = result.getMessage();
 		String update = result.getChildren()[0].getMessage();
 		assertEquals("1337", tgflash);
 		assertEquals("7331", update);
-		System.out.println("TESTBUILD END");
 	}
 	
 	public void testAuth() throws Exception {
-		System.out.println("TESTSCMURL START");
 		assertEquals("user", bodhi.username);
 		assertEquals("pass", bodhi.password);
-		System.out.println("TESTSCMURL END");
 	}
 	
 	public void testArgs() throws Exception {
 		String clog = "* Wed Oct 29 2008 Karsten Hopp <karsten@redhat.com> 1.1-1\n"+
 			 "- update to lastest version, fixes CVE-2008-3916";
-		System.out.println("TESTTARGET START");
 		assertEquals("ed-1.1-1.fc10", bodhi.buildName);
 		assertEquals("F10", bodhi.release);
 		assertEquals("", bodhi.bugs);
 		assertEquals("bugfix", bodhi.type);
 		assertEquals("testing", bodhi.request);
 		assertEquals(clog, bodhi.notes);
-		System.out.println("TESTTARGET END");
 	}
 }

@@ -11,11 +11,7 @@ import org.fedoraproject.eclipse.packager.cvs.DownloadHandler;
 public class DownloadTest extends AbstractTest {
 	@Override
 	protected void setUp() throws Exception {
-		System.out.println("SETUP1 START");
 		super.setUp();
-		System.out.println("SETUP1 END");
-		
-		System.out.println("SETUP2 START");
 		handler = new DownloadHandler();
 		handler.setDebug(true);
 		handler.setResource(branch);
@@ -23,33 +19,20 @@ public class DownloadTest extends AbstractTest {
 		handler.setShell(aShell);
 		handler.execute(null);
 		handler.waitForJob();
-		System.out.println("SETUP2 END");
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		System.out.println("TEARDOWN START");
-		super.tearDown();
-		System.out.println("TEARDOWN END");
 	}
 
 	public void testNoChange() throws Exception {
-		System.out.println("TESTNOCHANGE START");
 		handler.execute(null);
 		assertTrue(handler.waitForJob().isOK());
 		assertNotNull(branch.findMember("ed-1.1.tar.bz2"));
-		System.out.println("TESTNOCHANGE END");
 	}
 
 	public void testNeedDownload() throws Exception {
-		System.out.println("TESTNEEDDOWNLOAD START");
 		assertTrue(handler.waitForJob().isOK());
 		assertNotNull(branch.findMember("ed-1.1.tar.bz2"));
-		System.out.println("TESTNEEDDOWNLOAD END");
 	}
 	
 	public void testMD5Mismatch() throws Exception {
-		System.out.println("TESTMD5MISMATCH START");
 		assertTrue(handler.waitForJob().isOK());
 		IFile source = (IFile) branch.findMember("ed-1.1.tar.bz2");
 		FileWriter out = new FileWriter(source.getLocation().toFile());
@@ -58,11 +41,9 @@ public class DownloadTest extends AbstractTest {
 		handler.execute(null);
 		assertTrue(handler.waitForJob().isOK());
 		assertNotNull(branch.findMember("ed-1.1.tar.bz2"));
-		System.out.println("TESTMD5MISMATCH END");
 	}
 	
 	public void testBadMD5() throws Exception {
-		System.out.println("TESTBADMD5 START");
 		IFile source = (IFile) branch.findMember("sources");
 		PrintWriter out = new PrintWriter(new FileWriter(source.getLocation().toFile()));
 		// Incorrect MD5sum
@@ -71,6 +52,5 @@ public class DownloadTest extends AbstractTest {
 		handler.execute(null);
 		assertFalse(handler.waitForJob().isOK());
 		assertNull(branch.findMember("ed-1.1.tar.bz2"));
-		System.out.println("TESTBADMD5 END");
 	}
 }

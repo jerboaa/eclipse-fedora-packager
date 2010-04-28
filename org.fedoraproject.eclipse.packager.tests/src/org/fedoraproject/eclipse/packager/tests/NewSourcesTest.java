@@ -15,16 +15,8 @@ import org.fedoraproject.eclipse.packager.cvs.NewSourcesHandler;
 
 public class NewSourcesTest extends AbstractTest {
 	protected IResource resource;
-	@Override
-	protected void setUp() throws Exception {
-		System.out.println("SETUP1 START");
-		super.setUp();
-		System.out.println("SETUP1 END");	
-	}
 
 	protected void runHandler() throws Exception {
-		System.out.println("HANDLER START");
-		
 		handler = new NewSourcesHandler();
 		handler.setDebug(true);
 		handler.setResource(resource);
@@ -32,8 +24,6 @@ public class NewSourcesTest extends AbstractTest {
 		handler.setShell(aShell);
 		handler.execute(null);		
 		handler.waitForJob();
-		
-		System.out.println("HANDLER END");
 	}
 	
 	protected IResource makeFile(String name, Integer contents) throws IOException, CoreException {
@@ -65,15 +55,7 @@ public class NewSourcesTest extends AbstractTest {
 		return result.trim();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		System.out.println("TEARDOWN START");
-		super.tearDown();
-		System.out.println("TEARDOWN END");
-	}
-
 	public void testEmpty() throws Exception {
-		System.out.println("TESTEMPTY START");
 		String message = "REMOVEME is empty";
 		resource = makeFile("REMOVEME", null);
 		String oldSources = readFile("sources");
@@ -82,29 +64,24 @@ public class NewSourcesTest extends AbstractTest {
 		assertEquals(message, handler.waitForJob().getMessage());
 		assertEquals(oldSources, readFile("sources"));
 		assertEquals(oldCvsignore, readFile(".cvsignore"));
-		System.out.println("TESTEMPTY START");
 	}
 	
 	public void testNewFile() throws Exception {
 		String newLine = "fcd3dfe8777d16d64235bc7ae6bdcb8a  REMOVEME";
-		System.out.println("TESTNEWFILE START");
 		resource = makeFile("REMOVEME", 0x90);
 		runHandler();
 		assertEquals(newLine, readFile("sources"));
 		assertEquals("REMOVEME", readFile(".cvsignore"));
-		System.out.println("TESTNEWFILE END");
 	}
 	
 	public void testUpdate() throws Exception {
 		String newLine = "fcd3dfe8777d16d64235bc7ae6bdcb8a  REMOVEME";
-		System.out.println("TESTUPDATE START");
 		resource = makeFile("REMOVEME", 0x99);
 		runHandler();
 		resource = makeFile("REMOVEME", 0x90);
 		runHandler();
 		assertEquals(newLine, readFile("sources"));
 		assertEquals("REMOVEME", readFile(".cvsignore"));
-		System.out.println("TESTUPDATE END");
 	}
 
 }
