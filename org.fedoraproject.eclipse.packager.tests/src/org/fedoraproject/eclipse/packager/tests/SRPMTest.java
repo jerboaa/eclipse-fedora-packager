@@ -35,7 +35,7 @@ public class SRPMTest extends AbstractTest {
 	public void testSRPM() throws Exception {
 		System.out.println("TESTSRPM START");
 		branch.refreshLocal(IResource.DEPTH_INFINITE, null);
-		IFile srpm = (IFile) branch.findMember("ed-0.8-1.fc8.src.rpm");
+		IFile srpm = (IFile) branch.findMember("ed-1.1-1.fc10.src.rpm");
 		assertNotNull(srpm);
 		assertTrue(srpm.getLocation().toFile().length() > 0);
 		System.out.println("TESTSRPM END");

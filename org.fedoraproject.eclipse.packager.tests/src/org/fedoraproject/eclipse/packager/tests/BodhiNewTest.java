@@ -55,11 +55,11 @@ public class BodhiNewTest extends AbstractTest {
 	}
 	
 	public void testArgs() throws Exception {
-		String clog = "* Wed Aug 22 2007 Karsten Hopp <karsten@redhat.com> 0.8-1\n"
-			+ "- update to 0.8";
+		String clog = "* Wed Oct 29 2008 Karsten Hopp <karsten@redhat.com> 1.1-1\n"+
+			 "- update to lastest version, fixes CVE-2008-3916";
 		System.out.println("TESTTARGET START");
-		assertEquals("ed-0.8-1.fc8", bodhi.buildName);
-		assertEquals("F8", bodhi.release);
+		assertEquals("ed-1.1-1.fc10", bodhi.buildName);
+		assertEquals("F10", bodhi.release);
 		assertEquals("", bodhi.bugs);
 		assertEquals("bugfix", bodhi.type);
 		assertEquals("testing", bodhi.request);

@@ -22,10 +22,10 @@ public abstract class AbstractTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		project = new CVSTestProject("ed", "ed-0_8-1_fc8");
+		project = new CVSTestProject("ed", "ed-1_1-1_fc10");
 		
 		IProject testProj = project.getProject();
-		branch = (IContainer) testProj.findMember("F-8");
+		branch = (IContainer) testProj.findMember("F-10");
 	}
 
 	@Override

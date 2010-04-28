@@ -37,27 +37,27 @@ public class DownloadTest extends AbstractTest {
 		System.out.println("TESTNOCHANGE START");
 		handler.execute(null);
 		assertTrue(handler.waitForJob().isOK());
-		assertNotNull(branch.findMember("ed-0.8.tar.bz2"));
+		assertNotNull(branch.findMember("ed-1.1.tar.bz2"));
 		System.out.println("TESTNOCHANGE END");
 	}
 
 	public void testNeedDownload() throws Exception {
 		System.out.println("TESTNEEDDOWNLOAD START");
 		assertTrue(handler.waitForJob().isOK());
-		assertNotNull(branch.findMember("ed-0.8.tar.bz2"));
+		assertNotNull(branch.findMember("ed-1.1.tar.bz2"));
 		System.out.println("TESTNEEDDOWNLOAD END");
 	}
 	
 	public void testMD5Mismatch() throws Exception {
 		System.out.println("TESTMD5MISMATCH START");
 		assertTrue(handler.waitForJob().isOK());
-		IFile source = (IFile) branch.findMember("ed-0.8.tar.bz2");
+		IFile source = (IFile) branch.findMember("ed-1.1.tar.bz2");
 		FileWriter out = new FileWriter(source.getLocation().toFile());
 		out.write(0x90);
 		out.close();
 		handler.execute(null);
 		assertTrue(handler.waitForJob().isOK());
-		assertNotNull(branch.findMember("ed-0.8.tar.bz2"));
+		assertNotNull(branch.findMember("ed-1.1.tar.bz2"));
 		System.out.println("TESTMD5MISMATCH END");
 	}
 	
@@ -66,11 +66,11 @@ public class DownloadTest extends AbstractTest {
 		IFile source = (IFile) branch.findMember("sources");
 		PrintWriter out = new PrintWriter(new FileWriter(source.getLocation().toFile()));
 		// Incorrect MD5sum
-		out.println("a359451fb32097974484b5ba7c19f5fb  ed-0.8.tar.bz2");
+		out.println("a359451fb32097974484b5ba7c19f5fb  ed-1.1.tar.bz2");
 		out.close();
 		handler.execute(null);
 		assertFalse(handler.waitForJob().isOK());
-		assertNull(branch.findMember("ed-0.8.tar.bz2"));
+		assertNull(branch.findMember("ed-1.1.tar.bz2"));
 		System.out.println("TESTBADMD5 END");
 	}
 }

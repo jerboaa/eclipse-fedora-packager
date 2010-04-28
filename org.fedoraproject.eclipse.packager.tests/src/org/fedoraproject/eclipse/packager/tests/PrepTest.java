@@ -21,7 +21,7 @@ public class PrepTest extends AbstractTest {
 	}
 	
 	public void testSourceFolder() throws Exception {
-		IContainer folder = (IContainer) branch.findMember("ed-0.8");
+		IContainer folder = (IContainer) branch.findMember("ed-1.1");
 		assertNotNull(folder);
 		assertTrue(folder.members().length > 0);
 	}

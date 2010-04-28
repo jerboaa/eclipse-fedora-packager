@@ -42,13 +42,13 @@ public class KojiBuildTest extends AbstractTest {
 	
 	public void testSCMURL() throws Exception {
 		System.out.println("TESTSCMURL START");
-		assertEquals("cvs://cvs.fedoraproject.org/cvs/pkgs?rpms/ed/F-8#ed-0_8-1_fc8", koji.scmURL);
+		assertEquals("cvs://cvs.fedoraproject.org/cvs/pkgs?rpms/ed/F-10#ed-1_1-1_fc10", koji.scmURL);
 		System.out.println("TESTSCMURL END");
 	}
 	
 	public void testTarget() throws Exception {
 		System.out.println("TESTTARGET START");
-		assertEquals("dist-f8-updates-candidate", koji.target);
+		assertEquals("dist-f10-updates-candidate", koji.target);
 		System.out.println("TESTTARGET END");
 	}
 }
