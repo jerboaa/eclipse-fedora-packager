@@ -338,13 +338,9 @@ public abstract class RPMHandler extends CommonHandler {
 		try {
 			// create thread for reading inputStream (process' stdout)
 			ConsoleWriterThread outThread = new ConsoleWriterThread(is, outStream);
-			// create thread for reading errorStream (process' stderr)
-			ConsoleWriterThread errThread = new ConsoleWriterThread(is, errStream);
 			// start both threads
 			outThread.start();
-			errThread.start();
 			
-			int returnCode = -1;
 			while (!mon.isCanceled()) {
 				try {
 					//Don't waste system resources
@@ -357,7 +353,6 @@ public abstract class RPMHandler extends CommonHandler {
 			
 			if (mon.isCanceled()) {
 				outThread.close();
-				errThread.close();
 				Display.getDefault().asyncExec(new Runnable() {
 
 					@Override
@@ -376,10 +371,8 @@ public abstract class RPMHandler extends CommonHandler {
 			
 			// finish reading whatever's left in the buffers
 			outThread.join();
-			errThread.join();
 			
-			status = returnCode == 0 ? Status.OK_STATUS : handleError(NLS.bind(Messages.getString("RPMHandler.23"), //$NON-NLS-1$
-					 returnCode));
+			status = Status.OK_STATUS;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			status = Status.OK_STATUS;
