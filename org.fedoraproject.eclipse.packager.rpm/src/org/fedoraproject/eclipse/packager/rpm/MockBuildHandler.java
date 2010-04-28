@@ -34,9 +34,8 @@ public class MockBuildHandler extends RPMHandler {
 
 	protected IStatus createMockJob(IProgressMonitor monitor) {
 		// get buildarch
-		String buildarch;
 		try {
-			buildarch = rpmEval("_arch"); //$NON-NLS-1$
+			String buildarch = rpmEval("_arch"); //$NON-NLS-1$
 			final String mockcfg = getMockcfg(buildarch);
 
 			monitor.subTask(NLS.bind(Messages.getString("MockBuildHandler.1"), specfile.getName())); //$NON-NLS-1$

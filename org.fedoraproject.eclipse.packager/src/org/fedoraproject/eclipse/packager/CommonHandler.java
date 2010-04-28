@@ -65,30 +65,6 @@ public abstract class CommonHandler extends AbstractHandler {
 	protected Job job;
 	protected ExecutionEvent event;
 
-	public IResource getSpecfile() {
-		return specfile;
-	}
-
-	public void setSpecfile(IResource specfile) {
-		this.specfile = specfile;
-	}
-
-	public IResource getResource() {
-		return resource;
-	}
-
-	public Shell getShell() {
-		return shell;
-	}
-
-	public Job getJob() {
-		return job;
-	}
-
-	public boolean isDebug() {
-		return debug;
-	}
-
 	public void setDebug(boolean debug) {
 		this.debug = debug;
 	}

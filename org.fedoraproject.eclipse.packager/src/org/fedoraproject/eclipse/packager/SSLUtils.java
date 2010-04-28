@@ -16,7 +16,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.ssl.KeyMaterial;
 import org.apache.commons.ssl.TrustChain;
 import org.apache.commons.ssl.TrustMaterial;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.IPath;
 
 public class SSLUtils {
 	public static void initSSLConnection() throws GeneralSecurityException,
@@ -25,7 +25,7 @@ public class SSLUtils {
 
 		KeyMaterial kmat = getKeyMaterial();
 
-		SSLContext sc = SSLContext.getInstance("SSL");
+		SSLContext sc = SSLContext.getInstance("SSL"); //$NON-NLS-1$
 
 		// Create empty HostnameVerifier
 		HostnameVerifier hv = new HostnameVerifier() {
@@ -43,8 +43,8 @@ public class SSLUtils {
 
 	public static KeyMaterial getKeyMaterial()
 			throws GeneralSecurityException, IOException {
-		String file = System.getProperty("user.home") + Path.SEPARATOR
-				+ ".fedora.cert";
+		String file = System.getProperty("user.home") + IPath.SEPARATOR //$NON-NLS-1$
+				+ ".fedora.cert"; //$NON-NLS-1$
 		KeyMaterial kmat = new KeyMaterial(new File(file), new File(file),
 				new char[0]);
 		return kmat;
@@ -72,12 +72,12 @@ public class SSLUtils {
 
 	protected static TrustChain getTrustChain()
 			throws GeneralSecurityException, IOException {
-		String file = System.getProperty("user.home") + Path.SEPARATOR
-				+ ".fedora-upload-ca.cert";
+		String file = System.getProperty("user.home") + IPath.SEPARATOR //$NON-NLS-1$
+				+ ".fedora-upload-ca.cert"; //$NON-NLS-1$
 		TrustChain tc = new TrustChain();
 		tc.addTrustMaterial(new TrustMaterial(file));
-		file = System.getProperty("user.home") + Path.SEPARATOR
-				+ ".fedora-server-ca.cert";
+		file = System.getProperty("user.home") + IPath.SEPARATOR //$NON-NLS-1$
+				+ ".fedora-server-ca.cert"; //$NON-NLS-1$
 		tc.addTrustMaterial(new TrustMaterial(file));
 		return tc;
 	}
