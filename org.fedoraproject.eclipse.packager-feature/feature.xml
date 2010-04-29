@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.fedoraproject.eclipse.packager_feature"
-      label="Fedora Packager Feature"
+      id="org.fedoraproject.eclipse.packager"
+      label="Fedora Packager Tools"
       version="0.0.3.qualifier"
       provider-name="FedoraProject.org"
       os="linux">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description url="http://fedorahosted.org/eclipse-fedorapackager">
+      Fedorapackager is an Eclipse plugin helping 
+      Fedora contributors with their interaction 
+      with the Fedora infrastructure - Koji, Bodhi, CVS and etc. 
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright url="epl-v10.html">
+      %copyright
    </copyright>
 
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
+   <license url="license.html">
+      %license
    </license>
 
    <requires>
