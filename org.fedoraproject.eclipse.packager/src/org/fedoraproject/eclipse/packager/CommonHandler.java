@@ -14,6 +14,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +51,9 @@ import org.eclipse.team.internal.ccvs.core.CVSException;
 import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.core.CVSTeamProvider;
+import org.eclipse.team.internal.ccvs.core.ICVSFile;
 import org.eclipse.team.internal.ccvs.core.ICVSFolder;
+import org.eclipse.team.internal.ccvs.core.ICVSRemoteResource;
 import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.core.client.Command;
 import org.eclipse.team.internal.ccvs.core.client.Session;
@@ -82,33 +86,35 @@ public abstract class CommonHandler extends AbstractHandler {
 	private HashMap<String, HashMap<String, String>> getBranches() {
 		HashMap<String, HashMap<String, String>> ret = new HashMap<String, HashMap<String, String>>();
 
-		String[] branches = { "RHL-7:rhl7:.rhl7:rhl:7",
-				"RHL-8:rhl8:.rhl8:rhl:8", "RHL-9:rhl9:.rhl9:rhl:9",
-				"OLPC-2:dist-olpc2:.olpc2:olpc:2",
-				"OLPC-3:dist-olpc3:.olpc3:olpc:3",
-				"OLPC-4:dist-olpc4:.olpc4:olpc:4",
-				"EL-4:dist-4E-epel-testing-candidate:.el4:epel:4",
-				"EL-5:dist-5E-epel-testing-candidate:.el5:epel:5", "FC-1:fc1:.fc1:fedora:1",
-				"FC-2:fc2:.fc2:fedora:2", "FC-3:fc3:.fc3:fedora:3",
-				"FC-4:fc4:.fc4:fedora:4", "FC-5:fc5:.fc5:fedora:5",
-				"FC-6:fc6:.fc6:fedora:6",
-				"F-7:dist-fc7-updates-candidate:.fc7:fedora:7",
-				"F-8:dist-f8-updates-candidate:.fc8:fedora:8",
-				"F-9:dist-f9-updates-candidate:.fc9:fedora:9",
-				"F-10:dist-f10-updates-candidate:.fc10:fedora:10",
-				"F-11:dist-f11-updates-candidate:.fc11:fedora:11",
-				"F-12:dist-f12-updates-candidate:.fc12:fedora:12",
-				"devel:dist-f13:.fc13:fedora:13" };
+		IFile branchesFile = resource.getProject().getFolder("common").getFile(
+				"branches");
+		InputStream is;
+		try {
+			is = branchesFile.getContents();
+			BufferedReader bufReader = new BufferedReader(
+					new InputStreamReader(is));
+			List<String> branches = new ArrayList<String>();
+			String line;
+			while ((line = bufReader.readLine()) != null) {
+				branches.add(line);
+			}
 
-		for (String branch : branches) {
-			HashMap<String, String> temp = new HashMap<String, String>();
-			StringTokenizer st = new StringTokenizer(branch, ":");
-			String target = st.nextToken();
-			temp.put("target", st.nextToken());
-			temp.put("dist", st.nextToken());
-			temp.put("distvar", st.nextToken());
-			temp.put("distval", st.nextToken());
-			ret.put(target, temp);
+			for (String branch : branches) {
+				HashMap<String, String> temp = new HashMap<String, String>();
+				StringTokenizer st = new StringTokenizer(branch, ":");
+				String target = st.nextToken();
+				temp.put("target", st.nextToken());
+				temp.put("dist", st.nextToken());
+				temp.put("distvar", st.nextToken());
+				temp.put("distval", st.nextToken());
+				ret.put(target, temp);
+			}
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		return ret;
@@ -116,11 +122,11 @@ public abstract class CommonHandler extends AbstractHandler {
 
 	public Object execute(ExecutionEvent e) throws ExecutionException {
 		this.event = e;
-		job = new Job ("Fedora Packager") {
+		job = new Job("Fedora Packager") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(getTaskName(), IProgressMonitor.UNKNOWN);
-				
+
 				// in debug mode, these will be set programmatically
 				if (!debug) {
 					shell = HandlerUtil.getActiveShell(event);
@@ -128,8 +134,8 @@ public abstract class CommonHandler extends AbstractHandler {
 						@Override
 						public void run() {
 							resource = getResource(event);
-						}						
-					});					
+						}
+					});
 				}
 
 				branches = getBranches();
@@ -183,9 +189,9 @@ public abstract class CommonHandler extends AbstractHandler {
 				monitor.done();
 				return result;
 			}
-			
+
 		};
-		
+
 		job.setUser(true);
 		job.schedule();
 		return null;
@@ -210,8 +216,8 @@ public abstract class CommonHandler extends AbstractHandler {
 		return result;
 	}
 
-	public abstract IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
-	throws ExecutionException;
+	public abstract IStatus doExecute(ExecutionEvent event,
+			IProgressMonitor monitor) throws ExecutionException;
 
 	protected String getBranchName(String branch) throws CoreException {
 		// check for early-branched
@@ -240,7 +246,7 @@ public abstract class CommonHandler extends AbstractHandler {
 		IProject proj = specfile.getProject();
 		// get CVSProvider
 		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
-		.getProvider(proj, CVSProviderPlugin.getTypeId());
+				.getProvider(proj, CVSProviderPlugin.getTypeId());
 
 		// get CVSROOT
 		CVSWorkspaceRoot cvsRoot = provider.getCVSWorkspaceRoot();
@@ -275,7 +281,7 @@ public abstract class CommonHandler extends AbstractHandler {
 		ISelection selection = provider.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			Object element = ((IStructuredSelection) selection)
-			.getFirstElement();
+					.getFirstElement();
 			if (element instanceof IResource) {
 				return (IResource) element;
 			} else if (element instanceof IAdaptable) {
@@ -297,14 +303,15 @@ public abstract class CommonHandler extends AbstractHandler {
 		return (name + "-" + version + "-" + release).replaceAll("\\.", "_");
 	}
 
-	protected IStatus createCVSTag(String tagName, boolean forceTag, IProgressMonitor monitor) {
+	protected IStatus createCVSTag(String tagName, boolean forceTag,
+			IProgressMonitor monitor) {
 		IStatus result;
 		IProject proj = specfile.getProject();
 		CVSTag tag = new CVSTag(tagName, CVSTag.VERSION);
 
 		// get CVSProvider
 		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
-		.getProvider(proj, CVSProviderPlugin.getTypeId());
+				.getProvider(proj, CVSProviderPlugin.getTypeId());
 		// get Repository Location
 		ICVSRepositoryLocation location;
 		try {
@@ -327,8 +334,7 @@ public abstract class CommonHandler extends AbstractHandler {
 			LocalOption[] opts;
 			if (forceTag) {
 				opts = new LocalOption[] { Tag.FORCE_REASSIGNMENT };
-			}
-			else {
+			} else {
 				opts = new LocalOption[0];
 			}
 
@@ -339,7 +345,8 @@ public abstract class CommonHandler extends AbstractHandler {
 
 			session.close();
 			if (!status.isOK()) {
-				MultiStatus temp = new MultiStatus(status.getPlugin(), status.getCode(), status.getMessage(), status.getException());
+				MultiStatus temp = new MultiStatus(status.getPlugin(), status
+						.getCode(), status.getMessage(), status.getException());
 				for (IStatus error : session.getErrors()) {
 					temp.add(error);
 				}
@@ -354,7 +361,8 @@ public abstract class CommonHandler extends AbstractHandler {
 		return result;
 	}
 
-	protected String rpmQuery(IResource specfile, String format) throws CoreException {
+	protected String rpmQuery(IResource specfile, String format)
+			throws CoreException {
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = getRPMDefines(dir);
@@ -367,15 +375,15 @@ public abstract class CommonHandler extends AbstractHandler {
 		defines.addAll(distDefines);
 		defines.add("-q");
 		defines.add("--qf");
-	    defines.add("%{"+ format + "}\\n");
+		defines.add("%{" + format + "}\\n");
 		defines.add("--specfile");
-		defines.add(specfile
-				.getLocation().toString());
+		defines.add(specfile.getLocation().toString());
 
 		try {
 			result = Utils.runCommandToString(defines.toArray(new String[0]));
 		} catch (IOException e) {
-			throw new CoreException(new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, e.getMessage(), e));
+			throw new CoreException(new Status(IStatus.ERROR,
+					PackagerPlugin.PLUGIN_ID, e.getMessage(), e));
 		}
 
 		return result.substring(0, result.indexOf('\n'));
@@ -407,7 +415,7 @@ public abstract class CommonHandler extends AbstractHandler {
 		return rpmDefines;
 	}
 
-	protected boolean isTagged() throws CoreException {
+	protected boolean isTagged(String tagName) throws CoreException {
 		String branchName = specfile.getParent().getName();
 		IProject proj = specfile.getProject();
 
@@ -418,9 +426,9 @@ public abstract class CommonHandler extends AbstractHandler {
 		CVSWorkspaceRoot cvsRoot = provider.getCVSWorkspaceRoot();
 
 		ICVSFolder folder = cvsRoot.getLocalRoot().getFolder(branchName);
-
-		CVSEntryLineTag tag = folder.getFolderSyncInfo().getTag();
-		if (tag == null) {
+		CVSTag tag = new CVSTag(tagName, CVSTag.VERSION);
+		ICVSRemoteResource remoteResource = CVSWorkspaceRoot.getRemoteResourceFor(specfile).forTag(tag);
+		if (remoteResource == null) {
 			throw new CVSException(folder.getName() + " is not tagged");
 		}
 
@@ -470,14 +478,15 @@ public abstract class CommonHandler extends AbstractHandler {
 			return recentClog.trim();
 		} finally {
 			br.close();
-		}			
+		}
 	}
 
 	protected IStatus error(String message) {
 		return new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, message);
 	}
 
-	protected IStatus handleError(final String message, Throwable exception, final boolean isError, boolean showInDialog) {
+	protected IStatus handleError(final String message, Throwable exception,
+			final boolean isError, boolean showInDialog) {
 		// do not ask for user interaction while in debug mode
 		if (showInDialog && !debug) {
 			if (Display.getCurrent() == null) {
@@ -485,30 +494,31 @@ public abstract class CommonHandler extends AbstractHandler {
 					@Override
 					public void run() {
 						if (isError) {
-							MessageDialog.openError(shell, "Fedora Packager", message);
+							MessageDialog.openError(shell, "Fedora Packager",
+									message);
+						} else {
+							MessageDialog.openInformation(shell,
+									"Fedora Packager", message);
 						}
-						else {
-							MessageDialog.openInformation(shell, "Fedora Packager", message);
-						}						
-					}					
+					}
 				});
-			}
-			else {
+			} else {
 				if (isError) {
 					MessageDialog.openError(shell, "Fedora Packager", message);
+				} else {
+					MessageDialog.openInformation(shell, "Fedora Packager",
+							message);
 				}
-				else {
-					MessageDialog.openInformation(shell, "Fedora Packager", message);
-				}	
 			}
 		}
-		return new Status(isError ? IStatus.ERROR : IStatus.OK, PackagerPlugin.PLUGIN_ID, message, exception);
+		return new Status(isError ? IStatus.ERROR : IStatus.OK,
+				PackagerPlugin.PLUGIN_ID, message, exception);
 	}
 
 	protected IStatus handleError(String message) {
 		return handleError(message, null, true, false);
 	}
-	
+
 	protected IStatus handleError(String message, boolean showInDialog) {
 		return handleError(message, null, true, showInDialog);
 	}
@@ -518,11 +528,11 @@ public abstract class CommonHandler extends AbstractHandler {
 	}
 
 	protected IStatus handleError(Exception e) {
-		return handleError(e.getMessage(), e, true, false);		
+		return handleError(e.getMessage(), e, true, false);
 	}
-	
+
 	protected IStatus handleError(Exception e, boolean showInDialog) {
-		return handleError(e.getMessage(), e, true, showInDialog);		
+		return handleError(e.getMessage(), e, true, showInDialog);
 	}
 
 	public IStatus waitForJob() {
@@ -534,14 +544,17 @@ public abstract class CommonHandler extends AbstractHandler {
 		}
 		return job.getResult();
 	}
-	
+
 	protected boolean promptForceTag(final String tagName) {
 		boolean okPressed;
 		if (Display.getCurrent() != null) {
-			okPressed = MessageDialog.openQuestion(shell, "Fedora Packager", "Branch is already tagged with " + tagName + ".\nAttempt to overwrite?");
-		}
-		else {
-			YesNoRunnable op = new YesNoRunnable("Branch is already tagged with " + tagName + ".\nAttempt to overwrite?");
+			okPressed = MessageDialog.openQuestion(shell, "Fedora Packager",
+					"Branch is already tagged with " + tagName
+							+ ".\nAttempt to overwrite?");
+		} else {
+			YesNoRunnable op = new YesNoRunnable(
+					"Branch is already tagged with " + tagName
+							+ ".\nAttempt to overwrite?");
 			Display.getDefault().syncExec(op);
 			okPressed = op.isOkPressed();
 		}
@@ -557,7 +570,7 @@ public abstract class CommonHandler extends AbstractHandler {
 			e.printStackTrace();
 			return handleError(e);
 		}
-	
+
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
@@ -577,7 +590,7 @@ public abstract class CommonHandler extends AbstractHandler {
 				}
 			}
 			if (tagExists) {
-				// prompt to force tag							
+				// prompt to force tag
 				if (promptForceTag(tagName)) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
@@ -599,7 +612,8 @@ public abstract class CommonHandler extends AbstractHandler {
 
 		@Override
 		public void run() {
-			okPressed = MessageDialog.openQuestion(shell, "Fedora Packager", question);
+			okPressed = MessageDialog.openQuestion(shell, "Fedora Packager",
+					question);
 		}
 
 		public boolean isOkPressed() {
