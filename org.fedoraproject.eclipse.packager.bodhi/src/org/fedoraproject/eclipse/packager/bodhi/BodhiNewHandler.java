@@ -48,7 +48,7 @@ public class BodhiNewHandler extends RPMHandler {
 			String branchName = specfile.getParent().getName();
 
 			// ensure branch is tagged properly before proceeding
-			if (isTagged()) {
+			if (isTagged(tag)) {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
