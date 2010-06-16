@@ -17,12 +17,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.core.ICVSRemoteFolder;
 import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
+import org.eclipse.team.internal.ccvs.core.client.Command.LocalOption;
 import org.eclipse.team.internal.ccvs.core.connection.CVSRepositoryLocation;
+import org.eclipse.team.internal.ccvs.core.resources.RemoteFolder;
+import org.eclipse.team.internal.ccvs.core.resources.RemoteModule;
 import org.eclipse.team.internal.ccvs.ui.operations.CheckoutSingleProjectOperation;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
@@ -34,13 +36,14 @@ public class CVSTestProject {
 	
 	public CVSTestProject(String name, String tag) throws CoreException, InvocationTargetException, InterruptedException {
 		ICVSRepositoryLocation repo = CVSRepositoryLocation.fromString(SCM_URL);
-		ICVSRemoteFolder remoteFolder = repo.getRemoteFolder("rpms" + IPath.SEPARATOR + name, new CVSTag(tag, CVSTag.VERSION));
+		ICVSRemoteFolder remoteFolder = repo.getRemoteFolder("rpms", null);
+		RemoteModule remoteModule = new RemoteModule(name, (RemoteFolder) remoteFolder, repo, name,new LocalOption[]{}, new CVSTag(), true);
 		
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		project = root.getProject(name);
 		
 		IProgressService progress = PlatformUI.getWorkbench().getProgressService();
-		IRunnableWithProgress op = new CheckoutSingleProjectOperation(null, remoteFolder, project, null, false);
+		IRunnableWithProgress op = new CheckoutSingleProjectOperation(null, remoteModule, project, null, false);
 		progress.busyCursorWhile(op);
 		
 		project.refreshLocal(IResource.DEPTH_INFINITE, null);
