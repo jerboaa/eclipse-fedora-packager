@@ -41,7 +41,7 @@ public class ConsoleWriterThread extends Thread {
 			//Log error, but do nothing about it
 			PackagerPlugin.getDefault().getLog().log(new Status(IStatus.WARNING,
 				      PackagerPlugin.PLUGIN_ID, 0,
-				      "I/O failed. This may be because you cancelled a command.", e));
+				      Messages.ConsoleWriterThread_0, e));
 		}
 	}
 
