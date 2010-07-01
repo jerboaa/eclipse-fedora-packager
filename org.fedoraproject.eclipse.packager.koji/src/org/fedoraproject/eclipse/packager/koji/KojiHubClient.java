@@ -65,6 +65,7 @@ public class KojiHubClient implements IKojiHubClient {
 	 * 
 	 * @see org.fedoraproject.eclipse.packager.IKojiHubClient#sslLogin()
 	 */
+	@Override
 	public String sslLogin() throws XmlRpcException, MalformedURLException {
 		ArrayList<String> params = new ArrayList<String>();
 		Object result = client.execute("sslLogin", params); //$NON-NLS-1$
@@ -80,6 +81,7 @@ public class KojiHubClient implements IKojiHubClient {
 	 * 
 	 * @see org.fedoraproject.eclipse.packager.IKojiHubClient#logout()
 	 */
+	@Override
 	public void logout() throws MalformedURLException, XmlRpcException {
 		ArrayList<String> params = new ArrayList<String>();
 		client.execute("logout", params); //$NON-NLS-1$
@@ -111,6 +113,7 @@ public class KojiHubClient implements IKojiHubClient {
 	 * org.fedoraproject.eclipse.packager.IKojiHubClient#build(java.lang.String,
 	 * java.lang.String)
 	 */
+	@Override
 	public String build(String target, String scmURL, boolean scratch) throws XmlRpcException {
 		ArrayList<Object> params = new ArrayList<Object>();
 		params.add(scmURL);

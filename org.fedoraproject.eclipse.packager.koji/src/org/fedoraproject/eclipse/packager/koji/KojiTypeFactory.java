@@ -48,6 +48,7 @@ public class KojiTypeFactory extends TypeFactoryImpl {
 		super(pController);
 	}
 
+	@Override
 	public TypeParser getParser(XmlRpcStreamConfig pConfig,
 			NamespaceContextImpl pContext, String pURI, String pLocalName) {
 		if (NullSerializer.NIL_TAG.equals(pLocalName)) {
