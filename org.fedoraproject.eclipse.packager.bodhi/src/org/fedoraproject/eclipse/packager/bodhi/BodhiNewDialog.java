@@ -34,6 +34,7 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getBuildName()
 	 */
+	@Override
 	public String getBuildName() {
 		return buildName;
 	}
@@ -41,6 +42,7 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getRelease()
 	 */
+	@Override
 	public String getRelease() {
 		return release;
 	}
@@ -48,6 +50,7 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getBugs()
 	 */
+	@Override
 	public String getBugs() {
 		return bugs;
 	}
@@ -55,6 +58,7 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getNotes()
 	 */
+	@Override
 	public String getNotes() {
 		return notes;
 	}
@@ -62,6 +66,7 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getType()
 	 */
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -69,6 +74,7 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getRequest()
 	 */
+	@Override
 	public String getRequest() {
 		return request;
 	}

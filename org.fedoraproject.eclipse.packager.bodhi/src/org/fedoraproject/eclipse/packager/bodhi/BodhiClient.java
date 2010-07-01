@@ -45,6 +45,7 @@ public class BodhiClient implements IBodhiClient {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiClient#login(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public JSONObject login(String username, String password)
 	throws IOException, HttpException, ParseException, JSONException {
 		PostMethod postMethod = new PostMethod(BODHI_URL
@@ -62,6 +63,7 @@ public class BodhiClient implements IBodhiClient {
 		return new JSONObject(postMethod.getResponseBodyAsString());
 	}
 
+	@Override
 	public void logout()
 	throws IOException, HttpException, ParseException {
 		PostMethod postMethod = new PostMethod(BODHI_URL
@@ -76,6 +78,7 @@ public class BodhiClient implements IBodhiClient {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiClient#newUpdate(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public JSONObject newUpdate(String buildName, String release, String type,
 			String request, String bugs, String notes) throws IOException,
 			HttpException, ParseException, JSONException {
