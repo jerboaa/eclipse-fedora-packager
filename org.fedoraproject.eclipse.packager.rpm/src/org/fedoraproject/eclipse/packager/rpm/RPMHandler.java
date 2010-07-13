@@ -175,7 +175,9 @@ public abstract class RPMHandler extends CommonHandler {
 		FileInputStream fis = null;
 		try {
 			fis = new FileInputStream(file);
-			result = DigestUtils.md5Hex(fis);
+			byte buf[] = new byte[(int) file.length()];
+			fis.read(buf); // read entire file into buf array
+			result = DigestUtils.md5Hex(new String(buf));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			handleError(e);
