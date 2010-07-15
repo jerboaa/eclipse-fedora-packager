@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager.tests;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.koji.KojiBuildHandler;
+import org.fedoraproject.eclipse.packager.test_utils.KojiHubClientStub;
 
 public class KojiBuildTest extends AbstractTest {
 	private KojiHubClientStub koji;

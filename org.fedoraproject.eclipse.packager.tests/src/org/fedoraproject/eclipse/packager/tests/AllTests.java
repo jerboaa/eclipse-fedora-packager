@@ -22,7 +22,7 @@ public class AllTests extends TestSuite {
 		suite.addTestSuite(TagTest.class);
 		suite.addTestSuite(NewSourcesTest.class);
 		suite.addTestSuite(BodhiNewTest.class);
-		//suite.addTestSuite(MockTest.class);
+		suite.addTestSuite(MockTest.class);
 		suite.addTestSuite(UploadTest.class);
 		suite.addTestSuite(DownloadTest.class);
 		suite.addTestSuite(LocalBuildTest.class);
