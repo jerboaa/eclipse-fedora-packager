@@ -60,6 +60,13 @@
       </menuContribution>
    </extension>
    <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.fedoraproject.eclipse.packager.koji.preferences.KojiPreferencePage"
+            id="org.fedoraproject.eclipse.packager.preferences.kojipreference"
+            name="%preferencepage.name"/>
+   </extension>
+   <extension
          point="org.eclipse.ui.commands">
       <command
             defaultHandler="org.fedoraproject.eclipse.packager.koji.KojiBuildHandler"
