@@ -84,8 +84,8 @@ public abstract class CommonHandler extends AbstractHandler {
 	private HashMap<String, HashMap<String, String>> getBranches() {
 		HashMap<String, HashMap<String, String>> ret = new HashMap<String, HashMap<String, String>>();
 
-		IFile branchesFile = resource.getProject().getFolder("common").getFile(
-				"branches");
+		IFile branchesFile = resource.getProject().getFolder("common").getFile(  //$NON-NLS-1$
+				"branches"); //$NON-NLS-1$
 		InputStream is;
 		try {
 			is = branchesFile.getContents();

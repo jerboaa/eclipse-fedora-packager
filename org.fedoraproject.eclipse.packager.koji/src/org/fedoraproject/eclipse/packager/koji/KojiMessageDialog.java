@@ -59,7 +59,7 @@ public class KojiMessageDialog extends MessageDialog {
 		// composite.setLayoutData(data);
 
 		FormText taskLink = new FormText(parent, SWT.NONE);
-		final String url = KojiHubClient.KOJI_WEB_URL + "/taskinfo?taskID=" //$NON-NLS-1$
+		final String url = KojiHubClient.kojiWebUrl + "/taskinfo?taskID=" //$NON-NLS-1$
 				+ taskNo;
 		taskLink.setText("<form><p>" +  //$NON-NLS-1$
 				Messages.getString("KojiMessageDialog.3") + "</p><p>"+ url //$NON-NLS-1$ //$NON-NLS-2$

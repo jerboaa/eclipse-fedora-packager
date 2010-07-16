@@ -23,23 +23,31 @@ import java.util.Map;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.fedoraproject.eclipse.packager.SSLUtils;
+import org.fedoraproject.eclipse.packager.koji.preferences.PreferencesConstants;
 
 // TODO Catch all Exceptions and return a unified error message
 public class KojiHubClient implements IKojiHubClient {
-	private static final String KOJI_HOST = "koji.fedoraproject.org"; //$NON-NLS-1$
-	public static final String KOJI_HUB_URL = "https://" + KOJI_HOST //$NON-NLS-1$
-			+ "/kojihub"; //$NON-NLS-1$
-	public static final String KOJI_WEB_URL = "http://" + KOJI_HOST + "/koji"; //$NON-NLS-1$ //$NON-NLS-2$
+	
+	public static String kojiHubUrl;	// set by setKojiHost
+	public static String kojiWebUrl;	// set by setKojiHost
 	private XmlRpcClientConfigImpl config;
 	private XmlRpcClient client;
 
+	static {
+		// set koji hostname from preference
+		IPreferenceStore kojiPrefStore = KojiPlugin.getDefault().getPreferenceStore();
+		initKojiUrls(kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_HOST));
+	}
+	
 	public KojiHubClient() throws GeneralSecurityException, IOException {
+		// init SSL connection
 		SSLUtils.initSSLConnection();
 
 		config = new XmlRpcClientConfigImpl();
 		try {
-			config.setServerURL(new URL(KOJI_HUB_URL));
+			config.setServerURL(new URL(KojiHubClient.kojiHubUrl));
 			config.setEnabledForExtensions(true);
 			config.setConnectionTimeout(30000);
 			client = new XmlRpcClient();
@@ -50,14 +58,24 @@ public class KojiHubClient implements IKojiHubClient {
 		}
 	}
 
+	/**
+	 * Sets Koji host according to preference and adjusts kojiHubUrl and kojiWebUrl
+	 * 
+	 * @param kojiHost
+	 */
+	private static void initKojiUrls(String kojiHost) {
+		KojiHubClient.kojiHubUrl = "https://" + kojiHost;
+		KojiHubClient.kojiWebUrl = "http://" + kojiHost;
+	}
+	
 	private void setSession(String sessionKey, String sessionID)
 			throws MalformedURLException {
-		config.setServerURL(new URL(KOJI_HUB_URL + "?session-key=" + sessionKey //$NON-NLS-1$
+		config.setServerURL(new URL(KojiHubClient.kojiHubUrl + "?session-key=" + sessionKey //$NON-NLS-1$
 				+ "&session-id=" + sessionID)); //$NON-NLS-1$
 	}
 
 	private void discardSession() throws MalformedURLException {
-		config.setServerURL(new URL(KOJI_HUB_URL));
+		config.setServerURL(new URL(KojiHubClient.kojiHubUrl));
 	}
 
 	/*

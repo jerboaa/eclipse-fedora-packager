@@ -24,5 +24,6 @@ Import-Package: junit.framework;version="3.8.2",
  org.fedoraproject.eclipse.packager.bodhi,
  org.fedoraproject.eclipse.packager.cvs,
  org.fedoraproject.eclipse.packager.koji,
+ org.fedoraproject.eclipse.packager.koji.preferences,
  org.fedoraproject.eclipse.packager.rpm,
  org.json

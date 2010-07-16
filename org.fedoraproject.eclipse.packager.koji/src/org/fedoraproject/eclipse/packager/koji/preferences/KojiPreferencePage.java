@@ -39,18 +39,8 @@ public class KojiPreferencePage extends FieldEditorPreferencePage implements
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
-
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.FieldEditorPreferencePage#performDefaults()
-	 */
-	@Override
-	protected void performDefaults() {
-		super.performDefaults();
-		getPreferenceStore().setValue(PreferencesConstants.PREF_KOJI_HOST, PreferencesConstants.DEFAULT_KOJI_HOST);
-	}
-
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.preference.FieldEditorPreferencePage#createFieldEditors()
 	 */

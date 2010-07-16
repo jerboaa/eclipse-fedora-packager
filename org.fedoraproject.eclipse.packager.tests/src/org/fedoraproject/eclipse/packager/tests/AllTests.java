@@ -29,6 +29,7 @@ public class AllTests extends TestSuite {
 		suite.addTestSuite(PrepTest.class);
 		suite.addTestSuite(KojiBuildTest.class);
 		suite.addTestSuite(SRPMTest.class);
+		suite.addTestSuite(KojiPreferenceTest.class);
 		//$JUnit-END$
 		return suite;
 	}

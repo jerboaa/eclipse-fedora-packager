@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.koji;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.koji.preferences.PreferencesConstants;
 
 public class KojiPlugin extends PackagerPlugin {
 
@@ -29,4 +31,13 @@ public class KojiPlugin extends PackagerPlugin {
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
+	
+	/** 
+	 * Initializes a preference store with default preference values 
+	 * for this plug-in.
+	 */
+	protected void initializeDefaultPreferences(IPreferenceStore store) {
+		store.setDefault(PreferencesConstants.PREF_KOJI_HOST, PreferencesConstants.DEFAULT_KOJI_HOST);
+	}
+
 }
