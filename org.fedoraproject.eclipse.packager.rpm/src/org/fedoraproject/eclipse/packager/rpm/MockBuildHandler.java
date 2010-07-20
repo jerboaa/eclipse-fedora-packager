@@ -65,7 +65,7 @@ public class MockBuildHandler extends RPMHandler {
 		String dir = parent.getLocation().toString();
 
 		try {
-			String[] cmd = { "mock", "-r", mockcfg + "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$
+			String[] cmd = { "mock", "-r", mockcfg, "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$
 					+ Path.SEPARATOR + makeTagName(), "rebuild", dir //$NON-NLS-1$
 					+ Path.SEPARATOR + rpmQuery(specfile, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
 					+ rpmQuery(specfile, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$

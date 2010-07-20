@@ -393,7 +393,7 @@ public abstract class RPMHandler extends CommonHandler {
 	}
 
 	protected String rpmEval(String format) throws CoreException {
-		String cmd = "rpm --eval %{" + format + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+		String cmd[] = { "rpm", "--eval", "%{" + format + "}" }; //$NON-NLS-1$ //$NON-NLS-2$
 
 		String result;
 		try {
