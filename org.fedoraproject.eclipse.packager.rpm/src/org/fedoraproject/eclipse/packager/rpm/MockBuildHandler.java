@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.rpm;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +25,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.osgi.util.NLS;
 
@@ -63,16 +66,20 @@ public class MockBuildHandler extends RPMHandler {
 		IStatus status;
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
-
+		
+		// make sure mock is installed, bail out otherwise
+		if (!isMockInstalled()) {
+			return handleError(Messages.getString("MockBuildHandlerMockNotInstalled"));
+		}
 		try {
-			String[] cmd = { "mock", "-r", mockcfg + "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$
+			String[] cmd = { "mock", "-r", mockcfg, "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$
 					+ Path.SEPARATOR + makeTagName(), "rebuild", dir //$NON-NLS-1$
 					+ Path.SEPARATOR + rpmQuery(specfile, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
 					+ rpmQuery(specfile, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
 					+ rpmQuery(specfile, "RELEASE") + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
 			InputStream is = Utils.runCommandToInputStream(cmd);
 			status = runShellCommand(is, monitor); //$NON-NLS-1$
-
+			
 			// refresh containing folder
 			parent.refreshLocal(IResource.DEPTH_INFINITE,
 					new NullProgressMonitor());
@@ -114,6 +121,34 @@ public class MockBuildHandler extends RPMHandler {
 			}
 		}
 		return mockcfg;
+	}
+	
+	/**
+	 * Determine if mock program is available
+	 * 
+	 * @return
+	 */
+	private boolean isMockInstalled() {
+		final String rpmQueryCmd[] = { "rpm", "-q", "mock" };
+		ProcessBuilder pBuilder = new ProcessBuilder(rpmQueryCmd);
+		pBuilder = pBuilder.redirectErrorStream(true);
+		Process child;
+		try {
+			child = pBuilder.start();
+			child.waitFor();
+			// decide according to status code if mock is installed
+			if (child.exitValue() == 0 ) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+		// shouldn't arrive here
+		return false;
 	}
 
 	@Override
