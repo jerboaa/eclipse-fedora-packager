@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<toc topic="userguide/Eclipse_Fedora_Packager_User_Guide/Eclipse-Fedora-Packager-User-Guide.html" label="Eclipse Fedora Packager User Guide">
+	<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Eclipse-Fedora-Packager-User-Guide.html" label="Fedora Packager User Guide">
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Eclipse-Fedora-Packager-User-Guide.html" label="Getting Started"></topic>
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Import-Fedora-CVS-Package.html" label="Import Fedora CVS Package"></topic>
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Do-Your-Fedora-Packaging-Work.html" label="Do Your Fedora Packaging Work"></topic>
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-the-Spec-File-Editor.html" label="Using the Spec-File Editor"></topic>
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Push-Build-to-Koji.html" label="Push Build to Koji"></topic>
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Reporting-Bugs.html" label="Reporting Bugs"></topic>
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Updating-This-Document.html" label="Updating This Document"></topic>
+	</topic>
+</toc>
