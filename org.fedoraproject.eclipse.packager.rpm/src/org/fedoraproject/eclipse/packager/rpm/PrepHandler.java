@@ -30,7 +30,7 @@ public class PrepHandler extends RPMHandler {
 			ArrayList<String> flags = new ArrayList<String>();
 			flags.add("--nodeps");
 			flags.add("-bp");
-			result = rpmBuild(flags, null, monitor); //$NON-NLS-1$
+			result = rpmBuild(flags, monitor); //$NON-NLS-1$
 		}	
 		
 		return result;

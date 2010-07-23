@@ -283,7 +283,7 @@ public abstract class RPMHandler extends CommonHandler {
 		return ret;
 	}
 
-	protected IStatus rpmBuild(List<String> flags, File log, IProgressMonitor monitor) {		
+	protected IStatus rpmBuild(List<String> flags, IProgressMonitor monitor) {		
 		monitor.subTask(NLS.bind(Messages.getString("RPMHandler.17"), specfile.getName())); //$NON-NLS-1$
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
@@ -414,7 +414,7 @@ public abstract class RPMHandler extends CommonHandler {
 					ArrayList<String> flags = new ArrayList<String>();
 					flags.add("--nodeps");
 					flags.add("-bs");
-					result = rpmBuild(flags, null, monitor); //$NON-NLS-1$
+					result = rpmBuild(flags, monitor); //$NON-NLS-1$
 				}
 				return result;
 			}

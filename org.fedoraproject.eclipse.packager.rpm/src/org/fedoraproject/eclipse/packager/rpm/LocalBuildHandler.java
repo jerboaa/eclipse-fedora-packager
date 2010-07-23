@@ -33,13 +33,7 @@ public class LocalBuildHandler extends RPMHandler {
 			try {
 				// search for noarch directive, otherwise use local arch
 				final String arch = rpmQuery(specfile, "ARCH"); //$NON-NLS-1$
-				final String log;
-
-				log = specfile.getParent().getLocation().toOSString()
-				+ Path.SEPARATOR + ".build-" //$NON-NLS-1$
-				+ rpmQuery(specfile, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-				+ rpmQuery(specfile, "RELEASE") + ".log"; //$NON-NLS-1$ //$NON-NLS-2$
-
+				
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
@@ -49,7 +43,7 @@ public class LocalBuildHandler extends RPMHandler {
 				flags.add(arch);
 				flags.add("-ba");
 				result = rpmBuild(flags, //$NON-NLS-1$ //$NON-NLS-2$
-						new File(log), monitor);
+						monitor);
 
 			} catch (CoreException e) {
 				e.printStackTrace();
