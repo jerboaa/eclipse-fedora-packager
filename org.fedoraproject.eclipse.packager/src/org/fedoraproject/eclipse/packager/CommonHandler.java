@@ -453,12 +453,7 @@ public abstract class CommonHandler extends AbstractHandler {
 			spec = parser.parse(buf);
 
 			// get the changelog section
-			SpecfileSection clogSection = null;
-			for (SpecfileSection section : spec.getSections()) {
-				if (section.getName().equals("changelog")) {
-					clogSection = section;
-				}
-			}
+			SpecfileSection clogSection = spec.getSection("changelog");
 
 			String clog = buf.substring(clogSection.getLineStartPosition());
 			String[] lines = clog.split("\n");
