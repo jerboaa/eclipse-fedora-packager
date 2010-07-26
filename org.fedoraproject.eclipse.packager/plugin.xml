@@ -32,6 +32,12 @@
             </adapt>
          </iterate>
       </definition>
+      <definition id="org.fedoraproject.eclipse.packager.project">
+         <or>
+         <reference definitionId="org.fedoraproject.eclipse.packager.cvsproject" />
+         <reference definitionId="org.fedoraproject.eclipse.packager.gitproject" />
+         </or>
+       </definition>
    </extension>
 
    <extension point="org.eclipse.ui.menus">
