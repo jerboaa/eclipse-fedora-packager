@@ -73,6 +73,10 @@ public class SourcesFile {
 	public Map<String, String> getSources() {
 		return sources;
 	}
+	
+	public String getSource(String key) {
+		return sources.get(key);
+	}
 
 	public void checkSources(Set<String> sourcesToGet) {
 		ArrayList<String> toRemove = new ArrayList<String>();
