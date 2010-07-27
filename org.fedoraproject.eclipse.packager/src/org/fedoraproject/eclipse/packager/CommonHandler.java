@@ -118,6 +118,7 @@ public abstract class CommonHandler extends AbstractHandler {
 		return ret;
 	}
 
+	@Override
 	public Object execute(ExecutionEvent e) throws ExecutionException {
 		this.event = e;
 		job = new Job("Fedora Packager") {
