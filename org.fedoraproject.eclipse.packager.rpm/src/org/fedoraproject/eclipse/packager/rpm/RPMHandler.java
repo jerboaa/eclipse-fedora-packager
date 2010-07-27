@@ -10,12 +10,8 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.rpm;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -38,8 +34,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -48,6 +46,7 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.fedoraproject.eclipse.packager.CommonHandler;
 import org.fedoraproject.eclipse.packager.ConsoleWriterThread;
+import org.fedoraproject.eclipse.packager.DownloadJob;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 
 public abstract class RPMHandler extends CommonHandler {
@@ -76,9 +75,8 @@ public abstract class RPMHandler extends CommonHandler {
 		// Need to download remaining sources from repo
 		IStatus status = null;
 		for (final String source : sourcesToGet) {
-			monitor.subTask(NLS.bind(Messages.getString("RPMHandler.4"), source)); //$NON-NLS-1$
 			final String url = repo + "/" + specfile.getProject().getName() //$NON-NLS-1$
-					+ "/" + source + "/" + sources.get(source) + "/" + source; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ "/" + source + "/" + sourcesFile.getSource(source) + "/" + source; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			status = download(url, source, monitor);
 			if (!status.isOK()) {
 				// download failed
@@ -130,38 +128,28 @@ public abstract class RPMHandler extends CommonHandler {
 
 	protected IStatus download(String location, String fileName,
 			IProgressMonitor monitor) {
-		InputStream in = null;
-		OutputStream out = null;
-		File file = null;
+		IFile file = null;
 		try {
 			URL url = new URL(location);
-			file = new File(specfile.getParent().getLocation().toOSString()
-					+ Path.SEPARATOR + fileName);
-
-			if (!file.createNewFile()) {
-				// try overwriting the file if it exists
-				file.delete();
-				if (!file.createNewFile()) {
-					return handleError(NLS.bind(
-							Messages.getString("RPMHandler.12"), fileName)); //$NON-NLS-1$
-				}
-			}
-			out = new BufferedOutputStream(new FileOutputStream(file));
+			file = specfile.getParent().getFile(new Path(fileName));
 
 			// connect to repo
 			URLConnection conn = url.openConnection();
 
-			in = conn.getInputStream();
-			// 1K buffer
-			byte[] buf = new byte[1024];
-
-			// download file
-			int bytesRead = -1;
-			while ((bytesRead = in.read(buf)) != -1) {
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
+			if (file.exists()) {
+				MessageBox mb = new MessageBox(Display.getCurrent()
+						.getActiveShell(), SWT.ICON_QUESTION | SWT.OK
+						| SWT.CANCEL);
+				mb.setText(Messages.getString("RPMHandler.0"));
+				mb.setMessage(NLS.bind(Messages.getString("RPMHandler.2"),
+						file));
+				int rc = mb.open();
+				if (rc == SWT.OK) {
+					new DownloadJob(file, conn, true).run(monitor);
 				}
-				out.write(buf, 0, bytesRead);
+
+			} else {
+				new DownloadJob(file, conn).run(monitor);
 			}
 
 			// refresh folder in resource tree
@@ -175,18 +163,7 @@ public abstract class RPMHandler extends CommonHandler {
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return handleError(Messages.getString("RPMHandler.14")); //$NON-NLS-1$
-		} finally {
-			try {
-				if (in != null) {
-					in.close();
-				}
-				if (out != null) {
-					out.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		} 
 	}
 
 	protected SourcesFile getSourcesFile() {
