@@ -9,11 +9,13 @@ public class KojiPreferenceTest extends AbstractTest {
 	private static final String NEW_KOJI_HOST = "koji.deltacloud.org";
 	private IPreferenceStore pluginPrefStore;
 	
+	@SuppressWarnings("static-access")
 	@Override
 	public void setUp() throws Exception {
 		pluginPrefStore = KojiPlugin.getDefault().getPreferenceStore();
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
 		// do nothing
 	}
