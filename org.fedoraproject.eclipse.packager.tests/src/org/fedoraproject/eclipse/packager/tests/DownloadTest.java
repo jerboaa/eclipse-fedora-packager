@@ -48,8 +48,8 @@ public class DownloadTest extends AbstractTest {
 		out.write(0x90); // write to file, make md5 sum invalid
 		out.close();
 		handler.execute(null);
-		// Should not succeed, because md5 do not match
-		assertFalse(handler.waitForJob().isOK());
+		// Handler will finish correctly despite the fact that md5 do not match
+		assertTrue(handler.waitForJob().isOK());
 		// FIXME: Why is this tested?
 		assertNotNull(branch.findMember("ed-1.1.tar.bz2"));
 	}
@@ -62,7 +62,6 @@ public class DownloadTest extends AbstractTest {
 		out.close();
 		handler.execute(null);
 		assertFalse(handler.waitForJob().isOK());
-		// FIXME: Why is this not null?
-		//assertNull(branch.findMember("ed-1.1.tar.bz2"));
+		assertNull("File should be removed",branch.findMember("ed-1.1.tar.bz2"));
 	}
 }
