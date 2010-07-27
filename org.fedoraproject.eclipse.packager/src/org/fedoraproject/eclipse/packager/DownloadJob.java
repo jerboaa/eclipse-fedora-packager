@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,10 +47,10 @@ public class DownloadJob extends Job {
 
 	@Override
 	public IStatus run(IProgressMonitor monitor) {
-		monitor.beginTask(
-				NLS.bind(Messages.DownloadJob_0,
-						file.getName()), content.getContentLength());
 		try {
+			monitor.beginTask(
+					NLS.bind(Messages.DownloadJob_0,
+							file.getName()), content.getContentLength());
 			File tempFile = File.createTempFile(file.getName(), ""); //$NON-NLS-1$
 			FileOutputStream fos = new FileOutputStream(tempFile);
 			InputStream is = new BufferedInputStream(content.getInputStream());
@@ -75,6 +76,8 @@ public class DownloadJob extends Job {
 				}
 			}
 			tempFile.delete();
+		} catch (FileNotFoundException e) {
+			return Status.CANCEL_STATUS;
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return Status.CANCEL_STATUS;
