@@ -27,7 +27,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -69,19 +68,18 @@ import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
 @SuppressWarnings("restriction")
 public class UploadHandler extends RPMHandler {
 	public static String uploadURL = "https://cvs.fedoraproject.org/repo/pkgs/upload.cgi"; //$NON-NLS-1$
-	protected Map<String, String> existing;
 
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
 			throws ExecutionException {
 		monitor.subTask(Messages.getString("UploadHandler.1")); //$NON-NLS-1$
-		existing = getSourcesFile().getSources();
+		sources = getSourcesFile().getSources();
 
 		// get the sources and .cvsignore files
-		final File sources;
+		final File sourceFile;
 		final File cvsignore;
 		try {
-			sources = getFileFor("sources"); //$NON-NLS-1$
+			sourceFile = getFileFor("sources"); //$NON-NLS-1$
 			cvsignore = getFileFor(".cvsignore"); //$NON-NLS-1$
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -102,8 +100,8 @@ public class UploadHandler extends RPMHandler {
 		monitor.subTask(Messages.getString("UploadHandler.5")); //$NON-NLS-1$
 		// ensure file has changed if already listed in sources
 		final String filename = resource.getName();
-		if (existing.containsKey(filename)
-				&& SourcesFile.checkMD5(existing.get(filename), resource)) {
+		if (sources.containsKey(filename)
+				&& SourcesFile.checkMD5(sources.get(filename), resource)) {
 			// file already in sources
 			return handleOK(
 					NLS.bind(Messages.getString("UploadHandler.2"), filename) //$NON-NLS-1$
@@ -118,7 +116,7 @@ public class UploadHandler extends RPMHandler {
 				throw new OperationCanceledException();
 			}
 			monitor.subTask(Messages.getString("UploadHandler.8")); //$NON-NLS-1$
-			result = updateFiles(sources, cvsignore, toAdd, filename, monitor);
+			result = updateFiles(sourceFile, cvsignore, toAdd, filename, monitor);
 
 		}
 
@@ -338,30 +336,30 @@ public class UploadHandler extends RPMHandler {
 		return status;
 	}
 
-	protected IStatus updateSources(File sources, File toAdd,
+	protected IStatus updateSources(File sourceFile, File toAdd,
 			boolean forceOverwrite) {
 		IStatus status;
 		String filename = toAdd.getName();
 		boolean append = true;
-		if (existing.containsKey(filename)) {
+		if (sources.containsKey(filename)) {
 			append = false;
 		}
-		existing.put(filename, SourcesFile.getMD5(toAdd));
+		sources.put(filename, SourcesFile.getMD5(toAdd));
 
 		PrintWriter pw = null;
 		try {
 			if (forceOverwrite) {
-				pw = new PrintWriter(new FileWriter(sources, false));
-				pw.println(existing.get(filename) + "  " + filename); //$NON-NLS-1$
+				pw = new PrintWriter(new FileWriter(sourceFile, false));
+				pw.println(sources.get(filename) + "  " + filename); //$NON-NLS-1$
 				status = Status.OK_STATUS;
 			} else {
-				pw = new PrintWriter(new FileWriter(sources, append));
+				pw = new PrintWriter(new FileWriter(sourceFile, append));
 				if (append) {
-					pw.println(existing.get(filename) + "  " + filename); //$NON-NLS-1$
+					pw.println(sources.get(filename) + "  " + filename); //$NON-NLS-1$
 				} else {
 					// file exists at some location in the file, so rewrite it
-					for (String source : existing.keySet()) {
-						pw.println(existing.get(source) + "  " + source); //$NON-NLS-1$
+					for (String source : sources.keySet()) {
+						pw.println(sources.get(source) + "  " + source); //$NON-NLS-1$
 					}
 				}
 				status = Status.OK_STATUS;

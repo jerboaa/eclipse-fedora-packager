@@ -24,12 +24,12 @@ public class NewSourcesHandler extends UploadHandler {
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
 			throws ExecutionException {
 		monitor.subTask("Examining resources");
-		existing = getSourcesFile().getSources();
+		sources = getSourcesFile().getSources();
 		// get the sources and .cvsignore files
-		final File sources;
+		final File sourceFile;
 		final File cvsignore;
 		try {
-			sources = getFileFor("sources");
+			sourceFile = getFileFor("sources");
 			cvsignore = getFileFor(".cvsignore");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -54,7 +54,7 @@ public class NewSourcesHandler extends UploadHandler {
 				throw new OperationCanceledException();
 			}
 			monitor.subTask("Updating 'sources' and '.cvsignore'");
-			result = updateFiles(sources, cvsignore, toAdd, filename, monitor);
+			result = updateFiles(sourceFile, cvsignore, toAdd, filename, monitor);
 
 		}
 
