@@ -34,10 +34,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -64,7 +62,6 @@ public abstract class RPMHandler extends CommonHandler {
 	protected IStatus retrieveSources(IProgressMonitor monitor) {
 		sourcesFile = getSourcesFile();
 
-
 		// check md5sum of any local sources
 		Set<String> sourcesToGet = sourcesFile.getSourcesToDownload();
 
@@ -75,7 +72,8 @@ public abstract class RPMHandler extends CommonHandler {
 		// Need to download remaining sources from repo
 		IStatus status = null;
 		for (final String source : sourcesToGet) {
-			final String url = repo + "/" + specfile.getProject().getName() //$NON-NLS-1$
+			final String url = repo
+					+ "/" + specfile.getProject().getName() //$NON-NLS-1$
 					+ "/" + source + "/" + sourcesFile.getSource(source) + "/" + source; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			status = download(url, source, monitor);
 			if (!status.isOK()) {
@@ -137,42 +135,33 @@ public abstract class RPMHandler extends CommonHandler {
 			URLConnection conn = url.openConnection();
 
 			if (file.exists()) {
-				MessageBox mb = new MessageBox(Display.getCurrent()
-						.getActiveShell(), SWT.ICON_QUESTION | SWT.OK
-						| SWT.CANCEL);
-				mb.setText(Messages.getString("RPMHandler.0"));
-				mb.setMessage(NLS.bind(Messages.getString("RPMHandler.2"),
-						file));
-				int rc = mb.open();
-				if (rc == SWT.OK) {
-					new DownloadJob(file, conn, true).run(monitor);
-				}
-
+				return new DownloadJob(file, conn, true).run(monitor);
 			} else {
-				new DownloadJob(file, conn).run(monitor);
+				return new DownloadJob(file, conn).run(monitor);
 			}
-
-			// refresh folder in resource tree
-			specfile.getParent().refreshLocal(IResource.DEPTH_ONE, monitor);
-
-			return Status.OK_STATUS;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return handleError(NLS.bind(
 					Messages.getString("RPMHandler.12"), fileName)); //$NON-NLS-1$
-		} catch (CoreException e) {
-			e.printStackTrace();
-			return handleError(Messages.getString("RPMHandler.14")); //$NON-NLS-1$
-		} 
+
+		} finally {
+			// refresh folder in resource tree
+			try {
+				specfile.getParent().refreshLocal(IResource.DEPTH_ONE, monitor);
+			} catch (CoreException e) {
+				e.printStackTrace();
+				return handleError(Messages.getString("RPMHandler.14")); //$NON-NLS-1$
+			}
+		}
 	}
 
 	protected SourcesFile getSourcesFile() {
-		IFile sourcesIFile = specfile.getParent().getFile(
-				new Path("./sources"));
+		IFile sourcesIFile = specfile.getParent()
+				.getFile(new Path("./sources"));
 		try {
 			sourcesIFile.refreshLocal(1, new NullProgressMonitor());
 		} catch (CoreException e) {
-			//TODO what should we do if refresh fails?
+			// TODO what should we do if refresh fails?
 		}
 		return new SourcesFile(sourcesIFile);
 	}
