@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,13 +30,14 @@ import org.eclipse.core.runtime.CoreException;
 public class SourcesFile {
 
 	private IFile sourcesFile;
+	Map<String, String> sources = new HashMap<String, String>();
 
 	public SourcesFile(IFile sources) {
 		sourcesFile = sources;
+		parseSources();
 	}
 
-	public Map<String, String> getSources() {
-		HashMap<String, String> ret = new LinkedHashMap<String, String>();
+	private void parseSources() {
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new InputStreamReader(
@@ -45,9 +46,9 @@ public class SourcesFile {
 			while (line != null) {
 				String[] source = line.split("\\s+"); //$NON-NLS-1$
 				if (source.length != 2) {
-					return null;
+					continue;
 				}
-				ret.put(source[1], source[0]);
+				sources.put(source[1], source[0]);
 				line = br.readLine();
 			}
 		} catch (CoreException e) {
@@ -66,10 +67,13 @@ public class SourcesFile {
 				}
 			}
 		}
-		return ret;
+	}
+	
+	public Map<String, String> getSources() {
+		return sources;
 	}
 
-	protected void checkSources(Set<String> sourcesToGet) {
+	public void checkSources(Set<String> sourcesToGet) {
 		ArrayList<String> toRemove = new ArrayList<String>();
 		for (String source : sourcesToGet) {
 			IResource r = sourcesFile.getParent().findMember(source);
@@ -81,6 +85,19 @@ public class SourcesFile {
 		}
 
 		sourcesToGet.removeAll(toRemove);
+	}
+
+	public Set<String> getSourcesToDownload() {
+		HashSet<String> missingSources = new HashSet<String>();
+		for (String source : sources.keySet()) {
+			IResource r = sourcesFile.getParent().findMember(source);
+			// matched source name
+			if (r == null || !checkMD5(sources.get(source), r)) {
+				// match
+				missingSources.add(source);
+			}
+		}
+		return missingSources;
 	}
 
 	public static boolean checkMD5(String other, IResource r) {
@@ -109,7 +126,7 @@ public class SourcesFile {
 				try {
 					fis.close();
 				} catch (IOException e) {
-					//Do nothing
+					// Do nothing
 				}
 			}
 		}
