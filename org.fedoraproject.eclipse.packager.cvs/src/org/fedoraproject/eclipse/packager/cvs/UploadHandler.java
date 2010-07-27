@@ -27,7 +27,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -63,21 +63,19 @@ import org.eclipse.team.internal.ccvs.core.client.Command;
 import org.eclipse.team.internal.ccvs.core.client.Session;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
 import org.fedoraproject.eclipse.packager.SSLUtils;
+import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
 
 @SuppressWarnings("restriction")
 public class UploadHandler extends RPMHandler {
 	public static String uploadURL = "https://cvs.fedoraproject.org/repo/pkgs/upload.cgi"; //$NON-NLS-1$
-	protected HashMap<String, String> existing;
+	protected Map<String, String> existing;
+
 	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
+	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
+			throws ExecutionException {
 		monitor.subTask(Messages.getString("UploadHandler.1")); //$NON-NLS-1$
-		try {
-			existing = getSources();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return handleError(e);
-		}
+		existing = getSources();
 
 		// get the sources and .cvsignore files
 		final File sources;
@@ -93,7 +91,9 @@ public class UploadHandler extends RPMHandler {
 		// don't add empty files
 		final File toAdd = resource.getLocation().toFile();
 		if (toAdd.length() == 0) {
-			return handleOK(NLS.bind(Messages.getString("UploadHandler.0"), resource.getName()), true); //$NON-NLS-1$
+			return handleOK(
+					NLS.bind(
+							Messages.getString("UploadHandler.0"), resource.getName()), true); //$NON-NLS-1$
 		}
 
 		if (monitor.isCanceled()) {
@@ -103,9 +103,10 @@ public class UploadHandler extends RPMHandler {
 		// ensure file has changed if already listed in sources
 		final String filename = resource.getName();
 		if (existing.containsKey(filename)
-				&& checkMD5(existing.get(filename), resource)) {
+				&& SourcesFile.checkMD5(existing.get(filename), resource)) {
 			// file already in sources
-			return handleOK(NLS.bind(Messages.getString("UploadHandler.2"), filename) //$NON-NLS-1$
+			return handleOK(
+					NLS.bind(Messages.getString("UploadHandler.2"), filename) //$NON-NLS-1$
 					, true);
 		}
 
@@ -117,15 +118,15 @@ public class UploadHandler extends RPMHandler {
 				throw new OperationCanceledException();
 			}
 			monitor.subTask(Messages.getString("UploadHandler.8")); //$NON-NLS-1$
-			result = updateFiles(sources, cvsignore, toAdd,
-					filename, monitor);
+			result = updateFiles(sources, cvsignore, toAdd, filename, monitor);
 
 		}
 
 		return result;
 	}
 
-	protected IStatus performUpload(final File toAdd, final String filename, IProgressMonitor monitor) {
+	protected IStatus performUpload(final File toAdd, final String filename,
+			IProgressMonitor monitor) {
 		IStatus status;
 		try {
 			registerProtocol();
@@ -134,33 +135,39 @@ public class UploadHandler extends RPMHandler {
 				throw new OperationCanceledException();
 			}
 			// first check remote status to see if file is already uploaded
-			monitor.subTask(NLS.bind(Messages.getString("UploadHandler.3"), filename)); //$NON-NLS-1$
+			monitor.subTask(NLS.bind(
+					Messages.getString("UploadHandler.3"), filename)); //$NON-NLS-1$
 			HttpClient client = new HttpClient();
-			client.getHttpConnectionManager().getParams().setConnectionTimeout(30000);
+			client.getHttpConnectionManager().getParams()
+					.setConnectionTimeout(30000);
 			PostMethod postMethod = new PostMethod(uploadURL);
 			NameValuePair[] data = {
 					new NameValuePair("name", rpmQuery(specfile, "NAME")), //$NON-NLS-1$ //$NON-NLS-2$
-					new NameValuePair("md5sum", getMD5(toAdd)), //$NON-NLS-1$
+					new NameValuePair("md5sum", SourcesFile.getMD5(toAdd)), //$NON-NLS-1$
 					new NameValuePair("filename", filename) }; //$NON-NLS-1$
 			postMethod.setRequestBody(data);
 			if (client.executeMethod(postMethod) != HttpURLConnection.HTTP_OK) {
-				status = handleError(NLS.bind(Messages.getString("UploadHandler.4"), filename)); //$NON-NLS-1$
+				status = handleError(NLS.bind(
+						Messages.getString("UploadHandler.4"), filename)); //$NON-NLS-1$
 			} else {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
 				InputStream responseStream = postMethod
-				.getResponseBodyAsStream();
+						.getResponseBodyAsStream();
 				String response = parseResponse(responseStream);
 
 				// if we're in debug mode, forget this check
 				if (response.toLowerCase().equals("available") && !debug) { //$NON-NLS-1$
-					status = handleOK(NLS.bind(Messages.getString("UploadHandler.6"), filename), true); //$NON-NLS-1$ //$NON-NLS-2$
+					status = handleOK(
+							NLS.bind(
+									Messages.getString("UploadHandler.6"), filename), true); //$NON-NLS-1$ //$NON-NLS-2$
 				} else if (response.toLowerCase().equals("missing") || debug) { //$NON-NLS-1$
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-					monitor.subTask(NLS.bind(Messages.getString("UploadHandler.9"), filename)); //$NON-NLS-1$
+					monitor.subTask(NLS.bind(
+							Messages.getString("UploadHandler.9"), filename)); //$NON-NLS-1$
 					status = upload(toAdd);
 				} else {
 					status = handleError(response);
@@ -195,7 +202,9 @@ public class UploadHandler extends RPMHandler {
 			}
 			if ((status = updateCVSIgnore(cvsignore, toAdd)).isOK()) {
 				try {
-					handleOK(NLS.bind(Messages.getString("UploadHandler.10"), filename), true); //$NON-NLS-1$
+					handleOK(
+							NLS.bind(
+									Messages.getString("UploadHandler.10"), filename), true); //$NON-NLS-1$
 					specfile.getParent().refreshLocal(IResource.DEPTH_INFINITE,
 							new NullProgressMonitor());
 
@@ -225,8 +234,8 @@ public class UploadHandler extends RPMHandler {
 		IStatus status = Status.OK_STATUS;
 		// get CVSProvider
 		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
-		.getProvider(specfile.getProject(), CVSProviderPlugin
-				.getTypeId());
+				.getProvider(specfile.getProject(),
+						CVSProviderPlugin.getTypeId());
 
 		try {
 			ICVSRepositoryLocation location = provider.getRemoteLocation();
@@ -290,8 +299,7 @@ public class UploadHandler extends RPMHandler {
 		PrintWriter pw = null;
 		try {
 			if (forceOverwrite) {
-				pw = new PrintWriter(new FileWriter(cvsignore,
-						false));
+				pw = new PrintWriter(new FileWriter(cvsignore, false));
 				pw.println(filename);
 				status = Status.OK_STATUS;
 			} else {
@@ -305,8 +313,7 @@ public class UploadHandler extends RPMHandler {
 				}
 
 				if (!ignoreFiles.contains(filename)) {
-					pw = new PrintWriter(new FileWriter(cvsignore,
-							true));
+					pw = new PrintWriter(new FileWriter(cvsignore, true));
 					pw.println(filename);
 				}
 				status = Status.OK_STATUS;
@@ -339,7 +346,7 @@ public class UploadHandler extends RPMHandler {
 		if (existing.containsKey(filename)) {
 			append = false;
 		}
-		existing.put(filename, getMD5(toAdd));
+		existing.put(filename, SourcesFile.getMD5(toAdd));
 
 		PrintWriter pw = null;
 		try {
@@ -348,8 +355,7 @@ public class UploadHandler extends RPMHandler {
 				pw.println(existing.get(filename) + "  " + filename); //$NON-NLS-1$
 				status = Status.OK_STATUS;
 			} else {
-				pw = new PrintWriter(
-						new FileWriter(sources, append));
+				pw = new PrintWriter(new FileWriter(sources, append));
 				if (append) {
 					pw.println(existing.get(filename) + "  " + filename); //$NON-NLS-1$
 				} else {
@@ -372,8 +378,8 @@ public class UploadHandler extends RPMHandler {
 	}
 
 	protected void registerProtocol() throws GeneralSecurityException,
-	IOException, NoSuchAlgorithmException, KeyStoreException,
-	KeyManagementException, CertificateException {
+			IOException, NoSuchAlgorithmException, KeyStoreException,
+			KeyManagementException, CertificateException {
 		HttpSecureProtocol protocol = new HttpSecureProtocol();
 		protocol.setKeyMaterial(SSLUtils.getKeyMaterial());
 		protocol.setTrustMaterial(TrustMaterial.TRUST_ALL);
@@ -393,19 +399,21 @@ public class UploadHandler extends RPMHandler {
 			fis.read(bytes);
 
 			HttpClient client = new HttpClient();
-			client.getHttpConnectionManager().getParams().setConnectionTimeout(30000);
+			client.getHttpConnectionManager().getParams()
+					.setConnectionTimeout(30000);
 			PostMethod postMethod = new PostMethod(uploadURL);
 
 			Part[] data = { new StringPart("name", rpmQuery(specfile, "NAME")), //$NON-NLS-1$ //$NON-NLS-2$
-					new StringPart("md5sum", getMD5(file)), //$NON-NLS-1$
+					new StringPart("md5sum", SourcesFile.getMD5(file)), //$NON-NLS-1$
 					new FilePart("file", file) }; //$NON-NLS-1$
 
 			postMethod.setRequestEntity(new MultipartRequestEntity(data,
 					postMethod.getParams()));
-			
+
 			int code = client.executeMethod(postMethod);
 			if (code != HttpURLConnection.HTTP_OK) {
-				status = handleError(NLS.bind(Messages.getString("UploadHandler.33"), filename, postMethod.getStatusLine())); //$NON-NLS-1$
+				status = handleError(NLS
+						.bind(Messages.getString("UploadHandler.33"), filename, postMethod.getStatusLine())); //$NON-NLS-1$
 			} else {
 				status = Status.OK_STATUS;
 			}
@@ -434,7 +442,8 @@ public class UploadHandler extends RPMHandler {
 		return status;
 	}
 
-	protected String parseResponse(InputStream responseStream) throws IOException {
+	protected String parseResponse(InputStream responseStream)
+			throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(
 				responseStream));
 
@@ -460,7 +469,8 @@ public class UploadHandler extends RPMHandler {
 			ret = new File(specfile.getParent().getLocation().toString()
 					+ Path.SEPARATOR + name);
 			if (!ret.createNewFile()) {
-				throw new IOException(NLS.bind(Messages.getString("UploadHandler.12"), name)); //$NON-NLS-1$
+				throw new IOException(NLS.bind(
+						Messages.getString("UploadHandler.12"), name)); //$NON-NLS-1$
 			}
 		} else {
 			ret = res.getLocation().toFile();

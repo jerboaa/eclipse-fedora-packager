@@ -11,12 +11,8 @@
 package org.fedoraproject.eclipse.packager.rpm;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,14 +20,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -54,24 +48,22 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.fedoraproject.eclipse.packager.CommonHandler;
 import org.fedoraproject.eclipse.packager.ConsoleWriterThread;
+import org.fedoraproject.eclipse.packager.SourcesFile;
 
 public abstract class RPMHandler extends CommonHandler {
 	protected static final QualifiedName KEY = new QualifiedName(
 			RPMPlugin.PLUGIN_ID, "source"); //$NON-NLS-1$
 
-	public static final String CONSOLE_NAME = Messages.getString("RPMHandler.1"); //$NON-NLS-1$
+	public static final String CONSOLE_NAME = Messages
+			.getString("RPMHandler.1"); //$NON-NLS-1$
 
-	protected HashMap<String, String> sources;
+	protected Map<String, String> sources;
 
 	protected static final String repo = "http://cvs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
 
-	protected IStatus retrieveSources(ExecutionEvent event, IProgressMonitor monitor) {
-		try {
-			sources = getSources();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return handleError(e);
-		}
+	protected IStatus retrieveSources(ExecutionEvent event,
+			IProgressMonitor monitor) {
+		sources = getSources();
 
 		Set<String> sourcesToGet = sources.keySet();
 
@@ -87,7 +79,7 @@ public abstract class RPMHandler extends CommonHandler {
 		for (final String source : sourcesToGet) {
 			monitor.subTask(NLS.bind(Messages.getString("RPMHandler.4"), source)); //$NON-NLS-1$
 			final String url = repo + "/" + specfile.getProject().getName() //$NON-NLS-1$
-			+ "/" + source + "/" + sources.get(source) + "/" + source; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ "/" + source + "/" + sources.get(source) + "/" + source; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			status = download(url, source, monitor);
 			if (!status.isOK()) {
 				// download failed
@@ -139,8 +131,8 @@ public abstract class RPMHandler extends CommonHandler {
 		}
 		// no existing console, create new one
 		if (ret == null) {
-			ret = new MessageConsole(name, RPMPlugin
-					.getImageDescriptor("icons/rpm.gif")); //$NON-NLS-1$
+			ret = new MessageConsole(name,
+					RPMPlugin.getImageDescriptor("icons/rpm.gif")); //$NON-NLS-1$
 		}
 		return ret;
 	}
@@ -150,50 +142,13 @@ public abstract class RPMHandler extends CommonHandler {
 		for (String source : sourcesToGet) {
 			IResource r = specfile.getParent().findMember(source);
 			// matched source name
-			if (r != null && checkMD5(sources.get(source), r)) {
+			if (r != null && SourcesFile.checkMD5(sources.get(source), r)) {
 				// match
 				toRemove.add(source);
 			}
 		}
-		
+
 		sourcesToGet.removeAll(toRemove);
-	}
-
-	protected boolean checkMD5(String other, IResource r) {
-		// open file
-		File file = r.getLocation().toFile();
-		String md5 = getMD5(file);
-
-		// perform check
-		return md5 == null ? false : md5.equalsIgnoreCase(other);
-	}
-
-	protected String getMD5(File file) {
-		String result = null;
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(file);
-			byte buf[] = new byte[(int) file.length()];
-			fis.read(buf); // read entire file into buf array
-			result = DigestUtils.md5Hex(buf);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			handleError(e);
-		} catch (IOException e) {
-			e.printStackTrace();
-			handleError(e);
-		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-					handleError(e);
-				}
-			}
-		}
-
-		return result;
 	}
 
 	protected IStatus download(String location, String fileName,
@@ -210,7 +165,8 @@ public abstract class RPMHandler extends CommonHandler {
 				// try overwriting the file if it exists
 				file.delete();
 				if (!file.createNewFile()) {
-					return handleError(NLS.bind(Messages.getString("RPMHandler.12"), fileName)); //$NON-NLS-1$
+					return handleError(NLS.bind(
+							Messages.getString("RPMHandler.12"), fileName)); //$NON-NLS-1$
 				}
 			}
 			out = new BufferedOutputStream(new FileOutputStream(file));
@@ -237,7 +193,8 @@ public abstract class RPMHandler extends CommonHandler {
 			return Status.OK_STATUS;
 		} catch (IOException e) {
 			e.printStackTrace();
-			return handleError(NLS.bind(Messages.getString("RPMHandler.12"), fileName)); //$NON-NLS-1$
+			return handleError(NLS.bind(
+					Messages.getString("RPMHandler.12"), fileName)); //$NON-NLS-1$
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return handleError(Messages.getString("RPMHandler.14")); //$NON-NLS-1$
@@ -255,34 +212,20 @@ public abstract class RPMHandler extends CommonHandler {
 		}
 	}
 
-	protected HashMap<String, String> getSources() throws IOException {
-		HashMap<String, String> ret = new LinkedHashMap<String, String>();
-		IResource sourcesResource = specfile.getParent().findMember("sources"); //$NON-NLS-1$
-		if (sourcesResource instanceof IFile) {
-			File sourcesFile = sourcesResource.getLocation().toFile();
-			BufferedReader br = null;
-			try {
-				br = new BufferedReader(new FileReader(sourcesFile));
-				String line = br.readLine();
-				while (line != null) {
-					String[] source = line.split("\\s+"); //$NON-NLS-1$
-					if (source.length != 2) {
-						return null;
-					}
-					ret.put(source[1], source[0]);
-					line = br.readLine();
-				}
-			} finally {
-				if (br != null) {
-					br.close();
-				}
-			}
+	protected Map<String, String> getSources() {
+		try {
+			specfile.getParent().getFile(
+					new Path("./sources")).refreshLocal(1, new NullProgressMonitor());
+		} catch (CoreException e) {
+			//TODO what should we do if refresh fails?
 		}
-		return ret;
+		return new SourcesFile(specfile.getParent().getFile(
+				new Path("./sources"))).getSources();
 	}
 
-	protected IStatus rpmBuild(List<String> flags, IProgressMonitor monitor) {		
-		monitor.subTask(NLS.bind(Messages.getString("RPMHandler.17"), specfile.getName())); //$NON-NLS-1$
+	protected IStatus rpmBuild(List<String> flags, IProgressMonitor monitor) {
+		monitor.subTask(NLS.bind(
+				Messages.getString("RPMHandler.17"), specfile.getName())); //$NON-NLS-1$
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = getRPMDefines(dir);
@@ -322,14 +265,14 @@ public abstract class RPMHandler extends CommonHandler {
 	protected IStatus runShellCommand(InputStream is, IProgressMonitor mon) {
 		boolean terminateMonitor = false;
 		if (mon == null) {
-			terminateMonitor=true;
+			terminateMonitor = true;
 			mon = new NullProgressMonitor();
 			mon.beginTask(Messages.getString("RPMHandlerMockBuild"), 1); //$NON-NLS-1$
 		}
 		IStatus status;
 		final MessageConsole console = getConsole(CONSOLE_NAME);
 		IConsoleManager manager = ConsolePlugin.getDefault()
-		.getConsoleManager();
+				.getConsoleManager();
 		manager.addConsoles(new IConsole[] { console });
 		console.activate();
 
@@ -347,41 +290,45 @@ public abstract class RPMHandler extends CommonHandler {
 
 		try {
 			// create thread for reading inputStream (process' stdout)
-			ConsoleWriterThread outThread = new ConsoleWriterThread(is, outStream);
+			ConsoleWriterThread outThread = new ConsoleWriterThread(is,
+					outStream);
 			// start both threads
 			outThread.start();
-			
+
 			while (!mon.isCanceled()) {
 				try {
-					//Don't waste system resources
+					// Don't waste system resources
 					Thread.sleep(300);
 					break;
 				} catch (IllegalThreadStateException e) {
-					//Do nothing
+					// Do nothing
 				}
 			}
-			
+
 			if (mon.isCanceled()) {
 				outThread.close();
 				Display.getDefault().asyncExec(new Runnable() {
 
 					@Override
 					public void run() {
-						MessageDialog.openError(new Shell(), Messages.getString("RPMHandlerScriptCancelled"), //$NON-NLS-1$
+						MessageDialog.openError(
+								new Shell(),
+								Messages.getString("RPMHandlerScriptCancelled"), //$NON-NLS-1$
 								Messages.getString("RPMHandlerUserWarning")); //$NON-NLS-1$
 					}
-					
+
 				});
-				handleError(Messages.getString("RPMHandlerTerminationErrorHandling")); //$NON-NLS-1$
+				handleError(Messages
+						.getString("RPMHandlerTerminationErrorHandling")); //$NON-NLS-1$
 				return Status.CANCEL_STATUS;
 			}
-			
+
 			if (terminateMonitor)
 				mon.done();
-			
+
 			// finish reading whatever's left in the buffers
 			outThread.join();
-			
+
 			status = Status.OK_STATUS;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -397,23 +344,24 @@ public abstract class RPMHandler extends CommonHandler {
 		try {
 			result = Utils.runCommandToString(cmd);
 		} catch (IOException e) {
-			throw new CoreException(new Status(IStatus.ERROR, RPMPlugin.PLUGIN_ID, e.getMessage(), e));
+			throw new CoreException(new Status(IStatus.ERROR,
+					RPMPlugin.PLUGIN_ID, e.getMessage(), e));
 		}
 
 		return result.substring(0, result.indexOf('\n'));
 	}
 
 	protected IStatus makeSRPM(ExecutionEvent event, IProgressMonitor monitor) {
-				IStatus result = retrieveSources(event, monitor);
-				if (result.isOK()) {
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-					ArrayList<String> flags = new ArrayList<String>();
-					flags.add("--nodeps");
-					flags.add("-bs");
-					result = rpmBuild(flags, monitor); //$NON-NLS-1$
-				}
-				return result;
+		IStatus result = retrieveSources(event, monitor);
+		if (result.isOK()) {
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
 			}
+			ArrayList<String> flags = new ArrayList<String>();
+			flags.add("--nodeps");
+			flags.add("-bs");
+			result = rpmBuild(flags, monitor); //$NON-NLS-1$
+		}
+		return result;
+	}
 }

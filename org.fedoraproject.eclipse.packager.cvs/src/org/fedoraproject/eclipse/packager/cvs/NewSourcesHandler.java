@@ -21,15 +21,10 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 public class NewSourcesHandler extends UploadHandler {
 	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
+	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
+			throws ExecutionException {
 		monitor.subTask("Examining resources");
-		try {
-			existing = getSources();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return handleError(e);
-		}
-
+		existing = getSources();
 		// get the sources and .cvsignore files
 		final File sources;
 		final File cvsignore;
@@ -46,7 +41,7 @@ public class NewSourcesHandler extends UploadHandler {
 		if (toAdd.length() == 0) {
 			return handleOK(resource.getName() + " is empty", true);
 		}
-		
+
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
@@ -59,11 +54,10 @@ public class NewSourcesHandler extends UploadHandler {
 				throw new OperationCanceledException();
 			}
 			monitor.subTask("Updating 'sources' and '.cvsignore'");
-			result = updateFiles(sources, cvsignore, toAdd,
-					filename, monitor);
+			result = updateFiles(sources, cvsignore, toAdd, filename, monitor);
 
 		}
-		
+
 		return result;
 	}
 
