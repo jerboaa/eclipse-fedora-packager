@@ -155,10 +155,8 @@ public abstract class RPMHandler extends CommonHandler {
 				toRemove.add(source);
 			}
 		}
-
-		for (String source : toRemove) {
-			sourcesToGet.remove(source);
-		}
+		
+		sourcesToGet.removeAll(toRemove);
 	}
 
 	protected boolean checkMD5(String other, IResource r) {
