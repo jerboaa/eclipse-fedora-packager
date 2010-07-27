@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -68,7 +69,7 @@ public class SourcesFile {
 			}
 		}
 	}
-	
+
 	public Map<String, String> getSources() {
 		return sources;
 	}
@@ -98,6 +99,14 @@ public class SourcesFile {
 			}
 		}
 		return missingSources;
+	}
+
+	public void deleteSource(String file) throws CoreException {
+		IContainer branch = sourcesFile.getParent();
+		IResource toDelete = branch.findMember(file);
+		if (toDelete != null) {
+			toDelete.delete(true, null);
+		}
 	}
 
 	public static boolean checkMD5(String other, IResource r) {

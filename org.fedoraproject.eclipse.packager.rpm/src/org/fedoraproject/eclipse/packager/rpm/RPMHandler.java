@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -83,7 +82,12 @@ public abstract class RPMHandler extends CommonHandler {
 			status = download(url, source, monitor);
 			if (!status.isOK()) {
 				// download failed
-				deleteSource(source);
+				try {
+					sourcesFile.deleteSource(source);
+				} catch (CoreException e) {
+					e.printStackTrace();
+					handleError(e);
+				}
 				break;
 			}
 		}
@@ -93,31 +97,18 @@ public abstract class RPMHandler extends CommonHandler {
 		}
 
 		// sources downloaded successfully, check MD5
-		sourcesFile.checkSources(sourcesToGet);
+		sourcesToGet = sourcesFile.getSourcesToDownload();
 
 		// if all checks pass we should have an empty list
-		if (!sources.isEmpty()) {
+		if (!sourcesToGet.isEmpty()) {
 			String failedSources = ""; //$NON-NLS-1$
-			for (String source : sources.keySet()) {
+			for (String source : sourcesToGet) {
 				failedSources += source + '\n';
 			}
 			return handleError(Messages.getString("RPMHandler.10") //$NON-NLS-1$
 					+ failedSources);
 		} else {
 			return Status.OK_STATUS;
-		}
-	}
-
-	private void deleteSource(String file) {
-		IContainer branch = specfile.getParent();
-		IResource toDelete = branch.findMember(file);
-		if (toDelete != null) {
-			try {
-				toDelete.delete(true, null);
-			} catch (CoreException e) {
-				e.printStackTrace();
-				handleError(e);
-			}
 		}
 	}
 
