@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.rpm;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -19,13 +18,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
 
 public class LocalBuildHandler extends RPMHandler {
 
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
-		IStatus result = retrieveSources(event, monitor);
+		IStatus result = retrieveSources(monitor);
 		if (result.isOK()) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();

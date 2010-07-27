@@ -75,7 +75,7 @@ public class UploadHandler extends RPMHandler {
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
 			throws ExecutionException {
 		monitor.subTask(Messages.getString("UploadHandler.1")); //$NON-NLS-1$
-		existing = getSources();
+		existing = getSourcesFile().getSources();
 
 		// get the sources and .cvsignore files
 		final File sources;

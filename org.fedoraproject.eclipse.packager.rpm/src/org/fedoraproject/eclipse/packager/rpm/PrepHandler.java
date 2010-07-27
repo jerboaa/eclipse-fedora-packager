@@ -22,7 +22,7 @@ public class PrepHandler extends RPMHandler {
 
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
-		IStatus result = retrieveSources(event, monitor);
+		IStatus result = retrieveSources(monitor);
 		if (result.isOK()) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();

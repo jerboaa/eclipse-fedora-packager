@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -58,17 +59,16 @@ public abstract class RPMHandler extends CommonHandler {
 			.getString("RPMHandler.1"); //$NON-NLS-1$
 
 	protected Map<String, String> sources;
+	protected SourcesFile sourcesFile;
 
 	protected static final String repo = "http://cvs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
 
-	protected IStatus retrieveSources(ExecutionEvent event,
-			IProgressMonitor monitor) {
-		sources = getSources();
+	protected IStatus retrieveSources(IProgressMonitor monitor) {
+		sourcesFile = getSourcesFile();
 
-		Set<String> sourcesToGet = sources.keySet();
 
 		// check md5sum of any local sources
-		checkSources(sourcesToGet);
+		Set<String> sourcesToGet = sourcesFile.getSourcesToDownload();
 
 		if (sourcesToGet.isEmpty()) {
 			return handleOK(Messages.getString("RPMHandler.3"), false); //$NON-NLS-1$
@@ -93,7 +93,7 @@ public abstract class RPMHandler extends CommonHandler {
 		}
 
 		// sources downloaded successfully, check MD5
-		checkSources(sourcesToGet);
+		sourcesFile.checkSources(sourcesToGet);
 
 		// if all checks pass we should have an empty list
 		if (!sources.isEmpty()) {
@@ -135,20 +135,6 @@ public abstract class RPMHandler extends CommonHandler {
 					RPMPlugin.getImageDescriptor("icons/rpm.gif")); //$NON-NLS-1$
 		}
 		return ret;
-	}
-
-	protected void checkSources(Set<String> sourcesToGet) {
-		ArrayList<String> toRemove = new ArrayList<String>();
-		for (String source : sourcesToGet) {
-			IResource r = specfile.getParent().findMember(source);
-			// matched source name
-			if (r != null && SourcesFile.checkMD5(sources.get(source), r)) {
-				// match
-				toRemove.add(source);
-			}
-		}
-
-		sourcesToGet.removeAll(toRemove);
 	}
 
 	protected IStatus download(String location, String fileName,
@@ -212,15 +198,15 @@ public abstract class RPMHandler extends CommonHandler {
 		}
 	}
 
-	protected Map<String, String> getSources() {
+	protected SourcesFile getSourcesFile() {
+		IFile sourcesIFile = specfile.getParent().getFile(
+				new Path("./sources"));
 		try {
-			specfile.getParent().getFile(
-					new Path("./sources")).refreshLocal(1, new NullProgressMonitor());
+			sourcesIFile.refreshLocal(1, new NullProgressMonitor());
 		} catch (CoreException e) {
 			//TODO what should we do if refresh fails?
 		}
-		return new SourcesFile(specfile.getParent().getFile(
-				new Path("./sources"))).getSources();
+		return new SourcesFile(sourcesIFile);
 	}
 
 	protected IStatus rpmBuild(List<String> flags, IProgressMonitor monitor) {
@@ -352,7 +338,7 @@ public abstract class RPMHandler extends CommonHandler {
 	}
 
 	protected IStatus makeSRPM(ExecutionEvent event, IProgressMonitor monitor) {
-		IStatus result = retrieveSources(event, monitor);
+		IStatus result = retrieveSources(monitor);
 		if (result.isOK()) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
