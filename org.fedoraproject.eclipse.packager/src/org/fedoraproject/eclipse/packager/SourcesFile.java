@@ -127,7 +127,9 @@ public class SourcesFile {
 		FileInputStream fis = null;
 		try {
 			fis = new FileInputStream(file);
-			result = DigestUtils.md5Hex(fis);
+			byte buf[] = new byte[(int) file.length()];
+			fis.read(buf); // read entire file into buf array
+			result = DigestUtils.md5Hex(buf);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
