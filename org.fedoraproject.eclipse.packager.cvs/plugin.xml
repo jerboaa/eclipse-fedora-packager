@@ -36,13 +36,13 @@
                      <with
                            variable="activeMenuSelection">
                         <reference
-                              definitionId="org.fedoraproject.eclipse.packager.cvsproject">
+                              definitionId="org.fedoraproject.eclipse.packager.project">
                         </reference>
                      </with>
                      <with
                            variable="activeMenuEditorInput">
                         <reference
-                              definitionId="org.fedoraproject.eclipse.packager.cvsproject">
+                              definitionId="org.fedoraproject.eclipse.packager.project">
                         </reference>
                      </with>
                   </or>
@@ -59,13 +59,13 @@
                      <with
                            variable="activeMenuSelection">
                         <reference
-                              definitionId="org.fedoraproject.eclipse.packager.cvsproject">
+                              definitionId="org.fedoraproject.eclipse.packager.project">
                         </reference>
                      </with>
                      <with
                            variable="activeMenuEditorInput">
                         <reference
-                              definitionId="org.fedoraproject.eclipse.packager.cvsproject">
+                              definitionId="org.fedoraproject.eclipse.packager.project">
                         </reference>
                      </with>
                   </or>
