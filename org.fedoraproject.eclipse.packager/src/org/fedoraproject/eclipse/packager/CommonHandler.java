@@ -26,6 +26,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -34,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -76,6 +78,7 @@ public abstract class CommonHandler extends AbstractHandler {
 	protected HashMap<String, HashMap<String, String>> branches;
 	protected Job job;
 	protected ExecutionEvent event;
+	private FedoraProjectRoot projectRoot;
 
 	public void setDebug(boolean debug) {
 		this.debug = debug;
@@ -119,7 +122,7 @@ public abstract class CommonHandler extends AbstractHandler {
 	}
 
 	@Override
-	public Object execute(ExecutionEvent e) throws ExecutionException {
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		this.event = e;
 		job = new Job("Fedora Packager") {
 			@Override
@@ -151,6 +154,8 @@ public abstract class CommonHandler extends AbstractHandler {
 						&& branches.containsKey(resource.getParent().getName())) {
 					branch = resource.getParent();
 				}
+				IResource tmpResource = getResource(e);
+				getValidRoot(tmpResource);
 				// ensure resource selected is either a branch folder or a child
 				// resource of a branch folder
 				if (branch == null) {
@@ -293,6 +298,28 @@ public abstract class CommonHandler extends AbstractHandler {
 		} else {
 			return null;
 		}
+	}
+	
+	protected FedoraProjectRoot getValidRoot(IResource resource) {
+		if (resource instanceof IFolder|| resource instanceof IProject) {
+			//TODO check that spec file and sources file are present
+			if (validateFedorapackageRoot((IContainer)resource)){
+				projectRoot = new FedoraProjectRoot((IContainer)resource);
+			}
+		} else if (resource instanceof IFile) {
+			if (validateFedorapackageRoot(resource.getParent())){
+				projectRoot = new FedoraProjectRoot(resource.getParent());
+			}
+		}
+		return projectRoot;
+	}
+
+	private boolean validateFedorapackageRoot(IContainer resource) {
+		IFile file = resource.getFile(new Path("sources"));
+		if(file.exists()){
+			return true;
+		}
+		return false;
 	}
 
 	protected String makeTagName() throws CoreException {
