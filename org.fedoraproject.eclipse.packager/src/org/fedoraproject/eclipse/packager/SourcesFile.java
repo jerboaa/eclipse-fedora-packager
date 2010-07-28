@@ -16,9 +16,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,15 +30,21 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 public class SourcesFile {
 
 	private IFile sourcesFile;
-	Map<String, String> sources = new HashMap<String, String>();
+	Map<String, String> sources = new LinkedHashMap<String, String>();
 
 	public SourcesFile(IFile sources) {
 		sourcesFile = sources;
 		parseSources();
+	}
+
+	public String getName() {
+		return sourcesFile.getName();
 	}
 
 	private void parseSources() {
@@ -73,7 +82,7 @@ public class SourcesFile {
 	public Map<String, String> getSources() {
 		return sources;
 	}
-	
+
 	public String getSource(String key) {
 		return sources.get(key);
 	}
@@ -147,6 +156,37 @@ public class SourcesFile {
 		}
 
 		return result;
+	}
+
+	public void save() throws CoreException {
+		PipedInputStream in = new PipedInputStream();
+
+		// create an OutputStream with the InputStream from above as input
+		PipedOutputStream out = null;
+		try {
+			out = new PipedOutputStream(in);
+			PrintWriter pw = new PrintWriter(out);
+			for (Map.Entry<String, String> entry : sources.entrySet()) {
+				pw.println(entry.getValue() + "  " + entry.getKey()); //$NON-NLS-1$
+			}
+			pw.close();
+			out.close();
+			sourcesFile.refreshLocal(1, null);
+			sourcesFile.setContents(in,true, true, null);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new CoreException(new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, "Error saving "+sourcesFile.getName()));
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+				} catch (IOException e) {
+					// Nothing to do
+				}
+			}
+		}
+
+
 	}
 
 }
