@@ -78,7 +78,6 @@ public abstract class CommonHandler extends AbstractHandler {
 	protected HashMap<String, HashMap<String, String>> branches;
 	protected Job job;
 	protected ExecutionEvent event;
-	private FedoraProjectRoot projectRoot;
 
 	public void setDebug(boolean debug) {
 		this.debug = debug;
@@ -154,8 +153,6 @@ public abstract class CommonHandler extends AbstractHandler {
 						&& branches.containsKey(resource.getParent().getName())) {
 					branch = resource.getParent();
 				}
-				IResource tmpResource = getResource(e);
-				getValidRoot(tmpResource);
 				// ensure resource selected is either a branch folder or a child
 				// resource of a branch folder
 				if (branch == null) {
@@ -262,6 +259,11 @@ public abstract class CommonHandler extends AbstractHandler {
 	}
 
 	protected IResource getResource(ExecutionEvent event) {
+		//For testing purposes only. One should never enter this in real world usage.
+		if (resource != null) {
+			return resource;
+		}
+		//
 		IWorkbenchPart part = HandlerUtil.getActivePart(event);
 		if (part == null) {
 			return null;
@@ -304,14 +306,14 @@ public abstract class CommonHandler extends AbstractHandler {
 		if (resource instanceof IFolder|| resource instanceof IProject) {
 			//TODO check that spec file and sources file are present
 			if (validateFedorapackageRoot((IContainer)resource)){
-				projectRoot = new FedoraProjectRoot((IContainer)resource);
+				return new FedoraProjectRoot((IContainer)resource);
 			}
 		} else if (resource instanceof IFile) {
 			if (validateFedorapackageRoot(resource.getParent())){
-				projectRoot = new FedoraProjectRoot(resource.getParent());
+				return new FedoraProjectRoot(resource.getParent());
 			}
 		}
-		return projectRoot;
+		return null;
 	}
 
 	private boolean validateFedorapackageRoot(IContainer resource) {
