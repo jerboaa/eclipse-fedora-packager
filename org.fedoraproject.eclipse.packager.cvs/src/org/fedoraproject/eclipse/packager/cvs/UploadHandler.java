@@ -83,7 +83,7 @@ public class UploadHandler extends RPMHandler {
 		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job("Fedora Packager") {
+		job = new Job("Fedora Packager") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(
@@ -118,7 +118,7 @@ public class UploadHandler extends RPMHandler {
 				}
 
 				// use our Fedora client certificate to start SSL connection
-				IStatus result = performUpload(toAdd, filename, monitor);
+				IStatus result = performUpload(toAdd, filename, monitor, fedoraProjectRoot);
 
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
@@ -140,7 +140,7 @@ public class UploadHandler extends RPMHandler {
 	}
 
 	protected IStatus performUpload(final File toAdd, final String filename,
-			IProgressMonitor monitor) {
+			IProgressMonitor monitor, FedoraProjectRoot fedoraProjectRoot) {
 		IStatus status;
 		try {
 			registerProtocol();
@@ -183,7 +183,7 @@ public class UploadHandler extends RPMHandler {
 					}
 					monitor.subTask(NLS.bind(
 							Messages.getString("UploadHandler.9"), filename)); //$NON-NLS-1$
-					status = upload(toAdd);
+					status = upload(toAdd, fedoraProjectRoot);
 				} else {
 					status = handleError(response);
 				}
@@ -377,7 +377,7 @@ public class UploadHandler extends RPMHandler {
 				(ProtocolSocketFactory) protocol, 443));
 	}
 
-	protected IStatus upload(File file) {
+	protected IStatus upload(File file, FedoraProjectRoot fedoraProjectRoot) {
 		IStatus status;
 		byte[] bytes = new byte[(int) file.length()];
 		FileInputStream fis = null;
@@ -393,7 +393,7 @@ public class UploadHandler extends RPMHandler {
 					.setConnectionTimeout(30000);
 			PostMethod postMethod = new PostMethod(uploadURL);
 
-			Part[] data = { new StringPart("name", rpmQuery(specfile, "NAME")), //$NON-NLS-1$ //$NON-NLS-2$
+			Part[] data = { new StringPart("name", fedoraProjectRoot.getSpecfileModel().getName()), //$NON-NLS-1$ //$NON-NLS-2$
 					new StringPart("md5sum", SourcesFile.getMD5(file)), //$NON-NLS-1$
 					new FilePart("file", file) }; //$NON-NLS-1$
 
@@ -414,9 +414,6 @@ public class UploadHandler extends RPMHandler {
 			e.printStackTrace();
 			status = handleError(e);
 		} catch (IOException e) {
-			e.printStackTrace();
-			status = handleError(e);
-		} catch (CoreException e) {
 			e.printStackTrace();
 			status = handleError(e);
 		} finally {

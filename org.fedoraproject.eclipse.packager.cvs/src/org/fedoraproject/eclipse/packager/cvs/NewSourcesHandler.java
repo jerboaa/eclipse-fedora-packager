@@ -37,7 +37,7 @@ public class NewSourcesHandler extends UploadHandler {
 		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job("Fedora Packager") {
+		job = new Job("Fedora Packager") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask("Examining resources", IProgressMonitor.UNKNOWN);
@@ -56,7 +56,7 @@ public class NewSourcesHandler extends UploadHandler {
 				}
 				final String filename = resource.getName();
 				// use our Fedora client certificate to start SSL connection
-				IStatus result = performUpload(toAdd, filename, monitor);
+				IStatus result = performUpload(toAdd, filename, monitor, fedoraProjectRoot);
 
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
