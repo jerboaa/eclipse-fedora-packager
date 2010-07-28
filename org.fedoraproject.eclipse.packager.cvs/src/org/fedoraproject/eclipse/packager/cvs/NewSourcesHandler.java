@@ -11,54 +11,68 @@
 package org.fedoraproject.eclipse.packager.cvs;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.SourcesFile;
 
 public class NewSourcesHandler extends UploadHandler {
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
 			throws ExecutionException {
-		monitor.subTask("Examining resources");
-		sources = getSourcesFile().getSources();
-		// get the sources and .cvsignore files
-		final File sourceFile;
-		final File cvsignore;
-		try {
-			sourceFile = getFileFor("sources");
-			cvsignore = getFileFor(".cvsignore");
-		} catch (IOException e) {
-			e.printStackTrace();
-			return handleError(e);
-		}
+		return Status.OK_STATUS;
+	}
 
-		// don't add empty files
-		final File toAdd = resource.getLocation().toFile();
-		if (toAdd.length() == 0) {
-			return handleOK(resource.getName() + " is empty", true);
-		}
+	@Override
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+		final IResource resource = getResource(e);
+		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
+		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
+		specfile = fedoraProjectRoot.getSpecFile();
+		Job job = new Job("Fedora Packager") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask("Examining resources", IProgressMonitor.UNKNOWN);
+				// get the sources and .cvsignore files
+				final File cvsignore = new File(fedoraProjectRoot.getContainer().getLocation().toString()
+							+ Path.SEPARATOR + ".cvsignore");
 
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
-		final String filename = resource.getName();
-		// use our Fedora client certificate to start SSL connection
-		IStatus result = performUpload(toAdd, filename, monitor);
+				// don't add empty files
+				final File toAdd = resource.getLocation().toFile();
+				if (toAdd.length() == 0) {
+					return handleOK(resource.getName() + " is empty", true);
+				}
 
-		if (result.isOK()) {
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				final String filename = resource.getName();
+				// use our Fedora client certificate to start SSL connection
+				IStatus result = performUpload(toAdd, filename, monitor);
+
+				if (result.isOK()) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					monitor.subTask("Updating 'sources' and '.cvsignore'");
+					result = updateFiles(sourceFile, cvsignore, toAdd, filename,
+							monitor);
+				}
+				monitor.done();
+				return result;
 			}
-			monitor.subTask("Updating 'sources' and '.cvsignore'");
-			result = updateFiles(sourceFile, cvsignore, toAdd, filename, monitor);
-
-		}
-
-		return result;
+		};
+		job.setUser(true);
+		job.schedule();
+		return null;
 	}
 
 	@Override
@@ -67,7 +81,7 @@ public class NewSourcesHandler extends UploadHandler {
 	}
 
 	@Override
-	protected IStatus updateSources(File sources, File toAdd) {
+	protected IStatus updateSources(SourcesFile sources, File toAdd) {
 		return updateSources(sources, toAdd, true /* overwrite */);
 	}
 

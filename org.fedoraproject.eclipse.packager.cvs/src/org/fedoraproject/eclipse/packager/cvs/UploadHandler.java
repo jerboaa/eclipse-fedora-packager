@@ -50,6 +50,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.internal.ccvs.core.CVSException;
@@ -61,6 +62,7 @@ import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.core.client.Command;
 import org.eclipse.team.internal.ccvs.core.client.Session;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.SSLUtils;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
@@ -72,55 +74,69 @@ public class UploadHandler extends RPMHandler {
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
 			throws ExecutionException {
-		monitor.subTask(Messages.getString("UploadHandler.1")); //$NON-NLS-1$
-		sources = getSourcesFile().getSources();
+		return Status.OK_STATUS;
+	}
 
-		// get the sources and .cvsignore files
-		final File sourceFile;
-		final File cvsignore;
-		try {
-			sourceFile = getFileFor("sources"); //$NON-NLS-1$
-			cvsignore = getFileFor(".cvsignore"); //$NON-NLS-1$
-		} catch (IOException e) {
-			e.printStackTrace();
-			return handleError(e);
-		}
+	@Override
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+		final IResource resource = getResource(e);
+		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
+		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
+		specfile = fedoraProjectRoot.getSpecFile();
+		Job job = new Job("Fedora Packager") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask(
+						Messages.getString("UploadHandler.1"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+				sources = getSourcesFile().getSources();
 
-		// don't add empty files
-		final File toAdd = resource.getLocation().toFile();
-		if (toAdd.length() == 0) {
-			return handleOK(
-					NLS.bind(
-							Messages.getString("UploadHandler.0"), resource.getName()), true); //$NON-NLS-1$
-		}
+				final File cvsignore = new File(fedoraProjectRoot
+						.getContainer().getLocation().toString()
+						+ Path.SEPARATOR + ".cvsignore");
 
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
-		monitor.subTask(Messages.getString("UploadHandler.5")); //$NON-NLS-1$
-		// ensure file has changed if already listed in sources
-		final String filename = resource.getName();
-		if (sources.containsKey(filename)
-				&& SourcesFile.checkMD5(sources.get(filename), resource)) {
-			// file already in sources
-			return handleOK(
-					NLS.bind(Messages.getString("UploadHandler.2"), filename) //$NON-NLS-1$
-					, true);
-		}
+				// don't add empty files
+				final File toAdd = resource.getLocation().toFile();
+				if (toAdd.length() == 0) {
+					return handleOK(
+							NLS.bind(
+									Messages.getString("UploadHandler.0"), resource.getName()), true); //$NON-NLS-1$
+				}
 
-		// use our Fedora client certificate to start SSL connection
-		IStatus result = performUpload(toAdd, filename, monitor);
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				monitor.subTask(Messages.getString("UploadHandler.5")); //$NON-NLS-1$
+				// ensure file has changed if already listed in sources
+				final String filename = resource.getName();
+				if (sources.containsKey(filename)
+						&& SourcesFile
+								.checkMD5(sources.get(filename), resource)) {
+					// file already in sources
+					return handleOK(NLS.bind(
+							Messages.getString("UploadHandler.2"), filename) //$NON-NLS-1$
+							, true);
+				}
 
-		if (result.isOK()) {
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
+				// use our Fedora client certificate to start SSL connection
+				IStatus result = performUpload(toAdd, filename, monitor);
+
+				if (result.isOK()) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					monitor.subTask(Messages.getString("UploadHandler.8")); //$NON-NLS-1$
+					// TODO fix
+					result = updateFiles(sourceFile, cvsignore, toAdd,
+							filename, monitor);
+
+				}
+
+				return result;
 			}
-			monitor.subTask(Messages.getString("UploadHandler.8")); //$NON-NLS-1$
-			result = updateFiles(sourceFile, cvsignore, toAdd, filename, monitor);
-
-		}
-
-		return result;
+		};
+		job.setUser(true);
+		job.schedule();
+		return null;
 	}
 
 	protected IStatus performUpload(final File toAdd, final String filename,
@@ -140,7 +156,8 @@ public class UploadHandler extends RPMHandler {
 					.setConnectionTimeout(30000);
 			PostMethod postMethod = new PostMethod(uploadURL);
 			NameValuePair[] data = {
-					new NameValuePair("name", rpmQuery(specfile, "NAME")), //$NON-NLS-1$ //$NON-NLS-2$
+					new NameValuePair(
+							"name", getValidRoot(resource).getSpecfileModel().getName()), //$NON-NLS-1$ //$NON-NLS-2$
 					new NameValuePair("md5sum", SourcesFile.getMD5(toAdd)), //$NON-NLS-1$
 					new NameValuePair("filename", filename) }; //$NON-NLS-1$
 			postMethod.setRequestBody(data);
@@ -180,16 +197,14 @@ public class UploadHandler extends RPMHandler {
 		} catch (GeneralSecurityException e) {
 			e.printStackTrace();
 			status = handleError(e);
-		} catch (CoreException e) {
-			e.printStackTrace();
-			status = handleError(e);
 		}
 
 		return status;
 	}
 
-	protected IStatus updateFiles(final File sources, final File cvsignore,
-			final File toAdd, final String filename, IProgressMonitor monitor) {
+	protected IStatus updateFiles(final SourcesFile sources,
+			final File cvsignore, final File toAdd, final String filename,
+			IProgressMonitor monitor) {
 		IStatus status;
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
@@ -215,7 +230,7 @@ public class UploadHandler extends RPMHandler {
 				}
 			}
 		}
-
+		monitor.done();
 		return status;
 	}
 
@@ -223,11 +238,11 @@ public class UploadHandler extends RPMHandler {
 		return updateCVSIgnore(cvsignore, toAdd, false);
 	}
 
-	protected IStatus updateSources(File sources, File toAdd) {
+	protected IStatus updateSources(SourcesFile sources, File toAdd) {
 		return updateSources(sources, toAdd, false);
 	}
 
-	protected IStatus updateCVS(File sources, File cvsignore,
+	protected IStatus updateCVS(SourcesFile sources, File cvsignore,
 			IProgressMonitor monitor) {
 		IStatus status = Status.OK_STATUS;
 		// get CVSProvider
@@ -336,43 +351,20 @@ public class UploadHandler extends RPMHandler {
 		return status;
 	}
 
-	protected IStatus updateSources(File sourceFile, File toAdd,
+	protected IStatus updateSources(SourcesFile sourceFile, File toAdd,
 			boolean forceOverwrite) {
-		IStatus status;
 		String filename = toAdd.getName();
-		boolean append = true;
-		if (sources.containsKey(filename)) {
-			append = false;
+		if (forceOverwrite) {
+			sourceFile.getSources().clear();
 		}
-		sources.put(filename, SourcesFile.getMD5(toAdd));
+		sourceFile.getSources().put(filename, SourcesFile.getMD5(toAdd));
 
-		PrintWriter pw = null;
 		try {
-			if (forceOverwrite) {
-				pw = new PrintWriter(new FileWriter(sourceFile, false));
-				pw.println(sources.get(filename) + "  " + filename); //$NON-NLS-1$
-				status = Status.OK_STATUS;
-			} else {
-				pw = new PrintWriter(new FileWriter(sourceFile, append));
-				if (append) {
-					pw.println(sources.get(filename) + "  " + filename); //$NON-NLS-1$
-				} else {
-					// file exists at some location in the file, so rewrite it
-					for (String source : sources.keySet()) {
-						pw.println(sources.get(source) + "  " + source); //$NON-NLS-1$
-					}
-				}
-				status = Status.OK_STATUS;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			status = handleError(e);
-		} finally {
-			if (pw != null) {
-				pw.close();
-			}
+			sourceFile.save();
+		} catch (CoreException e) {
+			return e.getStatus();
 		}
-		return status;
+		return Status.OK_STATUS;
 	}
 
 	protected void registerProtocol() throws GeneralSecurityException,
