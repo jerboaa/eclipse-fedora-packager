@@ -395,8 +395,7 @@ public abstract class CommonHandler extends AbstractHandler {
 		String dir = parent.getLocation().toString();
 		List<String> defines = getRPMDefines(dir);
 
-		HashMap<String, String> branch = branches.get(parent.getName());
-		List<String> distDefines = getDistDefines(branch);
+		List<String> distDefines = getDistDefines(branches, parent.getName());
 
 		String result = null;
 		defines.add(0, "rpm");
@@ -417,15 +416,18 @@ public abstract class CommonHandler extends AbstractHandler {
 		return result.substring(0, result.indexOf('\n'));
 	}
 
-	protected List<String> getDistDefines(HashMap<String, String> branch) {
+	protected List<String> getDistDefines(HashMap<String, HashMap<String,String>> branches, String parentName) {
 		// substitution for rhel
-		String distvar = branch.get("distvar").equals("epel") ? "rhel" : branch
-				.get("distvar");
 		ArrayList<String> distDefines = new ArrayList<String>();
-		distDefines.add("--define");
-		distDefines.add("dist " + branch.get("dist"));
-		distDefines.add("--define");
-		distDefines.add(distvar + branch.get("dist"));
+		if (branches != null) {
+			HashMap<String, String> branch = branches.get(parentName);
+			String distvar = branch.get("distvar").equals("epel") ? "rhel"
+					: branch.get("distvar");
+			distDefines.add("--define");
+			distDefines.add("dist " + branch.get("dist"));
+			distDefines.add("--define");
+			distDefines.add(distvar + branch.get("dist"));
+		}
 		return distDefines;
 	}
 
