@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
+import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 
@@ -51,7 +52,7 @@ public class MockBuildHandler extends RPMHandler {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-					result = createMockJob(monitor);
+					result = createMockJob(fedoraProjectRoot, monitor);
 				}
 				monitor.done();
 				return result;
@@ -62,24 +63,24 @@ public class MockBuildHandler extends RPMHandler {
 		return null;
 	}
 
-	protected IStatus createMockJob(IProgressMonitor monitor) {
+	protected IStatus createMockJob(FedoraProjectRoot projectRoot, IProgressMonitor monitor) {
 		// get buildarch
 		try {
 			String buildarch = rpmEval("_arch"); //$NON-NLS-1$
 			final String mockcfg = getMockcfg(buildarch);
 
-			monitor.subTask(NLS.bind(Messages.getString("MockBuildHandler.1"), specfile.getName())); //$NON-NLS-1$
+			monitor.subTask(NLS.bind(Messages.getString("MockBuildHandler.1"), projectRoot.getSpecFile().getName())); //$NON-NLS-1$
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			return mockBuild(mockcfg, monitor);
+			return mockBuild(mockcfg, projectRoot, monitor);
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return handleError(e);
 		}
 	}
 
-	protected IStatus mockBuild(String mockcfg, IProgressMonitor monitor) {
+	protected IStatus mockBuild(String mockcfg, FedoraProjectRoot projectRoot, IProgressMonitor monitor) {
 		IStatus status;
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
@@ -89,11 +90,12 @@ public class MockBuildHandler extends RPMHandler {
 			return handleError(Messages.getString("MockBuildHandlerMockNotInstalled"));
 		}
 		try {
+			Specfile specfile = projectRoot.getSpecfileModel();
 			String[] cmd = { "mock", "-r", mockcfg, "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$
-					+ Path.SEPARATOR + makeTagName(), "rebuild", dir //$NON-NLS-1$
-					+ Path.SEPARATOR + rpmQuery(specfile, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-					+ rpmQuery(specfile, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-					+ rpmQuery(specfile, "RELEASE") + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
+					+ Path.SEPARATOR + projectRoot.makeTagName(), "rebuild", dir //$NON-NLS-1$
+					+ Path.SEPARATOR + specfile.getName() + "-" //$NON-NLS-1$ //$NON-NLS-2$
+					+ specfile.getVersion() + "-" //$NON-NLS-1$ //$NON-NLS-2$
+					+ specfile.getRelease() + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
 			InputStream is = Utils.runCommandToInputStream(cmd);
 			status = runShellCommand(is, monitor); //$NON-NLS-1$
 			

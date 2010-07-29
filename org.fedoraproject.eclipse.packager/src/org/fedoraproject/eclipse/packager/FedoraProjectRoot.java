@@ -77,4 +77,12 @@ public class FedoraProjectRoot {
 		Specfile specfile = parser.parse(sb.toString());
 		return specfile;
 	}
+	
+	public String makeTagName() {
+		Specfile specfile = getSpecfileModel();
+		String name = specfile.getName().replaceAll("^[0-9]+", "");
+		String version = specfile.getVersion();
+		String release = specfile.getRelease();
+		return (name + "-" + version + "-" + release).replaceAll("\\.", "_");
+	}
 }
