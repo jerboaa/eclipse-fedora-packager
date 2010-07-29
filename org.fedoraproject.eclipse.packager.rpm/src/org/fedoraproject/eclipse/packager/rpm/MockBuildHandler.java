@@ -146,25 +146,9 @@ public class MockBuildHandler extends RPMHandler {
 	 * @return
 	 */
 	private boolean isMockInstalled() {
-		final String rpmQueryCmd[] = { "rpm", "-q", "mock" };
-		ProcessBuilder pBuilder = new ProcessBuilder(rpmQueryCmd);
-		pBuilder = pBuilder.redirectErrorStream(true);
-		Process child;
-		try {
-			child = pBuilder.start();
-			child.waitFor();
-			// decide according to status code if mock is installed
-			if (child.exitValue() == 0 ) {
-				return true;
-			} else {
-				return false;
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-		// shouldn't arrive here
+		if (Utils.fileExist("/usr/bin/mock")) {
+			return true;
+		}
 		return false;
 	}
 
