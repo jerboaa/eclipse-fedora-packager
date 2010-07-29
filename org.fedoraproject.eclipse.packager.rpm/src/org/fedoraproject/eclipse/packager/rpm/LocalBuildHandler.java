@@ -14,42 +14,63 @@ import java.util.ArrayList;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 
 public class LocalBuildHandler extends RPMHandler {
 
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
-		IStatus result = retrieveSources(monitor);
-		if (result.isOK()) {
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			try {
-				// search for noarch directive, otherwise use local arch
-				final String arch = rpmQuery(specfile, "ARCH"); //$NON-NLS-1$
-				
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
+		return Status.OK_STATUS;
+	}
+	
+	@Override
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+		final IResource resource = getResource(e);
+		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
+		specfile = fedoraProjectRoot.getSpecFile();
+		job = new Job("Fedora Packager") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask( Messages.getString("LocalBuildHandler.8"), IProgressMonitor.UNKNOWN);
+				IStatus result = retrieveSources(monitor);
+				if (result.isOK()) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					try {
+						// search for noarch directive, otherwise use local arch
+						final String arch = rpmQuery(specfile, "ARCH"); //$NON-NLS-1$
+						
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
+						// perform rpmbuild
+						ArrayList<String> flags = new ArrayList<String>();
+						flags.add("--target");
+						flags.add(arch);
+						flags.add("-ba");
+						result = rpmBuild(flags, //$NON-NLS-1$ //$NON-NLS-2$
+								monitor);
+
+					} catch (CoreException e) {
+						e.printStackTrace();
+						result = handleError(e);
+					}
 				}
-				// perform rpmbuild
-				ArrayList<String> flags = new ArrayList<String>();
-				flags.add("--target");
-				flags.add(arch);
-				flags.add("-ba");
-				result = rpmBuild(flags, //$NON-NLS-1$ //$NON-NLS-2$
-						monitor);
-
-			} catch (CoreException e) {
-				e.printStackTrace();
-				result = handleError(e);
+				monitor.done();
+				return result;
 			}
-		}
-
-		return result;
+		};
+		job.setUser(true);
+		job.schedule();
+		return null;
 	}
 
 	@Override

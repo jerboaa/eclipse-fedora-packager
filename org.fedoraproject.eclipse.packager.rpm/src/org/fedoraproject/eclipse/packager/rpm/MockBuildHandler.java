@@ -24,22 +24,42 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.osgi.util.NLS;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 
 public class MockBuildHandler extends RPMHandler {
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
-		// build fresh SRPM
-		IStatus result = makeSRPM(event, monitor);
-		if (result.isOK()) {
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
+		return Status.OK_STATUS;
+	}
+	
+	@Override
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+		final IResource resource = getResource(e);
+		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
+		specfile = fedoraProjectRoot.getSpecFile();
+		job = new Job("Fedora Packager") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask(Messages.getString("MockBuildHandler.27"), IProgressMonitor.UNKNOWN);
+				// build fresh SRPM
+				IStatus result = makeSRPM(event, monitor);
+				if (result.isOK()) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					result = createMockJob(monitor);
+				}
+				monitor.done();
+				return result;
 			}
-			result = createMockJob(monitor);
-		}
-
-		return result;
+		};
+		job.setUser(true);
+		job.schedule();
+		return null;
 	}
 
 	protected IStatus createMockJob(IProgressMonitor monitor) {

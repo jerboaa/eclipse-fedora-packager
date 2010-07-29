@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -173,8 +172,7 @@ public abstract class RPMHandler extends CommonHandler {
 		String dir = parent.getLocation().toString();
 		List<String> defines = getRPMDefines(dir);
 
-		HashMap<String, String> branch = branches.get(parent.getName());
-		List<String> distDefines = getDistDefines(branch);
+		List<String> distDefines = getDistDefines(branches, parent.getName());
 
 		defines.add(0, "rpmbuild");
 		defines.addAll(distDefines);
