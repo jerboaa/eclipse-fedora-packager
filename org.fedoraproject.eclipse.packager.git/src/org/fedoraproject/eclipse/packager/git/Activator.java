@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.git;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -58,5 +61,24 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
+	
+	/**
+	 * Handle an error. The error is logged. If <code>show</code> is
+	 * <code>true</code> the error is shown to the user.
+	 *
+	 * @param message 		a localized message
+	 * @param throwable
+	 * @param show
+	 */
+	public static void handleError(String message, Throwable throwable,
+			boolean show) {
+		IStatus status = new Status(IStatus.ERROR, PLUGIN_ID, message,
+				throwable);
+		int style = StatusManager.LOG;
+		if (show)
+			style |= StatusManager.SHOW;
+		StatusManager.getManager().handle(status, style);
+	}
+
 
 }

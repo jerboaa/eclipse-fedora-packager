@@ -36,13 +36,16 @@ public class SelectModulePage extends WizardPage {
 		GridLayout layout = new GridLayout();
 		composite.setLayout(layout);
 		Label label = new Label(composite, SWT.NONE);
-		label.setText("Package name:");
+		label.setText("Package name:"); // TODO: externalize
 		projectText = new Text(composite, SWT.BORDER | SWT.SINGLE);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		projectText.setLayoutData(gd);
 		setControl(composite);
 	}
 
+	/**
+	 * @return location the user wants to store this repository.
+	 */
 	public String getPackageName() {
 		return projectText.getText();
 	}

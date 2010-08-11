@@ -13,26 +13,32 @@ package org.fedoraproject.eclipse.packager.git;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import org.apache.commons.ssl.Certificates;
 import org.apache.commons.ssl.KeyMaterial;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
+import org.eclipse.egit.ui.RepositoryUtil;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 
@@ -42,12 +48,13 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 
 	public FedoraCheckoutWizard() {
 		super();
+		// required to show progress info of clone job
+		setNeedsProgressMonitor(true);
 	}
 
 	@Override
 	public void addPages() {
 		// get Fedora username from cert
-
 		page = new SelectModulePage();
 		addPage(page);
 	}
@@ -94,46 +101,75 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 		} else {
 			return "ssh://" + username + "@pkgs.stg.fedoraproject.org/"
 					+ packageName + ".git";
-
 		}
 	}
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public boolean performFinish() {
 		try {
-			CloneOperation clone = new CloneOperation(new URIish(getGitURL()),
-					true, new ArrayList<Ref>(), new File(ResourcesPlugin
+			final URIish uri = new URIish(getGitURL());
+			final CloneOperation clone = new CloneOperation(uri, true,
+					new ArrayList<Ref>(), new File(ResourcesPlugin
 							.getWorkspace().getRoot().getLocation().toFile(),
-							page.getPackageName()), "refs/heads/master",
+							page.getPackageName()), "refs/heads/master", // TODO:
+																			// use
+																			// constants
 					"origin");
-			clone.run(new NullProgressMonitor());
-			IProject project = ResourcesPlugin.getWorkspace().getRoot()
+
+			// Bail out if project already exists
+			IResource project = ResourcesPlugin.getWorkspace().getRoot()
+					.findMember(new Path(page.getPackageName()));
+			if (project != null && project.exists()) {
+				final String errorMessage = NLS.bind(
+						"Project already exists", project.getName());
+				ErrorDialog
+						.openError(
+								getShell(),
+								getWindowTitle(),
+								"Clone failed!",
+								new Status(
+										IStatus.ERROR,
+										org.fedoraproject.eclipse.packager.git.Activator.PLUGIN_ID,
+										0, errorMessage, null));
+				// let's give user a chance to fix this minor problem
+				return false;
+			}
+
+			// Perform clone in ModalContext thread with progress
+			// reporting on the wizard.
+			getContainer().run(true, true, new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					clone.run(monitor);
+					if (monitor.isCanceled())
+						throw new InterruptedException();
+				}
+			});
+			// Add cloned repository to the list of Git repositories so that it
+			// shows up in the Git repositories view.
+			final RepositoryUtil config = org.eclipse.egit.ui.Activator.getDefault().getRepositoryUtil();
+			config.addConfiguredRepository(clone.getGitDir());
+			IProject newProject = ResourcesPlugin.getWorkspace().getRoot()
 					.getProject(page.getPackageName());
-			project.create(null);
-			project.open(null);
-			ConnectProviderOperation connect = new ConnectProviderOperation(project);
+			newProject.create(null);
+			newProject.open(null);
+			ConnectProviderOperation connect = new ConnectProviderOperation(
+					newProject);
 			connect.execute(null);
-
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return true;
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MessageDialog.openInformation(getShell(), "Clone Failed", // TODO: externalize
+					"Clone cancelled by user");
+			return false;
+		} catch (Exception e) {
+			org.fedoraproject.eclipse.packager.git.Activator.handleError(
+					"Clone Failed", e, true);
+			return false;
 		}
-
-		return true;
 	}
 }
