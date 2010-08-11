@@ -41,6 +41,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 
 public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 
@@ -106,7 +107,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		// TODO Auto-generated method stub
+		// nothing
 	}
 
 	@Override
@@ -161,6 +162,10 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 			ConnectProviderOperation connect = new ConnectProviderOperation(
 					newProject);
 			connect.execute(null);
+			// Finally show the Git Repositories view for convenience
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+					.getActivePage().showView(
+							"org.eclipse.egit.ui.RepositoriesView"); //$NON-NLS-1$
 			return true;
 		} catch (InterruptedException e) {
 			MessageDialog.openInformation(getShell(), "Clone Failed", // TODO: externalize
