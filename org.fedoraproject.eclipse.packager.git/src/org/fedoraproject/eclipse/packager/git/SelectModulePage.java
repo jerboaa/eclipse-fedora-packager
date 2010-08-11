@@ -25,9 +25,10 @@ public class SelectModulePage extends WizardPage {
 
 	protected SelectModulePage() {
 		super("Package selection");
-		setDescription("Select a package you want to work on");
+		setTitle("Package selection");
+		setDescription("Please choose package you would like to work on"); // TODO: externalize
 		this.setImageDescriptor(ImageDescriptor.createFromFile(getClass(),
-				"/icons/import_obj.gif")); //$NON-NLS-1$
+				"/icons/wizban/newconnect_wizban.png")); //$NON-NLS-1$
 	}
 
 	@Override
