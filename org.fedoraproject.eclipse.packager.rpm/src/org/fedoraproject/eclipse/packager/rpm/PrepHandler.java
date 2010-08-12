@@ -17,12 +17,20 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 
 public class PrepHandler extends RPMHandler {
 
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
-		IStatus result = retrieveSources(monitor);
+		DownloadHandler dh = new DownloadHandler();
+		IStatus result = null;
+		try {
+			// retrieve sources
+			result = dh.doExecute(null, monitor);
+		} catch (ExecutionException e1) {
+			handleError(e1);
+		}
 		if (result.isOK()) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();

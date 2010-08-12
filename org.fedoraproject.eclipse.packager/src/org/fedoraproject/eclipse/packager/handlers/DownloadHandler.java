@@ -8,16 +8,21 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.cvs;
+package org.fedoraproject.eclipse.packager.handlers;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.fedoraproject.eclipse.packager.rpm.Messages;
-import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
+import org.fedoraproject.eclipse.packager.Messages;
 
-public class DownloadHandler extends RPMHandler {
+/**
+ * Class responsible for downloading source files
+ * 
+ * @author Red Hat inc.
+ *
+ */
+public class DownloadHandler extends WGetHandler {
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
 			throws ExecutionException {

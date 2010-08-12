@@ -40,5 +40,6 @@ Import-Package: org.apache.commons.codec.digest,
  org.eclipse.ui.forms.widgets,
  org.json
 Bundle-Localization: plugin
-Export-Package: org.fedoraproject.eclipse.packager
+Export-Package: org.fedoraproject.eclipse.packager,
+ org.fedoraproject.eclipse.packager.handlers
 Bundle-Vendor: %Bundle-Vendor.0

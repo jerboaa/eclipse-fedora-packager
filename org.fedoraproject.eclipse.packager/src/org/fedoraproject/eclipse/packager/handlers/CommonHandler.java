@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager;
+package org.fedoraproject.eclipse.packager.handlers;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
@@ -43,6 +44,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
+import org.eclipse.linuxtools.rpm.ui.editor.parser.Messages;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileSection;
@@ -68,6 +70,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.EditorPart;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.SourcesFile;
 
 @SuppressWarnings("restriction")
 public abstract class CommonHandler extends AbstractHandler {
@@ -78,11 +83,14 @@ public abstract class CommonHandler extends AbstractHandler {
 	protected HashMap<String, HashMap<String, String>> branches;
 	protected Job job;
 	protected ExecutionEvent event;
+	protected SourcesFile sourcesFile;
 
 	public void setDebug(boolean debug) {
 		this.debug = debug;
 	}
 
+	// FIXME: This will break with Git
+	//private abstract HashMap<String, HashMap<String, String>> getBranches();
 	private HashMap<String, HashMap<String, String>> getBranches() {
 		HashMap<String, HashMap<String, String>> ret = new HashMap<String, HashMap<String, String>>();
 
@@ -101,12 +109,12 @@ public abstract class CommonHandler extends AbstractHandler {
 
 			for (String branch : branches) {
 				HashMap<String, String> temp = new HashMap<String, String>();
-				StringTokenizer st = new StringTokenizer(branch, ":");
+				StringTokenizer st = new StringTokenizer(branch, ":");	//$NON-NLS-1$
 				String target = st.nextToken();
-				temp.put("target", st.nextToken());
-				temp.put("dist", st.nextToken());
-				temp.put("distvar", st.nextToken());
-				temp.put("distval", st.nextToken());
+				temp.put("target", st.nextToken()); 	//$NON-NLS-1$
+				temp.put("dist", st.nextToken());		//$NON-NLS-1$
+				temp.put("distvar", st.nextToken());	//$NON-NLS-1$
+				temp.put("distval", st.nextToken());	//$NON-NLS-1$
 				ret.put(target, temp);
 			}
 		} catch (CoreException e) {
@@ -123,7 +131,7 @@ public abstract class CommonHandler extends AbstractHandler {
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		this.event = e;
-		job = new Job("Fedora Packager") {
+		job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(getTaskName(), IProgressMonitor.UNKNOWN);
@@ -192,7 +200,6 @@ public abstract class CommonHandler extends AbstractHandler {
 			}
 
 		};
-
 		job.setUser(true);
 		job.schedule();
 		return null;
@@ -212,7 +219,7 @@ public abstract class CommonHandler extends AbstractHandler {
 		boolean result = false;
 		if (resource instanceof IFile) {
 			String ext = resource.getFileExtension();
-			result = ext != null && ext.equals("spec");
+			result = ext != null && ext.equals("spec"); //$NON-NLS-1$
 		}
 		return result;
 	}
@@ -220,9 +227,10 @@ public abstract class CommonHandler extends AbstractHandler {
 	public abstract IStatus doExecute(ExecutionEvent event,
 			IProgressMonitor monitor) throws ExecutionException;
 
+	// FIXME: This will breack Git
 	protected String getBranchName(String branch) throws CoreException {
 		// check for early-branched
-		if (branch.equals("devel")) {
+		if (branch.equals("devel")) { //$NON-NLS-1$
 			return getDevelBranch();
 		}
 		return branch;
@@ -232,17 +240,18 @@ public abstract class CommonHandler extends AbstractHandler {
 	private String getDevelBranch() throws CoreException {
 		int highestVersion = 0;
 		for (String branch : branches.keySet()) {
-			if (branch.startsWith("F-")) {
+			if (branch.startsWith("F-")) { //$NON-NLS-1$
 				int version = Integer.parseInt(branch.substring(2));
 				highestVersion = Math.max(version, highestVersion);
 			}
 		}
-		String newestBranch = "F-" + String.valueOf(highestVersion);
-		String secondNewestBranch = "F-" + String.valueOf(highestVersion - 1);
+		String newestBranch = "F-" + String.valueOf(highestVersion); //$NON-NLS-1$
+		String secondNewestBranch = "F-" + String.valueOf(highestVersion - 1); //$NON-NLS-1$
 
-		return containsSpec(secondNewestBranch) ? newestBranch : "devel";
+		return containsSpec(secondNewestBranch) ? newestBranch : "devel"; //$NON-NLS-1$
 	}
 
+	// FIXME: This will break Git
 	protected boolean containsSpec(String branch) throws CoreException {
 		IProject proj = specfile.getProject();
 		// get CVSProvider
@@ -317,7 +326,7 @@ public abstract class CommonHandler extends AbstractHandler {
 	}
 
 	private boolean validateFedorapackageRoot(IContainer resource) {
-		IFile file = resource.getFile(new Path("sources"));
+		IFile file = resource.getFile(new Path("sources")); //$NON-NLS-1$
 		if(file.exists()){
 			return true;
 		}
@@ -325,10 +334,10 @@ public abstract class CommonHandler extends AbstractHandler {
 	}
 
 	protected String makeTagName() throws CoreException {
-		String name = rpmQuery(specfile, "NAME").replaceAll("^[0-9]+", "");
-		String version = rpmQuery(specfile, "VERSION");
-		String release = rpmQuery(specfile, "RELEASE");
-		return (name + "-" + version + "-" + release).replaceAll("\\.", "_");
+		String name = rpmQuery(specfile, "NAME").replaceAll("^[0-9]+", "");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String version = rpmQuery(specfile, "VERSION");  //$NON-NLS-1$
+		String release = rpmQuery(specfile, "RELEASE");  //$NON-NLS-1$
+		return (name + "-" + version + "-" + release).replaceAll("\\.", "_");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	protected IStatus createCVSTag(String tagName, boolean forceTag,
@@ -357,7 +366,7 @@ public abstract class CommonHandler extends AbstractHandler {
 
 			TagListener listener = new TagListener();
 
-			String args[] = new String[] { "." };
+			String args[] = new String[] { "." }; //$NON-NLS-1$
 
 			LocalOption[] opts;
 			if (forceTag) {
@@ -398,12 +407,12 @@ public abstract class CommonHandler extends AbstractHandler {
 		List<String> distDefines = getDistDefines(branches, parent.getName());
 
 		String result = null;
-		defines.add(0, "rpm");
+		defines.add(0, "rpm"); //$NON-NLS-1$
 		defines.addAll(distDefines);
-		defines.add("-q");
-		defines.add("--qf");
-		defines.add("%{" + format + "}\\n");
-		defines.add("--specfile");
+		defines.add("-q"); //$NON-NLS-1$
+		defines.add("--qf"); //$NON-NLS-1$
+		defines.add("%{" + format + "}\\n");  //$NON-NLS-1$//$NON-NLS-2$
+		defines.add("--specfile"); //$NON-NLS-1$
 		defines.add(specfile.getLocation().toString());
 
 		try {
@@ -421,26 +430,26 @@ public abstract class CommonHandler extends AbstractHandler {
 		ArrayList<String> distDefines = new ArrayList<String>();
 		if (branches != null) {
 			HashMap<String, String> branch = branches.get(parentName);
-			String distvar = branch.get("distvar").equals("epel") ? "rhel"
-					: branch.get("distvar");
-			distDefines.add("--define");
-			distDefines.add("dist " + branch.get("dist"));
-			distDefines.add("--define");
-			distDefines.add(distvar + branch.get("dist"));
+			String distvar = branch.get("distvar").equals("epel") ? "rhel"  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+					: branch.get("distvar"); //$NON-NLS-1$
+			distDefines.add("--define"); //$NON-NLS-1$
+			distDefines.add("dist " + branch.get("dist"));  //$NON-NLS-1$//$NON-NLS-2$
+			distDefines.add("--define"); //$NON-NLS-1$
+			distDefines.add(distvar + branch.get("dist")); //$NON-NLS-1$
 		}
 		return distDefines;
 	}
 
 	protected List<String> getRPMDefines(String dir) {
 		ArrayList<String> rpmDefines = new ArrayList<String>();
-		rpmDefines.add("--define");
-		rpmDefines.add("_sourcedir " + dir);
-		rpmDefines.add("--define");
-		rpmDefines.add("_builddir " + dir);
-		rpmDefines.add("--define");
-		rpmDefines.add("_srcrpmdir " + dir);
-		rpmDefines.add("--define");
-		rpmDefines.add("_rpmdir " + dir);
+		rpmDefines.add("--define"); //$NON-NLS-1$
+		rpmDefines.add("_sourcedir " + dir); //$NON-NLS-1$
+		rpmDefines.add("--define"); //$NON-NLS-1$
+		rpmDefines.add("_builddir " + dir); //$NON-NLS-1$
+		rpmDefines.add("--define"); //$NON-NLS-1$
+		rpmDefines.add("_srcrpmdir " + dir); //$NON-NLS-1$
+		rpmDefines.add("--define"); //$NON-NLS-1$
+		rpmDefines.add("_rpmdir " + dir); //$NON-NLS-1$
 
 		return rpmDefines;
 	}
@@ -469,7 +478,7 @@ public abstract class CommonHandler extends AbstractHandler {
 		File file = specfile.getLocation().toFile();
 		SpecfileParser parser = new SpecfileParser();
 		Specfile spec = null;
-		String buf = "";
+		String buf = ""; //$NON-NLS-1$
 
 		BufferedReader br = null;
 		try {
@@ -485,17 +494,17 @@ public abstract class CommonHandler extends AbstractHandler {
 			spec = parser.parse(buf);
 
 			// get the changelog section
-			SpecfileSection clogSection = spec.getSection("changelog");
+			SpecfileSection clogSection = spec.getSection("changelog"); //$NON-NLS-1$
 
 			String clog = buf.substring(clogSection.getLineStartPosition());
-			String[] lines = clog.split("\n");
+			String[] lines = clog.split("\n"); //$NON-NLS-1$
 
 			// get the first clog entry
-			String recentClog = "";
+			String recentClog = ""; //$NON-NLS-1$
 
 			// ignore the header
 			int i = 1;
-			while (!lines[i].equals("")) {
+			while (!lines[i].equals("")) { //$NON-NLS-1$
 				recentClog += lines[i] + '\n';
 				i++;
 			}
@@ -519,19 +528,19 @@ public abstract class CommonHandler extends AbstractHandler {
 					@Override
 					public void run() {
 						if (isError) {
-							MessageDialog.openError(shell, "Fedora Packager",
+							MessageDialog.openError(shell, Messages.getString("FedoraPackager.name"), //$NON-NLS-1$
 									message);
 						} else {
 							MessageDialog.openInformation(shell,
-									"Fedora Packager", message);
+									Messages.getString("FedoraPackager.name"), message); //$NON-NLS-1$
 						}
 					}
 				});
 			} else {
 				if (isError) {
-					MessageDialog.openError(shell, "Fedora Packager", message);
+					MessageDialog.openError(shell, Messages.getString("FedoraPackager.name"), message); //$NON-NLS-1$
 				} else {
-					MessageDialog.openInformation(shell, "Fedora Packager",
+					MessageDialog.openInformation(shell, Messages.getString("FedoraPackager.name"),//$NON-NLS-1$
 							message);
 				}
 			}
@@ -573,7 +582,7 @@ public abstract class CommonHandler extends AbstractHandler {
 	protected boolean promptForceTag(final String tagName) {
 		boolean okPressed;
 		if (Display.getCurrent() != null) {
-			okPressed = MessageDialog.openQuestion(shell, "Fedora Packager",
+			okPressed = MessageDialog.openQuestion(shell, Messages.getString("FedoraPackager.name"), //$NON-NLS-1$
 					"Branch is already tagged with " + tagName
 							+ ".\nAttempt to overwrite?");
 		} else {
@@ -586,6 +595,7 @@ public abstract class CommonHandler extends AbstractHandler {
 		return okPressed;
 	}
 
+	// FIXME: This breaks git
 	protected IStatus doTag(IProgressMonitor monitor) {
 		monitor.subTask("Generating Tag Name from Specfile");
 		final String tagName;
@@ -626,6 +636,18 @@ public abstract class CommonHandler extends AbstractHandler {
 		}
 		return result;
 	}
+	
+	protected SourcesFile getSourcesFile() {
+		IFile sourcesIFile = specfile.getParent()
+				.getFile(new Path("./sources")); //$NON-NLS-1$
+		try {
+			sourcesIFile.refreshLocal(1, new NullProgressMonitor());
+		} catch (CoreException e) {
+			// Show what has gone wrong
+			handleError(e);
+		}
+		return new SourcesFile(sourcesIFile);
+	}
 
 	public final class YesNoRunnable implements Runnable {
 		private final String question;
@@ -637,7 +659,7 @@ public abstract class CommonHandler extends AbstractHandler {
 
 		@Override
 		public void run() {
-			okPressed = MessageDialog.openQuestion(shell, "Fedora Packager",
+			okPressed = MessageDialog.openQuestion(shell,  Messages.getString("FedoraPackager.name"), //$NON-NLS-1$
 					question);
 		}
 

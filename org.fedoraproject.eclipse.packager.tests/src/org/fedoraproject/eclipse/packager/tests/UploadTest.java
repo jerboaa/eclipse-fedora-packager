@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.fedoraproject.eclipse.packager.cvs.UploadHandler;
+import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
 
 public class UploadTest extends AbstractTest {
 	protected IResource resource;

@@ -31,5 +31,6 @@ Import-Package: org.apache.commons.httpclient,
  org.eclipse.team.internal.ccvs.ui.wizards,
  org.eclipse.team.internal.core.subscribers,
  org.fedoraproject.eclipse.packager,
+ org.fedoraproject.eclipse.packager.handlers,
  org.fedoraproject.eclipse.packager.rpm
 Export-Package: org.fedoraproject.eclipse.packager.cvs

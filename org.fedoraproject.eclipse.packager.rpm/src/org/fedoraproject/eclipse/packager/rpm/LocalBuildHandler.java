@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 
 public class LocalBuildHandler extends RPMHandler {
 
@@ -39,7 +40,14 @@ public class LocalBuildHandler extends RPMHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask( Messages.getString("LocalBuildHandler.8"), IProgressMonitor.UNKNOWN);
-				IStatus result = retrieveSources(monitor);
+				DownloadHandler dh = new DownloadHandler();
+				IStatus result = null;
+				try {
+					// retrieve sources
+					result = dh.doExecute(null, monitor);
+				} catch (ExecutionException e1) {
+					handleError(e1);
+				}
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();

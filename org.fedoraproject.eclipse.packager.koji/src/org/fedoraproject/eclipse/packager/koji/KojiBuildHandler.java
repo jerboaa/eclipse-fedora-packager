@@ -39,7 +39,7 @@ import org.eclipse.team.internal.ccvs.core.ICVSFolder;
 import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
 import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
-import org.fedoraproject.eclipse.packager.CommonHandler;
+import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 
 @SuppressWarnings("restriction")
 public class KojiBuildHandler extends CommonHandler {

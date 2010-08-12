@@ -114,6 +114,12 @@ public class SourcesFile {
 		return missingSources;
 	}
 
+	/**
+	 * Delete actual file in project
+	 * 
+	 * @param file
+	 * @throws CoreException
+	 */
 	public void deleteSource(String file) throws CoreException {
 		IContainer branch = sourcesFile.getParent();
 		IResource toDelete = branch.findMember(file);

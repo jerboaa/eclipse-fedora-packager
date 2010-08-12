@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
 
 public class NewSourcesHandler extends UploadHandler {
 	@Override

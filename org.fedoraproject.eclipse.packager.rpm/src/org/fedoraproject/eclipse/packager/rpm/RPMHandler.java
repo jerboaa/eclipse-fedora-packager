@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -41,10 +42,11 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
-import org.fedoraproject.eclipse.packager.CommonHandler;
 import org.fedoraproject.eclipse.packager.ConsoleWriterThread;
 import org.fedoraproject.eclipse.packager.DownloadJob;
 import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
+import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 
 public abstract class RPMHandler extends CommonHandler {
 	protected static final QualifiedName KEY = new QualifiedName(
@@ -54,58 +56,6 @@ public abstract class RPMHandler extends CommonHandler {
 			.getString("RPMHandler.1"); //$NON-NLS-1$
 
 	protected Map<String, String> sources;
-	protected SourcesFile sourcesFile;
-
-	protected static final String repo = "http://cvs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
-
-	protected IStatus retrieveSources(IProgressMonitor monitor) {
-		sourcesFile = getSourcesFile();
-
-		// check md5sum of any local sources
-		Set<String> sourcesToGet = sourcesFile.getSourcesToDownload();
-
-		if (sourcesToGet.isEmpty()) {
-			return handleOK(Messages.getString("RPMHandler.3"), false); //$NON-NLS-1$
-		}
-
-		// Need to download remaining sources from repo
-		IStatus status = null;
-		for (final String source : sourcesToGet) {
-			final String url = repo
-					+ "/" + specfile.getProject().getName() //$NON-NLS-1$
-					+ "/" + source + "/" + sourcesFile.getSource(source) + "/" + source; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			status = download(url, source, monitor);
-			if (!status.isOK()) {
-				// download failed
-				try {
-					sourcesFile.deleteSource(source);
-				} catch (CoreException e) {
-					e.printStackTrace();
-					handleError(e);
-				}
-				break;
-			}
-		}
-
-		if (!status.isOK()) {
-			return handleError(status.getMessage());
-		}
-
-		// sources downloaded successfully, check MD5
-		sourcesToGet = sourcesFile.getSourcesToDownload();
-
-		// if all checks pass we should have an empty list
-		if (!sourcesToGet.isEmpty()) {
-			String failedSources = ""; //$NON-NLS-1$
-			for (String source : sourcesToGet) {
-				failedSources += source + '\n';
-			}
-			return handleError(Messages.getString("RPMHandler.10") //$NON-NLS-1$
-					+ failedSources);
-		} else {
-			return Status.OK_STATUS;
-		}
-	}
 
 	protected MessageConsole getConsole(String name) {
 		MessageConsole ret = null;
@@ -121,37 +71,6 @@ public abstract class RPMHandler extends CommonHandler {
 					RPMPlugin.getImageDescriptor("icons/rpm.gif")); //$NON-NLS-1$
 		}
 		return ret;
-	}
-
-	protected IStatus download(String location, String fileName,
-			IProgressMonitor monitor) {
-		IFile file = null;
-		try {
-			URL url = new URL(location);
-			file = specfile.getParent().getFile(new Path(fileName));
-
-			// connect to repo
-			URLConnection conn = url.openConnection();
-
-			if (file.exists()) {
-				return new DownloadJob(file, conn, true).run(monitor);
-			} else {
-				return new DownloadJob(file, conn).run(monitor);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			return handleError(NLS.bind(
-					Messages.getString("RPMHandler.12"), fileName)); //$NON-NLS-1$
-
-		} finally {
-			// refresh folder in resource tree
-			try {
-				specfile.getParent().refreshLocal(IResource.DEPTH_ONE, monitor);
-			} catch (CoreException e) {
-				e.printStackTrace();
-				return handleError(Messages.getString("RPMHandler.14")); //$NON-NLS-1$
-			}
-		}
 	}
 
 	protected SourcesFile getSourcesFile() {
@@ -293,7 +212,14 @@ public abstract class RPMHandler extends CommonHandler {
 	}
 
 	protected IStatus makeSRPM(ExecutionEvent event, IProgressMonitor monitor) {
-		IStatus result = retrieveSources(monitor);
+		DownloadHandler dh = new DownloadHandler();
+		IStatus result = null;
+		try {
+			// retrieve sources
+			result = dh.doExecute(null, monitor);
+		} catch (ExecutionException e1) {
+			handleError(e1);
+		}
 		if (result.isOK()) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();

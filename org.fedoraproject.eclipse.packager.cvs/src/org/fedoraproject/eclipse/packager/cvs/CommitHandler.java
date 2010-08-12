@@ -34,7 +34,7 @@ import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.wizards.CommitWizard;
 import org.eclipse.team.internal.core.subscribers.ActiveChangeSet;
 import org.eclipse.team.internal.core.subscribers.ActiveChangeSetManager;
-import org.fedoraproject.eclipse.packager.CommonHandler;
+import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 
 @SuppressWarnings("restriction")
 public class CommitHandler extends CommonHandler {
