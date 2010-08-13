@@ -33,4 +33,5 @@ Import-Package: org.apache.commons.httpclient,
  org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.handlers,
  org.fedoraproject.eclipse.packager.rpm
-Export-Package: org.fedoraproject.eclipse.packager.cvs
+Export-Package: org.fedoraproject.eclipse.packager.cvs,
+ org.fedoraproject.eclipse.packager.cvs.handlers
