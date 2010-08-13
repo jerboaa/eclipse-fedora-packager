@@ -157,7 +157,7 @@ public class UploadHandler extends RPMHandler {
 			PostMethod postMethod = new PostMethod(uploadURL);
 			NameValuePair[] data = {
 					new NameValuePair(
-							"name", getValidRoot(resource).getSpecfileModel().getName()), //$NON-NLS-1$ //$NON-NLS-2$
+							"name", fedoraProjectRoot.getSpecfileModel().getName()), //$NON-NLS-1$ //$NON-NLS-2$
 					new NameValuePair("md5sum", SourcesFile.getMD5(toAdd)), //$NON-NLS-1$
 					new NameValuePair("filename", filename) }; //$NON-NLS-1$
 			postMethod.setRequestBody(data);
