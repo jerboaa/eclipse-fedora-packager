@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.cvs.Messages;
@@ -38,49 +39,63 @@ public class CVSNewSourcesHandler extends CVSHandler {
 		final IResource resource = getResource(e);
 		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
-		
-		// Do the file uploading
-		IStatus status = (IStatus)super.execute(e);
-		
-		// Do rest of work if uploading was Ok.
-		if (status.isOK()) {
-			
-			//Update sources file
-			final File toAdd = resource.getLocation().toFile();
-			status = updateSources(sourceFile, toAdd);
-			if (!status.isOK()) {
-				// fail updating sources file
-			}
 
-			// Handle CVS specific stuff; Update .cvsignore
-			final File cvsignore = new File(fedoraProjectRoot
-					.getContainer().getLocation().toString()
-					+ IPath.SEPARATOR + ".cvsignore"); //$NON-NLS-1$
-			status = updateCVSIgnore(cvsignore, toAdd);
-			if (!status.isOK()) {
-				// fail updating sources file
-			}
-			
-			// Do CVS update
-			job = new Job(org.fedoraproject.eclipse.packager.Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					monitor
-							.beginTask(
-									Messages.getString("CVSUploadHandler.doCvsOps"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+		// do tasks as job
+		job = new Job(getTaskName()) {
 
-					final IStatus result = updateCVS(sourceFile, cvsignore, monitor);
-					if (result.isOK()) {
-						if (monitor.isCanceled()) {
-							throw new OperationCanceledException();
-						}
-					}
-					return result;
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				monitor.beginTask(getTaskName(), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+
+				// Don't do anything if file is empty
+				final File toAdd = resource.getLocation().toFile();
+				if (toAdd.length() == 0) {
+					return handleOK(
+							NLS.bind(org.fedoraproject.eclipse.packager.Messages
+													.getString("UploadHandler.0"),
+													toAdd.getName()), true); //$NON-NLS-1$
 				}
-			};
-			job.setUser(true);
-			job.schedule();
-		}
+
+				// Do the file uploading
+				String filename = resource.getName();
+				IStatus result = performUpload(toAdd, filename, monitor,
+						fedoraProjectRoot);
+
+				if (result.isOK()) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+				}
+
+				// Update sources file
+				result = updateSources(sourceFile, toAdd);
+				if (!result.isOK()) {
+					// fail updating sources file
+				}
+
+				// Handle CVS specific stuff; Update .cvsignore
+				final File cvsignore = new File(fedoraProjectRoot
+						.getContainer().getLocation().toString()
+						+ IPath.SEPARATOR + ".cvsignore"); //$NON-NLS-1$
+				result = updateCVSIgnore(cvsignore, toAdd);
+				if (!result.isOK()) {
+					// fail updating sources file
+				}
+
+				// Do CVS update
+				result = updateCVS(sourceFile, cvsignore, monitor);
+				if (result.isOK()) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+				}
+				return result;
+			}
+
+		};
+		job.setUser(true);
+		job.schedule();
 		return null;
 	}
 

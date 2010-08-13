@@ -23,7 +23,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
@@ -36,15 +35,12 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.SSLUtils;
@@ -59,64 +55,15 @@ import org.fedoraproject.eclipse.packager.Messages;
  */
 public abstract class UploadHandler extends WGetHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final IResource resource = getResource(e);
-		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
-		specfile = fedoraProjectRoot.getSpecFile();
-		job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(
-						Messages.getString("UploadHandler.1"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
-				Map<String, String> sources = getSourcesFile().getSources();
-
-				// don't add empty files
-				final File toAdd = resource.getLocation().toFile();
-				if (toAdd.length() == 0) {
-					return handleOK(
-							NLS.bind(
-									Messages.getString("UploadHandler.0"), resource.getName()), true); //$NON-NLS-1$
-				}
-
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
-				}
-				monitor.subTask(Messages.getString("UploadHandler.5")); //$NON-NLS-1$
-				// ensure file has changed if already listed in sources
-				final String filename = resource.getName();
-				if (sources.containsKey(filename)
-						&& SourcesFile
-								.checkMD5(sources.get(filename), resource)) {
-					// file already in sources
-					return handleOK(NLS.bind(
-							Messages.getString("UploadHandler.2"), filename) //$NON-NLS-1$
-							, true);
-				}
-
-				// use our Fedora client certificate to start SSL connection
-				IStatus result = performUpload(toAdd, filename, monitor, fedoraProjectRoot);
-
-				if (result.isOK()) {
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-				}
-				return result;
-			}
-		};
-		job.setUser(true);
-		job.schedule();
-		// Wait for job to finish
-		try {
-			job.join();
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		return job.getResult(); // return something, not just null
-	}
-
+	/**
+	 * Upload source files as job.
+	 * 
+	 * @param toAdd
+	 * @param filename
+	 * @param monitor
+	 * @param fedoraProjectRoot
+	 * @return
+	 */
 	protected IStatus performUpload(final File toAdd, final String filename,
 			IProgressMonitor monitor, FedoraProjectRoot fedoraProjectRoot) {
 		IStatus status;

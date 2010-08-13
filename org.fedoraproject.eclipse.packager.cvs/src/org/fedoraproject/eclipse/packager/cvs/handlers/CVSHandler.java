@@ -32,7 +32,7 @@ import org.eclipse.team.internal.ccvs.core.client.Command;
 import org.eclipse.team.internal.ccvs.core.client.Session;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
-import org.fedoraproject.eclipse.packager.handlers.WGetHandler;
+import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
 
 /**
  * Common functionality of CVS handlers
@@ -41,7 +41,7 @@ import org.fedoraproject.eclipse.packager.handlers.WGetHandler;
  *
  */
 @SuppressWarnings("restriction")
-public abstract class CVSHandler extends WGetHandler {
+public abstract class CVSHandler extends UploadHandler {
 
 	/**
 	 * Update .cvsignore file. Appends to file.

@@ -33,7 +33,7 @@ public class CVSUploadTest extends AbstractTest {
 		handler.setResource(resource);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
-		handler.execute(null);		
+		handler.execute(null);
 		handler.waitForJob();
 	}
 
