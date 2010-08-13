@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.cvs;
+package org.fedoraproject.eclipse.packager.cvs.handlers;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -34,6 +34,7 @@ import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.wizards.CommitWizard;
 import org.eclipse.team.internal.core.subscribers.ActiveChangeSet;
 import org.eclipse.team.internal.core.subscribers.ActiveChangeSetManager;
+import org.fedoraproject.eclipse.packager.cvs.Messages;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 
 @SuppressWarnings("restriction")
