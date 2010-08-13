@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -16,6 +17,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.internal.ccvs.core.CVSException;
 import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
@@ -38,21 +41,47 @@ public class CVSUploadHandler extends UploadHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		// Do the file uploading
 		IStatus status = (IStatus)super.execute(e);
-		// Update .cvsignore
+		
+		// Handle CVS specific stuff
+		final IResource resource = getResource(e);
+		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
+		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
+		specfile = fedoraProjectRoot.getSpecFile();
+		
+		// Update (potentially add) sources/.cvsignore to CVS
+		job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask(
+						Messages.getString("UploadHandler.1"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				// do the actual work
+				IStatus result = updateFiles(, cvsignore, toAdd,
+						filename, monitor);
+
+				if (result.isOK()) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+				}
+				return result;
+			}
+		};
 		final IResource resource = getResource(e);
 		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
 		SourcesFile sourcesFile = getSourcesFile();
+		final File cvsignore = new File(fedoraProjectRoot
+			.getContainer().getLocation().toString()
+			+ IPath.SEPARATOR + ".cvsignore"); //$NON-NLS-1$
+		
 		// Update sources file
 		final File toAdd = resource.getLocation().toFile();
 		status = updateSources(sourcesFile, toAdd);
 		if (!status.isOK()) {
 			// fail updating sources file
 		}
-		final File cvsignore = new File(fedoraProjectRoot
-			.getContainer().getLocation().toString()
-			+ IPath.SEPARATOR + ".cvsignore"); //$NON-NLS-1$
-		IStatus result = updateFiles(, cvsignore, toAdd,
-			filename, monitor);
 	}
 	
 	protected IStatus updateCVSIgnore(File cvsignore, File toAdd) {
