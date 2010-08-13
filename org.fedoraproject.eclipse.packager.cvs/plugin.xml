@@ -121,12 +121,12 @@
             name="%command.name.1">
       </command>
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.cvs.UploadHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.cvs.CVSUploadHandler"
             id="org.fedoraproject.eclipse.packager.UploadCommand"
             name="%command.name.6">
       </command>
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.cvs.NewSourcesHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.cvs.CSVNewSourcesHandler"
             id="org.fedoraproject.eclipse.packager.NewSourcesCommand"
             name="%command.name.7">
       </command>

@@ -1,5 +1,6 @@
 package org.fedoraproject.eclipse.packager.handlers;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -14,6 +15,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.DownloadJob;
 import org.fedoraproject.eclipse.packager.Messages;
+import org.fedoraproject.eclipse.packager.SourcesFile;
 
 public abstract class WGetHandler extends CommonHandler {
 	
@@ -97,6 +99,28 @@ public abstract class WGetHandler extends CommonHandler {
 				return handleError(Messages.getString("WGetHandler.couldNotRefresh")); //$NON-NLS-1$
 			}
 		}
+	}
+	
+	protected IStatus updateSources(SourcesFile sources, File toAdd) {
+		return updateSources(sources, toAdd, false);
+	}
+
+	
+
+	protected IStatus updateSources(SourcesFile sourceFile, File toAdd,
+			boolean forceOverwrite) {
+		String filename = toAdd.getName();
+		if (forceOverwrite) {
+			sourceFile.getSources().clear();
+		}
+		sourceFile.getSources().put(filename, SourcesFile.getMD5(toAdd));
+
+		try {
+			sourceFile.save();
+		} catch (CoreException e) {
+			return e.getStatus();
+		}
+		return Status.OK_STATUS;
 	}
 
 }

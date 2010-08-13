@@ -39,7 +39,6 @@ import org.apache.commons.ssl.TrustMaterial;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -53,18 +52,12 @@ import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.Messages;
 
 /**
- * Class responsible for uploading source files.
+ * Class responsible for uploading source files (VCS independent bits).
  * 
  * @author Red Hat inc.
  *
  */
-public class UploadHandler extends WGetHandler {
-
-	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
-			throws ExecutionException {
-		return Status.OK_STATUS;
-	}
+public abstract class UploadHandler extends WGetHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
@@ -114,8 +107,14 @@ public class UploadHandler extends WGetHandler {
 		};
 		job.setUser(true);
 		job.schedule();
-		//job.join(); // wait for it to finish; might block
-		return null;
+		// Wait for job to finish
+		try {
+			job.join();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return job.getResult(); // return something, not just null
 	}
 
 	protected IStatus performUpload(final File toAdd, final String filename,
@@ -179,28 +178,6 @@ public class UploadHandler extends WGetHandler {
 		}
 
 		return status;
-	}
-
-	protected IStatus updateSources(SourcesFile sources, File toAdd) {
-		return updateSources(sources, toAdd, false);
-	}
-
-	
-
-	protected IStatus updateSources(SourcesFile sourceFile, File toAdd,
-			boolean forceOverwrite) {
-		String filename = toAdd.getName();
-		if (forceOverwrite) {
-			sourceFile.getSources().clear();
-		}
-		sourceFile.getSources().put(filename, SourcesFile.getMD5(toAdd));
-
-		try {
-			sourceFile.save();
-		} catch (CoreException e) {
-			return e.getStatus();
-		}
-		return Status.OK_STATUS;
 	}
 
 	protected void registerProtocol() throws GeneralSecurityException,
@@ -299,11 +276,6 @@ public class UploadHandler extends WGetHandler {
 			ret = res.getLocation().toFile();
 		}
 		return ret;
-	}
-
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("UploadHandler.38"); //$NON-NLS-1$
 	}
 
 }

@@ -24,8 +24,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
+import org.fedoraproject.eclipse.packager.handlers.WGetHandler;
 
-public class NewSourcesHandler extends UploadHandler {
+public class NewSourcesHandler extends WGetHandler {
 	@Override
 	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
 			throws ExecutionException {
@@ -77,13 +78,8 @@ public class NewSourcesHandler extends UploadHandler {
 	}
 
 	@Override
-	protected IStatus updateCVSIgnore(File cvsignore, File toAdd) {
-		return updateCVSIgnore(cvsignore, toAdd, true /* overwrite */);
+	protected String getTaskName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
-
-	@Override
-	protected IStatus updateSources(SourcesFile sources, File toAdd) {
-		return updateSources(sources, toAdd, true /* overwrite */);
-	}
-
 }
