@@ -17,6 +17,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -43,6 +46,12 @@ import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
 @SuppressWarnings("restriction")
 public abstract class CVSHandler extends UploadHandler {
 
+	@Override
+	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
+			throws ExecutionException {
+		return Status.OK_STATUS; //TODO remove this once we remove the abstract doExecute from CommonHandler.
+	}
+	
 	/**
 	 * Update .cvsignore file. Appends to file.
 	 * 

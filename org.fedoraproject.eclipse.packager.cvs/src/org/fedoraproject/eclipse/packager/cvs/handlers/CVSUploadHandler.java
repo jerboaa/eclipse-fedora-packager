@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
@@ -35,13 +34,6 @@ import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
  *
  */
 public class CVSUploadHandler extends CVSHandler {
-	
-	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
-			throws ExecutionException {
-		// do nothing. Why?
-		return Status.OK_STATUS;
-	}
 	
 	@Override
 	/**
