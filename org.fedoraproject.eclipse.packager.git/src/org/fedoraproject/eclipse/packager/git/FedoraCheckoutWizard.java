@@ -98,9 +98,9 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 		String username = getUsername();
 		String packageName = page.getPackageName();
 		if (username.equals("anonymous")) {
-			return "git://pkgs.stg.fedoraproject.org/" + packageName + ".git";
+			return "git://pkgs.fedoraproject.org/" + packageName + ".git";
 		} else {
-			return "ssh://" + username + "@pkgs.stg.fedoraproject.org/"
+			return "ssh://" + username + "@pkgs.fedoraproject.org/"
 					+ packageName + ".git";
 		}
 	}
