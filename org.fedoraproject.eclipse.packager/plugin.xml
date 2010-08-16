@@ -100,5 +100,14 @@
             name="%command.name.9">
       </command>
     </extension>
+    
+	<extension point="org.eclipse.core.runtime.adapters">
+         <factory 
+            class="org.fedoraproject.eclipse.packager.IResourceAdapterFactory" 
+            adaptableType="org.eclipse.core.resources.IResource">
+            <adapter type="org.fedoraproject.eclipse.packager.FpProject"/>
+         </factory>
+    </extension>
+
 
 </plugin>
