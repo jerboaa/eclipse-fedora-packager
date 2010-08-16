@@ -12,23 +12,16 @@ package org.fedoraproject.eclipse.packager.rpm;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -43,8 +36,7 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.fedoraproject.eclipse.packager.ConsoleWriterThread;
-import org.fedoraproject.eclipse.packager.DownloadJob;
-import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 
@@ -71,17 +63,6 @@ public abstract class RPMHandler extends CommonHandler {
 					RPMPlugin.getImageDescriptor("icons/rpm.gif")); //$NON-NLS-1$
 		}
 		return ret;
-	}
-
-	protected SourcesFile getSourcesFile() {
-		IFile sourcesIFile = specfile.getParent()
-				.getFile(new Path("./sources"));
-		try {
-			sourcesIFile.refreshLocal(1, new NullProgressMonitor());
-		} catch (CoreException e) {
-			// TODO what should we do if refresh fails?
-		}
-		return new SourcesFile(sourcesIFile);
 	}
 
 	protected IStatus rpmBuild(List<String> flags, IProgressMonitor monitor) {
@@ -211,15 +192,12 @@ public abstract class RPMHandler extends CommonHandler {
 		return result.substring(0, result.indexOf('\n'));
 	}
 
-	protected IStatus makeSRPM(ExecutionEvent event, IProgressMonitor monitor) {
+	protected IStatus makeSRPM(FedoraProjectRoot fedoraProjectRoot,
+			IProgressMonitor monitor) {
 		DownloadHandler dh = new DownloadHandler();
 		IStatus result = null;
-		try {
-			// retrieve sources
-			result = dh.doExecute(null, monitor);
-		} catch (ExecutionException e1) {
-			handleError(e1);
-		}
+		// retrieve sources
+		result = dh.doExecute(fedoraProjectRoot, monitor);
 		if (result.isOK()) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();

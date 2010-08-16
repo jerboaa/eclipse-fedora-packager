@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Set;
+
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -14,15 +18,24 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.DownloadJob;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 
 public abstract class WGetHandler extends CommonHandler {
 	
 	protected static final String uploadURL = "http://cvs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
-
-	protected IStatus retrieveSources(IProgressMonitor monitor) {
-		sourcesFile = getSourcesFile();
+	
+	protected IProject project;
+	
+	@Override
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+		return null;
+	}
+	
+	protected IStatus retrieveSources(FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
+		SourcesFile sourcesFile = fedoraProjectRoot.getSourcesFile();
+		project = fedoraProjectRoot.getContainer().getProject();
 	
 		// check md5sum of any local sources
 		Set<String> sourcesToGet = sourcesFile.getSourcesToDownload();
@@ -35,7 +48,7 @@ public abstract class WGetHandler extends CommonHandler {
 		IStatus status = null;
 		for (final String source : sourcesToGet) {
 			final String url = uploadURL
-					+ "/" + specfile.getProject().getName() //$NON-NLS-1$
+					+ "/" + project.getName() //$NON-NLS-1$
 					+ "/" + source + "/" + sourcesFile.getSource(source) + "/" + source; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			status = download(url, source, monitor);
 			if (!status.isOK()) {
@@ -75,7 +88,7 @@ public abstract class WGetHandler extends CommonHandler {
 		IFile file = null;
 		try {
 			URL url = new URL(location);
-			file = specfile.getParent().getFile(new Path(fileName));
+			file = project.getFile(new Path(fileName));
 
 			// connect to repo
 			URLConnection conn = url.openConnection();
@@ -93,7 +106,7 @@ public abstract class WGetHandler extends CommonHandler {
 		} finally {
 			// refresh folder in resource tree
 			try {
-				specfile.getParent().refreshLocal(IResource.DEPTH_ONE, monitor);
+				project.refreshLocal(IResource.DEPTH_ONE, monitor);
 			} catch (CoreException e) {
 				e.printStackTrace();
 				return handleError(Messages.getString("WGetHandler.couldNotRefresh")); //$NON-NLS-1$

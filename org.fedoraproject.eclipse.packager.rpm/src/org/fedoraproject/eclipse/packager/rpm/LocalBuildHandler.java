@@ -27,10 +27,11 @@ import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 public class LocalBuildHandler extends RPMHandler {
 
 	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
+	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
+			throws ExecutionException {
 		return Status.OK_STATUS;
 	}
-	
+
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final IResource resource = getResource(e);
@@ -39,15 +40,12 @@ public class LocalBuildHandler extends RPMHandler {
 		job = new Job("Fedora Packager") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask( Messages.getString("LocalBuildHandler.8"), IProgressMonitor.UNKNOWN);
+				monitor.beginTask(Messages.getString("LocalBuildHandler.8"),
+						IProgressMonitor.UNKNOWN);
 				DownloadHandler dh = new DownloadHandler();
 				IStatus result = null;
-				try {
-					// retrieve sources
-					result = dh.doExecute(null, monitor);
-				} catch (ExecutionException e1) {
-					handleError(e1);
-				}
+				// retrieve sources
+				result = dh.doExecute(fedoraProjectRoot, monitor);
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
@@ -55,7 +53,7 @@ public class LocalBuildHandler extends RPMHandler {
 					try {
 						// search for noarch directive, otherwise use local arch
 						final String arch = rpmQuery(specfile, "ARCH"); //$NON-NLS-1$
-						
+
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
