@@ -62,10 +62,14 @@
             </separator>
             
          </menu>
+      </menuContribution>
+      <menuContribution
+               locationURI="popup:org.eclipse.fedoraproject.packager.main">
          <command
                   commandId="org.fedoraproject.eclipse.packager.DownloadCommand"
                   label="%command.label.4"
                   mnemonic="%command.mnemonic.4"
+                  
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -85,7 +89,7 @@
                   </or>
                </visibleWhen>
          </command>
-      </menuContribution>
+               </menuContribution>
     </extension>
     
     <extension
