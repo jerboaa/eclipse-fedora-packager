@@ -12,6 +12,7 @@ package org.fedoraproject.eclipse.packager.cvs.handlers;
 
 import java.io.File;
 import java.util.Map;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
@@ -25,6 +26,7 @@ import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.cvs.Messages;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 /**
  * Handles upload commands (CSV implementation)
@@ -48,8 +50,8 @@ public class CVSUploadHandler extends CVSHandler {
 	 */
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 
-		final IResource resource = getResource(e);
-		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
+		final IResource resource = FedoraHandlerUtils.getResource(e);
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(resource);
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 
 		// do tasks as job

@@ -14,6 +14,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.Messages;
 
@@ -21,23 +22,32 @@ import org.fedoraproject.eclipse.packager.Messages;
  * Class responsible for downloading source files
  * 
  * @author Red Hat inc.
- *
+ * 
  */
 public class DownloadHandler extends WGetHandler {
-	
-	public IStatus doExecute(FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
+
+	public IStatus doExecute(FedoraProjectRoot fedoraProjectRoot,
+			IProgressMonitor monitor) {
 		return retrieveSources(fedoraProjectRoot, monitor);
 	}
 
 	@Override
-	protected String getTaskName() {
-		return Messages.getString("DownloadHandler.0"); //$NON-NLS-1$
-	}
-
-	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
-			throws ExecutionException {
-		// TODO Remove once every handler handles it execute directly
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
+				.getValidRoot(e);
+		specfile = fedoraProjectRoot.getSpecFile();
+		Job job = new Job("Fedora Packager") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask(Messages.getString("DownloadHandler.0"),
+						IProgressMonitor.UNKNOWN);
+				IStatus status = retrieveSources(fedoraProjectRoot, monitor);
+				monitor.done();
+				return status;
+			}
+		};
+		job.setUser(true);
+		job.schedule();
 		return null;
 	}
 

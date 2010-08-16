@@ -29,9 +29,17 @@ public abstract class WGetHandler extends CommonHandler {
 	protected IProject project;
 	
 	@Override
-	public Object execute(final ExecutionEvent e) throws ExecutionException {
+	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
+			throws ExecutionException {
+		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	protected String getTaskName() {
+		return ""; //$NON-NLS-1$
+	}
+
 	
 	protected IStatus retrieveSources(FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
 		SourcesFile sourcesFile = fedoraProjectRoot.getSourcesFile();
@@ -117,8 +125,6 @@ public abstract class WGetHandler extends CommonHandler {
 	protected IStatus updateSources(SourcesFile sources, File toAdd) {
 		return updateSources(sources, toAdd, false);
 	}
-
-	
 
 	protected IStatus updateSources(SourcesFile sourceFile, File toAdd,
 			boolean forceOverwrite) {

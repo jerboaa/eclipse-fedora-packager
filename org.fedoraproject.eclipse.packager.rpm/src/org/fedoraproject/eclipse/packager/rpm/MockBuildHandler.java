@@ -24,23 +24,18 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 public class MockBuildHandler extends RPMHandler {
-	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
-		return Status.OK_STATUS;
-	}
 	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final IResource resource = getResource(e);
-		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
 		specfile = fedoraProjectRoot.getSpecFile();
 		job = new Job("Fedora Packager") {
 			@Override
@@ -154,8 +149,4 @@ public class MockBuildHandler extends RPMHandler {
 		return false;
 	}
 
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("MockBuildHandler.27"); //$NON-NLS-1$
-	}
 }

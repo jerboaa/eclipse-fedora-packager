@@ -14,28 +14,21 @@ import java.util.ArrayList;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 public class LocalBuildHandler extends RPMHandler {
 
-	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
-			throws ExecutionException {
-		return Status.OK_STATUS;
-	}
-
+	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final IResource resource = getResource(e);
-		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
 		specfile = fedoraProjectRoot.getSpecFile();
 		job = new Job("Fedora Packager") {
 			@Override
@@ -79,8 +72,4 @@ public class LocalBuildHandler extends RPMHandler {
 		return null;
 	}
 
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("LocalBuildHandler.8"); //$NON-NLS-1$
-	}
 }

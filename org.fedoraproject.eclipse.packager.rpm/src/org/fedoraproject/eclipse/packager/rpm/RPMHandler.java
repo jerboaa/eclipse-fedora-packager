@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,6 +41,7 @@ import org.fedoraproject.eclipse.packager.ConsoleWriterThread;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 public abstract class RPMHandler extends CommonHandler {
 	protected static final QualifiedName KEY = new QualifiedName(
@@ -48,6 +51,19 @@ public abstract class RPMHandler extends CommonHandler {
 			.getString("RPMHandler.1"); //$NON-NLS-1$
 
 	protected Map<String, String> sources;
+	protected IResource specfile;
+
+	//TODO remove the following 2 methods once we decouple rpm handler from CommonHandler
+	@Override
+	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
+			throws ExecutionException {
+		return Status.OK_STATUS;
+	}
+	
+	@Override
+	protected String getTaskName() {
+		return ""; //$NON-NLS-1$
+	}
 
 	protected MessageConsole getConsole(String name) {
 		MessageConsole ret = null;
@@ -70,7 +86,7 @@ public abstract class RPMHandler extends CommonHandler {
 				Messages.getString("RPMHandler.17"), specfile.getName())); //$NON-NLS-1$
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
-		List<String> defines = getRPMDefines(dir);
+		List<String> defines = FedoraHandlerUtils.getRPMDefines(dir);
 
 		List<String> distDefines = getDistDefines(branches, parent.getName());
 
@@ -209,4 +225,5 @@ public abstract class RPMHandler extends CommonHandler {
 		}
 		return result;
 	}
+	
 }

@@ -26,11 +26,9 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -40,9 +38,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Messages;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
@@ -64,13 +59,6 @@ import org.eclipse.team.internal.ccvs.core.client.Session;
 import org.eclipse.team.internal.ccvs.core.client.Tag;
 import org.eclipse.team.internal.ccvs.core.client.listeners.TagListener;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.eclipse.ui.part.EditorPart;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 
@@ -135,17 +123,6 @@ public abstract class CommonHandler extends AbstractHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(getTaskName(), IProgressMonitor.UNKNOWN);
-
-				// in debug mode, these will be set programmatically
-				if (!debug) {
-					shell = HandlerUtil.getActiveShell(event);
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							resource = getResource(event);
-						}
-					});
-				}
 
 				branches = getBranches();
 				if (branches == null) {
@@ -267,72 +244,6 @@ public abstract class CommonHandler extends AbstractHandler {
 		return folder.getFile(specfile.getName()) != null;
 	}
 
-	protected IResource getResource(ExecutionEvent event) {
-		//For testing purposes only. One should never enter this in real world usage.
-		if (resource != null) {
-			return resource;
-		}
-		//
-		IWorkbenchPart part = HandlerUtil.getActivePart(event);
-		if (part == null) {
-			return null;
-		}
-		if (part instanceof EditorPart) {
-			IEditorInput input = ((EditorPart) part).getEditorInput();
-			if (input instanceof IFileEditorInput) {
-				return ((IFileEditorInput) input).getFile();
-			} else {
-				return null;
-			}
-		}
-		IWorkbenchSite site = part.getSite();
-		if (site == null) {
-			return null;
-		}
-		ISelectionProvider provider = site.getSelectionProvider();
-		if (provider == null) {
-			return null;
-		}
-		ISelection selection = provider.getSelection();
-		if (selection instanceof IStructuredSelection) {
-			Object element = ((IStructuredSelection) selection)
-					.getFirstElement();
-			if (element instanceof IResource) {
-				return (IResource) element;
-			} else if (element instanceof IAdaptable) {
-				IAdaptable adaptable = (IAdaptable) element;
-				Object adapted = adaptable.getAdapter(IResource.class);
-				return (IResource) adapted;
-			} else {
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}
-	
-	protected FedoraProjectRoot getValidRoot(IResource resource) {
-		if (resource instanceof IFolder|| resource instanceof IProject) {
-			//TODO check that spec file and sources file are present
-			if (validateFedorapackageRoot((IContainer)resource)){
-				return new FedoraProjectRoot((IContainer)resource);
-			}
-		} else if (resource instanceof IFile) {
-			if (validateFedorapackageRoot(resource.getParent())){
-				return new FedoraProjectRoot(resource.getParent());
-			}
-		}
-		return null;
-	}
-
-	private boolean validateFedorapackageRoot(IContainer resource) {
-		IFile file = resource.getFile(new Path("sources")); //$NON-NLS-1$
-		if(file.exists()){
-			return true;
-		}
-		return false;
-	}
-
 	protected String makeTagName() throws CoreException {
 		String name = rpmQuery(specfile, "NAME").replaceAll("^[0-9]+", "");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String version = rpmQuery(specfile, "VERSION");  //$NON-NLS-1$
@@ -402,7 +313,7 @@ public abstract class CommonHandler extends AbstractHandler {
 			throws CoreException {
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
-		List<String> defines = getRPMDefines(dir);
+		List<String> defines = FedoraHandlerUtils.getRPMDefines(dir);
 
 		List<String> distDefines = getDistDefines(branches, parent.getName());
 
@@ -440,19 +351,7 @@ public abstract class CommonHandler extends AbstractHandler {
 		return distDefines;
 	}
 
-	protected List<String> getRPMDefines(String dir) {
-		ArrayList<String> rpmDefines = new ArrayList<String>();
-		rpmDefines.add("--define"); //$NON-NLS-1$
-		rpmDefines.add("_sourcedir " + dir); //$NON-NLS-1$
-		rpmDefines.add("--define"); //$NON-NLS-1$
-		rpmDefines.add("_builddir " + dir); //$NON-NLS-1$
-		rpmDefines.add("--define"); //$NON-NLS-1$
-		rpmDefines.add("_srcrpmdir " + dir); //$NON-NLS-1$
-		rpmDefines.add("--define"); //$NON-NLS-1$
-		rpmDefines.add("_rpmdir " + dir); //$NON-NLS-1$
-
-		return rpmDefines;
-	}
+	
 
 	protected boolean isTagged(String tagName) throws CoreException {
 		String branchName = specfile.getParent().getName();

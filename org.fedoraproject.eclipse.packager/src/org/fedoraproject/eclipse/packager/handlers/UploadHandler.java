@@ -82,7 +82,7 @@ public abstract class UploadHandler extends WGetHandler {
 			PostMethod postMethod = new PostMethod(uploadURL);
 			NameValuePair[] data = {
 					new NameValuePair(
-							"name", getValidRoot(resource).getSpecfileModel().getName()), //$NON-NLS-1$
+							"name", FedoraHandlerUtils.getValidRoot(resource).getSpecfileModel().getName()), //$NON-NLS-1$
 					new NameValuePair("md5sum", SourcesFile.getMD5(toAdd)), //$NON-NLS-1$
 					new NameValuePair("filename", filename) }; //$NON-NLS-1$
 			postMethod.setRequestBody(data);

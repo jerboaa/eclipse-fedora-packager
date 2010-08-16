@@ -25,6 +25,7 @@ import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.cvs.Messages;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 public class CVSNewSourcesHandler extends CVSHandler {
 	@Override
@@ -36,8 +37,8 @@ public class CVSNewSourcesHandler extends CVSHandler {
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 
-		final IResource resource = getResource(e);
-		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
+		final IResource resource = FedoraHandlerUtils.getResource(e);
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(resource);
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 
 		// do tasks as job
