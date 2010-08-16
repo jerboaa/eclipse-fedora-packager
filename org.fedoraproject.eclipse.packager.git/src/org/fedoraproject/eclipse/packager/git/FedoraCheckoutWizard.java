@@ -144,6 +144,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 			// Perform clone in ModalContext thread with progress
 			// reporting on the wizard.
 			getContainer().run(true, true, new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					clone.run(monitor);
