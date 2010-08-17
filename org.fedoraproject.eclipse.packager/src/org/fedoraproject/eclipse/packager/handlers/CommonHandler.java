@@ -204,7 +204,7 @@ public abstract class CommonHandler extends AbstractHandler {
 	public abstract IStatus doExecute(ExecutionEvent event,
 			IProgressMonitor monitor) throws ExecutionException;
 
-	// FIXME: This will breack Git
+	// FIXME: This will break Git
 	protected String getBranchName(String branch) throws CoreException {
 		// check for early-branched
 		if (branch.equals("devel")) { //$NON-NLS-1$
