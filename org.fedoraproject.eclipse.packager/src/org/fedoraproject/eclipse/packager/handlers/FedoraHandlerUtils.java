@@ -12,6 +12,7 @@ package org.fedoraproject.eclipse.packager.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IContainer;
@@ -19,8 +20,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,9 +34,13 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.EditorPart;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.FpProject;
 
 public class FedoraHandlerUtils {
+	
+	private static final String GIT_REPOSITORY = "org.eclipse.egit.core.GitProvider";
+	private static final String CVS_REPOSITORY = "org.eclipse.team.cvs.core.cvsnature";
+	
+	public static enum ProjectType { GIT, CVS, UNKNOWN }
 
 	public static FedoraProjectRoot getValidRoot(ExecutionEvent event) {
 		IResource resource = getResource(event);
@@ -113,5 +120,25 @@ public class FedoraHandlerUtils {
 		rpmDefines.add("_rpmdir " + dir); //$NON-NLS-1$
 
 		return rpmDefines;
+	}
+	
+	public static ProjectType getProjectType(IResource resource){
+		
+		Map persistentProperties = null;
+		try {
+			persistentProperties = resource.getProject().getPersistentProperties();
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		QualifiedName name = new QualifiedName("org.eclipse.team.core", "repository");
+		String repository = (String)persistentProperties.get(name);
+		System.out.println(repository);
+		if (GIT_REPOSITORY.equals(repository)) {
+			return ProjectType.GIT;
+		} else if (CVS_REPOSITORY.equals(repository)) {
+			return ProjectType.CVS;
+		}
+		return ProjectType.UNKNOWN;
 	}
 }
