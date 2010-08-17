@@ -1,6 +1,7 @@
 package org.fedoraproject.eclipse.packager;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterFactory;
 
 /**
@@ -18,7 +19,16 @@ public class IResourceAdapterFactory implements IAdapterFactory {
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		// We can only adapt to FpProject
 		if (FpProject.class.equals(adapterType) && adaptableObject instanceof IResource) {
-			return new FpProject((IResource) adaptableObject);
+			// try to adapt
+			FpProject adaptedResource;
+			try {
+				adaptedResource = FpProject.doAdapt((IResource) adaptableObject);
+			} catch (CoreException e) {
+				// Something is seriously wrong, can't adapt.
+				return null;
+			}
+			if (adaptedResource != null)
+				return adaptedResource;
 		}
 		return null;
 	}
