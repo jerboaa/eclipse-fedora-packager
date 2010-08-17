@@ -36,10 +36,10 @@ public class DownloadHandler extends WGetHandler {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
 		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job("Fedora Packager") {
+		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("DownloadHandler.0"),
+				monitor.beginTask(Messages.getString("DownloadHandler.0"), //$NON-NLS-1$
 						IProgressMonitor.UNKNOWN);
 				IStatus status = retrieveSources(fedoraProjectRoot, monitor);
 				monitor.done();
