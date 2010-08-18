@@ -38,8 +38,6 @@ Import-Package: org.apache.commons.codec.digest,
  org.eclipse.ui,
  org.eclipse.ui.console,
  org.eclipse.ui.forms.widgets,
- org.fedoraproject.eclipse.packager.cvs,
- org.fedoraproject.eclipse.packager.git,
  org.json
 Bundle-Localization: plugin
 Export-Package: org.fedoraproject.eclipse.packager,
