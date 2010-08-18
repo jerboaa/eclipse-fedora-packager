@@ -11,6 +11,7 @@
  -->
 
 <plugin>
+   <extension-point id="vcsContribution" name="VCS interaction" schema="schema/vcsContribution.exsd"/>
 	<extension point="org.eclipse.core.expressions.definitions">
       <definition id="org.fedoraproject.eclipse.packager.cvsproject">
          <iterate ifEmpty="false">
@@ -100,14 +101,5 @@
             name="%command.name.9">
       </command>
     </extension>
-    
-	<extension point="org.eclipse.core.runtime.adapters">
-         <factory 
-            class="org.fedoraproject.eclipse.packager.IResourceAdapterFactory" 
-            adaptableType="org.eclipse.core.resources.IResource">
-            <adapter type="org.fedoraproject.eclipse.packager.FpProject"/>
-         </factory>
-    </extension>
-
 
 </plugin>

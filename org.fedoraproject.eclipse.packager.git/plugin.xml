@@ -24,4 +24,12 @@
          </description>
       </wizard>
    </extension>
+   <extension
+      point="org.fedoraproject.eclipse.packager.vcsContribution">
+   <vcs
+         class="org.fedoraproject.eclipse.packager.git.FpGitProjectBits"
+         type="GIT"
+         name="Git">
+   </vcs>
+</extension>
 </plugin>

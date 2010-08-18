@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager;
 
+import org.eclipse.core.resources.IResource;
+
 /**
  * Interface for VCS specific bits of an FpProject. Implementations should
  * handle branch related things and other VCS specific parts.
@@ -28,6 +30,8 @@ public interface IFpProjectBits {
 	 * Returns the branch name specified by branchName.
 	 */
 	public String getBranchName(String branchName);
+
+	public String getScmUrl(IResource resource);
 	
 	
 }

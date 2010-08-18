@@ -12,6 +12,7 @@ package org.fedoraproject.eclipse.packager.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IContainer;
@@ -19,8 +20,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -31,9 +37,17 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.EditorPart;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.FpProject;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 public class FedoraHandlerUtils {
+
+	private static final String GIT_REPOSITORY = "org.eclipse.egit.core.GitProvider"; //$NON-NLS-1$
+	private static final String CVS_REPOSITORY = "org.eclipse.team.cvs.core.cvsnature"; //$NON-NLS-1$
+
+	public static enum ProjectType {
+		GIT, CVS, UNKNOWN
+	}
 
 	public static FedoraProjectRoot getValidRoot(ExecutionEvent event) {
 		IResource resource = getResource(event);
@@ -100,7 +114,7 @@ public class FedoraHandlerUtils {
 			return null;
 		}
 	}
-	
+
 	public static List<String> getRPMDefines(String dir) {
 		ArrayList<String> rpmDefines = new ArrayList<String>();
 		rpmDefines.add("--define"); //$NON-NLS-1$
@@ -114,20 +128,57 @@ public class FedoraHandlerUtils {
 
 		return rpmDefines;
 	}
-	
+
 	/**
 	 * Get project type of passed in ressource. Uses FpProject adapter.
 	 * 
 	 * @param resource The project for which to get the type for.
 	 * @return The type of the project
 	 */
-	public static FpProject.ProjectType getProjectType(IResource resource){
-		IAdaptable adaptable = resource;
-		Object adapted = adaptable.getAdapter(FpProject.class);
-		if (adapted != null && adapted instanceof FpProject) {
-			FpProject adaptedProject = (FpProject)adapted;
-			return adaptedProject.getProjectType();
+	@SuppressWarnings("unchecked")
+	public static ProjectType getProjectType(IResource resource) {
+
+		Map persistentProperties = null;
+		try {
+			persistentProperties = resource.getProject()
+					.getPersistentProperties();
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return FpProject.ProjectType.UNKNOWN;
+		QualifiedName name = new QualifiedName("org.eclipse.team.core", //$NON-NLS-1$
+				"repository"); //$NON-NLS-1$
+		String repository = (String) persistentProperties.get(name);
+		if (GIT_REPOSITORY.equals(repository)) {
+			return ProjectType.GIT;
+		} else if (CVS_REPOSITORY.equals(repository)) {
+			return ProjectType.CVS;
+		}
+		return ProjectType.UNKNOWN;
+	}
+
+	public static IFpProjectBits getVcsHandler(ProjectType type) {
+		IExtensionPoint vcsExtensions = Platform.getExtensionRegistry()
+				.getExtensionPoint(PackagerPlugin.PLUGIN_ID, "vcsContribution"); //$NON-NLS-1$
+		if (vcsExtensions != null) {
+			IConfigurationElement[] elements = vcsExtensions
+					.getConfigurationElements();
+			for (int i = 0; i < elements.length; i++) {
+				if (elements[i].getName().equals("vcs") //$NON-NLS-1$
+						&& (elements[i].getAttribute("type") //$NON-NLS-1$
+								.equals(type.name()))) {
+					try {
+						IConfigurationElement bob = elements[i];
+						IFpProjectBits vcsContributor = (IFpProjectBits) bob
+								.createExecutableExtension("class"); //$NON-NLS-1$
+						return vcsContributor;
+					} catch (CoreException e) {
+						e.printStackTrace();
+					}
+
+				}
+			}
+		}
+		return null;
 	}
 }

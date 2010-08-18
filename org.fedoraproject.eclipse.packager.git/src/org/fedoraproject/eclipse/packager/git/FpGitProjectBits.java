@@ -21,10 +21,7 @@ import org.fedoraproject.eclipse.packager.IFpProjectBits;
  */
 public class FpGitProjectBits implements IFpProjectBits {
 
-	/**
-	 * Create Git specific project bits from IResource
-	 */
-	public FpGitProjectBits(IResource project) {
+	public FpGitProjectBits() {
 		//TODO Implement this!
 	}
 	
@@ -38,6 +35,12 @@ public class FpGitProjectBits implements IFpProjectBits {
 	public String getCurrentBranchName() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String getScmUrl(IResource resource) {
+		// TODO Auto-generated method stub
+		return "dummy output";
 	}
 
 }
