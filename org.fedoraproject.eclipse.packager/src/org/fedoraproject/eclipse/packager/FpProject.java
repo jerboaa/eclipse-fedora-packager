@@ -14,9 +14,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.team.core.RepositoryProvider;
-import org.fedoraproject.eclipse.packager.cvs.FpCVSProjectBits;
-import org.fedoraproject.eclipse.packager.git.FpGitProjectBits;
-
 /**
  * Enriched IResource with type. Use adapters to get instance. See
  * IResourceAdapterFactory.
@@ -45,11 +42,11 @@ public class FpProject {
 		this.project = res;
 		this.myType = type;
 		// According to project types do branch-parsing accordingly
-		if (type == ProjectType.CVS) {
-			vcsProjectBits = new FpCVSProjectBits(res);
-		} else if (type == ProjectType.GIT) {
-			vcsProjectBits = new FpGitProjectBits(res);
-		}
+//		if (type == ProjectType.CVS) {
+//			vcsProjectBits = new FpCVSProjectBits(res);
+//		} else if (type == ProjectType.GIT) {
+//			vcsProjectBits = new FpGitProjectBits(res);
+//		}
 	}
 	
 	/**

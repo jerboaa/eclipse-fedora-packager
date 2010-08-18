@@ -123,7 +123,6 @@ public class FedoraHandlerUtils {
 	 */
 	public static FpProject.ProjectType getProjectType(IResource resource){
 		IAdaptable adaptable = resource;
-		// Should return FpProject instance with GIT type
 		Object adapted = adaptable.getAdapter(FpProject.class);
 		if (adapted != null && adapted instanceof FpProject) {
 			FpProject adaptedProject = (FpProject)adapted;
