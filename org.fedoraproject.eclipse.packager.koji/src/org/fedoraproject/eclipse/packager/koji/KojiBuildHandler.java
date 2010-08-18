@@ -17,7 +17,6 @@ import java.security.GeneralSecurityException;
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,21 +32,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.team.core.RepositoryProvider;
-import org.eclipse.team.internal.ccvs.core.CVSException;
-import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
-import org.eclipse.team.internal.ccvs.core.CVSTeamProvider;
-import org.eclipse.team.internal.ccvs.core.ICVSFolder;
-import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
-import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
-import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils.ProjectType;
 
-@SuppressWarnings("restriction")
 public class KojiBuildHandler extends CommonHandler {
 	private String dist;
 	private String scmURL;
@@ -65,13 +55,8 @@ public class KojiBuildHandler extends CommonHandler {
 				monitor.beginTask(Messages.getString("KojiBuildHandler.12"),
 						IProgressMonitor.UNKNOWN);
 				dist = specfile.getParent().getName();
-				try {
-					scmURL = getRepo(resource, type);
-					System.out.println(scmURL);
-				} catch (CVSException e) {
-					e.printStackTrace();
-					return handleError(e);
-				}
+				scmURL = getRepo(resource, type);
+				System.out.println(scmURL);
 
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
@@ -215,7 +200,7 @@ public class KojiBuildHandler extends CommonHandler {
 		this.koji = koji;
 	}
 
-	private String getRepo(IResource resource, ProjectType type) throws CVSException {
+	private String getRepo(IResource resource, ProjectType type) {
 		// get the project for this specfile
 		IFpProjectBits vcsHandler=  FedoraHandlerUtils.getVcsHandler(type);
 		return vcsHandler.getScmUrl(resource);
