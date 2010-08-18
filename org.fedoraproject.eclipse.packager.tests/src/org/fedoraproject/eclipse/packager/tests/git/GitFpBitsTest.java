@@ -9,16 +9,18 @@ public class GitFpBitsTest extends GitTestCase {
 	public void testGetCurrentBranchName() {
 		fail("Not yet implemented");
 	}
-
-	public void testGetScmUrl() {
-		fail("Not yet implemented");
-	}
-
-	public void testInitialize() {
+	
+	public void testGetBranchName() {
 		IProject project = getiProject();
 		// this should do initialization
 		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraHandlerUtils.getVcsHandler(project);
 		assertNotNull(projectBits);
+		assertNotNull(projectBits.getBranchName("F-7")); // should be there
+		assertNotNull(projectBits.getBranchName("devel")); // master mapped to devel
+	}
+
+	public void testGetScmUrl() {
+		fail("Not yet implemented");
 	}
 
 }

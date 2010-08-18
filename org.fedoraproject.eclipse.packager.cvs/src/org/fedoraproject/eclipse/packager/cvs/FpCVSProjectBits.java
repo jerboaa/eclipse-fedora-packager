@@ -46,6 +46,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 
 	private IResource project; // The underlying project
 	private HashMap<String, HashMap<String, String>> branches; // All branches
+	private boolean initialized = false; // keep track if instance is initialized
 	
 	/**
 	 * See {@link IFpProjectBits#getCurrentBranchName()}
@@ -166,11 +167,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	 * Determine if instance has been properly initialized
 	 */
 	private boolean isInitialized() {
-		if (this.project != null && this.branches != null) {
-			return true;
-		} else {
-			return false;
-		}
+		return this.initialized;
 	}
 
 	/**
@@ -220,5 +217,6 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	public void initialize(IResource project) {
 		this.project = project.getProject();
 		this.branches = getBranches();
+		this.initialized = true;
 	}
 }

@@ -215,6 +215,10 @@ public class FedoraHandlerUtils {
 						IConfigurationElement bob = elements[i];
 						IFpProjectBits vcsContributor = (IFpProjectBits) bob
 								.createExecutableExtension("class");  //$NON-NLS-1$
+						// Do initialization
+						if (vcsContributor != null) {
+							vcsContributor.initialize(project);
+						}
 						return vcsContributor;
 					} catch (CoreException e) {
 						e.printStackTrace();

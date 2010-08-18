@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.egit.core.RepositoryCache;
@@ -35,7 +36,8 @@ import org.fedoraproject.eclipse.packager.IFpProjectBits;
 public class FpGitProjectBits implements IFpProjectBits {
 	
 	private IResource project; // The underlying project
-	private HashMap<String, HashMap<String, String>> branches; // All branches
+	private HashMap<String, String> branches; // All branches
+	private boolean initialized = false; // keep track if instance is initialized
 	
 	/**
 	 * See {@link IFpProjectBits#getBranchName(String)
@@ -45,8 +47,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 		if (!isInitialized()) {
 			return null;
 		}
-		// TODO Auto-generated method stub
-		return null;
+		return this.branches.get(branchName);
 	}
 
 	/**
@@ -73,21 +74,46 @@ public class FpGitProjectBits implements IFpProjectBits {
 		return "dummy output";
 	}
 	
-	private Object getBranches() {
-		RepositoryCache repoCache = org.eclipse.egit.core.Activator.getDefault()
-		.getRepositoryCache();
+	/**
+	 * Parse available branch names from Git remote branches.
+	 * 
+	 * @return
+	 */
+	private HashMap<String, String> getBranches() {
+		// We get the Repository from RepositoryCache
+		RepositoryCache repoCache = org.eclipse.egit.core.Activator
+				.getDefault().getRepositoryCache();
 		Repository repo = null;
+		HashMap<String, String> branches = new HashMap<String, String>();
 		try {
-			repo = repoCache.lookupRepository(new File(this.project.getProject().getName()));
-			Map<String, Ref> remotes = repo.getRefDatabase().getRefs(Constants.R_REMOTES);
+			repo = repoCache.lookupRepository(new File(this.project
+					.getProject().getLocation().toOSString()
+					+ "/.git"));
+			Map<String, Ref> remotes = repo.getRefDatabase().getRefs(
+					Constants.R_REMOTES);
 			Set<String> keyset = remotes.keySet();
-			for (String key: keyset) {
-				System.out.println("Key: "+ key + " value: " + remotes.get(key).getName());
+			String branch, prefix, version;
+			StringTokenizer tokenizer;
+			for (String key : keyset) {
+				branch = remotes.get(key).getName().substring(Constants.R_REMOTES.length());
+				tokenizer = new StringTokenizer(branch, "/");  //$NON-NLS-1$
+				tokenizer.nextToken(); // ignore "origin"
+				branch = tokenizer.nextToken();
+				prefix = branch.substring(0, 1);
+				version = branch.substring(1);
+				if (prefix.equals("f")) {
+					branch = "F-" + version; //$NON-NLS-1$
+				}
+				// Not sure if we want to map this that way?
+				if (branch.equals("master")) { // TODO: use constants!
+					branches.put("devel", "devel");
+				}
+				branches.put(branch, branch);
 			}
-		} catch (IOException ioexception) {
-			ioexception.printStackTrace();
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
 		}
-		return null;
+		return branches;
 	}
 
 	/**
@@ -97,18 +123,16 @@ public class FpGitProjectBits implements IFpProjectBits {
 	 */
 	@Override
 	public void initialize(IResource resource) {
-		this.project = resource.getProject();		
+		this.project = resource.getProject();
+		this.branches = getBranches();
+		this.initialized = true;
 	}
 	
 	/**
 	 * Determine if instance has been properly initialized
 	 */
 	private boolean isInitialized() {
-		if (this.project != null && this.branches != null) {
-			return true;
-		} else {
-			return false;
-		}
+		return this.initialized;
 	}
 
 }
