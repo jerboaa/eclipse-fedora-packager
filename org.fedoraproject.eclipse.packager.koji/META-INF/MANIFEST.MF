@@ -19,7 +19,6 @@ Import-Package: org.apache.ws.commons.util,
  org.eclipse.core.runtime.jobs,
  org.eclipse.jface.dialogs,
  org.eclipse.jface.resource,
- org.eclipse.jface.window,
  org.eclipse.swt,
  org.eclipse.swt.graphics,
  org.eclipse.swt.widgets,
@@ -31,8 +30,7 @@ Import-Package: org.apache.ws.commons.util,
  org.eclipse.ui.browser,
  org.eclipse.ui.forms.widgets,
  org.fedoraproject.eclipse.packager,
- org.fedoraproject.eclipse.packager.handlers,
- org.osgi.framework
+ org.fedoraproject.eclipse.packager.handlers
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
