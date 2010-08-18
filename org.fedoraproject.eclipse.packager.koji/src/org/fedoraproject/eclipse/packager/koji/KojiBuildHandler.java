@@ -55,7 +55,7 @@ public class KojiBuildHandler extends CommonHandler {
 				monitor.beginTask(Messages.getString("KojiBuildHandler.12"),
 						IProgressMonitor.UNKNOWN);
 				dist = specfile.getParent().getName();
-				scmURL = getRepo(resource, type);
+				scmURL = getSCMURL(resource);
 				System.out.println(scmURL);
 
 				if (monitor.isCanceled()) {
@@ -200,10 +200,15 @@ public class KojiBuildHandler extends CommonHandler {
 		this.koji = koji;
 	}
 
-	private String getRepo(IResource resource, ProjectType type) {
-		// get the project for this specfile
-		IFpProjectBits vcsHandler=  FedoraHandlerUtils.getVcsHandler(type);
-		return vcsHandler.getScmUrl(resource);
+	/**
+	 * Get the VCS specific URL for the given resource.
+	 * 
+	 * @param resource
+	 * @return The requested URL.
+	 */
+	private String getSCMURL(IResource resource) {
+		IFpProjectBits vcsHandler =  FedoraHandlerUtils.getVcsHandler(resource);
+		return vcsHandler.getScmUrl();
 	}
 
 	@Override

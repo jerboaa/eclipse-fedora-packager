@@ -172,6 +172,7 @@ public class FedoraHandlerUtils {
 	 * @param resource The base for determining the project type.
 	 * @return The project type.
 	 */
+	@SuppressWarnings("unchecked")
 	public static ProjectType getProjectType(IResource resource) {
 
 		Map persistentProperties = null;
@@ -195,10 +196,12 @@ public class FedoraHandlerUtils {
 
 	/**
 	 * Returns the IFpProjectBits used to abstract vcs specific things.
-	 * @param type The project type.
+	 * 
+	 * @param project The project for which to get the VCS specific parts.
 	 * @return The needed IFpProjectBits.
 	 */
-	public static IFpProjectBits getVcsHandler(ProjectType type) {
+	public static IFpProjectBits getVcsHandler(IResource project) {
+		ProjectType type = FedoraHandlerUtils.getProjectType(project);
 		IExtensionPoint vcsExtensions = Platform.getExtensionRegistry()
 				.getExtensionPoint(PackagerPlugin.PLUGIN_ID, "vcsContribution"); //$NON-NLS-1$
 		if (vcsExtensions != null) {

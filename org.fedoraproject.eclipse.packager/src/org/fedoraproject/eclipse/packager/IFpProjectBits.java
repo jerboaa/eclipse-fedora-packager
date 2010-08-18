@@ -11,6 +11,7 @@
 package org.fedoraproject.eclipse.packager;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 
 /**
  * Interface for VCS specific bits of an FpProject. Implementations should
@@ -22,16 +23,32 @@ import org.eclipse.core.resources.IResource;
 public interface IFpProjectBits {
 	
 	/**
-	 * Returns the current branch name.
+	 * Get the current branch name.
+	 * 
+	 * @return The current branch name.
 	 */
 	public String getCurrentBranchName();
 	
 	/**
 	 * Returns the branch name specified by branchName.
+	 * 
+	 * @param branchName Branch name for which to get the actual name for.
+	 * @return The actual branch name.
 	 */
 	public String getBranchName(String branchName);
 
-	public String getScmUrl(IResource resource);
+	/**
+	 * Get the VCS specific URL for the given resource.
+	 * 
+	 * @return String representation of URL.
+	 */
+	public String getScmUrl();
 	
+	/**
+	 * Initialize IFpProjectBits instance
+	 * 
+	 * @param resource The underlying project.
+	 */
+	public void initialize(IResource resource);
 	
 }

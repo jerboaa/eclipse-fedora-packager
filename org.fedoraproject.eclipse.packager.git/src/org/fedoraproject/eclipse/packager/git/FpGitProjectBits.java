@@ -10,37 +10,80 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.git;
 
+import java.util.HashMap;
+
 import org.eclipse.core.resources.IResource;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 
 /**
  * Git specific project bits (branches management and such).
+ * Implementation of
+ * org.fedoraproject.eclipse.packager.vcsContribution
+ * extension point.
  * 
  * @author Red Hat Inc.
  *
  */
 public class FpGitProjectBits implements IFpProjectBits {
-
-	public FpGitProjectBits() {
-		//TODO Implement this!
-	}
 	
+	private IResource project; // The underlying project
+	private HashMap<String, HashMap<String, String>> branches; // All branches
+	
+	/**
+	 * See {@link IFpProjectBits#getBranchName(String)
+	 */
 	@Override
 	public String getBranchName(String branchName) {
+		if (!isInitialized()) {
+			return null;
+		}
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/**
+	 * See {@link IFpProjectBits#getCurrentBranchName()
+	 */
 	@Override
 	public String getCurrentBranchName() {
+		if (!isInitialized()) {
+			return null;
+		}
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/**
+	 * See {@link IFpProjectBits#getScmUrl(IResource)
+	 */
 	@Override
-	public String getScmUrl(IResource resource) {
+	public String getScmUrl() {
+		if (!isInitialized()) {
+			return null;
+		}
 		// TODO Auto-generated method stub
 		return "dummy output";
+	}
+
+	/**
+	 * Do instance specific initialization.
+	 * 
+	 * See {@link IFpProjectBits#initialize(IResource)
+	 */
+	@Override
+	public void initialize(IResource resource) {
+		this.project = resource.getProject();		
+	}
+	
+	/**
+	 * Determine if instance has been properly initialized
+	 */
+	private boolean isInitialized() {
+		if (this.project != null && this.branches != null) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }
