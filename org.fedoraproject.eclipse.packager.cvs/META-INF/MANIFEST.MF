@@ -10,8 +10,15 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Import-Package: org.apache.commons.ssl,
+Import-Package: org.apache.commons.httpclient,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.methods.multipart,
+ org.apache.commons.httpclient.params,
+ org.apache.commons.httpclient.protocol,
+ org.apache.commons.ssl,
  org.eclipse.core.resources,
+ org.eclipse.linuxtools.rpm.ui.editor,
+ org.eclipse.linuxtools.rpm.ui.editor.parser,
  org.eclipse.team.core,
  org.eclipse.team.core.subscribers,
  org.eclipse.team.core.synchronize,
@@ -25,6 +32,7 @@ Import-Package: org.apache.commons.ssl,
  org.eclipse.team.internal.ccvs.ui.wizards,
  org.eclipse.team.internal.core.subscribers,
  org.fedoraproject.eclipse.packager,
- org.fedoraproject.eclipse.packager.handlers
+ org.fedoraproject.eclipse.packager.handlers,
+ org.fedoraproject.eclipse.packager.rpm
 Export-Package: org.fedoraproject.eclipse.packager.cvs,
  org.fedoraproject.eclipse.packager.cvs.handlers
