@@ -40,20 +40,48 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
+/**
+ * Utility class used to determine fedora specific properties from the
+ * information in the ExecutionEvent.
+ */
 public class FedoraHandlerUtils {
 
-	private static final String GIT_REPOSITORY = "org.eclipse.egit.core.GitProvider";
-	private static final String CVS_REPOSITORY = "org.eclipse.team.cvs.core.cvsnature";
+	private static final String GIT_REPOSITORY = "org.eclipse.egit.core.GitProvider"; //$NON-NLS-1$
+	private static final String CVS_REPOSITORY = "org.eclipse.team.cvs.core.cvsnature"; //$NON-NLS-1$
 
+	/**
+	 * Represents the Git, Cvs or unknown project type.
+	 * 
+	 */
 	public static enum ProjectType {
-		GIT, CVS, UNKNOWN
+		/** Git project */
+		GIT,
+		/** Cvs project */
+		CVS,
+		/** Unknown */
+		UNKNOWN
 	}
 
+	/**
+	 * Returns a FedoraProjectRoot from the ExecutionEvent.
+	 * 
+	 * @param event
+	 *            The execution event.
+	 * @return The retrieved FedoraProjectRoot.
+	 */
 	public static FedoraProjectRoot getValidRoot(ExecutionEvent event) {
 		IResource resource = getResource(event);
 		return getValidRoot(resource);
 	}
 
+	/**
+	 * Returns a FedoraProjectRoot from the given resource. It works by finding
+	 * the closest IContainer containing sources file.
+	 * 
+	 * @param resource
+	 *            The resource to use for determining the base folder.
+	 * @return The calculated FedoraProjectRoot.
+	 */
 	public static FedoraProjectRoot getValidRoot(IResource resource) {
 		if (resource instanceof IFolder || resource instanceof IProject) {
 			// TODO check that spec file and sources file are present
@@ -76,6 +104,11 @@ public class FedoraHandlerUtils {
 		return false;
 	}
 
+	/**
+	 * Returns the IResource that was selected when the event was fired.
+	 * @param event The fired execution event. 
+	 * @return The resource that was selected.
+	 */
 	public static IResource getResource(ExecutionEvent event) {
 		IWorkbenchPart part = HandlerUtil.getActivePart(event);
 		if (part == null) {
@@ -115,6 +148,11 @@ public class FedoraHandlerUtils {
 		}
 	}
 
+	/**
+	 * Creates a list of rpm defines to use the given directory as a base directory.
+	 * @param dir The base directory.
+	 * @return Defines to instruct rpmbuild to use given directory.
+	 */
 	public static List<String> getRPMDefines(String dir) {
 		ArrayList<String> rpmDefines = new ArrayList<String>();
 		rpmDefines.add("--define"); //$NON-NLS-1$
@@ -129,6 +167,11 @@ public class FedoraHandlerUtils {
 		return rpmDefines;
 	}
 
+	/**
+	 * Returns the project type determined from the given IResource.
+	 * @param resource The base for determining the project type.
+	 * @return The project type.
+	 */
 	public static ProjectType getProjectType(IResource resource) {
 
 		Map persistentProperties = null;
@@ -139,8 +182,8 @@ public class FedoraHandlerUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		QualifiedName name = new QualifiedName("org.eclipse.team.core",
-				"repository");
+		QualifiedName name = new QualifiedName("org.eclipse.team.core", //$NON-NLS-1$
+				"repository"); //$NON-NLS-1$
 		String repository = (String) persistentProperties.get(name);
 		if (GIT_REPOSITORY.equals(repository)) {
 			return ProjectType.GIT;
@@ -150,21 +193,26 @@ public class FedoraHandlerUtils {
 		return ProjectType.UNKNOWN;
 	}
 
+	/**
+	 * Returns the IFpProjectBits used to abstract vcs specific things.
+	 * @param type The project type.
+	 * @return The needed IFpProjectBits.
+	 */
 	public static IFpProjectBits getVcsHandler(ProjectType type) {
 		IExtensionPoint vcsExtensions = Platform.getExtensionRegistry()
-				.getExtensionPoint(PackagerPlugin.PLUGIN_ID, "vcsContribution");
+				.getExtensionPoint(PackagerPlugin.PLUGIN_ID, "vcsContribution"); //$NON-NLS-1$
 		if (vcsExtensions != null) {
 			IConfigurationElement[] elements = vcsExtensions
 					.getConfigurationElements();
 			for (int i = 0; i < elements.length; i++) {
-				if (elements[i].getName().equals("vcs") // $NON-NLS-1$
-						&& (elements[i].getAttribute("type") // $NON-NLS-1$
+				if (elements[i].getName().equals("vcs") //$NON-NLS-1$
+						&& (elements[i].getAttribute("type") //$NON-NLS-1$
 								.equals(type.name()))) {
 					//$NON-NLS-1$
 					try {
 						IConfigurationElement bob = elements[i];
 						IFpProjectBits vcsContributor = (IFpProjectBits) bob
-								.createExecutableExtension("class"); // $NON-NLS-1$
+								.createExecutableExtension("class");  //$NON-NLS-1$
 						return vcsContributor;
 					} catch (CoreException e) {
 						e.printStackTrace();
