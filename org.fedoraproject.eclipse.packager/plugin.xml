@@ -11,6 +11,7 @@
  -->
 
 <plugin>
+   <extension-point id="vcsContribution" name="VCS interaction" schema="schema/vcsContribution.exsd"/>
 	<extension point="org.eclipse.core.expressions.definitions">
       <definition id="org.fedoraproject.eclipse.packager.cvsproject">
          <iterate ifEmpty="false">

@@ -20,27 +20,31 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.team.core.RepositoryProvider;
+import org.eclipse.team.internal.ccvs.core.CVSException;
 import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
 import org.eclipse.team.internal.ccvs.core.CVSTeamProvider;
 import org.eclipse.team.internal.ccvs.core.ICVSFolder;
+import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
+import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 
 /**
  * CVS specific FpProject bits.
  * 
  * @author Red Hat Inc.
- *
+ * 
  */
 @SuppressWarnings("restriction")
 public class FpCVSProjectBits implements IFpProjectBits {
-	
+
 	private IResource project; // The underlying project
 	private HashMap<String, HashMap<String, String>> branches; // All branches
-	
+
 	/**
 	 * Create CVS specific project bits from IResource
 	 */
@@ -48,7 +52,12 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		this.branches = getBranches(project);
 	}
 	
-	
+	/**
+	 * Create CVS specific project bits from IResource
+	 */
+	public FpCVSProjectBits() {
+	}
+
 	/**
 	 * See {@link IFpProjectBits#getCurrentBranchName()}
 	 */
@@ -57,6 +66,10 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		return null;
 	}
 	
+	public String getCurrentBranchName(IResource resource) {
+		return resource.getParent().getName();
+	}
+
 	/**
 	 * See {@link IFpProjectBits#getBranchName(String)}
 	 */
@@ -71,19 +84,20 @@ public class FpCVSProjectBits implements IFpProjectBits {
 				e.printStackTrace();
 			}
 		}
-		return branchName;		
+		return branchName;
 	}
-	
+
 	/**
 	 * Parse branches from "common/branches" file.
-	 *  
+	 * 
 	 * @param resource
 	 * @return A map of branch names.
 	 */
-	private HashMap<String, HashMap<String, String>> getBranches(IResource resource) {
+	private HashMap<String, HashMap<String, String>> getBranches(
+			IResource resource) {
 		HashMap<String, HashMap<String, String>> ret = new HashMap<String, HashMap<String, String>>();
 
-		IFile branchesFile = resource.getProject().getFolder("common").getFile(  //$NON-NLS-1$
+		IFile branchesFile = resource.getProject().getFolder("common").getFile( //$NON-NLS-1$
 				"branches"); //$NON-NLS-1$
 		InputStream is;
 		try {
@@ -98,12 +112,12 @@ public class FpCVSProjectBits implements IFpProjectBits {
 
 			for (String branch : branches) {
 				HashMap<String, String> temp = new HashMap<String, String>();
-				StringTokenizer st = new StringTokenizer(branch, ":");	//$NON-NLS-1$
+				StringTokenizer st = new StringTokenizer(branch, ":"); //$NON-NLS-1$
 				String target = st.nextToken();
-				temp.put("target", st.nextToken()); 	//$NON-NLS-1$
-				temp.put("dist", st.nextToken());		//$NON-NLS-1$
-				temp.put("distvar", st.nextToken());	//$NON-NLS-1$
-				temp.put("distval", st.nextToken());	//$NON-NLS-1$
+				temp.put("target", st.nextToken()); //$NON-NLS-1$
+				temp.put("dist", st.nextToken()); //$NON-NLS-1$
+				temp.put("distvar", st.nextToken()); //$NON-NLS-1$
+				temp.put("distval", st.nextToken()); //$NON-NLS-1$
 				ret.put(target, temp);
 			}
 		} catch (CoreException e) {
@@ -114,7 +128,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 
 		return ret;
 	}
-	
+
 	/**
 	 * Checks if branch has been early-branched.
 	 * 
@@ -134,9 +148,10 @@ public class FpCVSProjectBits implements IFpProjectBits {
 
 		return containsSpec(secondNewestBranch) ? newestBranch : "devel"; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Check if branch contains spec file.
+	 * 
 	 * @param branch
 	 * @return True if given branch contains the spec file in CVS.
 	 * @throws CoreException
@@ -144,7 +159,8 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	private boolean containsSpec(String branch) throws CoreException {
 		// get CVSProvider
 		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
-				.getProvider(this.project.getProject(), CVSProviderPlugin.getTypeId());
+				.getProvider(this.project.getProject(),
+						CVSProviderPlugin.getTypeId());
 
 		// get CVSROOT
 		CVSWorkspaceRoot cvsRoot = provider.getCVSWorkspaceRoot();
@@ -154,6 +170,38 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		// search "branch" for a spec file
 		// FIXME: Make this less hard-coded!
 		return folder.getFile(this.project.getProject().getName() + ".spec") != null;
+	}
+
+	@Override
+	public String getScmUrl(IResource resource) {
+		String ret = null;
+		// get the project for this resource
+		IProject proj = resource.getProject();
+
+		if (CVSTeamProvider.isSharedWithCVS(proj)) {
+			// get CVSProvider
+			CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
+					.getProvider(proj, CVSProviderPlugin.getTypeId());
+			// get Repository Location
+			try {
+				ICVSRepositoryLocation location = provider.getRemoteLocation();
+
+				// get CVSROOT
+				CVSWorkspaceRoot cvsRoot = provider.getCVSWorkspaceRoot();
+
+				ICVSFolder folder = cvsRoot.getLocalRoot();
+				FolderSyncInfo syncInfo = folder.getFolderSyncInfo();
+
+				String module = syncInfo.getRepository();
+
+				ret = "cvs://" + location.getHost() + location.getRootDirectory() //$NON-NLS-1$
+						+ "?" + module + "/" + getCurrentBranchName(resource); //$NON-NLS-1$ //$NON-NLS-2$
+			} catch (CVSException cvsException) {
+				cvsException.printStackTrace();
+			}
+		}
+
+		return ret;
 	}
 
 }

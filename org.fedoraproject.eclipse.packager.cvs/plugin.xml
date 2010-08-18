@@ -126,4 +126,12 @@
          </description>
       </wizard>
    </extension>
+<extension
+      point="org.fedoraproject.eclipse.packager.vcsContribution">
+   <vcs
+         class="org.fedoraproject.eclipse.packager.cvs.FpCVSProjectBits"
+         type="CVS"
+         name="CVS">
+   </vcs>
+</extension>
 </plugin>
