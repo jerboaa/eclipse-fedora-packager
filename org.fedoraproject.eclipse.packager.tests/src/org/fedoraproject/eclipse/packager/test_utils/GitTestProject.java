@@ -21,7 +21,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
-import org.eclipse.egit.ui.RepositoryUtil;
+import org.eclipse.egit.core.RepositoryUtil;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.URIish;
 
@@ -38,7 +38,7 @@ public class GitTestProject {
 		clone.run(null); // clone project
 		// Add cloned repository to the list of Git repositories so that it
 		// shows up in the Git repositories view.
-		final RepositoryUtil config = org.eclipse.egit.ui.Activator.getDefault().getRepositoryUtil();
+		final RepositoryUtil config = org.eclipse.egit.core.Activator.getDefault().getRepositoryUtil();
 		config.addConfiguredRepository(clone.getGitDir());
 		project = ResourcesPlugin.getWorkspace().getRoot()
 				.getProject(packageName);

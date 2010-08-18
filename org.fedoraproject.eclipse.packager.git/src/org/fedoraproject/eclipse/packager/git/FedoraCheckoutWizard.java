@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
-import org.eclipse.egit.ui.RepositoryUtil;
+import org.eclipse.egit.core.RepositoryUtil;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -154,7 +154,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 			});
 			// Add cloned repository to the list of Git repositories so that it
 			// shows up in the Git repositories view.
-			final RepositoryUtil config = org.eclipse.egit.ui.Activator.getDefault().getRepositoryUtil();
+			final RepositoryUtil config = org.eclipse.egit.core.Activator.getDefault().getRepositoryUtil();
 			config.addConfiguredRepository(clone.getGitDir());
 			IProject newProject = ResourcesPlugin.getWorkspace().getRoot()
 					.getProject(page.getPackageName());
