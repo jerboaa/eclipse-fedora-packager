@@ -10,29 +10,13 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.tests.git;
 
-import junit.framework.TestCase;
-import org.eclipse.core.resources.IProject;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.test_utils.GitTestProject;
 
-public class GitProjectTypeTest extends TestCase {
-	private GitTestProject project;
-	private IProject iProject;
-	
-	@Override
-	protected void setUp() throws Exception {
-		project = new GitTestProject("ed");
-		iProject = project.getProject();
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		project.dispose();
-	}
+public class GitProjectTypeTest extends GitTestCase {
 	
 	public void testAdaptToFpProject() throws Exception {
 		// Should return FpProject instance with GIT type
-		assertTrue(FedoraHandlerUtils.getProjectType(this.iProject) == FedoraHandlerUtils.ProjectType.GIT);
+		assertTrue(FedoraHandlerUtils.getProjectType(getiProject()) == FedoraHandlerUtils.ProjectType.GIT);
 	}
 
 }

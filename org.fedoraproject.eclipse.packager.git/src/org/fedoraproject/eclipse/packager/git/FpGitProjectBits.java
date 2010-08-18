@@ -10,9 +10,17 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.git;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.egit.core.RepositoryCache;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 
 /**
@@ -63,6 +71,23 @@ public class FpGitProjectBits implements IFpProjectBits {
 		}
 		// TODO Auto-generated method stub
 		return "dummy output";
+	}
+	
+	private Object getBranches() {
+		RepositoryCache repoCache = org.eclipse.egit.core.Activator.getDefault()
+		.getRepositoryCache();
+		Repository repo = null;
+		try {
+			repo = repoCache.lookupRepository(new File(this.project.getProject().getName()));
+			Map<String, Ref> remotes = repo.getRefDatabase().getRefs(Constants.R_REMOTES);
+			Set<String> keyset = remotes.keySet();
+			for (String key: keyset) {
+				System.out.println("Key: "+ key + " value: " + remotes.get(key).getName());
+			}
+		} catch (IOException ioexception) {
+			ioexception.printStackTrace();
+		}
+		return null;
 	}
 
 	/**
