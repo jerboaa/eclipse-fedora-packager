@@ -65,13 +65,13 @@ import org.fedoraproject.eclipse.packager.SourcesFile;
 @SuppressWarnings("restriction")
 public abstract class CommonHandler extends AbstractHandler {
 	protected boolean debug = false;
-	protected IResource resource;
-	protected IResource specfile;
+	private IResource resource; //TODO remove when subclasses don't use it
+	private IResource specfile;
 	protected Shell shell;
 	protected HashMap<String, HashMap<String, String>> branches;
-	protected Job job;
-	protected ExecutionEvent event;
-	protected SourcesFile sourcesFile;
+	private Job job;
+	private ExecutionEvent event;
+	private SourcesFile sourcesFile;
 
 	public void setDebug(boolean debug) {
 		this.debug = debug;

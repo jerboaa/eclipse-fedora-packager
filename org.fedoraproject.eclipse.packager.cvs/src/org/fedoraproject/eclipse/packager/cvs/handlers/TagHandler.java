@@ -26,7 +26,6 @@ public class TagHandler extends CommonHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
-		specfile = fedoraProjectRoot.getSpecFile();
 		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

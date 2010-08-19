@@ -15,6 +15,7 @@ import java.util.Arrays;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -47,15 +48,15 @@ public class CommitHandler extends CommonHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
-		specfile = fedoraProjectRoot.getSpecFile();
 		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(Messages.getString("CommitHandler.3"), 
 						IProgressMonitor.UNKNOWN);
-				monitor.subTask(Messages.getString("CommitHandler.0")); //$NON-NLS-1$
+				monitor.subTask(Messages.getString("CommitHandler.0")); //$NON-NLtS-1$
 				// check all out of sync resources in this project for a specfile
-				IProject project = resource.getProject();
+				IFile specfile = fedoraProjectRoot.getSpecFile();
+				IProject project = specfile.getProject();
 				final SyncInfoSet set = new SyncInfoSet();
 				RepositoryProvider.getProvider(project,
 				"org.eclipse.team.cvs.core.cvsnature").getSubscriber() //$NON-NLS-1$

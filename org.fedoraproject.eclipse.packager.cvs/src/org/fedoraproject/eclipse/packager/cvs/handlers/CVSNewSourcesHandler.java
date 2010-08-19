@@ -36,7 +36,7 @@ public class CVSNewSourcesHandler extends CVSHandler {
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 
 		// do tasks as job
-		job = new Job(getTaskName()) {
+		Job job = new Job(getTaskName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -79,7 +79,7 @@ public class CVSNewSourcesHandler extends CVSHandler {
 				}
 
 				// Do CVS update
-				result = updateCVS(sourceFile, cvsignore, monitor);
+				result = updateCVS(fedoraProjectRoot, cvsignore, monitor);
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
