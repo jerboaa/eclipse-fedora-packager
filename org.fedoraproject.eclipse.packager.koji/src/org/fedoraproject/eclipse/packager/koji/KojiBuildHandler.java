@@ -62,7 +62,6 @@ public class KojiBuildHandler extends CommonHandler {
 					throw new OperationCanceledException();
 				}
 				IStatus status = Status.OK_STATUS;
-				FedoraHandlerUtils.getProjectType(resource);
 				if (promptForTag(type)) {
 					status = doTag(monitor);
 				}
