@@ -43,10 +43,17 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
+/**
+ * Wizard to checkout package content from Fedora Git.
+ *
+ */
 public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 
 	private SelectModulePage page;
 
+	/**
+	 * Creates the wizards and sets that it needs progress monitor.
+	 */
 	public FedoraCheckoutWizard() {
 		super();
 		// required to show progress info of clone job
@@ -91,17 +98,17 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 				e.printStackTrace();
 			}
 		}
-		return "anonymous";
+		return "anonymous"; //$NON-NLS-1$
 	}
 
 	private String getGitURL() {
 		String username = getUsername();
 		String packageName = page.getPackageName();
-		if (username.equals("anonymous")) {
-			return "git://pkgs.fedoraproject.org/" + packageName + ".git";
+		if (username.equals("anonymous")) { //$NON-NLS-1$
+			return "git://pkgs.fedoraproject.org/" + packageName + ".git"; //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
-			return "ssh://" + username + "@pkgs.fedoraproject.org/"
-					+ packageName + ".git";
+			return "ssh://" + username + "@pkgs.fedoraproject.org/" //$NON-NLS-1$ //$NON-NLS-2$
+					+ packageName + ".git"; //$NON-NLS-1$
 		}
 	}
 
@@ -117,22 +124,22 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 			final CloneOperation clone = new CloneOperation(uri, true,
 					new ArrayList<Ref>(), new File(ResourcesPlugin
 							.getWorkspace().getRoot().getLocation().toFile(),
-							page.getPackageName()), "refs/heads/master", // TODO:
+							page.getPackageName()), "refs/heads/master", // TODO: //$NON-NLS-1$
 																			// use
 																			// constants
-					"origin");
+					"origin"); //$NON-NLS-1$
 
 			// Bail out if project already exists
 			IResource project = ResourcesPlugin.getWorkspace().getRoot()
 					.findMember(new Path(page.getPackageName()));
 			if (project != null && project.exists()) {
 				final String errorMessage = NLS.bind(
-						"Project already exists", project.getName());
+						Messages.FedoraCheckoutWizard_0, project.getName());
 				ErrorDialog
 						.openError(
 								getShell(),
 								getWindowTitle(),
-								"Clone failed!",
+								Messages.FedoraCheckoutWizard_1,
 								new Status(
 										IStatus.ERROR,
 										org.fedoraproject.eclipse.packager.git.Activator.PLUGIN_ID,
@@ -169,12 +176,12 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 							"org.eclipse.egit.ui.RepositoriesView"); //$NON-NLS-1$
 			return true;
 		} catch (InterruptedException e) {
-			MessageDialog.openInformation(getShell(), "Clone Failed", // TODO: externalize
-					"Clone cancelled by user");
+			MessageDialog.openInformation(getShell(), Messages.FedoraCheckoutWizard_1, 
+					Messages.FedoraCheckoutWizard_2);
 			return false;
 		} catch (Exception e) {
 			org.fedoraproject.eclipse.packager.git.Activator.handleError(
-					"Clone Failed", e, true);
+					Messages.FedoraCheckoutWizard_1, e, true);
 			return false;
 		}
 	}

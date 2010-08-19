@@ -21,7 +21,7 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator extends AbstractUIPlugin {
 
-	// The plug-in ID
+	/** The symbolic ID of the plugin	 */
 	public static final String PLUGIN_ID = "org.fedoraproject.eclipse.packager.git"; //$NON-NLS-1$
 
 	// The shared instance

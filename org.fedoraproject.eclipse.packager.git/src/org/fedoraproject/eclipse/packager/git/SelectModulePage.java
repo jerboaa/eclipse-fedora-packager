@@ -19,14 +19,19 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * Page for selecting the module to clone.
+ *
+ */
+//TODO add controls for listing and selecting a module without writing it's name.
 public class SelectModulePage extends WizardPage {
 
 	private Text projectText;
 
 	protected SelectModulePage() {
-		super("Package selection");
-		setTitle("Package selection");
-		setDescription("Please choose package you would like to work on"); // TODO: externalize
+		super(Messages.SelectModulePage_0);
+		setTitle(Messages.SelectModulePage_0);
+		setDescription(Messages.SelectModulePage_1); 
 		this.setImageDescriptor(ImageDescriptor.createFromFile(getClass(),
 				"/icons/wizban/newconnect_wizban.png")); //$NON-NLS-1$
 	}
@@ -37,7 +42,7 @@ public class SelectModulePage extends WizardPage {
 		GridLayout layout = new GridLayout();
 		composite.setLayout(layout);
 		Label label = new Label(composite, SWT.NONE);
-		label.setText("Package name:"); // TODO: externalize
+		label.setText(Messages.SelectModulePage_2); 
 		projectText = new Text(composite, SWT.BORDER | SWT.SINGLE);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		projectText.setLayoutData(gd);
