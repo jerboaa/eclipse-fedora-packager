@@ -135,4 +135,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 		return this.initialized;
 	}
 
+	@Override
+	public String getDist() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

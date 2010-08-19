@@ -44,6 +44,13 @@ public interface IFpProjectBits {
 	public String getScmUrl();
 	
 	/**
+	 * Get the dist for the given branch.
+	 * 
+	 * @return String The dist as used by koji.
+	 */
+	public String getDist();
+	
+	/**
 	 * Initialize IFpProjectBits instance
 	 * 
 	 * @param resource The underlying project.
