@@ -105,7 +105,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 					branch = "F-" + version; //$NON-NLS-1$
 				}
 				// Not sure if we want to map this that way?
-				if (branch.equals("master")) { // TODO: use constants!
+				if (branch.equals(Constants.MASTER)) {
 					branches.put("devel", "devel");
 				}
 				branches.put(branch, branch);
