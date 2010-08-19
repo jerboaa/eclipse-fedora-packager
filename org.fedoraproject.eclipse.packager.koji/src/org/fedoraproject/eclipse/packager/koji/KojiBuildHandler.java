@@ -85,12 +85,6 @@ public class KojiBuildHandler extends CommonHandler {
 		return null;
 	}
 
-	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
-			throws ExecutionException {
-		return Status.OK_STATUS; //TODO remove once we remove doExecute from CommonHandler
-	}
-
 	private boolean promptForTag(ProjectType type) {
 		if (debug || type.equals(ProjectType.GIT)) {
 			// don't worry about tagging for debug mode
@@ -208,11 +202,6 @@ public class KojiBuildHandler extends CommonHandler {
 	private String getSCMURL(IResource resource) {
 		IFpProjectBits vcsHandler =  FedoraHandlerUtils.getVcsHandler(resource);
 		return vcsHandler.getScmUrl();
-	}
-
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("KojiBuildHandler.12"); //$NON-NLS-1$
 	}
 
 	protected boolean isScratch() {
