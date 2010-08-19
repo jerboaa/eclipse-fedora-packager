@@ -52,7 +52,7 @@ public class CVSUploadHandler extends CVSHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				monitor.beginTask(getTaskName(), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+				monitor.beginTask(Messages.getString("CVSUploadHandler.taskName"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
 
 				// ensure file has changed if already listed in sources
 				Map<String, String> sources = sourceFile.getSources();
@@ -115,9 +115,4 @@ public class CVSUploadHandler extends CVSHandler {
 		return null;
 	}
 	
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("CVSUploadHandler.taskName"); //$NON-NLS-1$
-	}
-
 }

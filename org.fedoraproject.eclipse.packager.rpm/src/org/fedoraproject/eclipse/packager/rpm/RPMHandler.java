@@ -53,18 +53,6 @@ public abstract class RPMHandler extends CommonHandler {
 	protected Map<String, String> sources;
 	protected IResource specfile;
 
-	//TODO remove the following 2 methods once we decouple rpm handler from CommonHandler
-	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
-			throws ExecutionException {
-		return Status.OK_STATUS;
-	}
-	
-	@Override
-	protected String getTaskName() {
-		return ""; //$NON-NLS-1$
-	}
-
 	protected MessageConsole getConsole(String name) {
 		MessageConsole ret = null;
 		for (IConsole cons : ConsolePlugin.getDefault().getConsoleManager()

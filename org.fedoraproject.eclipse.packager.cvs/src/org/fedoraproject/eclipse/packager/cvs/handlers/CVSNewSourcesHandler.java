@@ -41,7 +41,7 @@ public class CVSNewSourcesHandler extends CVSHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				monitor.beginTask(getTaskName(), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+				monitor.beginTask(Messages.getString("CVSNewSourcesHandler.taskName"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
 
 				// Don't do anything if file is empty
 				final File toAdd = resource.getLocation().toFile();
@@ -94,8 +94,4 @@ public class CVSNewSourcesHandler extends CVSHandler {
 		return null;
 	}
 
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("CVSNewSourcesHandler.taskName"); //$NON-NLS-1$
-	}
 }

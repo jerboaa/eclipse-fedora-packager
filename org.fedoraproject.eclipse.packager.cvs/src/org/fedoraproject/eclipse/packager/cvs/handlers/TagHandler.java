@@ -14,19 +14,32 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 public class TagHandler extends CommonHandler {
 
 	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
-		IStatus result = doTag(monitor);
-
-		return result;
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
+				.getValidRoot(e);
+		specfile = fedoraProjectRoot.getSpecFile();
+		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask("Tagging Branch", 
+						IProgressMonitor.UNKNOWN);
+				IStatus result = doTag(monitor);
+				monitor.done();
+				return result;
+			}
+		};
+		job.setUser(true);
+		job.schedule();
+		return null;
 	}
 
-	@Override
-	protected String getTaskName() {
-		return "Tagging Branch";
-	}
 }

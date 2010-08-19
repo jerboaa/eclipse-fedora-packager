@@ -46,12 +46,6 @@ import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
 @SuppressWarnings("restriction")
 public abstract class CVSHandler extends UploadHandler {
 
-	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
-			throws ExecutionException {
-		return Status.OK_STATUS; //TODO remove this once we remove the abstract doExecute from CommonHandler.
-	}
-	
 	/**
 	 * Update .cvsignore file. Appends to file.
 	 * 

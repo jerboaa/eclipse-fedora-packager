@@ -62,7 +62,6 @@ public class KojiBuildHandler extends CommonHandler {
 					throw new OperationCanceledException();
 				}
 				IStatus status = Status.OK_STATUS;
-				FedoraHandlerUtils.getProjectType(resource);
 				if (promptForTag(type)) {
 					status = doTag(monitor);
 				}
@@ -84,12 +83,6 @@ public class KojiBuildHandler extends CommonHandler {
 		job.setUser(true);
 		job.schedule();
 		return null;
-	}
-
-	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
-			throws ExecutionException {
-		return Status.OK_STATUS; //TODO remove once we remove doExecute from CommonHandler
 	}
 
 	private boolean promptForTag(ProjectType type) {
@@ -209,11 +202,6 @@ public class KojiBuildHandler extends CommonHandler {
 	private String getSCMURL(IResource resource) {
 		IFpProjectBits vcsHandler =  FedoraHandlerUtils.getVcsHandler(resource);
 		return vcsHandler.getScmUrl();
-	}
-
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("KojiBuildHandler.12"); //$NON-NLS-1$
 	}
 
 	protected boolean isScratch() {

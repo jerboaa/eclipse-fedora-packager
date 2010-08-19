@@ -182,7 +182,9 @@ public abstract class CommonHandler extends AbstractHandler {
 		return null;
 	}
 
-	protected abstract String getTaskName();
+	protected final String getTaskName(){
+		return ""; //TODO remove 
+	}
 
 	public void setResource(IResource resource) {
 		this.resource = resource;
@@ -201,8 +203,10 @@ public abstract class CommonHandler extends AbstractHandler {
 		return result;
 	}
 
-	public abstract IStatus doExecute(ExecutionEvent event,
-			IProgressMonitor monitor) throws ExecutionException;
+	public final IStatus doExecute(ExecutionEvent event,
+			IProgressMonitor monitor) throws ExecutionException{
+		return Status.OK_STATUS;
+	}
 
 	// FIXME: This will break Git
 	protected String getBranchName(String branch) throws CoreException {
