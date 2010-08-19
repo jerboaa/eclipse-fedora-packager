@@ -185,7 +185,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 					.getDefault().getRepositoryCache();
 			try {
 				this.gitRepository = repoCache.lookupRepository(new File(
-						newProject.getLocation().toOSString() + "/.git"));
+						newProject.getLocation().toOSString() + "/.git")); //$NON-NLS-1$
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
@@ -228,7 +228,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 	 * @throws CoreException
 	 */
 	private void createLocalBranches(IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask("Creating local branches",
+		monitor.beginTask(Messages.FedoraCheckoutWizard_createLocalBranchesJob,
 				IProgressMonitor.UNKNOWN);
 
 		try {
