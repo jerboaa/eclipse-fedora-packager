@@ -172,10 +172,9 @@ public class FedoraHandlerUtils {
 	 * @param resource The base for determining the project type.
 	 * @return The project type.
 	 */
-	@SuppressWarnings("unchecked")
 	public static ProjectType getProjectType(IResource resource) {
 
-		Map persistentProperties = null;
+		Map<?,?> persistentProperties = null;
 		try {
 			persistentProperties = resource.getProject()
 					.getPersistentProperties();
