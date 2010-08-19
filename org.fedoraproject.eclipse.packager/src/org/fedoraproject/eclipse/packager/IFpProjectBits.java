@@ -11,7 +11,6 @@
 package org.fedoraproject.eclipse.packager;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 
 /**
  * Interface for VCS specific bits of an FpProject. Implementations should
@@ -43,6 +42,13 @@ public interface IFpProjectBits {
 	 * @return String representation of URL.
 	 */
 	public String getScmUrl();
+	
+	/**
+	 * Get the dist for the given branch.
+	 * 
+	 * @return String The dist as used by koji.
+	 */
+	public String getDist();
 	
 	/**
 	 * Initialize IFpProjectBits instance

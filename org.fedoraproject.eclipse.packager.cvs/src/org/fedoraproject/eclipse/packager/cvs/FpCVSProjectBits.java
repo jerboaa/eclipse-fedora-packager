@@ -214,9 +214,16 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	 * 
 	 * @param project The underlying project.
 	 */
+	@Override
 	public void initialize(IResource project) {
 		this.project = project.getProject();
 		this.branches = getBranches();
 		this.initialized = true;
+	}
+
+	@Override
+	public String getDist() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
