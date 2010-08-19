@@ -11,7 +11,6 @@
 package org.fedoraproject.eclipse.packager;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 
 /**
  * Interface for VCS specific bits of an FpProject. Implementations should
