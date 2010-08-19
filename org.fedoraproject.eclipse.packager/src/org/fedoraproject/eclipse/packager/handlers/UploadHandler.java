@@ -23,6 +23,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
@@ -35,17 +36,15 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.SSLUtils;
 import org.fedoraproject.eclipse.packager.SourcesFile;
-import org.fedoraproject.eclipse.packager.Messages;
 
 /**
  * Class responsible for uploading source files (VCS independent bits).
@@ -207,22 +206,6 @@ public abstract class UploadHandler extends WGetHandler {
 		}
 
 		return responseText.trim();
-	}
-
-	protected File getFileFor(String name) throws IOException {
-		File ret = null;
-		IResource res = specfile.getParent().findMember(name, true);
-		if (res == null) {
-			ret = new File(specfile.getParent().getLocation().toString()
-					+ IPath.SEPARATOR + name);
-			if (!ret.createNewFile()) {
-				throw new IOException(NLS.bind(
-						Messages.getString("UploadHandler.12"), name)); //$NON-NLS-1$
-			}
-		} else {
-			ret = res.getLocation().toFile();
-		}
-		return ret;
 	}
 
 }

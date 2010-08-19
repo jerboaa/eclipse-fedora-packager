@@ -42,19 +42,19 @@ public class KojiBuildHandler extends CommonHandler {
 	private String dist;
 	private String scmURL;
 	protected IKojiHubClient koji;
+	private Job job;
 	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final IResource resource = FedoraHandlerUtils.getResource(e);
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
 		final ProjectType type = FedoraHandlerUtils.getProjectType(resource);
-		specfile = fedoraProjectRoot.getSpecFile();
 		job = new Job("Fedora Packager") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(Messages.getString("KojiBuildHandler.12"),
 						IProgressMonitor.UNKNOWN);
-				dist = specfile.getParent().getName();
+				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
 				scmURL = getSCMURL(resource);
 				System.out.println(scmURL);
 

@@ -18,8 +18,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -34,6 +33,7 @@ import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.core.client.Command;
 import org.eclipse.team.internal.ccvs.core.client.Session;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
 
@@ -41,7 +41,7 @@ import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
  * Common functionality of CVS handlers
  * 
  * @author RedHat Inc.
- *
+ * 
  */
 @SuppressWarnings("restriction")
 public abstract class CVSHandler extends UploadHandler {
@@ -56,18 +56,20 @@ public abstract class CVSHandler extends UploadHandler {
 	protected IStatus updateCVSIgnore(File cvsignore, File toAdd) {
 		return updateCVSIgnore(cvsignore, toAdd, false);
 	}
-	
+
 	/**
 	 * Run CVS update/add on sources, and .cvsignore file
 	 * 
 	 * @param sources
 	 * @param cvsignore
 	 * @param monitor
-	 * @return	Status of the operation performed.
+	 * @return Status of the operation performed.
 	 */
-	protected IStatus updateCVS(SourcesFile sources, File cvsignore,
+	protected IStatus updateCVS(FedoraProjectRoot projectRoot, File cvsignore,
 			IProgressMonitor monitor) {
 		IStatus status = Status.OK_STATUS;
+		IFile specfile = projectRoot.getSpecFile();
+		SourcesFile sources = projectRoot.getSourcesFile();
 		// get CVSProvider
 		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
 				.getProvider(specfile.getProject(),
@@ -113,10 +115,12 @@ public abstract class CVSHandler extends UploadHandler {
 								monitor);
 					}
 				} else {
-					status = handleError(org.fedoraproject.eclipse.packager.Messages.getString("UploadHandler.22")); //$NON-NLS-1$
+					status = handleError(org.fedoraproject.eclipse.packager.Messages
+							.getString("UploadHandler.22")); //$NON-NLS-1$
 				}
 			} else {
-				status = handleError(org.fedoraproject.eclipse.packager.Messages.getString("UploadHandler.23")); //$NON-NLS-1$
+				status = handleError(org.fedoraproject.eclipse.packager.Messages
+						.getString("UploadHandler.23")); //$NON-NLS-1$
 			}
 
 		} catch (CVSException e) {
