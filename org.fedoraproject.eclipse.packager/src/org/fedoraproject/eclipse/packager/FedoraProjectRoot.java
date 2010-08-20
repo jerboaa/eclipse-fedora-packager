@@ -141,24 +141,25 @@ public class FedoraProjectRoot {
 	 * @return The ignore file (.cvsignore or .gitignore).
 	 */
 	public File getIgnoreFile() {
+		File ignoreFile = null;
 		switch (type) {
 		case GIT:
-			getFileMember(".gitignore"); //$NON-NLS-1$
+			ignoreFile = getFileMember(".gitignore"); //$NON-NLS-1$
 			break;
 		case CVS:
-			getFileMember(".cvsignore"); //$NON-NLS-1$
+			ignoreFile = getFileMember(".cvsignore"); //$NON-NLS-1$
 			break;
 
 		default:
 			break;
 		}
-		return null;
+		return ignoreFile;
 	}
 
-	private IFile getFileMember(String ignoreFileName) {
+	private File getFileMember(String ignoreFileName) {
 		IResource resource = rootContainer.findMember(ignoreFileName);
 		if (resource instanceof IFile) {
-			return (IFile) resource;
+			return ((IFile) resource).getLocation().toFile();
 		}
 		return null;
 	}

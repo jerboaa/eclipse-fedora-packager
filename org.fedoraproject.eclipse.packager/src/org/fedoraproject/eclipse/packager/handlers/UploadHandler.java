@@ -14,15 +14,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -206,6 +210,73 @@ public abstract class UploadHandler extends WGetHandler {
 		}
 
 		return responseText.trim();
+	}
+	
+	/**
+	 * Update the ignore file .cvsignore or .gitignore file. Appends to file.
+	 * 
+	 * @param ignoreFile
+	 * @param toAdd
+	 * @return
+	 */
+	protected IStatus updateIgnoreFile(File ignoreFile, File toAdd) {
+		return updateIgnoreFile(ignoreFile, toAdd, false);
+	}
+
+	/**
+	 * Actually writes to .cvsignore. ATM this method is never called with
+	 * <code>forceOverwrite</code> set to true.
+	 * 
+	 * @param cvsignore
+	 * @param toAdd
+	 * @param forceOverwrite
+	 * @return Status of the performed operation.
+	 */
+	private IStatus updateIgnoreFile(File ignoreRile, File toAdd,
+			boolean forceOverwrite) {
+		IStatus status;
+		String filename = toAdd.getName();
+		ArrayList<String> ignoreFiles = new ArrayList<String>();
+		BufferedReader br = null;
+		PrintWriter pw = null;
+		try {
+			if (forceOverwrite) {
+				pw = new PrintWriter(new FileWriter(ignoreRile, false));
+				pw.println(filename);
+				status = Status.OK_STATUS;
+			} else {
+				// only append to file if not already present
+				br = new BufferedReader(new FileReader(ignoreRile));
+
+				String line = br.readLine();
+				while (line != null) {
+					ignoreFiles.add(line);
+					line = br.readLine();
+				}
+
+				if (!ignoreFiles.contains(filename)) {
+					pw = new PrintWriter(new FileWriter(ignoreRile, true));
+					pw.println(filename);
+				}
+				status = Status.OK_STATUS;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			status = handleError(e);
+		} finally {
+			if (pw != null) {
+				pw.close();
+			}
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+					status = handleError(e);
+				}
+			}
+		}
+		return status;
 	}
 
 }

@@ -16,16 +16,17 @@ import java.util.Map;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.cvs.Messages;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
 
 /**
  * Handles upload commands (CSV implementation)
@@ -33,7 +34,7 @@ import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
  * @author Red Hat Inc.
  *
  */
-public class CVSUploadHandler extends CVSHandler {
+public class CVSUploadHandler extends UploadHandler {
 	
 	@Override
 	/**
@@ -45,9 +46,9 @@ public class CVSUploadHandler extends CVSHandler {
 		final IResource resource = FedoraHandlerUtils.getResource(e);
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(resource);
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
-
+		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(resource);
 		// do tasks as job
-		Job job = new Job(getTaskName()) {
+		Job job = new Job(Messages.getString("CVSUploadHandler.taskName")) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -91,16 +92,13 @@ public class CVSUploadHandler extends CVSHandler {
 				}
 
 				// Handle CVS specific stuff; Update .cvsignore
-				final File cvsignore = new File(fedoraProjectRoot
-						.getContainer().getLocation().toString()
-						+ IPath.SEPARATOR + ".cvsignore"); //$NON-NLS-1$
-				result = updateIgnoreFile(cvsignore, toAdd);
+				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
 				}
 
 				// Do CVS update
-				result = updateCVS(fedoraProjectRoot, cvsignore, monitor);
+				result = projectBits.updateVCS(fedoraProjectRoot, monitor);
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
