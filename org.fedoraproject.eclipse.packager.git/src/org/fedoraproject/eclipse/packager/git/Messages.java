@@ -25,6 +25,7 @@ public class Messages extends NLS {
 	public static String SelectModulePage_1;
 	public static String SelectModulePage_2;
 	public static String FedoraCheckoutWizard_createLocalBranchesJob;
+	public static String FpGitProjectBits_FetchJobName;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

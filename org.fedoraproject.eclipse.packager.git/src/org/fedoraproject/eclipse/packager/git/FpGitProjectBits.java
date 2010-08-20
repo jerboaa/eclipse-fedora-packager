@@ -12,7 +12,12 @@ package org.fedoraproject.eclipse.packager.git;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -21,11 +26,20 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.egit.core.RepositoryCache;
+import org.eclipse.jgit.errors.NotSupportedException;
+import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ProgressMonitor;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.FetchResult;
+import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.transport.Transport;
+import org.eclipse.jgit.transport.URIish;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 
@@ -42,6 +56,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	
 	private IResource project; // The underlying project
 	private HashMap<String, String> branches; // All branches
+	private Repository gitRepository; // The Git repository for this project
 	private boolean initialized = false; // keep track if instance is initialized
 	
 	// String regexp pattern used for branch mapping this should basically be the
@@ -72,22 +87,16 @@ public class FpGitProjectBits implements IFpProjectBits {
 		if (!isInitialized()) {
 			return null;
 		}
-		RepositoryCache repoCache = org.eclipse.egit.core.Activator
-				.getDefault().getRepositoryCache();
-		Repository repo = null;
 		String currentBranch = null;
 		try {
-			repo = repoCache.lookupRepository(new File(this.project
-					.getProject().getLocation().toOSString()
-					+ "/.git")); //$NON-NLS-1$
 			// make sure it's a named branch
-			if (!isNamedBranch(repo.getFullBranch())) {
+			if (!isNamedBranch(this.gitRepository.getFullBranch())) {
 				return null; // unknown branch!
 			}
 			// get the current head target
-			currentBranch = repo.getBranch();
-		} catch (IOException ex) {
-			ex.printStackTrace();
+			currentBranch = this.gitRepository.getBranch();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return mapBranchName(currentBranch);
 	}
@@ -143,6 +152,8 @@ public class FpGitProjectBits implements IFpProjectBits {
 	@Override
 	public void initialize(IResource resource) {
 		this.project = resource.getProject();
+		// now set Git Repository object
+		this.gitRepository = getGitRepository();
 		this.branches = getBranches();
 		this.initialized = true;
 	}
@@ -190,12 +201,12 @@ public class FpGitProjectBits implements IFpProjectBits {
             self.target = 'dist-f%s' % self.distval # will be dist-rawhide
 		 */
 		String currBranch = getCurrentBranchName();
-		if (currBranch.startsWith("F-") || currBranch.startsWith("EL-") || currBranch.startsWith("OLPC-")) {
-			String version = currBranch.split("-")[1];
-			return ".fc" + version;
+		if (currBranch.startsWith("F-") || currBranch.startsWith("EL-") || currBranch.startsWith("OLPC-")) {  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			String version = currBranch.split("-")[1]; //$NON-NLS-1$
+			return ".fc" + version; //$NON-NLS-1$
 		} else if (currBranch.equals("devel")) { //$NON-NLS-1$
-			String nextversion = "14"; // TODO: Look at remote branches and calculate something more precise.
-			return ".fc" + nextversion;
+			String nextversion = "14"; // TODO: Look at remote branches and calculate something more precise. //$NON-NLS-1$
+			return ".fc" + nextversion; //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -217,7 +228,6 @@ public class FpGitProjectBits implements IFpProjectBits {
 		if (!branchMatcher.matches()) {
 			// This should never happen. Maybe something wrong with the regular
 			// expression?
-			System.err.println("no match!");
 			return null;
 		}
 		for (int i = 1; i < branchMatcher.groupCount(); i++) {
@@ -252,11 +262,85 @@ public class FpGitProjectBits implements IFpProjectBits {
 		return false;
 	}
 
+	/**
+	 * See {@link IFpProjectBits#updateVCS(FedoraProjectRoot, IProgressMonitor)}
+	 */
 	@Override
 	public IStatus updateVCS(FedoraProjectRoot projectRoot,
 			IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-		return Status.OK_STATUS;
+		// FIXME: Not working just, yet. Use projectRoot and monitor!
+		return performPull();
 	}
+	
+	/**
+	 * Pull "sources" and ".gitignore".
+	 * 
+	 * TODO: Clean this up a little
+	 */
+	private IStatus performPull() {
+		IStatus errorStatus = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Fail"); //$NON-NLS-1$
+		if (!isInitialized()) {
+			return errorStatus;
+		}
+		final Transport transport;
+		URIish uri = null;
+		List<RefSpec> mRefSpecs = new ArrayList<RefSpec>();
+		final List<RefSpec> refSpecs;
+		try {
+			final RefSpec singleRefSpec = new RefSpec(this.gitRepository.getFullBranch() + ":" + Constants.R_REMOTES + "origin/" + this.gitRepository.getBranch());  //$NON-NLS-1$//$NON-NLS-2$
+			mRefSpecs.add(singleRefSpec);
+			uri = new URIish(getScmUrl());
+			refSpecs = Collections.unmodifiableList(mRefSpecs);
+			transport = Transport.open(this.gitRepository, uri);
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+			return errorStatus;
+		} catch (final NotSupportedException e) {
+			e.printStackTrace();
+			return errorStatus;
+		}	catch (IOException e1) {
+			e1.printStackTrace();
+			return errorStatus;
+		} 
+		
+		Job fetchJob = new Job(Messages.FpGitProjectBits_FetchJobName) {
 
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				FetchResult result = null;
+				try {
+					result = transport.fetch((ProgressMonitor)new NullProgressMonitor(), refSpecs);
+				} catch (NotSupportedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (TransportException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				String resultMsg = result.getMessages();
+				return new Status(IStatus.INFO, Activator.PLUGIN_ID, resultMsg);
+			}
+			
+		};
+		fetchJob.setUser(true);
+		fetchJob.schedule();
+		return fetchJob.getResult(); // TODO: Do merging!
+	}
+	
+	/**
+	 * Get the JGit repository.
+	 */
+	private Repository getGitRepository() {
+		RepositoryCache repoCache = org.eclipse.egit.core.Activator
+				.getDefault().getRepositoryCache();
+		Repository repo = null;
+		try {
+			repo = repoCache.lookupRepository(new File(this.project
+					.getProject().getLocation().toOSString()
+					+ "/.git")); //$NON-NLS-1$
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return repo;
+	}
 }
