@@ -343,4 +343,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 		}
 		return repo;
 	}
+	
+	@Override
+	public IStatus ignoreResource(IResource resourceToIgnore) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

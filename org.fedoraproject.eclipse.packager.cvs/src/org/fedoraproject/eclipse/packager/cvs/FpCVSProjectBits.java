@@ -316,4 +316,10 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	public String getDist() {
 		return this.branches.get(getCurrentBranchName()).get("dist");//$NON-NLS-1$
 	}
+
+	@Override
+	public IStatus ignoreResource(IResource resourceToIgnore) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
