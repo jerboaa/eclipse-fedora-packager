@@ -140,6 +140,7 @@ public class FedoraProjectRoot {
 	 * Returns the ignore file based on the project type.
 	 * @return The ignore file (.cvsignore or .gitignore).
 	 */
+	//TODO remove this method once we are sure we can use git or cvs methods to manipulate their ignore files.
 	public File getIgnoreFile() {
 		File ignoreFile = null;
 		switch (type) {

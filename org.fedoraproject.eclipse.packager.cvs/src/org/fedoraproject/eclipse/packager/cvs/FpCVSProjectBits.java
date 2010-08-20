@@ -305,4 +305,10 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public IStatus ignoreResource(IResource resourceToIgnore) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

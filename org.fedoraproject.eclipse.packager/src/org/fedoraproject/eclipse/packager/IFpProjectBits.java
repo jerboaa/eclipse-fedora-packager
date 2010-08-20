@@ -61,6 +61,13 @@ public interface IFpProjectBits {
 	public IStatus updateVCS(FedoraProjectRoot projectRoot, IProgressMonitor monitor);
 	
 	/**
+	 * Ignores the given resource.
+	 * @param resourceToIgnore The resource to ignore.
+	 * @return The status of the operation.
+	 */
+	public IStatus ignoreResource(IResource resourceToIgnore);
+	
+	/**
 	 * Initialize IFpProjectBits instance
 	 * 
 	 * @param resource The underlying project.
