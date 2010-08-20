@@ -220,6 +220,11 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		return ret;
 	}
 	
+	/**
+	 * Do CVS update to get updated "sources" and ".cvsignore" file.
+	 * 
+	 * See {@link IFpProjectBits#updateVCS(FedoraProjectRoot, IProgressMonitor)}
+	 */
 	@Override
 	public IStatus updateVCS(FedoraProjectRoot projectRoot,
 			IProgressMonitor monitor) {
