@@ -18,18 +18,6 @@
              <menu
                   label="%menu.label.1"
                   mnemonic="%menu.mnemonic.0">
-               <command
-                     commandId="org.fedoraproject.eclipse.packager.CVSUploadCommand"
-                     label="%command.label.2"
-                     mnemonic="%command.mnemonic.2"
-                     style="push">
-               </command>
-               <command
-                     commandId="org.fedoraproject.eclipse.packager.CVSNewSourcesCommand"
-                     label="%command.label.3"
-                     mnemonic="%command.mnemonic.3"
-                     style="push">
-               </command>
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -96,16 +84,6 @@
             defaultHandler="org.fedoraproject.eclipse.packager.cvs.handlers.CommitHandler"
             id="org.fedoraproject.eclipse.packager.CommitCommand"
             name="%command.name.1">
-      </command>
-      <command
-            defaultHandler="org.fedoraproject.eclipse.packager.cvs.handlers.CVSUploadHandler"
-            id="org.fedoraproject.eclipse.packager.CVSUploadCommand"
-            name="%command.name.6">
-      </command>
-      <command
-            defaultHandler="org.fedoraproject.eclipse.packager.cvs.handlers.CVSNewSourcesHandler"
-            id="org.fedoraproject.eclipse.packager.CVSNewSourcesCommand"
-            name="%command.name.7">
       </command>
       <command
             defaultHandler="org.fedoraproject.eclipse.packager.cvs.handlers.TagHandler"
