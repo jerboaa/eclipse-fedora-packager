@@ -52,6 +52,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 /**
  * Wizard to checkout package content from Fedora Git.
@@ -83,37 +84,8 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 		super.dispose();
 	}
 
-	private String getUsername() {
-		String file = System.getProperty("user.home") + IPath.SEPARATOR //$NON-NLS-1$
-				+ ".fedora.cert"; //$NON-NLS-1$
-		File cert = new File(file);
-		if (cert.exists()) {
-			KeyMaterial kmat;
-			try {
-				kmat = new KeyMaterial(cert, cert, new char[0]);
-				List<?> chains = kmat.getAssociatedCertificateChains();
-				Iterator<?> it = chains.iterator();
-				ArrayList<String> cns = new ArrayList<String>();
-				while (it.hasNext()) {
-					X509Certificate[] certs = (X509Certificate[]) it.next();
-					if (certs != null) {
-						for (int i = 0; i < certs.length; i++) {
-							cns.add(Certificates.getCN(certs[i]));
-						}
-					}
-				}
-				return cns.get(0);
-			} catch (GeneralSecurityException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return "anonymous"; //$NON-NLS-1$
-	}
-
 	private String getGitURL() {
-		String username = getUsername();
+		String username = FedoraHandlerUtils.getUsernameFromCert();
 		String packageName = page.getPackageName();
 		if (username.equals("anonymous")) { //$NON-NLS-1$
 			return "git://pkgs.fedoraproject.org/" + packageName + ".git"; //$NON-NLS-1$ //$NON-NLS-2$
