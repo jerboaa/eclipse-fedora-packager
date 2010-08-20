@@ -34,6 +34,7 @@ public class AllTests extends TestSuite {
 		suite.addTestSuite(KojiBuildTest.class);
 		suite.addTestSuite(SRPMTest.class);
 		suite.addTestSuite(KojiPreferenceTest.class);
+		suite.addTestSuite(UploadFileValidityTest.class);
 		// Adapter tests
 		suite.addTestSuite(CVSProjectTypeTest.class);
 		suite.addTestSuite(GitProjectTypeTest.class);
