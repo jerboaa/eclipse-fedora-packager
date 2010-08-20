@@ -73,7 +73,7 @@ public class CVSNewSourcesHandler extends CVSHandler {
 				final File cvsignore = new File(fedoraProjectRoot
 						.getContainer().getLocation().toString()
 						+ IPath.SEPARATOR + ".cvsignore"); //$NON-NLS-1$
-				result = updateCVSIgnore(cvsignore, toAdd);
+				result = updateIgnoreFile(cvsignore, toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
 				}

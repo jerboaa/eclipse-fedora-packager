@@ -47,14 +47,14 @@ import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
 public abstract class CVSHandler extends UploadHandler {
 
 	/**
-	 * Update .cvsignore file. Appends to file.
+	 * Update the ignore file .cvsignore or .gitignore file. Appends to file.
 	 * 
-	 * @param cvsignore
+	 * @param ignoreFile
 	 * @param toAdd
 	 * @return
 	 */
-	protected IStatus updateCVSIgnore(File cvsignore, File toAdd) {
-		return updateCVSIgnore(cvsignore, toAdd, false);
+	protected IStatus updateIgnoreFile(File ignoreFile, File toAdd) {
+		return updateIgnoreFile(ignoreFile, toAdd, false);
 	}
 
 	/**
@@ -139,7 +139,7 @@ public abstract class CVSHandler extends UploadHandler {
 	 * @param forceOverwrite
 	 * @return Status of the performed operation.
 	 */
-	private IStatus updateCVSIgnore(File cvsignore, File toAdd,
+	private IStatus updateIgnoreFile(File ignoreRile, File toAdd,
 			boolean forceOverwrite) {
 		IStatus status;
 		String filename = toAdd.getName();
@@ -148,12 +148,12 @@ public abstract class CVSHandler extends UploadHandler {
 		PrintWriter pw = null;
 		try {
 			if (forceOverwrite) {
-				pw = new PrintWriter(new FileWriter(cvsignore, false));
+				pw = new PrintWriter(new FileWriter(ignoreRile, false));
 				pw.println(filename);
 				status = Status.OK_STATUS;
 			} else {
 				// only append to file if not already present
-				br = new BufferedReader(new FileReader(cvsignore));
+				br = new BufferedReader(new FileReader(ignoreRile));
 
 				String line = br.readLine();
 				while (line != null) {
@@ -162,7 +162,7 @@ public abstract class CVSHandler extends UploadHandler {
 				}
 
 				if (!ignoreFiles.contains(filename)) {
-					pw = new PrintWriter(new FileWriter(cvsignore, true));
+					pw = new PrintWriter(new FileWriter(ignoreRile, true));
 					pw.println(filename);
 				}
 				status = Status.OK_STATUS;
