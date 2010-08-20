@@ -94,7 +94,8 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	/**
 	 * Parse branches from "common/branches" file.
 	 * 
-	 * @return A map of branch names.
+	 * @return A map of branch names and according properties required for
+	 * 		   building.
 	 */
 	private HashMap<String, HashMap<String, String>> getBranches() {
 		HashMap<String, HashMap<String, String>> ret = new HashMap<String, HashMap<String, String>>();
@@ -148,6 +149,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		String newestBranch = "F-" + String.valueOf(highestVersion); //$NON-NLS-1$
 		String secondNewestBranch = "F-" + String.valueOf(highestVersion - 1); //$NON-NLS-1$
 
+		// Why is it determining if a .spec file is present?
 		return containsSpec(secondNewestBranch) ? newestBranch : "devel"; //$NON-NLS-1$
 	}
 
@@ -305,9 +307,13 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		this.initialized = true;
 	}
 
+	/**
+	 * Get distribution String.
+	 * 
+	 * See {@link IFpProjectBits#getDist()}
+	 */
 	@Override
 	public String getDist() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.branches.get(getCurrentBranchName()).get("dist");//$NON-NLS-1$
 	}
 }
