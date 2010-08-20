@@ -11,6 +11,7 @@
 package org.fedoraproject.eclipse.packager;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -133,5 +134,32 @@ public class FedoraProjectRoot {
 	 */
 	public ProjectType getProjectType() {
 		return type;
+	}
+
+	/**
+	 * Returns the ignore file based on the project type.
+	 * @return The ignore file (.cvsignore or .gitignore).
+	 */
+	public File getIgnoreFile() {
+		switch (type) {
+		case GIT:
+			getFileMember(".gitignore"); //$NON-NLS-1$
+			break;
+		case CVS:
+			getFileMember(".cvsignore"); //$NON-NLS-1$
+			break;
+
+		default:
+			break;
+		}
+		return null;
+	}
+
+	private IFile getFileMember(String ignoreFileName) {
+		IResource resource = rootContainer.findMember(ignoreFileName);
+		if (resource instanceof IFile) {
+			return (IFile) resource;
+		}
+		return null;
 	}
 }
