@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +41,7 @@ import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 /**
  * Git specific project bits (branches management and such).
@@ -109,8 +109,14 @@ public class FpGitProjectBits implements IFpProjectBits {
 		if (!isInitialized()) {
 			return null;
 		}
-		// TODO Auto-generated method stub
-		return "dummy output";
+		String username = FedoraHandlerUtils.getUsernameFromCert();
+		String packageName = this.project.getProject().getName();
+		if (username.equals("anonymous")) { //$NON-NLS-1$
+			return "git://pkgs.fedoraproject.org/" + packageName + ".git"; //$NON-NLS-1$ //$NON-NLS-2$
+		} else {
+			return "ssh://" + username + "@pkgs.fedoraproject.org/" //$NON-NLS-1$ //$NON-NLS-2$
+					+ packageName + ".git"; //$NON-NLS-1$
+		}
 	}
 	
 	/**
@@ -173,40 +179,63 @@ public class FpGitProjectBits implements IFpProjectBits {
 	 */
 	@Override
 	public String getDist() {
-		/* fedpkg is (was?) doing this:
-		 * # Still requires a 'branch' file in each branch
-        self.branch = self._findbranch()
-        if self.branch.startswith('F-'):
-            self.distval = self.branch.split('-')[1]
-            self.distvar = 'fedora'
-            self.dist = '.fc%s' % self.distval
-            self.target = 'dist-f%s-updates-candidate' % self.distval
-            self.mockconfig = 'fedora-%s-%s' % (self.distval, self.localarch)
-        elif self.branch.startswith('EL-'):
-            self.distval = self.branch.split('-')[1]
-            self.distvar = 'epel'
-            self.dist = '.el%s' % self.distval
-            self.target = 'dist-%sE-epel-testing-candidate' % self.distval
-            self.mockconfig = 'epel-%s-%s' % (self.distval, self.localarch)
-        elif self.branch.startswith('OLPC-'):
-            self.distval = self.branch.split('-')[1]
-            self.distvar = 'olpc'
-            self.dist = '.olpc%s' % self.distval
-            self.target = 'dist-olpc%s' % self.distval
-        # Need to do something about no branch here
-        elif self.branch == 'devel':
-            self.distval = '14' # this is hardset for now, which is bad
-            self.distvar = 'fedora'
-            self.dist = '.fc%s' % self.distval
-            self.target = 'dist-f%s' % self.distval # will be dist-rawhide
-		 */
 		String currBranch = getCurrentBranchName();
-		if (currBranch.startsWith("F-") || currBranch.startsWith("EL-") || currBranch.startsWith("OLPC-")) {  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-			String version = currBranch.split("-")[1]; //$NON-NLS-1$
-			return ".fc" + version; //$NON-NLS-1$
+		if (currBranch.startsWith("F-")) { //$NON-NLS-1$
+			return ".fc" + getDistVal(); //$NON-NLS-1$
+		} else if (currBranch.startsWith("EL-")) { //$NON-NLS-1$
+			return ".el" + getDistVal(); //$NON-NLS-1$
+		} else if (currBranch.startsWith("OLPC-")) {  //$NON-NLS-1$
+			return ".olpc" + getDistVal(); //$NON-NLS-1$
 		} else if (currBranch.equals("devel")) { //$NON-NLS-1$
-			String nextversion = "14"; // TODO: Look at remote branches and calculate something more precise. //$NON-NLS-1$
-			return ".fc" + nextversion; //$NON-NLS-1$
+			return ".fc" + determineNextReleaseNumber(); //$NON-NLS-1$
+		}
+		return null;
+	}
+	
+	/**
+	 * See {@link IFpProjectBits#getDistVal()}
+	 */
+	@Override
+	public String getDistVal() {
+		String currBranch = getCurrentBranchName();
+		if (currBranch.equals("devel")) { //$NON-NLS-1$
+			return determineNextReleaseNumber();
+		}
+		return currBranch.split("-")[1]; //$NON-NLS-1$
+	}
+
+	/**
+	 * See {@link IFpProjectBits#getDistVariable()}
+	 */
+	@Override
+	public String getDistVariable() {
+		String currBranch = getCurrentBranchName();
+		if (currBranch.startsWith("F-")) { //$NON-NLS-1$
+			return "fedora"; //$NON-NLS-1$" +
+		} else if (currBranch.startsWith("EL-")) { //$NON-NLS-1$
+			return "rhel"; //$NON-NLS-1$
+		} else if (currBranch.startsWith("OLPC-")) {  //$NON-NLS-1$
+			return "olpc"; //$NON-NLS-1$
+		} else if (currBranch.equals("devel")) { //$NON-NLS-1$
+			return "fedora"; //$NON-NLS-1$
+		}
+		return null;
+	}
+
+	/**
+	 * See {@link IFpProjectBits#getTarget()}
+	 */
+	@Override
+	public String getTarget() {
+		String currBranch = getCurrentBranchName();
+		if (currBranch.startsWith("F-")) { //$NON-NLS-1$
+			return "dist-f" + getDistVal() + "-updates-candidate"; //$NON-NLS-1$" //$NON-NLS-2$
+		} else if (currBranch.startsWith("EL-")) { //$NON-NLS-1$
+			return "dist-" + getDistVal() + "E-epel-testing-candidate"; //$NON-NLS-1$ //$NON-NLS-2$
+		} else if (currBranch.startsWith("OLPC-")) {  //$NON-NLS-1$
+			return "dist-olpc" + getDistVal(); //$NON-NLS-1$
+		} else if (currBranch.equals("devel")) { //$NON-NLS-1$
+			return "dist-rawhide"; //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -342,6 +371,17 @@ public class FpGitProjectBits implements IFpProjectBits {
 			e.printStackTrace();
 		}
 		return repo;
+	}
+	
+	/**
+	 * Determine what the next release number (in terms of the
+	 * distribution) will be.
+	 * 
+	 * @return The next release number in String representation
+	 */
+	private String determineNextReleaseNumber() {
+		// TODO: Look at remote branches and calculate something more precise.
+		return "14"; //$NON-NLS-1$
 	}
 	
 	@Override

@@ -46,11 +46,35 @@ public interface IFpProjectBits {
 	public String getScmUrl();
 	
 	/**
-	 * Get the dist for the given branch.
+	 * Get the dist for the given branch. See also
+	 * {@link "http://fedoraproject.org/wiki/Packaging:DistTag"}
 	 * 
-	 * @return String The dist as used by koji.
+	 * @return The dist as used by koji.
 	 */
 	public String getDist();
+	
+	/**
+	 * Get the dist-value (usally, distribution release number)
+	 * for the given branch.
+	 * 
+	 * @return The dist-value.
+	 */
+	public String getDistVal();
+	
+	/**
+	 * Get the dist-variable (usally, the name of the distribution)
+	 * for the given branch.
+	 * 
+	 * @return The dist-variable.
+	 */
+	public String getDistVariable();
+	
+	/**
+	 * Get the koji build target for the given branch.
+	 * 
+	 * @return The koji build target.
+	 */
+	public String getTarget();
 	
 	/**
 	 * Updates the given project from the remote

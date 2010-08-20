@@ -317,6 +317,33 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		return this.branches.get(getCurrentBranchName()).get("dist");//$NON-NLS-1$
 	}
 
+	/**
+	 * See {@link IFpProjectBits#getDistVal()}
+	 */
+	@Override
+	public String getDistVal() {
+		return this.branches.get(getCurrentBranchName()).get("distval"); //$NON-NLS-1$
+	}
+
+	/**
+	 * See {@link IFpProjectBits#getDistVariable()}
+	 */
+	@Override
+	public String getDistVariable() {
+		return this.branches.get(getCurrentBranchName()).get("distvar"); //$NON-NLS-1$
+	}
+
+	/**
+	 * See {@link IFpProjectBits#getTarget()}
+	 */
+	@Override
+	public String getTarget() {
+		return this.branches.get(getCurrentBranchName()).get("target"); //$NON-NLS-1$
+	}
+	
+	/**
+	 * See {@link IFpProjectBits#ignoreResource(IResource)}
+	 */
 	@Override
 	public IStatus ignoreResource(IResource resourceToIgnore) {
 		// TODO Auto-generated method stub
