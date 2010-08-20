@@ -27,6 +27,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -40,12 +41,17 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.SSLUtils;
 import org.fedoraproject.eclipse.packager.SourcesFile;
@@ -56,8 +62,95 @@ import org.fedoraproject.eclipse.packager.SourcesFile;
  * @author Red Hat inc.
  *
  */
-public abstract class UploadHandler extends WGetHandler {
+public class UploadHandler extends WGetHandler {
 
+	@Override
+	/**
+	 *  Performs upload of sources (independent of VCS used), updates "sources"
+	 *  file and performs necessary CVS operations to bring branch in sync.
+	 *  Checks if sources have changed.
+	 *  
+	 *  # TODO: upload only:
+	 *  UPLOADEXTS = ['tar', 'gz', 'bz2', 'lzma', 'xz', 'Z', 'zip', 'tff', 'bin',
+     *          'tbz', 'tbz2', 'tlz', 'txz', 'pdf', 'rpm', 'jar', 'war', 'db',
+     *          'cpio', 'jisp', 'egg', 'gem']
+	 */
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+
+		final IResource resource = FedoraHandlerUtils.getResource(e);
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(resource);
+		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
+		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(resource);
+		// do tasks as job
+		Job job = new Job(Messages.getString("UploadHandler.taskName")) { //$NON-NLS-1$
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				monitor.beginTask(Messages.getString("UploadHandler.taskName"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+
+				// ensure file has changed if already listed in sources
+				Map<String, String> sources = sourceFile.getSources();
+				String filename = resource.getName();
+				if (sources.containsKey(filename)
+						&& SourcesFile
+								.checkMD5(sources.get(filename), resource)) {
+					// file already in sources
+					return handleOK(NLS.bind(Messages
+							.getString("UploadHandler.versionExists"), filename) //$NON-NLS-1$
+							, true);
+				}
+
+				// Don't do anything if file is empty
+				final File toAdd = resource.getLocation().toFile();
+				if (toAdd.length() == 0) {
+					return handleOK(NLS.bind(org.fedoraproject.eclipse.packager.Messages
+							.getString("UploadHandler.0"), //$NON-NLS-1$
+							toAdd.getName()), true);
+				}
+
+				// Do the file uploading
+				IStatus result = performUpload(toAdd, filename, monitor,
+						fedoraProjectRoot);
+
+				if (result.isOK()) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+				}
+
+				// Update sources file
+				result = updateSources(sourceFile, toAdd);
+				if (!result.isOK()) {
+					// fail updating sources file
+					return handleError(Messages
+							.getString("UploadHandler.failUpdatSourceFile")); //$NON-NLS-1$
+				}
+
+				// Handle CVS specific stuff; Update .cvsignore
+				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
+				if (!result.isOK()) {
+					// fail updating sources file
+					return handleError(Messages
+							.getString("UploadHandler.failVCSUpdate")); //$NON-NLS-1$
+				}
+
+				// Do CVS update
+				result = projectBits.updateVCS(fedoraProjectRoot, monitor);
+				if (result.isOK()) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+				}
+				return result;
+			}
+
+		};
+		job.setUser(true);
+		job.schedule();
+		return null;
+	}
+	
 	/**
 	 * Upload source files as job.
 	 * 

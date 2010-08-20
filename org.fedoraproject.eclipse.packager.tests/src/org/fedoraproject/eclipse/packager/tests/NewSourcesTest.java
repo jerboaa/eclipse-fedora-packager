@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.tests.cvs;
+package org.fedoraproject.eclipse.packager.tests;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,27 +16,27 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.fedoraproject.eclipse.packager.cvs.handlers.CVSUploadHandler;
-import org.fedoraproject.eclipse.packager.tests.AbstractTest;
+import org.fedoraproject.eclipse.packager.handlers.NewSourcesHandler;
 
-public class CVSUploadTest extends AbstractTest {
+public class NewSourcesTest extends AbstractTest {
 	protected IResource resource;
 
 	protected void runHandler() throws Exception {
-		handler = new CVSUploadHandler();
+		handler = new NewSourcesHandler();
 		handler.setDebug(true);
 		handler.setResource(resource);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
-		handler.execute(null);
+		handler.execute(new ExecutionEvent());		
 		handler.waitForJob();
 	}
-
+	
 	protected IResource makeFile(String name, Integer contents) throws IOException, CoreException {
 		File newSource = new File(branch.getLocation().toOSString() + IPath.SEPARATOR + name);
 		newSource.createNewFile();
@@ -52,7 +52,7 @@ public class CVSUploadTest extends AbstractTest {
 		}
 		return result;
 	}
-
+	
 	protected String readFile(String name) throws IOException {
 		String result = "";
 		File file = branch.findMember(name).getLocation().toFile();
@@ -66,16 +66,6 @@ public class CVSUploadTest extends AbstractTest {
 		return result.trim();
 	}
 
-	public void testNoChange() throws Exception {
-		resource = makeFile("REMOVEME", 0x90);
-		runHandler();
-		String oldSources = readFile("sources");
-		String oldCvsignore = readFile(".cvsignore");
-		runHandler();
-		assertEquals(oldSources, readFile("sources"));
-		assertEquals(oldCvsignore, readFile(".cvsignore"));
-	}
-	
 	public void testEmpty() throws Exception {
 		String message = "REMOVEME is empty";
 		resource = makeFile("REMOVEME", null);
@@ -86,27 +76,23 @@ public class CVSUploadTest extends AbstractTest {
 		assertEquals(oldSources, readFile("sources"));
 		assertEquals(oldCvsignore, readFile(".cvsignore"));
 	}
-
+	
 	public void testNewFile() throws Exception {
 		String newLine = "fcd3dfe8777d16d64235bc7ae6bdcb8a  REMOVEME";
 		resource = makeFile("REMOVEME", 0x90);
-		String oldSources = readFile("sources");
-		String oldCvsignore = readFile(".cvsignore");
 		runHandler();
-		assertEquals(oldSources + "\n" + newLine, readFile("sources"));
-		assertEquals(oldCvsignore + "\nREMOVEME", readFile(".cvsignore"));
+		assertEquals(newLine, readFile("sources"));
+		assertEquals("REMOVEME", readFile(".cvsignore"));
 	}
-
+	
 	public void testUpdate() throws Exception {
 		String newLine = "fcd3dfe8777d16d64235bc7ae6bdcb8a  REMOVEME";
-		String oldSources = readFile("sources");
-		String oldCvsignore = readFile(".cvsignore");
 		resource = makeFile("REMOVEME", 0x99);
 		runHandler();
 		resource = makeFile("REMOVEME", 0x90);
 		runHandler();
-		assertEquals(oldSources + "\n" + newLine, readFile("sources"));
-		assertEquals(oldCvsignore + "\nREMOVEME", readFile(".cvsignore"));
+		assertEquals(newLine, readFile("sources"));
+		assertEquals("REMOVEME", readFile(".cvsignore"));
 	}
 
 }

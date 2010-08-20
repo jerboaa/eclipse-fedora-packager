@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.cvs.handlers;
+package org.fedoraproject.eclipse.packager.handlers;
 
 import java.io.File;
 
@@ -23,11 +23,15 @@ import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.SourcesFile;
-import org.fedoraproject.eclipse.packager.cvs.Messages;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
+import org.fedoraproject.eclipse.packager.Messages;
 
-public class CVSNewSourcesHandler extends UploadHandler {
+/**
+ * Uploads new sources. Does not check if sources changed.
+ * 
+ * @author Red Hat Inc.
+ *
+ */
+public class NewSourcesHandler extends UploadHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
@@ -42,15 +46,15 @@ public class CVSNewSourcesHandler extends UploadHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				monitor.beginTask(Messages.getString("CVSNewSourcesHandler.taskName"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+				monitor.beginTask(Messages.getString("NewSourcesHandler.taskName"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
 
 				// Don't do anything if file is empty
 				final File toAdd = resource.getLocation().toFile();
 				if (toAdd.length() == 0) {
 					return handleOK(
 							NLS.bind(org.fedoraproject.eclipse.packager.Messages
-													.getString("UploadHandler.0"),
-													toAdd.getName()), true); //$NON-NLS-1$
+													.getString("UploadHandler.0"), //$NON-NLS-1$
+													toAdd.getName()), true);
 				}
 
 				// Do the file uploading
@@ -68,12 +72,16 @@ public class CVSNewSourcesHandler extends UploadHandler {
 				result = updateSources(sourceFile, toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
+					return handleError(Messages
+							.getString("UploadHandler.failUpdatSourceFile")); //$NON-NLS-1$
 				}
 
 				// Handle CVS specific stuff; Update .cvsignore
 				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
+					return handleError(Messages
+							.getString("UploadHandler.failVCSUpdate")); //$NON-NLS-1$
 				}
 
 				// Do CVS update

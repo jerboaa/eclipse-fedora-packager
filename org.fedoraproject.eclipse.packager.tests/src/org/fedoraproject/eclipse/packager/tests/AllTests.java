@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.tests;
 
-import org.fedoraproject.eclipse.packager.tests.cvs.CVSNewSourcesTest;
 import org.fedoraproject.eclipse.packager.tests.cvs.CVSProjectTypeTest;
 import org.fedoraproject.eclipse.packager.tests.cvs.CVSTagTest;
-import org.fedoraproject.eclipse.packager.tests.cvs.CVSUploadTest;
 import org.fedoraproject.eclipse.packager.tests.git.GitProjectTypeTest;
 
 import junit.framework.Test;
@@ -26,10 +24,10 @@ public class AllTests extends TestSuite {
 				"Eclipse Fedorapackager Test Suite");
 		//$JUnit-BEGIN$
 		suite.addTestSuite(CVSTagTest.class);
-		suite.addTestSuite(CVSNewSourcesTest.class);
+		suite.addTestSuite(NewSourcesTest.class);
 		suite.addTestSuite(BodhiNewTest.class);
 		suite.addTestSuite(MockTest.class);
-		suite.addTestSuite(CVSUploadTest.class);
+		suite.addTestSuite(UploadTest.class);
 		suite.addTestSuite(DownloadTest.class);
 		suite.addTestSuite(LocalBuildTest.class);
 		suite.addTestSuite(PrepTest.class);
