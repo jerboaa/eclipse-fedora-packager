@@ -11,6 +11,8 @@
 package org.fedoraproject.eclipse.packager;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 /**
  * Interface for VCS specific bits of an FpProject. Implementations should
@@ -49,6 +51,14 @@ public interface IFpProjectBits {
 	 * @return String The dist as used by koji.
 	 */
 	public String getDist();
+	
+	/**
+	 * Updates the given project from the remote
+	 * @param projectRoot The project root to update.
+	 * @param monitor The monitor to show progress.
+	 * @return The status of the operation.
+	 */
+	public IStatus updateVCS(FedoraProjectRoot projectRoot, IProgressMonitor monitor);
 	
 	/**
 	 * Initialize IFpProjectBits instance

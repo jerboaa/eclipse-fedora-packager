@@ -19,10 +19,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 
 /**
@@ -48,7 +51,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 			);
 	
 	/**
-	 * See {@link IFpProjectBits#getBranchName(String)
+	 * See {@link IFpProjectBits#getBranchName(String)}
 	 */
 	@Override
 	public String getBranchName(String branchName) {
@@ -61,7 +64,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	/**
 	 * Parse current branch from active local branch.
 	 * 
-	 * See {@link IFpProjectBits#getCurrentBranchName()
+	 * See {@link IFpProjectBits#getCurrentBranchName()}
 	 */
 	@Override
 	public String getCurrentBranchName() {
@@ -75,7 +78,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 		try {
 			repo = repoCache.lookupRepository(new File(this.project
 					.getProject().getLocation().toOSString()
-					+ "/.git"));
+					+ "/.git")); //$NON-NLS-1$
 			// make sure it's a named branch
 			if (!isNamedBranch(repo.getFullBranch())) {
 				return null; // unknown branch!
@@ -89,7 +92,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	}
 
 	/**
-	 * See {@link IFpProjectBits#getScmUrl(IResource)
+	 * See {@link IFpProjectBits#getScmUrl()}
 	 */
 	@Override
 	public String getScmUrl() {
@@ -114,7 +117,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 		try {
 			repo = repoCache.lookupRepository(new File(this.project
 					.getProject().getLocation().toOSString()
-					+ "/.git"));
+					+ "/.git")); //$NON-NLS-1$
 			Map<String, Ref> remotes = repo.getRefDatabase().getRefs(
 					Constants.R_REMOTES);
 			Set<String> keyset = remotes.keySet();
@@ -134,7 +137,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	/**
 	 * Do instance specific initialization.
 	 * 
-	 * See {@link IFpProjectBits#initialize(IResource)
+	 * See {@link IFpProjectBits#initialize(IResource)}
 	 */
 	@Override
 	public void initialize(IResource resource) {
@@ -154,7 +157,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	 * Determine distribution qualifier. This is VCS specific because
 	 * branch determination is VCS specific.
 	 * 
-	 * See {@link IFpProjectBits#getDist()
+	 * See {@link IFpProjectBits#getDist()}
 	 */
 	@Override
 	public String getDist() {
@@ -246,6 +249,13 @@ public class FpGitProjectBits implements IFpProjectBits {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public IStatus updateVCS(FedoraProjectRoot projectRoot,
+			IProgressMonitor monitor) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
