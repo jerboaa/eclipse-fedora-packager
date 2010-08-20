@@ -245,7 +245,7 @@ public class FedoraHandlerUtils {
 	 */
 	public static boolean isValidUploadFile(File candidate) {
 		if (candidate.length() != 0) {
-			Pattern extensionPattern = Pattern.compile("\\.(?:tar|gz|bz2|lzma|xz|Z|zip|tff|bin|tbz|tbz2|tlz|txz|pdf|rpm|jar|war|db|cpio|jisp|egg|gem)$"); //$NON-NLS-1$
+			Pattern extensionPattern = Pattern.compile("^.*\\.(?:tar|gz|bz2|lzma|xz|Z|zip|tff|bin|tbz|tbz2|tlz|txz|pdf|rpm|jar|war|db|cpio|jisp|egg|gem)$"); //$NON-NLS-1$
 			Matcher extMatcher = extensionPattern.matcher(candidate.getName());
 			if (extMatcher.matches()) {
 				// file extension seems to be good
