@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.handlers;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IContainer;
@@ -228,4 +231,28 @@ public class FedoraHandlerUtils {
 		}
 		return null;
 	}
+	
+	/**
+	 * Checks if <code>candidate</code> is a valid file for uploading.
+	 * I.e. is non-empty and has a valid file extension. Valid file extensions
+	 * are: <code>'tar', 'gz', 'bz2', 'lzma', 'xz', 'Z', 'zip', 'tff', 'bin',
+     *            'tbz', 'tbz2', 'tlz', 'txz', 'pdf', 'rpm', 'jar', 'war', 'db',
+     *            'cpio', 'jisp', 'egg', 'gem'</code>
+	 * 
+	 * @param candidate
+	 * @return <code>true</code> if <code>candidate</code> is a valid file for uploading
+	 * 		   <code>false</code> otherwise.
+	 */
+	public static boolean isValidUploadFile(File candidate) {
+		if (candidate.length() != 0) {
+			Pattern extensionPattern = Pattern.compile("\\.(?:tar|gz|bz2|lzma|xz|Z|zip|tff|bin|tbz|tbz2|tlz|txz|pdf|rpm|jar|war|db|cpio|jisp|egg|gem)$"); //$NON-NLS-1$
+			Matcher extMatcher = extensionPattern.matcher(candidate.getName());
+			if (extMatcher.matches()) {
+				// file extension seems to be good
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

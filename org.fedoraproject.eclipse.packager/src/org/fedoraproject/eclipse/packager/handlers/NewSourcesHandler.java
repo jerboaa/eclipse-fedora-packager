@@ -50,10 +50,10 @@ public class NewSourcesHandler extends UploadHandler {
 
 				// Don't do anything if file is empty
 				final File toAdd = resource.getLocation().toFile();
-				if (toAdd.length() == 0) {
+				if (!FedoraHandlerUtils.isValidUploadFile(toAdd)) {
 					return handleOK(
 							NLS.bind(org.fedoraproject.eclipse.packager.Messages
-													.getString("UploadHandler.0"), //$NON-NLS-1$
+													.getString("UploadHandler.invalidFile"), //$NON-NLS-1$
 													toAdd.getName()), true);
 				}
 
