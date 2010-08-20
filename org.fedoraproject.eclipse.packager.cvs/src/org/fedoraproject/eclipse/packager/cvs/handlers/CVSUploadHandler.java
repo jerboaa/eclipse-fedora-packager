@@ -40,6 +40,11 @@ public class CVSUploadHandler extends UploadHandler {
 	/**
 	 *  Performs upload of sources (independent of VCS used), updates "sources"
 	 *  file and performs necessary CVS operations to bring branch in sync.
+	 *  
+	 *  # TODO: upload only:
+	 *  UPLOADEXTS = ['tar', 'gz', 'bz2', 'lzma', 'xz', 'Z', 'zip', 'tff', 'bin',
+     *          'tbz', 'tbz2', 'tlz', 'txz', 'pdf', 'rpm', 'jar', 'war', 'db',
+     *          'cpio', 'jisp', 'egg', 'gem']
 	 */
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 
