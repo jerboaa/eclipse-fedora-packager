@@ -65,7 +65,7 @@
          </menu>
       </menuContribution>
       <menuContribution
-               locationURI="popup:org.eclipse.fedoraproject.packager.main">
+               locationURI="popup:org.eclipse.fedoraproject.packager.main?before=org.fedoraproject.eclipse.packager.cvssep">
          <command
                   commandId="org.fedoraproject.eclipse.packager.DownloadCommand"
                   label="%command.label.4"
