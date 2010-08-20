@@ -21,29 +21,36 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils.ProjectType;
 
 /**
- * This class is representing a root directory for fedora package in given branch. 
- * It can be a folder in the cvs case or a project in the git case.
- *
+ * This class is representing a root directory for fedora package in given
+ * branch. It can be a folder in the cvs case or a project in the git case.
+ * 
  */
 public class FedoraProjectRoot {
 
 	private IContainer rootContainer;
 	private SourcesFile sourcesFile;
+	private ProjectType type;
 
 	/**
 	 * Creates the FedoraProjectRoot using the given container.
-	 * @param container The root container either IFolder(cvs) or IProject(git).
+	 * 
+	 * @param container
+	 *            The root container either IFolder(cvs) or IProject(git).
 	 */
 	public FedoraProjectRoot(IContainer container) {
 		this.rootContainer = container;
 		this.sourcesFile = new SourcesFile(rootContainer.getFile(new Path(
 				"sources"))); //$NON-NLS-1$
+		this.type = FedoraHandlerUtils.getProjectType(container);
 	}
 
 	/**
 	 * Returns the root container.
+	 * 
 	 * @return The root container.
 	 */
 	public IContainer getContainer() {
@@ -52,6 +59,7 @@ public class FedoraProjectRoot {
 
 	/**
 	 * Returns the sources file containing the sources for the given srpm.
+	 * 
 	 * @return The sources file.
 	 */
 	public SourcesFile getSourcesFile() {
@@ -60,6 +68,7 @@ public class FedoraProjectRoot {
 
 	/**
 	 * Returns the .spec file for the given project.
+	 * 
 	 * @return The specfile
 	 */
 	public IFile getSpecFile() {
@@ -79,7 +88,8 @@ public class FedoraProjectRoot {
 	}
 
 	/**
-	 * Returns the parsed .spec file model to ease retrieving data from it. 
+	 * Returns the parsed .spec file model to ease retrieving data from it.
+	 * 
 	 * @return The parsed .spec file.
 	 */
 	public Specfile getSpecfileModel() {
@@ -102,9 +112,10 @@ public class FedoraProjectRoot {
 		Specfile specfile = parser.parse(sb.toString());
 		return specfile;
 	}
-	
+
 	/**
 	 * Creates a tag name from the given specfile.
+	 * 
 	 * @return The created tag name.
 	 */
 	public String makeTagName() {
@@ -113,5 +124,14 @@ public class FedoraProjectRoot {
 		String version = specfile.getVersion();
 		String release = specfile.getRelease();
 		return (name + "-" + version + "-" + release).replaceAll("\\.", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	}
+
+	/**
+	 * Returns the project type.
+	 * 
+	 * @return The project type based on the VCS used.
+	 */
+	public ProjectType getProjectType() {
+		return type;
 	}
 }
