@@ -41,7 +41,7 @@ public class NewSourcesHandler extends UploadHandler {
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(resource);
 		// do tasks as job
-		Job job = new Job(getTaskName()) {
+		Job job = new Job("Fedora Packager") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
