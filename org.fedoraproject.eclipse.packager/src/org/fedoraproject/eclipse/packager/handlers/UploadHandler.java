@@ -178,9 +178,10 @@ public class UploadHandler extends WGetHandler {
 					new NameValuePair("md5sum", SourcesFile.getMD5(toAdd)), //$NON-NLS-1$
 					new NameValuePair("filename", filename) }; //$NON-NLS-1$
 			postMethod.setRequestBody(data);
-			if (client.executeMethod(postMethod) != HttpURLConnection.HTTP_OK) {
+			int returnCode = client.executeMethod(postMethod);
+			if (returnCode != HttpURLConnection.HTTP_OK) {
 				status = handleError(NLS.bind(
-						Messages.getString("UploadHandler.4"), filename)); //$NON-NLS-1$
+						Messages.getString("UploadHandler.33"), filename, returnCode)); //$NON-NLS-1$
 			} else {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();

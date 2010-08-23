@@ -22,7 +22,8 @@ import org.fedoraproject.eclipse.packager.SourcesFile;
 
 public abstract class WGetHandler extends CommonHandler {
 	
-	protected static final String uploadURL = "http://cvs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
+	protected static final String uploadURL = "https://pkgs.fedoraproject.org/repo/pkgs/upload.cgi"; //$NON-NLS-1$
+	protected static final String downloadURL = "http://pkgs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
 	
 	protected IProject project;
 	
@@ -40,7 +41,7 @@ public abstract class WGetHandler extends CommonHandler {
 		// Need to download remaining sources from repo
 		IStatus status = null;
 		for (final String source : sourcesToGet) {
-			final String url = uploadURL
+			final String url = downloadURL
 					+ "/" + project.getName() //$NON-NLS-1$
 					+ "/" + source + "/" + sourcesFile.getSource(source) + "/" + source; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			status = download(url, source, monitor);
