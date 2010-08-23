@@ -296,8 +296,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 	@Override
 	public IStatus updateVCS(FedoraProjectRoot projectRoot,
 			IProgressMonitor monitor) {
-		// FIXME: Not working just, yet. Use projectRoot and monitor!
-		return performPull();
+		// FIXME: Not working just, yet. Use projectRoot and monitor!.
+//		return performPull();
+		// Return OK status to not see NPEs
+		return Status.OK_STATUS;
 	}
 	
 	/**
