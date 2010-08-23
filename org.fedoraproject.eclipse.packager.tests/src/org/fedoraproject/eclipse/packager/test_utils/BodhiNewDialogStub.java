@@ -29,12 +29,14 @@ public class BodhiNewDialogStub implements IBodhiNewDialog {
 	}
 
 	public String getBuildName() {
-		try {
-			return handler.getBuildName();
-		} catch (CoreException e) {
-			e.printStackTrace();
-			return null;
-		}
+//		try {
+//			return handler.getBuildName();
+//		} catch (CoreException e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+		//TODO fix this properly
+		return "";
 	}
 
 	public String getNotes() {
