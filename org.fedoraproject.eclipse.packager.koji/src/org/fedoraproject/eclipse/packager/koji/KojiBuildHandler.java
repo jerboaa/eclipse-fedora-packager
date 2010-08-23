@@ -63,14 +63,14 @@ public class KojiBuildHandler extends CommonHandler {
 				}
 				IStatus status = Status.OK_STATUS;
 				if (promptForTag(type)) {
-					status = doTag(monitor);
+					status = doTag(fedoraProjectRoot, monitor);
 				}
 				if (status.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
 					try {
-						status = makeBuildJob(scmURL, makeTagName(), monitor);
+						status = makeBuildJob(scmURL, makeTagName(fedoraProjectRoot), fedoraProjectRoot, monitor);
 					} catch (CoreException e) {
 						status = handleError(e);
 					}
@@ -96,8 +96,8 @@ public class KojiBuildHandler extends CommonHandler {
 	}
 
 	protected IStatus makeBuildJob(final String scmURL, final String tagName,
-			IProgressMonitor monitor) {
-		final IStatus result = newBuild(scmURL, tagName, monitor);
+			FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
+		final IStatus result = newBuild(scmURL, tagName, fedoraProjectRoot, monitor);
 		if (result.isOK()) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -135,7 +135,7 @@ public class KojiBuildHandler extends CommonHandler {
 	}
 
 	protected IStatus newBuild(String scmURL, String tagName,
-			IProgressMonitor monitor) {
+			FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
 		IStatus status;
 		try {
 			// for testing use the stub instead
@@ -160,7 +160,8 @@ public class KojiBuildHandler extends CommonHandler {
 			}
 			// push build
 			monitor.subTask(Messages.getString("KojiBuildHandler.6")); //$NON-NLS-1$
-			result = koji.build(branches.get(dist).get("target"), scmURL, isScratch()); //$NON-NLS-1$
+			IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot.getSpecFile());
+			result = koji.build(projectBits.getTarget(), scmURL, isScratch()); 
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();

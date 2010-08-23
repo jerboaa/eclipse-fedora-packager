@@ -25,7 +25,6 @@ public class CVSTagTest extends AbstractTest {
 		
 		handler = new TagHandler();
 		handler.setDebug(true);
-		handler.setResource(branch);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);

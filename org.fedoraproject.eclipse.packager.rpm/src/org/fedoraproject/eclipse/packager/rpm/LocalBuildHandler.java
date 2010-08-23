@@ -23,6 +23,10 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
+/**
+ * Handler for building locally.
+ *
+ */
 public class LocalBuildHandler extends RPMHandler {
 
 	
@@ -45,7 +49,7 @@ public class LocalBuildHandler extends RPMHandler {
 					}
 					try {
 						// search for noarch directive, otherwise use local arch
-						final String arch = rpmQuery(specfile, "ARCH"); //$NON-NLS-1$
+						final String arch = rpmQuery(fedoraProjectRoot, "ARCH"); //$NON-NLS-1$
 
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();

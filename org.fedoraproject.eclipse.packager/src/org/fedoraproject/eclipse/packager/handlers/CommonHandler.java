@@ -22,12 +22,15 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -39,55 +42,113 @@ import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileSection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.team.core.RepositoryProvider;
+import org.eclipse.team.internal.ccvs.core.CVSException;
+import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.team.internal.ccvs.core.CVSTeamProvider;
+import org.eclipse.team.internal.ccvs.core.ICVSFolder;
+import org.eclipse.team.internal.ccvs.core.ICVSRemoteResource;
+import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
+import org.eclipse.team.internal.ccvs.core.client.Command;
+import org.eclipse.team.internal.ccvs.core.client.Command.LocalOption;
+import org.eclipse.team.internal.ccvs.core.client.Session;
+import org.eclipse.team.internal.ccvs.core.client.Tag;
+import org.eclipse.team.internal.ccvs.core.client.listeners.TagListener;
+import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 
 
 public abstract class CommonHandler extends AbstractHandler {
 	protected boolean debug = false;
-	private IResource resource; //TODO remove when subclasses don't use it
 	private IResource specfile;
 	protected Shell shell;
-	protected HashMap<String, HashMap<String, String>> branches;
 	private Job job;
-	private ExecutionEvent event;
-	private SourcesFile sourcesFile;
 
 	public void setDebug(boolean debug) {
 		this.debug = debug;
-	}
-
-	public void setResource(IResource resource) {
-		this.resource = resource;
 	}
 
 	public void setShell(Shell shell) {
 		this.shell = shell;
 	}
 
-	private boolean isSpec(IResource resource) {
-		boolean result = false;
-		if (resource instanceof IFile) {
-			String ext = resource.getFileExtension();
-			result = ext != null && ext.equals("spec"); //$NON-NLS-1$
-		}
-		return result;
-	}
-
-	protected String makeTagName() throws CoreException {
-		String name = rpmQuery(specfile, "NAME").replaceAll("^[0-9]+", "");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		String version = rpmQuery(specfile, "VERSION");  //$NON-NLS-1$
-		String release = rpmQuery(specfile, "RELEASE");  //$NON-NLS-1$
+	protected String makeTagName(FedoraProjectRoot projectRoot) throws CoreException {
+		String name = rpmQuery(projectRoot, "NAME").replaceAll("^[0-9]+", "");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String version = rpmQuery(projectRoot, "VERSION");  //$NON-NLS-1$
+		String release = rpmQuery(projectRoot, "RELEASE");  //$NON-NLS-1$
 		return (name + "-" + version + "-" + release).replaceAll("\\.", "_");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
-	protected String rpmQuery(IResource specfile, String format)
+	protected IStatus createCVSTag(String tagName, boolean forceTag,
+			IProgressMonitor monitor) {
+		IStatus result;
+		IProject proj = specfile.getProject();
+		CVSTag tag = new CVSTag(tagName, CVSTag.VERSION);
+
+		// get CVSProvider
+		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
+				.getProvider(proj, CVSProviderPlugin.getTypeId());
+		// get Repository Location
+		ICVSRepositoryLocation location;
+		try {
+			location = provider.getRemoteLocation();
+
+			// get CVSROOT
+			CVSWorkspaceRoot cvsRoot = provider.getCVSWorkspaceRoot();
+
+			ICVSFolder folder = cvsRoot.getLocalRoot().getFolder(
+					specfile.getParent().getName());
+
+			// Make new CVS Session
+			Session session = new Session(location, folder, true);
+			session.open(monitor, true);
+
+			TagListener listener = new TagListener();
+
+			String args[] = new String[] { "." }; //$NON-NLS-1$
+
+			LocalOption[] opts;
+			if (forceTag) {
+				opts = new LocalOption[] { Tag.FORCE_REASSIGNMENT };
+			} else {
+				opts = new LocalOption[0];
+			}
+
+			// cvs tag "tagname" "project"
+			IStatus status = Command.TAG.execute(session,
+					Command.NO_GLOBAL_OPTIONS, opts, tag, args, listener,
+					monitor);
+
+			session.close();
+			if (!status.isOK()) {
+				MultiStatus temp = new MultiStatus(status.getPlugin(), status
+						.getCode(), status.getMessage(), status.getException());
+				for (IStatus error : session.getErrors()) {
+					temp.add(error);
+				}
+				result = temp;
+			} else {
+				result = status;
+			}
+		} catch (CVSException e) {
+			result = handleError(e);
+		}
+
+		return result;
+	}
+
+	protected String rpmQuery(FedoraProjectRoot projectRoot, String format)
 			throws CoreException {
-		IResource parent = specfile.getParent();
+		IResource parent = projectRoot.getSpecFile().getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = FedoraHandlerUtils.getRPMDefines(dir);
-
-		List<String> distDefines = getDistDefines(branches, parent.getName());
+		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot.getSpecFile());
+		List<String> distDefines = getDistDefines(projectBits, parent.getName());
 
 		String result = null;
 		defines.add(0, "rpm"); //$NON-NLS-1$
@@ -96,7 +157,7 @@ public abstract class CommonHandler extends AbstractHandler {
 		defines.add("--qf"); //$NON-NLS-1$
 		defines.add("%{" + format + "}\\n");  //$NON-NLS-1$//$NON-NLS-2$
 		defines.add("--specfile"); //$NON-NLS-1$
-		defines.add(specfile.getLocation().toString());
+		defines.add(projectRoot.getSpecFile().getLocation().toString());
 
 		try {
 			result = Utils.runCommandToString(defines.toArray(new String[0]));
@@ -108,19 +169,37 @@ public abstract class CommonHandler extends AbstractHandler {
 		return result.substring(0, result.indexOf('\n'));
 	}
 
-	protected List<String> getDistDefines(HashMap<String, HashMap<String,String>> branches, String parentName) {
+	protected List<String> getDistDefines(IFpProjectBits projectBits, String parentName) {
 		// substitution for rhel
 		ArrayList<String> distDefines = new ArrayList<String>();
-		if (branches != null) {
-			HashMap<String, String> branch = branches.get(parentName);
-			String distvar = branch.get("distvar").equals("epel") ? "rhel"  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-					: branch.get("distvar"); //$NON-NLS-1$
-			distDefines.add("--define"); //$NON-NLS-1$
-			distDefines.add("dist " + branch.get("dist"));  //$NON-NLS-1$//$NON-NLS-2$
-			distDefines.add("--define"); //$NON-NLS-1$
-			distDefines.add(distvar + branch.get("dist")); //$NON-NLS-1$
-		}
+		String distvar = projectBits.getDistVariable().equals("epel") ? "rhel" //$NON-NLS-1$//$NON-NLS-2$ 
+				: projectBits.getDistVariable(); 
+		distDefines.add("--define"); //$NON-NLS-1$
+		distDefines.add("dist " + projectBits.getDist()); //$NON-NLS-1$
+		distDefines.add("--define"); //$NON-NLS-1$
+		distDefines.add(distvar + projectBits.getDist()); 
 		return distDefines;
+	}
+	
+
+	protected boolean isTagged(FedoraProjectRoot projectRoot, String tagName) throws CoreException {
+		String branchName = specfile.getParent().getName();
+		IProject proj = specfile.getProject();
+
+		// get CVSProvider
+		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
+		.getProvider(proj, CVSProviderPlugin.getTypeId());
+		// get CVSROOT
+		CVSWorkspaceRoot cvsRoot = provider.getCVSWorkspaceRoot();
+
+		ICVSFolder folder = cvsRoot.getLocalRoot().getFolder(branchName);
+		CVSTag tag = new CVSTag(tagName, CVSTag.VERSION);
+		ICVSRemoteResource remoteResource = CVSWorkspaceRoot.getRemoteResourceFor(specfile).forTag(tag);
+		if (remoteResource == null) {
+			throw new CVSException(folder.getName() + " is not tagged");
+		}
+
+		return tag.getName().equals(makeTagName(projectRoot));
 	}
 
 	public String getClog() throws IOException {
@@ -242,6 +321,48 @@ public abstract class CommonHandler extends AbstractHandler {
 			okPressed = op.isOkPressed();
 		}
 		return okPressed;
+	}
+
+	// FIXME: This breaks git
+	protected IStatus doTag(FedoraProjectRoot projectRoot, IProgressMonitor monitor) {
+		monitor.subTask("Generating Tag Name from Specfile");
+		final String tagName;
+		try {
+			tagName = makeTagName(projectRoot);
+		} catch (CoreException e) {
+			e.printStackTrace();
+			return handleError(e);
+		}
+
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		monitor.subTask("Tagging as " + tagName);
+		IStatus result = createCVSTag(tagName, false, monitor);
+		String errExists = "Tag " + tagName + " has been already created";
+		if (!result.isOK()) {
+			boolean tagExists = false;
+			if (result.getMessage().contains(errExists)) {
+				tagExists = true;
+			}
+			if (result.isMultiStatus()) {
+				for (IStatus error : result.getChildren()) {
+					if (error.getMessage().contains(errExists)) {
+						tagExists = true;
+					}
+				}
+			}
+			if (tagExists) {
+				// prompt to force tag
+				if (promptForceTag(tagName)) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					result = createCVSTag(tagName, true, monitor);
+				}
+			}
+		}
+		return result;
 	}
 	
 	protected SourcesFile getSourcesFile() {

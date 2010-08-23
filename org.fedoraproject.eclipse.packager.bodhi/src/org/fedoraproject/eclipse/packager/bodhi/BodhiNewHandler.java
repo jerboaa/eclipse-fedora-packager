@@ -32,6 +32,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
@@ -57,19 +58,19 @@ public class BodhiNewHandler extends RPMHandler {
 						IProgressMonitor.UNKNOWN);
 				monitor.subTask(Messages.getString("BodhiNewHandler.0")); //$NON-NLS-1$
 				try {
-					String tag = makeTagName();
+					String tag = makeTagName(fedoraProjectRoot);
 					String branchName = specfile.getParent().getName();
 
 					// ensure branch is tagged properly before proceeding
-					if (isTagged(tag)) {
+					if (isTagged(fedoraProjectRoot, tag)) {
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
 						monitor.subTask(Messages.getString("BodhiNewHandler.1")); //$NON-NLS-1$
 						String clog = getClog();
 						String bugIDs = findBug(clog);
-						String buildName = getBuildName();
-						String release = getReleaseName();
+						String buildName = getBuildName(fedoraProjectRoot);
+						String release = getReleaseName(fedoraProjectRoot);
 
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
@@ -168,15 +169,15 @@ public class BodhiNewHandler extends RPMHandler {
 		return null;
 	}
 	
-	public String getReleaseName() throws CoreException {
-		return getBranchName(
-				specfile.getParent().getName()).replaceAll("-", ""); //$NON-NLS-1$ //$NON-NLS-2$
+	public String getReleaseName(FedoraProjectRoot projectRoot) throws CoreException {
+		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot.getSpecFile());
+		return projectBits.getCurrentBranchName().replaceAll("-", "");
 	}
 
-	public String getBuildName() throws CoreException {
-		return rpmQuery(specfile, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-		+ rpmQuery(specfile, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-		+ rpmQuery(specfile, "RELEASE"); //$NON-NLS-1$
+	public String getBuildName(FedoraProjectRoot projectRoot) throws CoreException {
+		return rpmQuery(projectRoot, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
+		+ rpmQuery(projectRoot, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
+		+ rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$
 	}
 
 	public IBodhiClient getBodhi() {

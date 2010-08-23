@@ -29,7 +29,6 @@ public class UploadTest extends AbstractTest {
 	protected void runHandler() throws Exception {
 		handler = new UploadHandler();
 		handler.setDebug(true);
-		handler.setResource(resource);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);

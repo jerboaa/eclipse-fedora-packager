@@ -23,7 +23,6 @@ public class LocalBuildTest extends AbstractTest {
 		super.setUp();
 		handler = new LocalBuildHandler();
 		handler.setDebug(true);
-		handler.setResource(branch);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);

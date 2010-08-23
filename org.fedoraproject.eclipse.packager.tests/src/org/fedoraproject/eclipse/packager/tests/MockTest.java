@@ -22,7 +22,6 @@ public class MockTest extends AbstractTest {
 		
 		handler = new MockBuildHandler();
 		handler.setDebug(true);
-		handler.setResource(branch);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);

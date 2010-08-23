@@ -23,7 +23,6 @@ public class DownloadTest extends AbstractTest {
 		super.setUp();
 		handler = new DownloadHandler();
 		handler.setDebug(true);
-		handler.setResource(branch);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);

@@ -30,7 +30,6 @@ public class NewSourcesTest extends AbstractTest {
 	protected void runHandler() throws Exception {
 		handler = new NewSourcesHandler();
 		handler.setDebug(true);
-		handler.setResource(resource);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(new ExecutionEvent());		
