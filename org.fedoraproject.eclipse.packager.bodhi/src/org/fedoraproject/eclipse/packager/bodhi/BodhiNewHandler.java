@@ -58,11 +58,12 @@ public class BodhiNewHandler extends RPMHandler {
 						IProgressMonitor.UNKNOWN);
 				monitor.subTask(Messages.getString("BodhiNewHandler.0")); //$NON-NLS-1$
 				try {
-					String tag = makeTagName(fedoraProjectRoot);
+					String tag = FedoraHandlerUtils.makeTagName(fedoraProjectRoot);
 					String branchName = specfile.getParent().getName();
 
 					// ensure branch is tagged properly before proceeding
-					if (isTagged(fedoraProjectRoot, tag)) {
+					IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(specfile);
+					if (projectBits.isVcsTagged(fedoraProjectRoot, tag)) {
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
@@ -175,9 +176,9 @@ public class BodhiNewHandler extends RPMHandler {
 	}
 
 	public String getBuildName(FedoraProjectRoot projectRoot) throws CoreException {
-		return rpmQuery(projectRoot, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-		+ rpmQuery(projectRoot, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-		+ rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$
+		return FedoraHandlerUtils.rpmQuery(projectRoot, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
+		+ FedoraHandlerUtils.rpmQuery(projectRoot, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
+		+ FedoraHandlerUtils.rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$
 	}
 
 	public IBodhiClient getBodhi() {

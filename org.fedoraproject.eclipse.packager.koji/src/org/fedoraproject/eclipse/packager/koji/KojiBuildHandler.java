@@ -38,7 +38,12 @@ import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils.ProjectType;
 
+/**
+ * Handler to perform a Koji build.
+ *
+ */
 public class KojiBuildHandler extends CommonHandler {
+	@SuppressWarnings("unused")
 	private String dist;
 	private String scmURL;
 	protected IKojiHubClient koji;
@@ -63,14 +68,16 @@ public class KojiBuildHandler extends CommonHandler {
 				}
 				IStatus status = Status.OK_STATUS;
 				if (promptForTag(type)) {
-					status = doTag(fedoraProjectRoot, monitor);
+					// Do VCS tagging
+					IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(resource);
+					status = projectBits.tagVcs(fedoraProjectRoot, monitor);
 				}
 				if (status.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
 					try {
-						status = makeBuildJob(scmURL, makeTagName(fedoraProjectRoot), fedoraProjectRoot, monitor);
+						status = makeBuildJob(scmURL, FedoraHandlerUtils.makeTagName(fedoraProjectRoot), fedoraProjectRoot, monitor);
 					} catch (CoreException e) {
 						status = handleError(e);
 					}

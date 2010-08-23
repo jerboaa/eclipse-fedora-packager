@@ -49,7 +49,7 @@ public class LocalBuildHandler extends RPMHandler {
 					}
 					try {
 						// search for noarch directive, otherwise use local arch
-						final String arch = rpmQuery(fedoraProjectRoot, "ARCH"); //$NON-NLS-1$
+						final String arch = FedoraHandlerUtils.rpmQuery(fedoraProjectRoot, "ARCH"); //$NON-NLS-1$
 
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();

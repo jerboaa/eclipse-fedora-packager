@@ -83,7 +83,7 @@ public abstract class RPMHandler extends CommonHandler {
 		List<String> defines = FedoraHandlerUtils.getRPMDefines(dir);
 		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(specfile);
 
-		List<String> distDefines = getDistDefines(projectBits, parent.getName());
+		List<String> distDefines = FedoraHandlerUtils.getDistDefines(projectBits, parent.getName());
 
 		defines.add(0, "rpmbuild");
 		defines.addAll(distDefines);

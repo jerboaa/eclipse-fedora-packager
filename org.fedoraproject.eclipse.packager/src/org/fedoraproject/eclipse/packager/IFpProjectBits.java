@@ -98,4 +98,21 @@ public interface IFpProjectBits {
 	 */
 	public void initialize(IResource resource);
 	
+	/**
+	 * Tag a revision of the VCS.
+	 * 
+	 * @param projectRoot
+	 * @param monitor
+	 * @return The status of the tagging operation.
+	 */
+	public IStatus tagVcs(FedoraProjectRoot projectRoot, IProgressMonitor monitor);
+	
+	/**
+	 * Determine if tag exists in VCS.
+	 * 
+	 * @param fedoraProjectRoot
+	 * @param tag
+	 * @return True if tag exists, false otherwise.
+	 */
+	public boolean isVcsTagged(FedoraProjectRoot fedoraProjectRoot, String tag);	
 }

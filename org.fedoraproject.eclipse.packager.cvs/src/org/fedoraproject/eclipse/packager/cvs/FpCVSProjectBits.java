@@ -26,23 +26,30 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.internal.ccvs.core.CVSException;
 import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.core.CVSTeamProvider;
 import org.eclipse.team.internal.ccvs.core.ICVSFile;
 import org.eclipse.team.internal.ccvs.core.ICVSFolder;
+import org.eclipse.team.internal.ccvs.core.ICVSRemoteResource;
 import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.core.client.Command;
+import org.eclipse.team.internal.ccvs.core.client.Command.LocalOption;
 import org.eclipse.team.internal.ccvs.core.client.Session;
+import org.eclipse.team.internal.ccvs.core.client.Tag;
+import org.eclipse.team.internal.ccvs.core.client.listeners.TagListener;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
 import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 /**
  * CVS specific FpProject bits. Implementation of
@@ -348,5 +355,146 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	public IStatus ignoreResource(IResource resourceToIgnore) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	/**
+	 * Do CVS tag.
+	 * 
+	 * See {@link IFpProjectBits#tagVcs(FedoraProjectRoot, IProgressMonitor)}
+	 */
+	@Override
+	public IStatus tagVcs(FedoraProjectRoot projectRoot,
+			IProgressMonitor monitor) {
+		monitor.subTask("Generating Tag Name from Specfile");
+		final String tagName;
+		try {
+			tagName = FedoraHandlerUtils.makeTagName(projectRoot);
+		} catch (CoreException e) {
+			e.printStackTrace();
+			return new Status(IStatus.ERROR, CVSPlugin.PLUGIN_ID, e.getMessage());
+		}
+
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		monitor.subTask("Tagging as " + tagName);
+		IStatus result = createCVSTag(tagName, false, monitor, projectRoot);
+		String errExists = "Tag " + tagName + " has been already created";
+		if (!result.isOK()) {
+			boolean tagExists = false;
+			if (result.getMessage().contains(errExists)) {
+				tagExists = true;
+			}
+			if (result.isMultiStatus()) {
+				for (IStatus error : result.getChildren()) {
+					if (error.getMessage().contains(errExists)) {
+						tagExists = true;
+					}
+				}
+			}
+			if (tagExists) {
+				// prompt to force tag
+				// FIXME: move this to the appropriate place
+				/*if (promptForceTag(tagName)) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					result = createCVSTag(tagName, true, monitor);
+				}*/
+			}
+		}
+		return result;
+	}
+	
+	private IStatus createCVSTag(String tagName, boolean forceTag,
+			IProgressMonitor monitor, FedoraProjectRoot projectRoot) {
+		IStatus result;
+		IFile specfile = projectRoot.getSpecFile();
+		IProject proj = specfile.getProject();
+		CVSTag tag = new CVSTag(tagName, CVSTag.VERSION);
+
+		// get CVSProvider
+		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
+				.getProvider(proj, CVSProviderPlugin.getTypeId());
+		// get Repository Location
+		ICVSRepositoryLocation location;
+		try {
+			location = provider.getRemoteLocation();
+
+			// get CVSROOT
+			CVSWorkspaceRoot cvsRoot = provider.getCVSWorkspaceRoot();
+
+			ICVSFolder folder = cvsRoot.getLocalRoot().getFolder(
+					specfile.getParent().getName());
+
+			// Make new CVS Session
+			Session session = new Session(location, folder, true);
+			session.open(monitor, true);
+
+			TagListener listener = new TagListener();
+
+			String args[] = new String[] { "." }; //$NON-NLS-1$
+
+			LocalOption[] opts;
+			if (forceTag) {
+				opts = new LocalOption[] { Tag.FORCE_REASSIGNMENT };
+			} else {
+				opts = new LocalOption[0];
+			}
+
+			// cvs tag "tagname" "project"
+			IStatus status = Command.TAG.execute(session,
+					Command.NO_GLOBAL_OPTIONS, opts, tag, args, listener,
+					monitor);
+
+			session.close();
+			if (!status.isOK()) {
+				MultiStatus temp = new MultiStatus(status.getPlugin(), status
+						.getCode(), status.getMessage(), status.getException());
+				for (IStatus error : session.getErrors()) {
+					temp.add(error);
+				}
+				result = temp;
+			} else {
+				result = status;
+			}
+		} catch (CVSException e) {
+			result = new Status(IStatus.ERROR, CVSPlugin.PLUGIN_ID, e.getMessage());
+		}
+
+		return result;
+	}
+	
+	/**
+	 * Determine if CVS tag exists.
+	 * 
+	 * See {@link IFpProjectBits#isVcsTagged(FedoraProjectRoot, String)}
+	 */
+	@Override
+	public boolean isVcsTagged(FedoraProjectRoot fedoraProjectRoot, String tagName) {
+		if (!isInitialized()) {
+			return false; // can't do this without being initialized
+		}
+		IResource specfile = fedoraProjectRoot.getSpecFile();
+
+		CVSTag tag = null;
+		try {
+		tag = new CVSTag(tagName, CVSTag.VERSION);
+		ICVSRemoteResource remoteResource = CVSWorkspaceRoot.getRemoteResourceFor(specfile).forTag(tag);
+		if (remoteResource == null) {
+			return false;
+		}
+		} catch (CVSException e) {
+			e.printStackTrace();
+		}
+		String createdTag = null;
+		try {
+			createdTag = FedoraHandlerUtils.makeTagName(fedoraProjectRoot);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return tag.getName().equals(createdTag);
 	}
 }

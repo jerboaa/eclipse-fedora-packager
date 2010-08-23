@@ -91,10 +91,10 @@ public class MockBuildHandler extends RPMHandler {
 		try {
 			Specfile specfile = projectRoot.getSpecfileModel();
 			String[] cmd = { "mock", "-r", mockcfg, "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$
-					+ Path.SEPARATOR + makeTagName(projectRoot), "rebuild", dir //$NON-NLS-1$
+					+ Path.SEPARATOR + FedoraHandlerUtils.makeTagName(projectRoot), "rebuild", dir //$NON-NLS-1$
 					+ Path.SEPARATOR + specfile.getName() + "-" //$NON-NLS-1$ //$NON-NLS-2$
 					+ specfile.getVersion() + "-" //$NON-NLS-1$ //$NON-NLS-2$
-					+ rpmQuery(projectRoot, "RELEASE") + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
+					+ FedoraHandlerUtils.rpmQuery(projectRoot, "RELEASE") + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
 			InputStream is = Utils.runCommandToInputStream(cmd);
 			status = runShellCommand(is, monitor); //$NON-NLS-1$
 			

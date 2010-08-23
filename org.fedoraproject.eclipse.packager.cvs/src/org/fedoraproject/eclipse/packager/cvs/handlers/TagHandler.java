@@ -16,10 +16,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
+/**
+ * Handler which performs VCS tagging.
+ *
+ */
 public class TagHandler extends CommonHandler {
 
 	@Override
@@ -30,7 +35,9 @@ public class TagHandler extends CommonHandler {
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask("Tagging Branch", 
 						IProgressMonitor.UNKNOWN);
-				IStatus result = doTag(fedoraProjectRoot, monitor);
+				// Do VCS tagging
+				IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot.getSpecFile());
+				IStatus result = projectBits.tagVcs(fedoraProjectRoot, monitor);
 				monitor.done();
 				return result;
 			}

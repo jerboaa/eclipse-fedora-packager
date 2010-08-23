@@ -390,4 +390,17 @@ public class FpGitProjectBits implements IFpProjectBits {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean isVcsTagged(FedoraProjectRoot fedoraProjectRoot, String tag) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public IStatus tagVcs(FedoraProjectRoot projectRoot,
+			IProgressMonitor monitor) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

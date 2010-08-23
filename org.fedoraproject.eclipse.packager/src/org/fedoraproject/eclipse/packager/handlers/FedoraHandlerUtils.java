@@ -34,12 +34,15 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
@@ -295,6 +298,52 @@ public class FedoraHandlerUtils {
 			}
 		}
 		return "anonymous"; //$NON-NLS-1$
+	}
+	
+	public static String makeTagName(FedoraProjectRoot projectRoot) throws CoreException {
+		String name = rpmQuery(projectRoot, "NAME").replaceAll("^[0-9]+", "");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String version = rpmQuery(projectRoot, "VERSION");  //$NON-NLS-1$
+		String release = rpmQuery(projectRoot, "RELEASE");  //$NON-NLS-1$
+		return (name + "-" + version + "-" + release).replaceAll("\\.", "_");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	}
+
+	public static String rpmQuery(FedoraProjectRoot projectRoot, String format)
+			throws CoreException {
+		IResource parent = projectRoot.getSpecFile().getParent();
+		String dir = parent.getLocation().toString();
+		List<String> defines = FedoraHandlerUtils.getRPMDefines(dir);
+		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot.getSpecFile());
+		List<String> distDefines = getDistDefines(projectBits, parent.getName());
+
+		String result = null;
+		defines.add(0, "rpm"); //$NON-NLS-1$
+		defines.addAll(distDefines);
+		defines.add("-q"); //$NON-NLS-1$
+		defines.add("--qf"); //$NON-NLS-1$
+		defines.add("%{" + format + "}\\n");  //$NON-NLS-1$//$NON-NLS-2$
+		defines.add("--specfile"); //$NON-NLS-1$
+		defines.add(projectRoot.getSpecFile().getLocation().toString());
+
+		try {
+			result = Utils.runCommandToString(defines.toArray(new String[0]));
+		} catch (IOException e) {
+			throw new CoreException(new Status(IStatus.ERROR,
+					PackagerPlugin.PLUGIN_ID, e.getMessage(), e));
+		}
+
+		return result.substring(0, result.indexOf('\n'));
+	}
+	
+	public static List<String> getDistDefines(IFpProjectBits projectBits, String parentName) {
+		// substitution for rhel
+		ArrayList<String> distDefines = new ArrayList<String>();
+		String distvar = projectBits.getDistVariable().equals("epel") ? "rhel" //$NON-NLS-1$//$NON-NLS-2$ 
+				: projectBits.getDistVariable(); 
+		distDefines.add("--define"); //$NON-NLS-1$
+		distDefines.add("dist " + projectBits.getDist()); //$NON-NLS-1$
+		distDefines.add("--define"); //$NON-NLS-1$
+		distDefines.add(distvar + projectBits.getDist()); 
+		return distDefines;
 	}
 
 }
