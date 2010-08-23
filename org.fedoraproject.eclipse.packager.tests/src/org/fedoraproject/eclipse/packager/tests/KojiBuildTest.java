@@ -25,7 +25,6 @@ public class KojiBuildTest extends AbstractTest {
 		handler.setDebug(true);
 		koji = new KojiHubClientStub();
 		((KojiBuildHandler) handler).setKoji(koji);
-		handler.setResource(branch);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);

@@ -49,12 +49,14 @@ public class BodhiNewDialogStub implements IBodhiNewDialog {
 	}
 
 	public String getRelease() {
-		try {
-			return handler.getReleaseName();
-		} catch (CoreException e) {
-			e.printStackTrace();
-			return null;
-		}
+//		try {
+//			return handler.getReleaseName();
+//		} catch (CoreException e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+		//TODO fix this properly
+		return "";
 	}
 
 	public String getRequest() {

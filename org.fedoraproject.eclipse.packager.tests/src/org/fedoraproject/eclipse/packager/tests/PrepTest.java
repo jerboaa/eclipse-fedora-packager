@@ -23,7 +23,6 @@ public class PrepTest extends AbstractTest {
 		
 		handler = new PrepHandler();
 		handler.setDebug(true);
-		handler.setResource(branch);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);		
