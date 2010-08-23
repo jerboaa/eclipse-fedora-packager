@@ -86,6 +86,18 @@
                      </with>
                   </or>
                </visibleWhen>
+               <command
+                     commandId="org.fedoraproject.eclipse.packager.UploadCommand"
+                     label="%command.label.2"
+                     mnemonic="%command.mnemonic.2"
+                     style="push">
+         	   </command>
+               <command
+                     commandId="org.fedoraproject.eclipse.packager.NewSourcesCommand"
+                     label="%command.label.3"
+                     mnemonic="%command.mnemonic.3"
+                     style="push">
+               </command>
             </menu>
          <command
                   commandId="org.fedoraproject.eclipse.packager.DownloadCommand"
@@ -110,18 +122,6 @@
                      </with>
                   </or>
                </visibleWhen>
-         </command>
-         <command
-                     commandId="org.fedoraproject.eclipse.packager.UploadCommand"
-                     label="%command.label.2"
-                     mnemonic="%command.mnemonic.2"
-                     style="push">
-         </command>
-         <command
-                     commandId="org.fedoraproject.eclipse.packager.NewSourcesCommand"
-                     label="%command.label.3"
-                     mnemonic="%command.mnemonic.3"
-                     style="push">
          </command>
        </menuContribution>
     </extension>
