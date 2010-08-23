@@ -63,14 +63,14 @@ public class KojiBuildHandler extends CommonHandler {
 				}
 				IStatus status = Status.OK_STATUS;
 				if (promptForTag(type)) {
-					status = doTag(monitor);
+					status = doTag(fedoraProjectRoot, monitor);
 				}
 				if (status.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
 					try {
-						status = makeBuildJob(scmURL, makeTagName(), monitor);
+						status = makeBuildJob(scmURL, makeTagName(fedoraProjectRoot), monitor);
 					} catch (CoreException e) {
 						status = handleError(e);
 					}

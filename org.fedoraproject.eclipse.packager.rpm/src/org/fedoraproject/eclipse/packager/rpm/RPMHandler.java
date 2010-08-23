@@ -37,14 +37,22 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.fedoraproject.eclipse.packager.ConsoleWriterThread;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
+/**
+ * Handler containing common functionality for implementations using rpm calls. 
+ *
+ */
 public abstract class RPMHandler extends CommonHandler {
 	protected static final QualifiedName KEY = new QualifiedName(
 			RPMPlugin.PLUGIN_ID, "source"); //$NON-NLS-1$
 
+	/**
+	 * Name of the console used for displaying rpm build output.
+	 */
 	public static final String CONSOLE_NAME = Messages
 			.getString("RPMHandler.1"); //$NON-NLS-1$
 
@@ -73,8 +81,9 @@ public abstract class RPMHandler extends CommonHandler {
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = FedoraHandlerUtils.getRPMDefines(dir);
+		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(specfile);
 
-		List<String> distDefines = getDistDefines(branches, parent.getName());
+		List<String> distDefines = getDistDefines(projectBits, parent.getName());
 
 		defines.add(0, "rpmbuild");
 		defines.addAll(distDefines);
