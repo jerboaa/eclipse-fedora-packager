@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -65,102 +64,17 @@ import org.fedoraproject.eclipse.packager.SourcesFile;
 @SuppressWarnings("restriction")
 public abstract class CommonHandler extends AbstractHandler {
 	protected boolean debug = false;
-	private IResource resource; //TODO remove when subclasses don't use it
 	private IResource specfile;
 	protected Shell shell;
-	protected HashMap<String, HashMap<String, String>> branches;
 	private Job job;
 
 	public void setDebug(boolean debug) {
 		this.debug = debug;
 	}
 
-	// FIXME: This will break with Git
-	//private abstract HashMap<String, HashMap<String, String>> getBranches();
-	private HashMap<String, HashMap<String, String>> getBranches() {
-		HashMap<String, HashMap<String, String>> ret = new HashMap<String, HashMap<String, String>>();
-
-		IFile branchesFile = resource.getProject().getFolder("common").getFile(  //$NON-NLS-1$
-				"branches"); //$NON-NLS-1$
-		InputStream is;
-		try {
-			is = branchesFile.getContents();
-			BufferedReader bufReader = new BufferedReader(
-					new InputStreamReader(is));
-			List<String> branches = new ArrayList<String>();
-			String line;
-			while ((line = bufReader.readLine()) != null) {
-				branches.add(line);
-			}
-
-			for (String branch : branches) {
-				HashMap<String, String> temp = new HashMap<String, String>();
-				StringTokenizer st = new StringTokenizer(branch, ":");	//$NON-NLS-1$
-				String target = st.nextToken();
-				temp.put("target", st.nextToken()); 	//$NON-NLS-1$
-				temp.put("dist", st.nextToken());		//$NON-NLS-1$
-				temp.put("distvar", st.nextToken());	//$NON-NLS-1$
-				temp.put("distval", st.nextToken());	//$NON-NLS-1$
-				ret.put(target, temp);
-			}
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return ret;
-	}
-
-
-	public void setResource(IResource resource) {
-		this.resource = resource;
-	}
 
 	public void setShell(Shell shell) {
 		this.shell = shell;
-	}
-
-	// FIXME: This will break Git
-	protected String getBranchName(String branch) throws CoreException {
-		// check for early-branched
-		if (branch.equals("devel")) { //$NON-NLS-1$
-			return getDevelBranch();
-		}
-		return branch;
-	}
-
-	// checks to see if branch is early-branched
-	private String getDevelBranch() throws CoreException {
-		int highestVersion = 0;
-		for (String branch : branches.keySet()) {
-			if (branch.startsWith("F-")) { //$NON-NLS-1$
-				int version = Integer.parseInt(branch.substring(2));
-				highestVersion = Math.max(version, highestVersion);
-			}
-		}
-		String newestBranch = "F-" + String.valueOf(highestVersion); //$NON-NLS-1$
-		String secondNewestBranch = "F-" + String.valueOf(highestVersion - 1); //$NON-NLS-1$
-
-		return containsSpec(secondNewestBranch) ? newestBranch : "devel"; //$NON-NLS-1$
-	}
-
-	// FIXME: This will break Git
-	protected boolean containsSpec(String branch) throws CoreException {
-		IProject proj = specfile.getProject();
-		// get CVSProvider
-		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
-				.getProvider(proj, CVSProviderPlugin.getTypeId());
-
-		// get CVSROOT
-		CVSWorkspaceRoot cvsRoot = provider.getCVSWorkspaceRoot();
-
-		ICVSFolder folder = cvsRoot.getLocalRoot().getFolder(branch);
-
-		// search "branch" for a spec file
-		return folder.getFile(specfile.getName()) != null;
 	}
 
 	protected String makeTagName(FedoraProjectRoot projectRoot) throws CoreException {

@@ -70,7 +70,7 @@ public class BodhiNewHandler extends RPMHandler {
 						String clog = getClog();
 						String bugIDs = findBug(clog);
 						String buildName = getBuildName(fedoraProjectRoot);
-						String release = getReleaseName();
+						String release = getReleaseName(fedoraProjectRoot);
 
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
@@ -169,9 +169,9 @@ public class BodhiNewHandler extends RPMHandler {
 		return null;
 	}
 	
-	public String getReleaseName() throws CoreException {
-		return getBranchName(
-				specfile.getParent().getName()).replaceAll("-", ""); //$NON-NLS-1$ //$NON-NLS-2$
+	public String getReleaseName(FedoraProjectRoot projectRoot) throws CoreException {
+		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot.getSpecFile());
+		return projectBits.getCurrentBranchName().replaceAll("-", "");
 	}
 
 	public String getBuildName(FedoraProjectRoot projectRoot) throws CoreException {
