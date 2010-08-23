@@ -25,14 +25,13 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ProgressMonitor;
+import org.eclipse.jgit.lib.NullProgressMonitor;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.FetchResult;
@@ -338,7 +337,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 			protected IStatus run(IProgressMonitor monitor) {
 				FetchResult result = null;
 				try {
-					result = transport.fetch((ProgressMonitor)new NullProgressMonitor(), refSpecs);
+					result = transport.fetch(NullProgressMonitor.INSTANCE, refSpecs);
 				} catch (NotSupportedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
