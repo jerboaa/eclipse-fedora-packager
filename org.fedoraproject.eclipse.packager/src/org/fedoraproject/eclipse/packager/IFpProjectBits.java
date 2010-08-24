@@ -121,4 +121,11 @@ public interface IFpProjectBits {
 	 * @return True if tag needs to be created, false otherwise.
 	 */
 	public boolean needsTag();
+	
+	/**
+	 * Returns the scm url in format suitable for koji.
+	 * @param fedoraProjectRoot The fedora project root.
+	 * @return The scm url as expected by koji.
+	 */
+	public String getScmUrlForKoji(FedoraProjectRoot fedoraProjectRoot);
 }

@@ -28,12 +28,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.egit.core.RepositoryCache;
+import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.errors.TransportException;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.NullProgressMonitor;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.ObjectWalk;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.Transport;
@@ -118,6 +123,33 @@ public class FpGitProjectBits implements IFpProjectBits {
 		}
 	}
 	
+	/**
+	 * Git should always return anonymous checkout with git protocol for koji.
+	 * 
+	 * @see org.fedoraproject.eclipse.packager.IFpProjectBits#getScmUrlForKoji(FedoraProjectRoot)
+	 */
+	@Override
+	public String getScmUrlForKoji(FedoraProjectRoot projectRoot) {
+		if (!isInitialized()) {
+			return null;
+		}
+		String packageName = this.project.getProject().getName();
+		return "git://pkgs.fedoraproject.org/" + packageName + ".git?#"+getCommitHash() ; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	private String getCommitHash() {
+		String commitHash = null;
+		RepositoryMapping mapping = RepositoryMapping.getMapping(project);
+		Repository repo = mapping.getRepository();
+		try {
+			Ref ref = repo.getRef(Constants.MASTER);
+			commitHash = ref.getObjectId().getName();
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		}
+		return commitHash;
+	}
+
 	/**
 	 * Parse available branch names from Git remote branches.
 	 * 
@@ -458,4 +490,5 @@ public class FpGitProjectBits implements IFpProjectBits {
 	public boolean needsTag() {
 		return false;
 	}
+
 }

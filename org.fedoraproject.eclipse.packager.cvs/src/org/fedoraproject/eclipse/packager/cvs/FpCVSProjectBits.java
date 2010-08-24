@@ -507,4 +507,15 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	public boolean needsTag() {
 		return true;
 	}
+
+	@Override
+	public String getScmUrlForKoji(FedoraProjectRoot projectRoot) {
+		try {
+			return getScmUrl()+"#"+FedoraHandlerUtils.makeTagName(projectRoot);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "";
+	}
 }

@@ -18,7 +18,6 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -36,50 +35,45 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils.ProjectType;
 
 /**
  * Handler to perform a Koji build.
- *
+ * 
  */
 public class KojiBuildHandler extends CommonHandler {
 	@SuppressWarnings("unused")
 	private String dist;
-	private String scmURL;
 	protected IKojiHubClient koji;
 	private Job job;
-	
+
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final IResource resource = FedoraHandlerUtils.getResource(e);
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
-		final ProjectType type = FedoraHandlerUtils.getProjectType(resource);
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
+				.getValidRoot(e);
+		final IFpProjectBits projectBits = FedoraHandlerUtils
+				.getVcsHandler(resource);
 		job = new Job("Fedora Packager") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(Messages.getString("KojiBuildHandler.12"),
 						IProgressMonitor.UNKNOWN);
 				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
-				scmURL = getSCMURL(resource);
 
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
 				IStatus status = Status.OK_STATUS;
-				if (promptForTag(type)) {
+				if (projectBits.needsTag()) {
 					// Do VCS tagging
-					IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(resource);
+					promptForTag();
 					status = projectBits.tagVcs(fedoraProjectRoot, monitor);
 				}
 				if (status.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-					try {
-						status = makeBuildJob(scmURL, FedoraHandlerUtils.makeTagName(fedoraProjectRoot), fedoraProjectRoot, monitor);
-					} catch (CoreException e) {
-						status = handleError(e);
-					}
+					status = makeBuildJob(fedoraProjectRoot, monitor);
 				}
 
 				monitor.done();
@@ -91,19 +85,20 @@ public class KojiBuildHandler extends CommonHandler {
 		return null;
 	}
 
-	private boolean promptForTag(ProjectType type) {
-		if (debug || type.equals(ProjectType.GIT)) {
+	private boolean promptForTag() {
+		if (debug) {
 			// don't worry about tagging for debug mode
 			return false;
 		}
-		YesNoRunnable op = new YesNoRunnable(Messages.getString("KojiBuildHandler.0")); //$NON-NLS-1$
+		YesNoRunnable op = new YesNoRunnable(
+				Messages.getString("KojiBuildHandler.0")); //$NON-NLS-1$
 		Display.getDefault().syncExec(op);
 		return op.isOkPressed();
 	}
 
-	protected IStatus makeBuildJob(final String scmURL, final String tagName,
-			FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
-		final IStatus result = newBuild(scmURL, tagName, fedoraProjectRoot, monitor);
+	protected IStatus makeBuildJob(FedoraProjectRoot fedoraProjectRoot,
+			IProgressMonitor monitor) {
+		final IStatus result = newBuild(fedoraProjectRoot, monitor);
 		if (result.isOK()) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -140,9 +135,11 @@ public class KojiBuildHandler extends CommonHandler {
 		return result;
 	}
 
-	protected IStatus newBuild(String scmURL, String tagName,
-			FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
+	protected IStatus newBuild(FedoraProjectRoot fedoraProjectRoot,
+			IProgressMonitor monitor) {
 		IStatus status;
+		IFpProjectBits projectBits = FedoraHandlerUtils
+				.getVcsHandler(fedoraProjectRoot.getSpecFile());
 		try {
 			// for testing use the stub instead
 			if (monitor.isCanceled()) {
@@ -153,7 +150,7 @@ public class KojiBuildHandler extends CommonHandler {
 				koji = new KojiHubClient();
 			}
 
-			scmURL += "#" + tagName; //$NON-NLS-1$
+			String scmURL = projectBits.getScmUrlForKoji(fedoraProjectRoot);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
@@ -166,8 +163,7 @@ public class KojiBuildHandler extends CommonHandler {
 			}
 			// push build
 			monitor.subTask(Messages.getString("KojiBuildHandler.6")); //$NON-NLS-1$
-			IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot.getSpecFile());
-			result = koji.build(projectBits.getTarget(), scmURL, isScratch()); 
+			result = koji.build(projectBits.getTarget(), scmURL, isScratch());
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -198,17 +194,6 @@ public class KojiBuildHandler extends CommonHandler {
 
 	public void setKoji(IKojiHubClient koji) {
 		this.koji = koji;
-	}
-
-	/**
-	 * Get the VCS specific URL for the given resource.
-	 * 
-	 * @param resource
-	 * @return The requested URL.
-	 */
-	private String getSCMURL(IResource resource) {
-		IFpProjectBits vcsHandler =  FedoraHandlerUtils.getVcsHandler(resource);
-		return vcsHandler.getScmUrl();
 	}
 
 	protected boolean isScratch() {
