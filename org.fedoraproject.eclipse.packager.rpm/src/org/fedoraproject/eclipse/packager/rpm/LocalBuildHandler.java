@@ -37,7 +37,7 @@ public class LocalBuildHandler extends RPMHandler {
 		Job job = new Job("Fedora Packager") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("LocalBuildHandler.8"),
+				monitor.beginTask(Messages.getString("LocalBuildHandler.8"), //$NON-NLS-1$
 						IProgressMonitor.UNKNOWN);
 				DownloadHandler dh = new DownloadHandler();
 				IStatus result = null;
@@ -56,10 +56,10 @@ public class LocalBuildHandler extends RPMHandler {
 						}
 						// perform rpmbuild
 						ArrayList<String> flags = new ArrayList<String>();
-						flags.add("--target");
+						flags.add("--target"); //$NON-NLS-1$
 						flags.add(arch);
-						flags.add("-ba");
-						result = rpmBuild(flags, //$NON-NLS-1$ //$NON-NLS-2$
+						flags.add("-ba"); //$NON-NLS-1$
+						result = rpmBuild(flags, 
 								monitor);
 
 					} catch (CoreException e) {

@@ -22,6 +22,10 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
+/**
+ * Handler for the fedpkg prep command.
+ *
+ */
 public class PrepHandler extends RPMHandler {
 	
 	@Override
@@ -31,7 +35,7 @@ public class PrepHandler extends RPMHandler {
 		Job job = new Job("Fedora Packager") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("PrepHandler.1"),
+				monitor.beginTask(Messages.getString("PrepHandler.1"), //$NON-NLS-1$
 						IProgressMonitor.UNKNOWN);
 				DownloadHandler dh = new DownloadHandler();
 				IStatus result = null;
@@ -42,9 +46,9 @@ public class PrepHandler extends RPMHandler {
 						throw new OperationCanceledException();
 					}
 					ArrayList<String> flags = new ArrayList<String>();
-					flags.add("--nodeps");
-					flags.add("-bp");
-					result = rpmBuild(flags, monitor); //$NON-NLS-1$
+					flags.add("--nodeps"); //$NON-NLS-1$
+					flags.add("-bp"); //$NON-NLS-1$
+					result = rpmBuild(flags, monitor);
 				}	
 				
 				return result;

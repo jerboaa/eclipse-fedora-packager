@@ -18,11 +18,11 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
@@ -86,17 +86,17 @@ public class MockBuildHandler extends RPMHandler {
 		
 		// make sure mock is installed, bail out otherwise
 		if (!isMockInstalled()) {
-			return handleError(Messages.getString("MockBuildHandlerMockNotInstalled"));
+			return handleError(Messages.getString("MockBuildHandlerMockNotInstalled")); //$NON-NLS-1$
 		}
 		try {
 			Specfile specfile = projectRoot.getSpecfileModel();
-			String[] cmd = { "mock", "-r", mockcfg, "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$
-					+ Path.SEPARATOR + FedoraHandlerUtils.makeTagName(projectRoot), "rebuild", dir //$NON-NLS-1$
-					+ Path.SEPARATOR + specfile.getName() + "-" //$NON-NLS-1$ //$NON-NLS-2$
-					+ specfile.getVersion() + "-" //$NON-NLS-1$ //$NON-NLS-2$
+			String[] cmd = { "mock", "-r", mockcfg, "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ IPath.SEPARATOR + FedoraHandlerUtils.makeTagName(projectRoot), "rebuild", dir //$NON-NLS-1$
+					+ IPath.SEPARATOR + specfile.getName() + "-" //$NON-NLS-1$
+					+ specfile.getVersion() + "-" //$NON-NLS-1$
 					+ FedoraHandlerUtils.rpmQuery(projectRoot, "RELEASE") + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
 			InputStream is = Utils.runCommandToInputStream(cmd);
-			status = runShellCommand(is, monitor); //$NON-NLS-1$
+			status = runShellCommand(is, monitor);
 			
 			// refresh containing folder
 			parent.refreshLocal(IResource.DEPTH_INFINITE,
@@ -129,11 +129,11 @@ public class MockBuildHandler extends RPMHandler {
 				mockcfg = "fedora-devel-" + buildarch; //$NON-NLS-1$
 			}
 			
-			if (projectBits.getCurrentBranchName().equals("devel")) {
+			if (projectBits.getCurrentBranchName().equals("devel")) { //$NON-NLS-1$
 				//If the specified mockcfg does not exist...
 				File file = new File("/etc/mock/" + mockcfg); //$NON-NLS-1$
 				if (!file.exists()){ 
-					mockcfg = "fedora-devel-" + buildarch; 
+					mockcfg = "fedora-devel-" + buildarch;  //$NON-NLS-1$
 				}
 			}
 		}
@@ -146,7 +146,7 @@ public class MockBuildHandler extends RPMHandler {
 	 * @return
 	 */
 	private boolean isMockInstalled() {
-		if (Utils.fileExist("/usr/bin/mock")) {
+		if (Utils.fileExist("/usr/bin/mock")) { //$NON-NLS-1$
 			return true;
 		}
 		return false;

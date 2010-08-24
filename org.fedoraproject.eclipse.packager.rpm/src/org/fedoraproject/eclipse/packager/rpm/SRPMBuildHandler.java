@@ -18,6 +18,10 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
+/**
+ * Handler for the fedpkg srpm command.
+ *
+ */
 public class SRPMBuildHandler extends RPMHandler {
 
 	@Override
@@ -28,7 +32,7 @@ public class SRPMBuildHandler extends RPMHandler {
 		Job job = new Job("Fedora Packager") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("SRPMBuildHandler.0"),
+				monitor.beginTask(Messages.getString("SRPMBuildHandler.0"), //$NON-NLS-1$
 						IProgressMonitor.UNKNOWN);
 				return makeSRPM(fedoraProjectRoot, monitor);
 			}

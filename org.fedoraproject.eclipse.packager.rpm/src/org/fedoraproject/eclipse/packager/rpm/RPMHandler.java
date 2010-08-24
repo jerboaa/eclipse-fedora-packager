@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -38,6 +37,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.fedoraproject.eclipse.packager.ConsoleWriterThread;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
@@ -56,7 +56,6 @@ public abstract class RPMHandler extends CommonHandler {
 	public static final String CONSOLE_NAME = Messages
 			.getString("RPMHandler.1"); //$NON-NLS-1$
 
-	protected Map<String, String> sources;
 	protected IResource specfile;
 
 	protected MessageConsole getConsole(String name) {
@@ -70,7 +69,7 @@ public abstract class RPMHandler extends CommonHandler {
 		// no existing console, create new one
 		if (ret == null) {
 			ret = new MessageConsole(name,
-					RPMPlugin.getImageDescriptor("icons/rpm.gif")); //$NON-NLS-1$
+					PackagerPlugin.getImageDescriptor("icons/rpm.gif")); //$NON-NLS-1$
 		}
 		return ret;
 	}
@@ -85,7 +84,7 @@ public abstract class RPMHandler extends CommonHandler {
 
 		List<String> distDefines = FedoraHandlerUtils.getDistDefines(projectBits, parent.getName());
 
-		defines.add(0, "rpmbuild");
+		defines.add(0, "rpmbuild"); //$NON-NLS-1$
 		defines.addAll(distDefines);
 		defines.addAll(flags);
 		defines.add(specfile.getLocation().toString());
@@ -94,7 +93,7 @@ public abstract class RPMHandler extends CommonHandler {
 		IStatus status = null;
 		try {
 			is = Utils.runCommandToInputStream(defines.toArray(new String[0]));
-			status = runShellCommand(is, monitor); //$NON-NLS-1$
+			status = runShellCommand(is, monitor);
 		} catch (IOException e) {
 			e.printStackTrace();
 			handleError(e);
@@ -190,7 +189,7 @@ public abstract class RPMHandler extends CommonHandler {
 	}
 
 	protected String rpmEval(String format) throws CoreException {
-		String cmd[] = { "rpm", "--eval", "%{" + format + "}" }; //$NON-NLS-1$ //$NON-NLS-2$
+		String cmd[] = { "rpm", "--eval", "%{" + format + "}" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 		String result;
 		try {
@@ -214,9 +213,9 @@ public abstract class RPMHandler extends CommonHandler {
 				throw new OperationCanceledException();
 			}
 			ArrayList<String> flags = new ArrayList<String>();
-			flags.add("--nodeps");
-			flags.add("-bs");
-			result = rpmBuild(flags, monitor); //$NON-NLS-1$
+			flags.add("--nodeps"); //$NON-NLS-1$
+			flags.add("-bs"); //$NON-NLS-1$
+			result = rpmBuild(flags, monitor);
 		}
 		return result;
 	}
