@@ -28,15 +28,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.egit.core.RepositoryCache;
-import org.eclipse.egit.core.op.TagOperation;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.NullProgressMonitor;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.Tag;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.Transport;
@@ -432,22 +429,23 @@ public class FpGitProjectBits implements IFpProjectBits {
 		if (!isInitialized()) {
 			return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Git tag error. Not initialized!");
 		}
-		Tag newTag = new Tag(this.gitRepository);
-		try {
-			newTag.setTag(FedoraHandlerUtils.makeTagName(projectRoot));
-			newTag.setMessage("Automatic Eclipse Fedorapackager tag");
-			// use FAS username as identity which did the tagging
-			newTag.setAuthor(new PersonIdent(FedoraHandlerUtils
-					.getUsernameFromCert()));
-			newTag.setObjId(this.gitRepository.resolve(this.gitRepository
-					.getFullBranch()));
-			TagOperation top = new TagOperation(this.gitRepository, newTag,
-					false);
-			top.execute(monitor);
+		//TODO fix to use latest jgit which has removed Tag object.
+//		Tag newTag = new Tag(this.gitRepository);
+//		try {
+//			newTag.setTag(FedoraHandlerUtils.makeTagName(projectRoot));
+//			newTag.setMessage("Automatic Eclipse Fedorapackager tag");
+//			// use FAS username as identity which did the tagging
+//			newTag.setAuthor(new PersonIdent(FedoraHandlerUtils
+//					.getUsernameFromCert()));
+//			newTag.setObjId(this.gitRepository.resolve(this.gitRepository
+//					.getFullBranch()));
+//			TagOperation top = new TagOperation(this.gitRepository, newTag,
+//					false);
+//			top.execute(monitor);
 			return new Status(IStatus.OK, Activator.PLUGIN_ID, "Tag succeeded!");
-		} catch (Exception e) {
-			return new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage());
-		}
+//		} catch (Exception e) {
+//			return new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage());
+//		}
 		// TODO: Extend and do a commit & push!
 	}
 }
