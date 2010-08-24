@@ -79,4 +79,7 @@ public class PackagerPlugin extends AbstractUIPlugin {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
+	public static ImageDescriptor getImageDescriptor(String pluginId, String path) {
+		return imageDescriptorFromPlugin(pluginId, path);
+	}
 }
