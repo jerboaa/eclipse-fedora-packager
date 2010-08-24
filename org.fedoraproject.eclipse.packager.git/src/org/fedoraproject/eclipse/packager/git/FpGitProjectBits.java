@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.git;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -27,18 +26,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.errors.TransportException;
-import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.NullProgressMonitor;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.ObjectWalk;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.Transport;
@@ -139,10 +133,8 @@ public class FpGitProjectBits implements IFpProjectBits {
 	
 	private String getCommitHash() {
 		String commitHash = null;
-		RepositoryMapping mapping = RepositoryMapping.getMapping(project);
-		Repository repo = mapping.getRepository();
 		try {
-			Ref ref = repo.getRef(Constants.MASTER);
+			Ref ref = gitRepository.getRef(Constants.MASTER);
 			commitHash = ref.getObjectId().getName();
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
@@ -156,22 +148,15 @@ public class FpGitProjectBits implements IFpProjectBits {
 	 * @return
 	 */
 	private HashMap<String, String> getBranches() {
-		// We get the Repository from RepositoryCache
-		RepositoryCache repoCache = org.eclipse.egit.core.Activator
-				.getDefault().getRepositoryCache();
-		Repository repo = null;
 		HashMap<String, String> branches = new HashMap<String, String>();
 		try {
-			repo = repoCache.lookupRepository(new File(this.project
-					.getProject().getLocation().toOSString()
-					+ "/.git")); //$NON-NLS-1$
-			Map<String, Ref> remotes = repo.getRefDatabase().getRefs(
+			Map<String, Ref> remotes = gitRepository.getRefDatabase().getRefs(
 					Constants.R_REMOTES);
 			Set<String> keyset = remotes.keySet();
 			String branch;
 			for (String key : keyset) {
 				// use shortenRefName() to get rid of refs/*/ prefix
-				branch = repo.shortenRefName(remotes.get(key).getName());
+				branch = gitRepository.shortenRefName(remotes.get(key).getName());
 				branch = mapBranchName(branch); // do the branch name mapping
 				branches.put(branch, branch);
 			}
@@ -393,17 +378,8 @@ public class FpGitProjectBits implements IFpProjectBits {
 	 * Get the JGit repository.
 	 */
 	private Repository getGitRepository() {
-		RepositoryCache repoCache = org.eclipse.egit.core.Activator
-				.getDefault().getRepositoryCache();
-		Repository repo = null;
-		try {
-			repo = repoCache.lookupRepository(new File(this.project
-					.getProject().getLocation().toOSString()
-					+ "/.git")); //$NON-NLS-1$
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return repo;
+		RepositoryMapping  repoMapping = RepositoryMapping.getMapping(project);
+		return repoMapping.getRepository();
 	}
 	
 	/**
