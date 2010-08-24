@@ -1,5 +1,4 @@
 /*******************************************************************************
- * Copyright (c) 2010 Red Hat Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,37 +9,22 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.handlers;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Messages;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
-import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileSection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
-import org.fedoraproject.eclipse.packager.SourcesFile;
 
 
 public abstract class CommonHandler extends AbstractHandler {
 	protected boolean debug = false;
-	private IResource specfile;
 	protected Shell shell;
 	private Job job;
 
@@ -52,45 +36,25 @@ public abstract class CommonHandler extends AbstractHandler {
 		this.shell = shell;
 	}
 
-	public String getClog() throws IOException {
-		File file = specfile.getLocation().toFile();
-		SpecfileParser parser = new SpecfileParser();
-		Specfile spec = null;
-		String buf = ""; //$NON-NLS-1$
+	public String getClog(FedoraProjectRoot projectRoot) {
+		Specfile spec = projectRoot.getSpecfileModel();
+		// get the changelog section
+		SpecfileSection clogSection = spec.getSection("changelog"); //$NON-NLS-1$
 
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new FileReader(file));
-			String line = br.readLine();
+		String clog = clogSection.getContents();
+		String[] lines = clog.split("\n"); //$NON-NLS-1$
 
-			int count = 0;
-			while (line != null) {
-				buf += line + '\n';
-				line = br.readLine();
-				count++;
-			}
-			spec = parser.parse(buf);
+		// get the first clog entry
+		String recentClog = ""; //$NON-NLS-1$
 
-			// get the changelog section
-			SpecfileSection clogSection = spec.getSection("changelog"); //$NON-NLS-1$
-
-			String clog = buf.substring(clogSection.getLineStartPosition());
-			String[] lines = clog.split("\n"); //$NON-NLS-1$
-
-			// get the first clog entry
-			String recentClog = ""; //$NON-NLS-1$
-
-			// ignore the header
-			int i = 1;
-			while (!lines[i].equals("")) { //$NON-NLS-1$
-				recentClog += lines[i] + '\n';
-				i++;
-			}
-
-			return recentClog.trim();
-		} finally {
-			br.close();
+		// ignore the header
+		int i = 1;
+		while (!lines[i].equals("")) { //$NON-NLS-1$
+			recentClog += lines[i] + '\n';
+			i++;
 		}
+
+		return recentClog.trim();
 	}
 
 	protected IStatus error(String message) {
@@ -173,18 +137,6 @@ public abstract class CommonHandler extends AbstractHandler {
 		return okPressed;
 	}
 	
-	protected SourcesFile getSourcesFile() {
-		IFile sourcesIFile = specfile.getParent()
-				.getFile(new Path("./sources")); //$NON-NLS-1$
-		try {
-			sourcesIFile.refreshLocal(1, new NullProgressMonitor());
-		} catch (CoreException e) {
-			// Show what has gone wrong
-			handleError(e);
-		}
-		return new SourcesFile(sourcesIFile);
-	}
-
 	public final class YesNoRunnable implements Runnable {
 		private final String question;
 		private boolean okPressed;

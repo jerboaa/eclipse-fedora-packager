@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.cvs.handlers;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -82,12 +81,7 @@ public class CommitHandler extends CommonHandler {
 					}
 					// add the most recent entry from the specfile's changelog to the
 					// commit message
-					try {
-						cs.setComment(getClog());
-					} catch (IOException e) {
-						e.printStackTrace();
-						return handleError(e);
-					}
+					cs.setComment(getClog(fedoraProjectRoot));
 				}
 
 				if (monitor.isCanceled()) {

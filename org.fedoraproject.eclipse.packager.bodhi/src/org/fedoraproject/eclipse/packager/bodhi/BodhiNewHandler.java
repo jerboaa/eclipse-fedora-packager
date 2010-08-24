@@ -50,7 +50,6 @@ public class BodhiNewHandler extends RPMHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
-		specfile = fedoraProjectRoot.getSpecFile();
 		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -68,7 +67,7 @@ public class BodhiNewHandler extends RPMHandler {
 							throw new OperationCanceledException();
 						}
 						monitor.subTask(Messages.getString("BodhiNewHandler.1")); //$NON-NLS-1$
-						String clog = getClog();
+						String clog = getClog(fedoraProjectRoot);
 						String bugIDs = findBug(clog);
 						String buildName = getBuildName(fedoraProjectRoot);
 						String release = getReleaseName(fedoraProjectRoot);
@@ -157,9 +156,6 @@ public class BodhiNewHandler extends RPMHandler {
 						return handleError(NLS.bind(Messages.getString("BodhiNewHandler.7"), branchName, tag)); //$NON-NLS-1$
 					}
 				} catch (CoreException e) {
-					e.printStackTrace();
-					return handleError(e);
-				} catch (IOException e) {
 					e.printStackTrace();
 					return handleError(e);
 				}
