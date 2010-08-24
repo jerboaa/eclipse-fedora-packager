@@ -61,7 +61,6 @@ public class KojiBuildHandler extends CommonHandler {
 						IProgressMonitor.UNKNOWN);
 				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
 				scmURL = getSCMURL(resource);
-				System.out.println(scmURL);
 
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();

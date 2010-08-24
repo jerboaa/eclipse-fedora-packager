@@ -28,9 +28,24 @@ import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.forms.widgets.FormText;
 
+/**
+ * Message dialog showing the link to the koji page showing build info
+ *
+ */
 public class KojiMessageDialog extends MessageDialog {
-	String taskNo;
+	private String taskNo;
 
+	/**
+	 * Creates the message dialog with the given index.
+	 * 
+	 * @param parentShell
+	 * @param dialogTitle
+	 * @param dialogTitleImage
+	 * @param taskNo
+	 * @param dialogImageType
+	 * @param dialogButtonLabels
+	 * @param defaultIndex
+	 */
 	public KojiMessageDialog(Shell parentShell, String dialogTitle,
 			Image dialogTitleImage, String taskNo, int dialogImageType,
 			String[] dialogButtonLabels, int defaultIndex) {
@@ -42,24 +57,14 @@ public class KojiMessageDialog extends MessageDialog {
 
 	@Override
 	public Image getImage() {
-		// TODO Auto-generated method stub
 		return KojiPlugin.getImageDescriptor("icons/koji.png") //$NON-NLS-1$
 				.createImage();
 	}
 
 	@Override
 	protected Control createCustomArea(Composite parent) {
-		// Composite composite = new Composite(parent, SWT.NONE);
-		// GridLayout layout = new GridLayout();
-		// layout.marginHeight = 0;
-		// layout.marginWidth = 0;
-		// composite.setLayout(layout);
-		// GridData data = new GridData(GridData.FILL_BOTH);
-		// data.horizontalSpan = 2;
-		// composite.setLayoutData(data);
-
 		FormText taskLink = new FormText(parent, SWT.NONE);
-		final String url = KojiHubClient.kojiWebUrl + "/taskinfo?taskID=" //$NON-NLS-1$
+		final String url = KojiHubClient.kojiWebUrl + "/koji/taskinfo?taskID=" //$NON-NLS-1$
 				+ taskNo;
 		taskLink.setText("<form><p>" +  //$NON-NLS-1$
 				Messages.getString("KojiMessageDialog.3") + "</p><p>"+ url //$NON-NLS-1$ //$NON-NLS-2$
@@ -77,6 +82,7 @@ public class KojiMessageDialog extends MessageDialog {
 											| IWorkbenchBrowserSupport.STATUS,
 									"koji_task", null, null); //$NON-NLS-1$
 					browser.openURL(new URL(url));
+					close();
 				} catch (PartInitException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
