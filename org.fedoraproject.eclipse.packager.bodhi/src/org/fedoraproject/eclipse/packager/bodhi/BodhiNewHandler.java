@@ -62,7 +62,7 @@ public class BodhiNewHandler extends CommonHandler {
 					String branchName = projectBits.getCurrentBranchName();
 
 					// ensure branch is tagged properly before proceeding
-					if (projectBits.isVcsTagged(fedoraProjectRoot, tag)) {
+					if (!projectBits.needsTag() || projectBits.isVcsTagged(fedoraProjectRoot, tag)) {
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
@@ -260,7 +260,7 @@ public class BodhiNewHandler extends CommonHandler {
 			// create new update
 			monitor.subTask(Messages.getString("BodhiNewHandler.24")); //$NON-NLS-1$
 			result = bodhi.newUpdate(buildName, release, type, request, bugs,
-					notes);
+					notes, result.getString("_csrf_token"));
 			status = new MultiStatus(BodhiPlugin.PLUGIN_ID, IStatus.OK, result
 					.getString("tg_flash"), null); //$NON-NLS-1$
 			if (result.has("update")) { //$NON-NLS-1$

@@ -36,7 +36,7 @@ public class BodhiClientStub implements IBodhiClient {
 	}
 
 	public JSONObject newUpdate(String buildName, String release, String type,
-			String request, String bugs, String notes) throws IOException,
+			String request, String bugs, String notes, String csrfToken) throws IOException,
 			HttpException, ParseException, JSONException {
 		this.buildName = buildName;
 		this.release = release;
