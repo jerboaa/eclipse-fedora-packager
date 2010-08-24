@@ -497,4 +497,14 @@ public class FpCVSProjectBits implements IFpProjectBits {
 
 		return tag.getName().equals(createdTag);
 	}
+
+	/**
+	 * CVS needs tags because commits are not atomic in cvs.
+	 * 
+	 * @see org.fedoraproject.eclipse.packager.IFpProjectBits#needsTag()
+	 */
+	@Override
+	public boolean needsTag() {
+		return true;
+	}
 }

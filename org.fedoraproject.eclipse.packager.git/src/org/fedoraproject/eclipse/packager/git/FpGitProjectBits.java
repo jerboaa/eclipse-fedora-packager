@@ -448,4 +448,14 @@ public class FpGitProjectBits implements IFpProjectBits {
 //		}
 		// TODO: Extend and do a commit & push!
 	}
+
+	/**
+	 * Fedora git doesn't need to tag because commit hashes are used.
+	 * 
+	 * @see org.fedoraproject.eclipse.packager.IFpProjectBits#needsTag()
+	 */
+	@Override
+	public boolean needsTag() {
+		return false;
+	}
 }

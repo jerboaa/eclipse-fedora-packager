@@ -114,5 +114,11 @@ public interface IFpProjectBits {
 	 * @param tag
 	 * @return True if tag exists, false otherwise.
 	 */
-	public boolean isVcsTagged(FedoraProjectRoot fedoraProjectRoot, String tag);	
+	public boolean isVcsTagged(FedoraProjectRoot fedoraProjectRoot, String tag);
+	
+	/**
+	 * Utility method to check whether the given VCS needs to tag.
+	 * @return True if tag needs to be created, false otherwise.
+	 */
+	public boolean needsTag();
 }
