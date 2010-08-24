@@ -34,12 +34,12 @@ import org.eclipse.swt.widgets.Display;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.Messages;
+import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class BodhiNewHandler extends RPMHandler {
+public class BodhiNewHandler extends CommonHandler {
 
 	protected IBodhiNewDialog dialog;
 	protected IUserValidationDialog authDialog;
@@ -50,6 +50,7 @@ public class BodhiNewHandler extends RPMHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
+		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot.getSpecFile());
 		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -58,10 +59,9 @@ public class BodhiNewHandler extends RPMHandler {
 				monitor.subTask(Messages.getString("BodhiNewHandler.0")); //$NON-NLS-1$
 				try {
 					String tag = FedoraHandlerUtils.makeTagName(fedoraProjectRoot);
-					String branchName = specfile.getParent().getName();
+					String branchName = projectBits.getCurrentBranchName();
 
 					// ensure branch is tagged properly before proceeding
-					IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(specfile);
 					if (projectBits.isVcsTagged(fedoraProjectRoot, tag)) {
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();

@@ -18,7 +18,6 @@ Import-Package: org.apache.commons.httpclient,
  org.eclipse.equinox.security.storage;version="1.0.0",
  org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.handlers,
- org.fedoraproject.eclipse.packager.rpm,
  org.json
 Bundle-Localization: plugin
 Export-Package: org.fedoraproject.eclipse.packager.bodhi
