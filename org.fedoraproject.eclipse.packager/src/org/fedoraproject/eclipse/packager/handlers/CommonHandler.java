@@ -49,9 +49,11 @@ public abstract class CommonHandler extends AbstractHandler {
 
 		// ignore the header
 		int i = 1;
-		while (!lines[i].equals("")) { //$NON-NLS-1$
-			recentClog += lines[i] + '\n';
-			i++;
+		if (lines.length > 1) {
+			while (!lines[i].equals("")) { //$NON-NLS-1$
+				recentClog += lines[i] + '\n';
+				i++;
+			}
 		}
 
 		return recentClog.trim();
