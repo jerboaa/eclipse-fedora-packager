@@ -13,17 +13,14 @@ Import-Package: org.apache.commons.codec.digest,
  org.apache.commons.httpclient;version="3.1.0",
  org.apache.commons.httpclient.methods;version="3.1.0",
  org.apache.commons.httpclient.methods.multipart;version="3.1.0",
- org.apache.commons.httpclient.protocol;version="3.1.0",
  org.apache.commons.httpclient.params;version="3.1.0",
+ org.apache.commons.httpclient.protocol;version="3.1.0",
  org.apache.commons.ssl,
  org.eclipse.core.resources,
+ org.eclipse.jface.text,
  org.eclipse.linuxtools.rpm.ui.editor.parser,
- org.eclipse.team.core,
  org.eclipse.ui,
- org.eclipse.ui.console,
- org.eclipse.ui.forms.widgets,
- org.json,
- org.eclipse.jface.text
+ org.eclipse.ui.console
 Bundle-Localization: plugin
 Export-Package: org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.handlers
