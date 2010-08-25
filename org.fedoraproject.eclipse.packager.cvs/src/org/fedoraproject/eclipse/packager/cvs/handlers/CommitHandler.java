@@ -40,6 +40,11 @@ import org.fedoraproject.eclipse.packager.cvs.Messages;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
+/**
+ * Handler responsible for CVS commit actions.
+ * 
+ * @author Red Hat Inc.
+ */
 @SuppressWarnings("restriction")
 public class CommitHandler extends CommonHandler {
 
