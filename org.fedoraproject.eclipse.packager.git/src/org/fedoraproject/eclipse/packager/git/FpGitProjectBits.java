@@ -128,13 +128,19 @@ public class FpGitProjectBits implements IFpProjectBits {
 			return null;
 		}
 		String packageName = this.project.getProject().getName();
-		return "git://pkgs.fedoraproject.org/" + packageName + ".git?#"+getCommitHash() ; //$NON-NLS-1$ //$NON-NLS-2$
+		return "git://pkgs.fedoraproject.org/" + packageName + ".git?#" + getCommitHash(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
+	/**
+	 * Get the SHA1 representing the current branch.
+	 * 
+	 * @return The SHA1 as hex in String form.
+	 */
 	private String getCommitHash() {
 		String commitHash = null;
 		try {
-			Ref ref = gitRepository.getRef(Constants.MASTER);
+			String currentBranchRefString = gitRepository.getFullBranch();
+			Ref ref = gitRepository.getRef(currentBranchRefString);
 			commitHash = ref.getObjectId().getName();
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
