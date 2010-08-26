@@ -14,16 +14,32 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
+/**
+ * Handler for the fedpkg srpm command.
+ *
+ */
 public class SRPMBuildHandler extends RPMHandler {
 
 	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
-		return makeSRPM(event, monitor);
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
+				.getValidRoot(e);
+		specfile = fedoraProjectRoot.getSpecFile();
+		Job job = new Job("Fedora Packager") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask(Messages.getString("SRPMBuildHandler.0"), //$NON-NLS-1$
+						IProgressMonitor.UNKNOWN);
+				return makeSRPM(fedoraProjectRoot, monitor);
+			}
+		};
+		job.setUser(true);
+		job.schedule();
+		return null;
 	}
 
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("SRPMBuildHandler.0"); //$NON-NLS-1$
-	}
 }

@@ -14,7 +14,7 @@ import junit.framework.TestCase;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
-import org.fedoraproject.eclipse.packager.CommonHandler;
+import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.test_utils.CVSTestProject;
 
 public abstract class AbstractTest extends TestCase {

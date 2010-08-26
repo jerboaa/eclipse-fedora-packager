@@ -11,6 +11,7 @@
  -->
 
 <plugin>
+   <extension-point id="vcsContribution" name="VCS interaction" schema="schema/vcsContribution.exsd"/>
 	<extension point="org.eclipse.core.expressions.definitions">
       <definition id="org.fedoraproject.eclipse.packager.cvsproject">
          <iterate ifEmpty="false">
@@ -63,6 +64,85 @@
             
          </menu>
       </menuContribution>
+      <menuContribution
+               locationURI="popup:org.eclipse.fedoraproject.packager.main?before=org.fedoraproject.eclipse.packager.cvssep">
+             <menu
+                  label="%menu.label.1"
+                  mnemonic="%menu.mnemonic.0">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <with
+                           variable="activeMenuSelection">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.project">
+                        </reference>
+                     </with>
+                     <with
+                           variable="activeMenuEditorInput">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.project">
+                        </reference>
+                     </with>
+                  </or>
+               </visibleWhen>
+               <command
+                     commandId="org.fedoraproject.eclipse.packager.UploadCommand"
+                     label="%command.label.2"
+                     mnemonic="%command.mnemonic.2"
+                     style="push">
+         	   </command>
+               <command
+                     commandId="org.fedoraproject.eclipse.packager.NewSourcesCommand"
+                     label="%command.label.3"
+                     mnemonic="%command.mnemonic.3"
+                     style="push">
+               </command>
+            </menu>
+         <command
+                  commandId="org.fedoraproject.eclipse.packager.DownloadCommand"
+                  label="%command.label.4"
+                  mnemonic="%command.mnemonic.4"
+                  
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <with
+                           variable="activeMenuSelection">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.project">
+                        </reference>
+                     </with>
+                     <with
+                           variable="activeMenuEditorInput">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.project">
+                        </reference>
+                     </with>
+                  </or>
+               </visibleWhen>
+         </command>
+       </menuContribution>
+    </extension>
+    
+    <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.fedoraproject.eclipse.packager.handlers.DownloadHandler"
+            id="org.fedoraproject.eclipse.packager.DownloadCommand"
+            name="%command.name.9">
+      </command>
+      <command
+            defaultHandler="org.fedoraproject.eclipse.packager.handlers.UploadHandler"
+            id="org.fedoraproject.eclipse.packager.UploadCommand"
+            name="%command.name.6">
+      </command>
+      <command
+            defaultHandler="org.fedoraproject.eclipse.packager.handlers.NewSourcesHandler"
+            id="org.fedoraproject.eclipse.packager.NewSourcesCommand"
+            name="%command.name.7">
+      </command>
     </extension>
 
 </plugin>

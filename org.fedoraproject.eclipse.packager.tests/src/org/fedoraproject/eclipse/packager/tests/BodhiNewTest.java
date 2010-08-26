@@ -30,7 +30,6 @@ public class BodhiNewTest extends AbstractTest {
 		((BodhiNewHandler) handler).setBodhi(bodhi);
 		((BodhiNewHandler) handler).setDialog(new BodhiNewDialogStub((BodhiNewHandler) handler));
 		((BodhiNewHandler) handler).setAuthDialog(new UserValidationDialogStub());
-		handler.setResource(branch);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);

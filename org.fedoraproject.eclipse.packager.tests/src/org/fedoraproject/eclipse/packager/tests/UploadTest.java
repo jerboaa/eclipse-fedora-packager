@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.fedoraproject.eclipse.packager.cvs.UploadHandler;
+import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
 
 public class UploadTest extends AbstractTest {
 	protected IResource resource;
@@ -29,10 +29,9 @@ public class UploadTest extends AbstractTest {
 	protected void runHandler() throws Exception {
 		handler = new UploadHandler();
 		handler.setDebug(true);
-		handler.setResource(resource);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
-		handler.execute(null);		
+		handler.execute(null);
 		handler.waitForJob();
 	}
 

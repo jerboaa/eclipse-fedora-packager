@@ -16,12 +16,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.fedoraproject.eclipse.packager.cvs.NewSourcesHandler;
+import org.fedoraproject.eclipse.packager.handlers.NewSourcesHandler;
 
 public class NewSourcesTest extends AbstractTest {
 	protected IResource resource;
@@ -29,10 +30,9 @@ public class NewSourcesTest extends AbstractTest {
 	protected void runHandler() throws Exception {
 		handler = new NewSourcesHandler();
 		handler.setDebug(true);
-		handler.setResource(resource);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
-		handler.execute(null);		
+		handler.execute(new ExecutionEvent());		
 		handler.waitForJob();
 	}
 	

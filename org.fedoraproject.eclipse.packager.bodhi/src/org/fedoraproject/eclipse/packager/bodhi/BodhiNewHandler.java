@@ -24,141 +24,157 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
-import org.fedoraproject.eclipse.packager.rpm.RPMHandler;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.Messages;
+import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class BodhiNewHandler extends RPMHandler {
+public class BodhiNewHandler extends CommonHandler {
 
 	protected IBodhiNewDialog dialog;
 	protected IUserValidationDialog authDialog;
 	protected IBodhiClient bodhi;
 
+	
 	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
-		monitor.subTask(Messages.getString("BodhiNewHandler.0")); //$NON-NLS-1$
-		try {
-			String tag = makeTagName();
-			String branchName = specfile.getParent().getName();
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
+				.getValidRoot(e);
+		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot.getSpecFile());
+		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask(Messages.getString("BodhiNewHandler.33"), 
+						IProgressMonitor.UNKNOWN);
+				monitor.subTask(Messages.getString("BodhiNewHandler.0")); //$NON-NLS-1$
+				try {
+					String tag = FedoraHandlerUtils.makeTagName(fedoraProjectRoot);
+					String branchName = projectBits.getCurrentBranchName();
 
-			// ensure branch is tagged properly before proceeding
-			if (isTagged(tag)) {
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
-				}
-				monitor.subTask(Messages.getString("BodhiNewHandler.1")); //$NON-NLS-1$
-				String clog = getClog();
-				String bugIDs = findBug(clog);
-				String buildName = getBuildName();
-				String release = getReleaseName();
+					// ensure branch is tagged properly before proceeding
+					if (!projectBits.needsTag() || projectBits.isVcsTagged(fedoraProjectRoot, tag)) {
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
+						monitor.subTask(Messages.getString("BodhiNewHandler.1")); //$NON-NLS-1$
+						String clog = getClog(fedoraProjectRoot);
+						String bugIDs = findBug(clog);
+						String buildName = getBuildName(fedoraProjectRoot);
+						String release = getReleaseName(fedoraProjectRoot);
 
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
-				}
-				// if debugging, want to use stub
-				if (!debug) {
-					dialog = new BodhiNewDialog(shell, buildName,
-							release, bugIDs, clog);
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							dialog.open();
-						}						
-					});
-				}
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
+						// if debugging, want to use stub
+						if (!debug) {
+							dialog = new BodhiNewDialog(shell, buildName,
+									release, bugIDs, clog);
+							Display.getDefault().syncExec(new Runnable() {
+								@Override
+								public void run() {
+									dialog.open();
+								}						
+							});
+						}
 
-				if (dialog.getReturnCode() == Window.OK) {
-					String type = dialog.getType();
-					String request = dialog.getRequest();
-					String bugs = dialog.getBugs();
-					String notes = dialog.getNotes();
+						if (dialog.getReturnCode() == Window.OK) {
+							String type = dialog.getType();
+							String request = dialog.getRequest();
+							String bugs = dialog.getBugs();
+							String notes = dialog.getNotes();
 
-					String cachedUsername = retrievePreference("username"); //$NON-NLS-1$
-					String cachedPassword = null;
-					if (cachedUsername != null) {
-						cachedPassword = retrievePreference("password"); //$NON-NLS-1$
-					}
-					if (cachedPassword == null) {
-						cachedUsername = System.getProperty("user.name"); //$NON-NLS-1$
-						cachedPassword = ""; //$NON-NLS-1$
-					}
+							String cachedUsername = retrievePreference("username"); //$NON-NLS-1$
+							String cachedPassword = null;
+							if (cachedUsername != null) {
+								cachedPassword = retrievePreference("password"); //$NON-NLS-1$
+							}
+							if (cachedPassword == null) {
+								cachedUsername = System.getProperty("user.name"); //$NON-NLS-1$
+								cachedPassword = ""; //$NON-NLS-1$
+							}
 
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-					if (!debug) {
-						authDialog = new UserValidationDialog(
-								shell, BodhiClient.BODHI_URL, cachedUsername,
-								cachedPassword,
-								Messages.getString("BodhiNewHandler.6"), //$NON-NLS-1$
-						"icons/bodhi-icon-48.png"); //$NON-NLS-1$
-						Display.getDefault().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								authDialog.open();
-							}							
-						});
-					}
-					if (authDialog.getReturnCode() != Window.OK) {
-						// Canceled
-						return Status.CANCEL_STATUS;
-					}
+							if (monitor.isCanceled()) {
+								throw new OperationCanceledException();
+							}
+							if (!debug) {
+								authDialog = new UserValidationDialog(
+										shell, BodhiClient.BODHI_URL, cachedUsername,
+										cachedPassword,
+										Messages.getString("BodhiNewHandler.6"), //$NON-NLS-1$
+								"icons/bodhi-icon-48.png"); //$NON-NLS-1$
+								Display.getDefault().syncExec(new Runnable() {
+									@Override
+									public void run() {
+										authDialog.open();
+									}							
+								});
+							}
+							if (authDialog.getReturnCode() != Window.OK) {
+								// Canceled
+								return Status.CANCEL_STATUS;
+							}
 
-					String username = authDialog.getUsername();
-					String password = authDialog.getPassword();
+							String username = authDialog.getUsername();
+							String password = authDialog.getPassword();
 
-					IStatus result = newUpdate(buildName, release,
-							type, request, bugs, notes, username,
-							password, monitor);
+							IStatus result = newUpdate(buildName, release,
+									type, request, bugs, notes, username,
+									password, monitor);
 
 
-					String message = result.getMessage();
-					for (IStatus child : result.getChildren()) {
-						message += "\n" + child.getMessage(); //$NON-NLS-1$
-					}
+							String message = result.getMessage();
+							for (IStatus child : result.getChildren()) {
+								message += "\n" + child.getMessage(); //$NON-NLS-1$
+							}
 
-					// success
-					if (result.isOK()) {
-						handleOK(message, true);
+							// success
+							if (result.isOK()) {
+								handleOK(message, true);
 
-						if (authDialog.getAllowCaching()) {
-							storeCredentials(username, password);
+								if (authDialog.getAllowCaching()) {
+									storeCredentials(username, password);
+								}
+							} else {
+								handleError(message);
+							}
+							return result;
+						}
+						else {
+							return Status.CANCEL_STATUS;
 						}
 					} else {
-						handleError(message);
+						return handleError(NLS.bind(Messages.getString("BodhiNewHandler.7"), branchName, tag)); //$NON-NLS-1$
 					}
-					return result;
+				} catch (CoreException e) {
+					e.printStackTrace();
+					return handleError(e);
 				}
-				else {
-					return Status.CANCEL_STATUS;
-				}
-			} else {
-				return handleError(NLS.bind(Messages.getString("BodhiNewHandler.7"), branchName, tag)); //$NON-NLS-1$
 			}
-		} catch (CoreException e) {
-			e.printStackTrace();
-			return handleError(e);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return handleError(e);
-		}
+		};
+		job.setUser(true);
+		job.schedule();
+		return null;
+	}
+	
+	public String getReleaseName(FedoraProjectRoot projectRoot) throws CoreException {
+		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot.getSpecFile());
+		return projectBits.getCurrentBranchName().replaceAll("-", "");
 	}
 
-	public String getReleaseName() throws CoreException {
-		return getBranchName(
-				specfile.getParent().getName()).replaceAll("-", ""); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	public String getBuildName() throws CoreException {
-		return rpmQuery(specfile, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-		+ rpmQuery(specfile, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-		+ rpmQuery(specfile, "RELEASE"); //$NON-NLS-1$
+	public String getBuildName(FedoraProjectRoot projectRoot) throws CoreException {
+		return FedoraHandlerUtils.rpmQuery(projectRoot, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
+		+ FedoraHandlerUtils.rpmQuery(projectRoot, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
+		+ FedoraHandlerUtils.rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$
 	}
 
 	public IBodhiClient getBodhi() {
@@ -244,7 +260,7 @@ public class BodhiNewHandler extends RPMHandler {
 			// create new update
 			monitor.subTask(Messages.getString("BodhiNewHandler.24")); //$NON-NLS-1$
 			result = bodhi.newUpdate(buildName, release, type, request, bugs,
-					notes);
+					notes, result.getString("_csrf_token"));
 			status = new MultiStatus(BodhiPlugin.PLUGIN_ID, IStatus.OK, result
 					.getString("tg_flash"), null); //$NON-NLS-1$
 			if (result.has("update")) { //$NON-NLS-1$
@@ -292,11 +308,6 @@ public class BodhiNewHandler extends RPMHandler {
 		} catch (IllegalArgumentException e) {
 			return null; // invalid path
 		}
-	}
-
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("BodhiNewHandler.33"); //$NON-NLS-1$
 	}
 
 }

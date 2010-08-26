@@ -39,64 +39,79 @@ public class BodhiClient implements IBodhiClient {
 				(ProtocolSocketFactory) protocol, 443));
 
 		httpclient = new HttpClient();
-		httpclient.getHttpConnectionManager().getParams().setConnectionTimeout(30000);
+		httpclient.getHttpConnectionManager().getParams()
+				.setConnectionTimeout(30000);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.fedoraproject.eclipse.packager.IBodhiClient#login(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.fedoraproject.eclipse.packager.IBodhiClient#login(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public JSONObject login(String username, String password)
-	throws IOException, HttpException, ParseException, JSONException {
+			throws IOException, HttpException, ParseException, JSONException {
 		PostMethod postMethod = new PostMethod(BODHI_URL
 				+ "login?tg_format=json"); //$NON-NLS-1$
 		NameValuePair[] data = { new NameValuePair("login", "Login"), //$NON-NLS-1$ //$NON-NLS-2$
 				new NameValuePair("user_name", username), //$NON-NLS-1$
 				new NameValuePair("password", password) }; //$NON-NLS-1$
 		postMethod.setRequestBody(data);
+
 		int code = httpclient.executeMethod(postMethod);
 		if (code != HttpURLConnection.HTTP_OK) {
-			throw new IOException(Messages.getString("BodhiClient.8") + code + " - " //$NON-NLS-1$ //$NON-NLS-2$
-					+ postMethod.getStatusText());
+			throw new IOException(
+					Messages.getString("BodhiClient.8") + code + " - " //$NON-NLS-1$ //$NON-NLS-2$
+							+ postMethod.getStatusText());
 		}
-
 		return new JSONObject(postMethod.getResponseBodyAsString());
 	}
 
 	@Override
-	public void logout()
-	throws IOException, HttpException, ParseException {
+	public void logout() throws IOException, HttpException, ParseException {
 		PostMethod postMethod = new PostMethod(BODHI_URL
 				+ "logout?tg_format=json"); //$NON-NLS-1$
 		int code = httpclient.executeMethod(postMethod);
 		if (code != HttpURLConnection.HTTP_OK) {
-			throw new IOException(Messages.getString("BodhiClient.8") + code + " - " //$NON-NLS-1$ //$NON-NLS-2$
-					+ postMethod.getStatusText());
+			throw new IOException(
+					Messages.getString("BodhiClient.8") + code + " - " //$NON-NLS-1$ //$NON-NLS-2$
+							+ postMethod.getStatusText());
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.fedoraproject.eclipse.packager.IBodhiClient#newUpdate(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.fedoraproject.eclipse.packager.IBodhiClient#newUpdate(java.lang.String
+	 * , java.lang.String, java.lang.String, java.lang.String, java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public JSONObject newUpdate(String buildName, String release, String type,
-			String request, String bugs, String notes) throws IOException,
+			String request, String bugs, String notes, String csrfToken) throws IOException,
 			HttpException, ParseException, JSONException {
 		PostMethod postMethod = new PostMethod(BODHI_URL
 				+ "save?tg_format=json"); //$NON-NLS-1$
 		NameValuePair[] data = { new NameValuePair("builds", buildName), //$NON-NLS-1$
-				new NameValuePair("release", release), //$NON-NLS-1$
-				new NameValuePair("type", type), //$NON-NLS-1$
+				new NameValuePair("type_", type), //$NON-NLS-1$
 				new NameValuePair("request", request), //$NON-NLS-1$
 				new NameValuePair("bugs", bugs), //$NON-NLS-1$
+				new NameValuePair("_csrf_token", csrfToken), //$NON-NLS-1$
 				new NameValuePair("notes", notes) }; //$NON-NLS-1$
 		postMethod.setRequestBody(data);
 		int code = httpclient.executeMethod(postMethod);
+		JSONObject jsonObject = new JSONObject(
+				postMethod.getResponseBodyAsString());
 		if (code != HttpURLConnection.HTTP_OK) {
-			throw new IOException(Messages.getString("BodhiClient.8") + code + " - " //$NON-NLS-1$ //$NON-NLS-2$
-					+ postMethod.getStatusText());
+			throw new IOException(
+					Messages.getString("BodhiClient.8") + code + " - " //$NON-NLS-1$ //$NON-NLS-2$
+							+ postMethod.getStatusText() + "\nDetails:"
+							+ jsonObject.getString("message"));
 		}
 
-		return new JSONObject(postMethod.getResponseBodyAsString());
+		return jsonObject;
 	}
 }

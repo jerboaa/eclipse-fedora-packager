@@ -24,12 +24,16 @@ Import-Package: org.apache.commons.httpclient,
  org.eclipse.team.core.synchronize,
  org.eclipse.team.internal.ccvs.core,
  org.eclipse.team.internal.ccvs.core.client,
+ org.eclipse.team.internal.ccvs.core.client.listeners,
  org.eclipse.team.internal.ccvs.core.connection,
  org.eclipse.team.internal.ccvs.core.resources,
+ org.eclipse.team.internal.ccvs.core.syncinfo,
  org.eclipse.team.internal.ccvs.core.util,
  org.eclipse.team.internal.ccvs.ui,
  org.eclipse.team.internal.ccvs.ui.wizards,
  org.eclipse.team.internal.core.subscribers,
  org.fedoraproject.eclipse.packager,
+ org.fedoraproject.eclipse.packager.handlers,
  org.fedoraproject.eclipse.packager.rpm
-Export-Package: org.fedoraproject.eclipse.packager.cvs
+Export-Package: org.fedoraproject.eclipse.packager.cvs,
+ org.fedoraproject.eclipse.packager.cvs.handlers

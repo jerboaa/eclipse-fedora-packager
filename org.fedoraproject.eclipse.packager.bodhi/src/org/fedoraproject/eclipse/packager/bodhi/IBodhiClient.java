@@ -23,7 +23,7 @@ public interface IBodhiClient {
 			throws IOException, HttpException, ParseException, JSONException;
 
 	public abstract JSONObject newUpdate(String buildName, String release,
-			String type, String request, String bugs, String notes)
+			String type, String request, String bugs, String notes, String csrf_token)
 			throws IOException, HttpException, ParseException, JSONException;
 
 	public abstract void logout() throws IOException, HttpException, ParseException;

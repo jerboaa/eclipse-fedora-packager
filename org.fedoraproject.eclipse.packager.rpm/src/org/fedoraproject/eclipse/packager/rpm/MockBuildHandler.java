@@ -13,41 +13,40 @@ package org.fedoraproject.eclipse.packager.rpm;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
+/**
+ * Handler for building locally using mock.
+ *
+ */
 public class MockBuildHandler extends RPMHandler {
-	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor) throws ExecutionException {
-		return Status.OK_STATUS;
-	}
 	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final IResource resource = getResource(e);
-		final FedoraProjectRoot fedoraProjectRoot = getValidRoot(resource);
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
 		specfile = fedoraProjectRoot.getSpecFile();
-		job = new Job("Fedora Packager") {
+		Job job = new Job("Fedora Packager") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(Messages.getString("MockBuildHandler.27"), IProgressMonitor.UNKNOWN);
 				// build fresh SRPM
-				IStatus result = makeSRPM(event, monitor);
+				IStatus result = makeSRPM(fedoraProjectRoot, monitor);
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
@@ -67,7 +66,7 @@ public class MockBuildHandler extends RPMHandler {
 		// get buildarch
 		try {
 			String buildarch = rpmEval("_arch"); //$NON-NLS-1$
-			final String mockcfg = getMockcfg(buildarch);
+			final String mockcfg = getMockcfg(projectRoot, buildarch);
 
 			monitor.subTask(NLS.bind(Messages.getString("MockBuildHandler.1"), projectRoot.getSpecFile().getName())); //$NON-NLS-1$
 			if (monitor.isCanceled()) {
@@ -87,17 +86,17 @@ public class MockBuildHandler extends RPMHandler {
 		
 		// make sure mock is installed, bail out otherwise
 		if (!isMockInstalled()) {
-			return handleError(Messages.getString("MockBuildHandlerMockNotInstalled"));
+			return handleError(Messages.getString("MockBuildHandlerMockNotInstalled")); //$NON-NLS-1$
 		}
 		try {
 			Specfile specfile = projectRoot.getSpecfileModel();
-			String[] cmd = { "mock", "-r", mockcfg, "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$
-					+ Path.SEPARATOR + projectRoot.makeTagName(), "rebuild", dir //$NON-NLS-1$
-					+ Path.SEPARATOR + specfile.getName() + "-" //$NON-NLS-1$ //$NON-NLS-2$
-					+ specfile.getVersion() + "-" //$NON-NLS-1$ //$NON-NLS-2$
-					+ specfile.getRelease() + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
+			String[] cmd = { "mock", "-r", mockcfg, "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ IPath.SEPARATOR + FedoraHandlerUtils.makeTagName(projectRoot), "rebuild", dir //$NON-NLS-1$
+					+ IPath.SEPARATOR + specfile.getName() + "-" //$NON-NLS-1$
+					+ specfile.getVersion() + "-" //$NON-NLS-1$
+					+ FedoraHandlerUtils.rpmQuery(projectRoot, "RELEASE") + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
 			InputStream is = Utils.runCommandToInputStream(cmd);
-			status = runShellCommand(is, monitor); //$NON-NLS-1$
+			status = runShellCommand(is, monitor);
 			
 			// refresh containing folder
 			parent.refreshLocal(IResource.DEPTH_INFINITE,
@@ -112,11 +111,10 @@ public class MockBuildHandler extends RPMHandler {
 		return status;
 	}
 
-	private String getMockcfg(String buildarch) throws CoreException {
-		HashMap<String, String> branch = branches.get(specfile.getParent()
-				.getName());
-		String distvar = branch.get("distvar"); //$NON-NLS-1$
-		String distval = branch.get("distval"); //$NON-NLS-1$
+	private String getMockcfg(FedoraProjectRoot projectRoot, String buildarch) {
+		IFpProjectBits projectBits =  FedoraHandlerUtils.getVcsHandler(projectRoot.getSpecFile());
+		String distvar = projectBits.getDistVariable(); 
+		String distval = projectBits.getDistVal(); 
 		String mockcfg = null;
 		if (distvar.equals("rhel")) { //$NON-NLS-1$
 			mockcfg = "fedora-" + distval + "-" + buildarch + "-epel"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -127,15 +125,15 @@ public class MockBuildHandler extends RPMHandler {
 				mockcfg += "-core"; //$NON-NLS-1$
 			}
 			
-			if (getBranchName(specfile.getParent().getName()).equals("devel")) { //$NON-NLS-1$
+			if (projectBits.getCurrentBranchName().equals("devel")) { //$NON-NLS-1$
 				mockcfg = "fedora-devel-" + buildarch; //$NON-NLS-1$
 			}
 			
-			if (specfile.getParent().getName().equals("devel")) {
+			if (projectBits.getCurrentBranchName().equals("devel")) { //$NON-NLS-1$
 				//If the specified mockcfg does not exist...
 				File file = new File("/etc/mock/" + mockcfg); //$NON-NLS-1$
 				if (!file.exists()){ 
-					mockcfg = "fedora-devel-" + buildarch; 
+					mockcfg = "fedora-devel-" + buildarch;  //$NON-NLS-1$
 				}
 			}
 		}
@@ -148,14 +146,10 @@ public class MockBuildHandler extends RPMHandler {
 	 * @return
 	 */
 	private boolean isMockInstalled() {
-		if (Utils.fileExist("/usr/bin/mock")) {
+		if (Utils.fileExist("/usr/bin/mock")) { //$NON-NLS-1$
 			return true;
 		}
 		return false;
 	}
 
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("MockBuildHandler.27"); //$NON-NLS-1$
-	}
 }

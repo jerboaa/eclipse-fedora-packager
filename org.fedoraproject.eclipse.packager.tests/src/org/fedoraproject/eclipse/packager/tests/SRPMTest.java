@@ -22,7 +22,6 @@ public class SRPMTest extends AbstractTest {
 		super.setUp();
 		handler = new SRPMBuildHandler();
 		handler.setDebug(true);
-		handler.setResource(branch);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);

@@ -152,7 +152,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 		Label imageLabel = new Label(imageComposite, SWT.NONE);
 
 		if (pathToImage != null) {
-			keyLockImage = BodhiPlugin.getImageDescriptor(pathToImage)
+			keyLockImage = BodhiPlugin.getImageDescriptor(BodhiPlugin.PLUGIN_ID, pathToImage)
 					.createImage();
 			imageLabel.setImage(keyLockImage);
 		}

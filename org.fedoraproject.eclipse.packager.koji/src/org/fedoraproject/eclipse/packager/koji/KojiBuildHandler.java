@@ -17,66 +17,72 @@ import java.security.GeneralSecurityException;
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.team.core.RepositoryProvider;
-import org.eclipse.team.internal.ccvs.core.CVSException;
-import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
-import org.eclipse.team.internal.ccvs.core.CVSTeamProvider;
-import org.eclipse.team.internal.ccvs.core.ICVSFolder;
-import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
-import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
-import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
-import org.fedoraproject.eclipse.packager.CommonHandler;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
-@SuppressWarnings("restriction")
+/**
+ * Handler to perform a Koji build.
+ * 
+ */
 public class KojiBuildHandler extends CommonHandler {
+	@SuppressWarnings("unused")
 	private String dist;
-	private String scmURL;
 	protected IKojiHubClient koji;
+	private Job job;
 
 	@Override
-	public IStatus doExecute(ExecutionEvent event, IProgressMonitor monitor)
-			throws ExecutionException {
-		dist = specfile.getParent().getName();
-		try {
-			scmURL = getRepo();
-		} catch (CVSException e) {
-			e.printStackTrace();
-			return handleError(e);
-		}
+	public Object execute(final ExecutionEvent e) throws ExecutionException {
+		final IResource resource = FedoraHandlerUtils.getResource(e);
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
+				.getValidRoot(e);
+		final IFpProjectBits projectBits = FedoraHandlerUtils
+				.getVcsHandler(resource);
+		job = new Job("Fedora Packager") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask(Messages.getString("KojiBuildHandler.12"),
+						IProgressMonitor.UNKNOWN);
+				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
 
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
-		IStatus status = Status.OK_STATUS;
-		if (promptForTag()) {
-			status = doTag(monitor);
-		}
-		if (status.isOK()) {
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			try {
-				status = makeBuildJob(scmURL, makeTagName(), monitor);
-			} catch (CoreException e) {
-				status = handleError(e);
-			}
-		}
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				IStatus status = Status.OK_STATUS;
+				if (projectBits.needsTag()) {
+					// Do VCS tagging
+					promptForTag();
+					status = projectBits.tagVcs(fedoraProjectRoot, monitor);
+				}
+				if (status.isOK()) {
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					status = makeBuildJob(fedoraProjectRoot, monitor);
+				}
 
-		return status;
+				monitor.done();
+				return status;
+			}
+		};
+		job.setUser(true);
+		job.schedule();
+		return null;
 	}
 
 	private boolean promptForTag() {
@@ -84,14 +90,15 @@ public class KojiBuildHandler extends CommonHandler {
 			// don't worry about tagging for debug mode
 			return false;
 		}
-		YesNoRunnable op = new YesNoRunnable(Messages.getString("KojiBuildHandler.0")); //$NON-NLS-1$
+		YesNoRunnable op = new YesNoRunnable(
+				Messages.getString("KojiBuildHandler.0")); //$NON-NLS-1$
 		Display.getDefault().syncExec(op);
 		return op.isOkPressed();
 	}
 
-	protected IStatus makeBuildJob(final String scmURL, final String tagName,
+	protected IStatus makeBuildJob(FedoraProjectRoot fedoraProjectRoot,
 			IProgressMonitor monitor) {
-		final IStatus result = newBuild(scmURL, tagName, monitor);
+		final IStatus result = newBuild(fedoraProjectRoot, monitor);
 		if (result.isOK()) {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -128,9 +135,11 @@ public class KojiBuildHandler extends CommonHandler {
 		return result;
 	}
 
-	protected IStatus newBuild(String scmURL, String tagName,
+	protected IStatus newBuild(FedoraProjectRoot fedoraProjectRoot,
 			IProgressMonitor monitor) {
 		IStatus status;
+		IFpProjectBits projectBits = FedoraHandlerUtils
+				.getVcsHandler(fedoraProjectRoot.getSpecFile());
 		try {
 			// for testing use the stub instead
 			if (monitor.isCanceled()) {
@@ -141,7 +150,7 @@ public class KojiBuildHandler extends CommonHandler {
 				koji = new KojiHubClient();
 			}
 
-			scmURL += "#" + tagName; //$NON-NLS-1$
+			String scmURL = projectBits.getScmUrlForKoji(fedoraProjectRoot);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
@@ -154,7 +163,7 @@ public class KojiBuildHandler extends CommonHandler {
 			}
 			// push build
 			monitor.subTask(Messages.getString("KojiBuildHandler.6")); //$NON-NLS-1$
-			result = koji.build(branches.get(dist).get("target"), scmURL, isScratch()); //$NON-NLS-1$
+			result = koji.build(projectBits.getTarget(), scmURL, isScratch());
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -185,38 +194,6 @@ public class KojiBuildHandler extends CommonHandler {
 
 	public void setKoji(IKojiHubClient koji) {
 		this.koji = koji;
-	}
-
-	private String getRepo() throws CVSException {
-		String ret = null;
-		// get the project for this specfile
-		IProject proj = specfile.getProject();
-
-		if (CVSTeamProvider.isSharedWithCVS(proj)) {
-			// get CVSProvider
-			CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
-					.getProvider(proj, CVSProviderPlugin.getTypeId());
-			// get Repository Location
-			ICVSRepositoryLocation location = provider.getRemoteLocation();
-
-			// get CVSROOT
-			CVSWorkspaceRoot cvsRoot = provider.getCVSWorkspaceRoot();
-
-			ICVSFolder folder = cvsRoot.getLocalRoot();
-			FolderSyncInfo syncInfo = folder.getFolderSyncInfo();
-
-			String module = syncInfo.getRepository();
-
-			ret = "cvs://" + location.getHost() + location.getRootDirectory() //$NON-NLS-1$
-					+ "?" + module + "/" + dist; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-
-		return ret;
-	}
-
-	@Override
-	protected String getTaskName() {
-		return Messages.getString("KojiBuildHandler.12"); //$NON-NLS-1$
 	}
 
 	protected boolean isScratch() {

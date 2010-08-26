@@ -15,7 +15,7 @@ import java.io.PrintWriter;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.fedoraproject.eclipse.packager.cvs.DownloadHandler;
+import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 
 public class DownloadTest extends AbstractTest {
 	@Override
@@ -23,7 +23,6 @@ public class DownloadTest extends AbstractTest {
 		super.setUp();
 		handler = new DownloadHandler();
 		handler.setDebug(true);
-		handler.setResource(branch);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);

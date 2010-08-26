@@ -8,15 +8,16 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.tests;
+package org.fedoraproject.eclipse.packager.tests.cvs;
 
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.fedoraproject.eclipse.packager.cvs.TagHandler;
+import org.fedoraproject.eclipse.packager.cvs.handlers.TagHandler;
+import org.fedoraproject.eclipse.packager.tests.AbstractTest;
 
-public class TagTest extends AbstractTest {
+public class CVSTagTest extends AbstractTest {
 	private IStatus result;
 	@Override
 	protected void setUp() throws Exception {
@@ -24,7 +25,6 @@ public class TagTest extends AbstractTest {
 		
 		handler = new TagHandler();
 		handler.setDebug(true);
-		handler.setResource(branch);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);

@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.test_utils;
 
-import java.io.IOException;
-
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.window.Window;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiNewHandler;
 import org.fedoraproject.eclipse.packager.bodhi.IBodhiNewDialog;
@@ -29,30 +26,35 @@ public class BodhiNewDialogStub implements IBodhiNewDialog {
 	}
 
 	public String getBuildName() {
-		try {
-			return handler.getBuildName();
-		} catch (CoreException e) {
-			e.printStackTrace();
-			return null;
-		}
+//		try {
+//			return handler.getBuildName();
+//		} catch (CoreException e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+		//TODO fix this properly
+		return "";
 	}
 
 	public String getNotes() {
-		try {
-			return handler.getClog();
-		} catch (IOException e) {
-			e.printStackTrace();
+//		try {
+//			return handler.getClog();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+		//TODO fix this properly
 			return null;
-		}
+//		}
 	}
 
 	public String getRelease() {
-		try {
-			return handler.getReleaseName();
-		} catch (CoreException e) {
-			e.printStackTrace();
-			return null;
-		}
+//		try {
+//			return handler.getReleaseName();
+//		} catch (CoreException e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+		//TODO fix this properly
+		return "";
 	}
 
 	public String getRequest() {

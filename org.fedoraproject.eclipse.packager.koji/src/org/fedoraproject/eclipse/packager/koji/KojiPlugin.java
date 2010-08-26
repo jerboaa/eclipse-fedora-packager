@@ -36,6 +36,7 @@ public class KojiPlugin extends PackagerPlugin {
 	 * Initializes a preference store with default preference values 
 	 * for this plug-in.
 	 */
+	@Override
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
 		store.setDefault(PreferencesConstants.PREF_KOJI_HOST, PreferencesConstants.DEFAULT_KOJI_HOST);
 	}

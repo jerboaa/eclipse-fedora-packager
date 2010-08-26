@@ -64,7 +64,7 @@ public class KojiHubClient implements IKojiHubClient {
 	 * @param kojiHost
 	 */
 	private static void initKojiUrls(String kojiHost) {
-		KojiHubClient.kojiHubUrl = "https://" + kojiHost;
+		KojiHubClient.kojiHubUrl = "https://" + kojiHost+"/kojihub";
 		KojiHubClient.kojiWebUrl = "http://" + kojiHost;
 	}
 	

@@ -19,7 +19,6 @@ import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -33,16 +32,33 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+/**
+ * Sources file (named sources) are files containing MD5 hash and file name.
+ * They are used by Fedora build tools to fetch SourceN files from the Fedora
+ * file server.
+ * 
+ */
 public class SourcesFile {
 
 	private IFile sourcesFile;
 	Map<String, String> sources = new LinkedHashMap<String, String>();
 
+	/**
+	 * Creates the sources file model from the given file.
+	 * 
+	 * @param sources
+	 *            The file to parse.
+	 */
 	public SourcesFile(IFile sources) {
 		sourcesFile = sources;
 		parseSources();
 	}
 
+	/**
+	 * Returns the name of the file.
+	 * 
+	 * @return The file name.
+	 */
 	public String getName() {
 		return sourcesFile.getName();
 	}
@@ -79,28 +95,28 @@ public class SourcesFile {
 		}
 	}
 
+	/**
+	 * Returns the parsed sources in a map with the file name used as a key.
+	 * @return The parsed sources.
+	 */
 	public Map<String, String> getSources() {
 		return sources;
 	}
 
+	/**
+	 * Returns the md5 for the given file in the sources file.
+	 * @param key The file name.
+	 * @return The md5 of the uploaded file.
+	 */
 	public String getSource(String key) {
 		return sources.get(key);
 	}
 
-	public void checkSources(Set<String> sourcesToGet) {
-		ArrayList<String> toRemove = new ArrayList<String>();
-		for (String source : sourcesToGet) {
-			IResource r = sourcesFile.getParent().findMember(source);
-			// matched source name
-			if (r != null && checkMD5(getSources().get(source), r)) {
-				// match
-				toRemove.add(source);
-			}
-		}
-
-		sourcesToGet.removeAll(toRemove);
-	}
-
+	/**
+	 * Returns the missing sources.
+	 * 
+	 * @return Files that are missing locally or has different md5.
+	 */
 	public Set<String> getSourcesToDownload() {
 		HashSet<String> missingSources = new HashSet<String>();
 		for (String source : sources.keySet()) {
@@ -114,6 +130,12 @@ public class SourcesFile {
 		return missingSources;
 	}
 
+	/**
+	 * Delete actual file in project
+	 * 
+	 * @param file
+	 * @throws CoreException
+	 */
 	public void deleteSource(String file) throws CoreException {
 		IContainer branch = sourcesFile.getParent();
 		IResource toDelete = branch.findMember(file);
@@ -122,15 +144,26 @@ public class SourcesFile {
 		}
 	}
 
-	public static boolean checkMD5(String other, IResource r) {
+	/**
+	 * Checks whether given md5 corresponds to the given resource.
+	 * @param storedMd5 The md5 to check.
+	 * @param resource The file whose md5 should be compared.
+	 * @return True if the given md5 is the same as the calculated one, false otherwise.
+	 */
+	public static boolean checkMD5(String storedMd5, IResource resource) {
 		// open file
-		File file = r.getLocation().toFile();
+		File file = resource.getLocation().toFile();
 		String md5 = getMD5(file);
 
 		// perform check
-		return md5 == null ? false : md5.equalsIgnoreCase(other);
+		return md5 == null ? false : md5.equalsIgnoreCase(storedMd5);
 	}
 
+	/**
+	 * Calculates md5 checksum for given file.
+	 * @param file The file to calculate checksum for.
+	 * @return The calculated checksum.
+	 */
 	public static String getMD5(File file) {
 		String result = null;
 		FileInputStream fis = null;
@@ -158,6 +191,10 @@ public class SourcesFile {
 		return result;
 	}
 
+	/**
+	 * Saves the sources file to the underlying file.
+	 * @throws CoreException
+	 */
 	public void save() throws CoreException {
 		PipedInputStream in = new PipedInputStream();
 
@@ -172,10 +209,12 @@ public class SourcesFile {
 			pw.close();
 			out.close();
 			sourcesFile.refreshLocal(1, null);
-			sourcesFile.setContents(in,true, true, null);
+			sourcesFile.setContents(in, true, true, null);
 		} catch (IOException e) {
 			e.printStackTrace();
-			throw new CoreException(new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, "Error saving "+sourcesFile.getName()));
+			throw new CoreException(new Status(IStatus.ERROR,
+					PackagerPlugin.PLUGIN_ID, "Error saving "
+							+ sourcesFile.getName()));
 		} finally {
 			if (out != null) {
 				try {
@@ -185,7 +224,6 @@ public class SourcesFile {
 				}
 			}
 		}
-
 
 	}
 

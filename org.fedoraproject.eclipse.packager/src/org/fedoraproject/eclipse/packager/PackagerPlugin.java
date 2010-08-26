@@ -19,7 +19,8 @@ import org.osgi.framework.BundleContext;
  */
 public class PackagerPlugin extends AbstractUIPlugin {
 
-	// The plug-in ID
+	
+	/** The symbolic plugin ID.	 */
 	public static final String PLUGIN_ID = "org.fedoraproject.eclipse.packager"; //$NON-NLS-1$
 
 	// The shared instance
@@ -78,4 +79,7 @@ public class PackagerPlugin extends AbstractUIPlugin {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
+	public static ImageDescriptor getImageDescriptor(String pluginId, String path) {
+		return imageDescriptorFromPlugin(pluginId, path);
+	}
 }
