@@ -395,8 +395,33 @@ public class FpGitProjectBits implements IFpProjectBits {
 	 * @return The next release number in String representation
 	 */
 	private String determineNextReleaseNumber() {
-		// TODO: Look at remote branches and calculate something more precise.
-		return "14"; //$NON-NLS-1$
+		if (!isInitialized()) {
+			return null;
+		}
+		// Try to guess the next release number based on existing branches
+		Set<String> keySet = this.branches.keySet();
+		String branchName;
+		int maxRelease = -1;
+		for (String key : keySet) {
+			branchName = this.branches.get(key);
+			if (branchName.startsWith("F-")) { //$NON-NLS-1$
+				// fedora
+				maxRelease = Math.max(maxRelease, Integer.parseInt(branchName.substring("F-".length()))); //$NON-NLS-1$
+			} else if (branchName.startsWith("EL-")) { //$NON-NLS-1$
+				// EPEL
+				maxRelease = Math.max(maxRelease, Integer.parseInt(branchName.substring("EL-".length()))); //$NON-NLS-1$
+			} else if (branchName.startsWith("OLPC-")) {  //$NON-NLS-1$
+				// OLPC
+				maxRelease = Math.max(maxRelease, Integer.parseInt(branchName.substring("OLPC-".length()))); //$NON-NLS-1$
+			}
+			// ignore
+		}
+		if (maxRelease == -1) {
+			// most likely a new package. ATM this is F-15
+			return "15"; //$NON-NLS-1$
+		} else {
+			return Integer.toString(maxRelease + 1);
+		}
 	}
 	
 	@Override

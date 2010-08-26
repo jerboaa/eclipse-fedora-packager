@@ -28,6 +28,20 @@ public class GitFpBitsTest extends GitTestCase {
 		assertNotNull(projectBits.getBranchName("F-7")); // should be there
 		assertNotNull(projectBits.getBranchName("devel")); // master mapped to devel
 	}
+	
+	public void testGetDistVal() throws Exception {
+		IProject project = getiProject();
+		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraHandlerUtils.getVcsHandler(project);
+		assertNotNull(projectBits);
+		// make sure we meet pre-condition (we should be on master)
+		assertEquals("devel", projectBits.getCurrentBranchName());
+		// ATM this will change with the next Fedora release, so expect this to fail
+		assertEquals(projectBits.getDistVal(), "15");
+		GitTestProject testProject = getProject();
+		// switch to remote branch f13
+		testProject.checkoutBranch(Constants.R_HEADS + "f13/master");
+		assertEquals(projectBits.getDistVal(), "13");
+	}
 
 	public void testGetScmUrl() {
 		fail("Not yet implemented");
