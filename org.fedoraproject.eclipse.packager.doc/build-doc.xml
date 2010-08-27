@@ -31,23 +31,35 @@
 	<target name="all" depends="generate-help, test" />
 
 	<target name="generate-help" depends="init" description="An example to generate Eclipse help content from the wiki">
-		<mediawiki-to-eclipse-help 
-			wikiBaseUrl="${help.doc.url.base}" 
-			validate="true" 
-			failonvalidationerror="true" 
-			prependImagePrefix="${imageFolder}" 
-			helpprefix="userguide"
-			formatoutput="true" 
-			dest="${outputFolder}" title="Eclipse Fedora Packager User Guide" fetchimages="true">
-			<path name="Eclipse_Fedora_Packager_User_Guide" title="Fedora Packager User Guide" generateToc="true" />
-			<pageAppendum>
+		<sequential>
+			<delete failonerror="false">
+				<fileset dir="${basedir}/help/images" />
+			</delete>
+			<mediawiki-to-eclipse-help wikiBaseUrl="${help.doc.url.base}"
+				validate="true"
+				failonvalidationerror="true"
+				prependImagePrefix="${imageFolder}"
+				helpprefix="${outputFolder}"
+				formatoutput="true"
+				navigationimages="true"
+				dest="${outputFolder}"
+				title="Eclipse Fedora Packager User Guide"
+				fetchimages="true">
+				
+				<path name="Eclipse_Fedora_Packager_User_Guide" title="Fedora Packager User Guide" generateToc="true" />
+				<stylesheet url="book.css" />
+				<pageAppendum>
 = Updating This Document =
 
 This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
 {url}
-    	  			</pageAppendum>
-		</mediawiki-to-eclipse-help>
-
+    	  		</pageAppendum>
+			</mediawiki-to-eclipse-help>
+			<mkdir dir="userguide/images" />
+			<copy todir="${basedir}/userguide/images" overwrite="true">
+				<fileset dir="images" />
+			</copy>
+		</sequential>
 	</target>
 
 	<target name="test" depends="init" description="verify that all of the HTML files are well-formed XML">

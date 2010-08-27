@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Fedora Packager User Guide - Dist-CVS Support (Deprecated)</title>
+		<link type="text/css" rel="stylesheet" href="../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Dist-CVS Support (Deprecated)</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Feedback-Reporting-Bugs.html" title="Feedback/Reporting Bugs">
+						<img alt="Previous" border="0" src="../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-This-Document.html" title="Updating This Document">
+						<img alt="Next" border="0" src="../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Feedback/Reporting Bugs</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating This Document</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Dist-CVS_Support_.28Deprecated.29">Dist-CVS Support (Deprecated)</h1>
+		<p>For historical reasons Eclipse Fedora Packager supports dist-cvs, which has been rendered obsolete by the switch to dist-git with Fedora 14. This documentation has been kept for reference.</p>
+		<h2 id="Importing_a_Fedora_CVS_Project">Importing a Fedora CVS Project</h2>
+		<p>Make sure you have run <code>fedora-packager-setup</code> before you start. This you have to do 
+			<i>once</i> on the command line (If you have used fedora-cvs before, this is not necessary). Then, you need to get your Fedora CVS module. Go to "File" =&gt; "Import" =&gt; "CVS" =&gt; "Projects from Fedora CVS" 
+		</p>
+		<p>
+			<img border="0" src="images/EclipseFedoraPackagerImportFedoraCVS.png"/>
+		</p>
+		<p>After you hit "Next" 
+			<b>twice</b>, you are ready to specify the module you'd like to check out.
+		</p>
+		<p>
+			<img border="0" src="images/EclipseFedoraPackagerSpecifyModuleForCheckout.png"/>
+		</p>
+		<p>After you hit "Finish" you should have a new project in Eclipse named after the Fedora CVS module you just checked out. 
+			<b>Note:</b> If you click "Next" at this step, checkout will most likely fail. This is a bug (
+			<a href="https://fedorahosted.org/eclipse-fedorapackager/ticket/5">https://fedorahosted.org/eclipse-fedorapackager/ticket/5</a>) we are currently working on.
+		</p>
+		<p>See section "Do Your Fedora Packaging Work" for help related to your packaging tasks.</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Feedback-Reporting-Bugs.html" title="Feedback/Reporting Bugs">
+						<img alt="Previous" border="0" src="../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Eclipse-Fedora-Packager-User-Guide.html" title="Fedora Packager User Guide">
+						<img alt="Fedora Packager User Guide" border="0" src="../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Updating-This-Document.html" title="Updating This Document">
+						<img alt="Next" border="0" src="../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Feedback/Reporting Bugs</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Updating This Document</td>
+			</tr>
+		</table>
+	</body>
+</html>
