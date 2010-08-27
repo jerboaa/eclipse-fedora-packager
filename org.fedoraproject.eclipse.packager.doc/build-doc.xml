@@ -52,7 +52,7 @@
 = Updating This Document =
 
 This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
-{url}
+https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide
     	  		</pageAppendum>
 			</mediawiki-to-eclipse-help>
 			<mkdir dir="userguide/images" />
