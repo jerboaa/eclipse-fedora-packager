@@ -27,10 +27,22 @@ import org.fedoraproject.eclipse.packager.SSLUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Bodhi client functionality.
+ */
 public class BodhiClient implements IBodhiClient {
+	/**
+	 *  XMLRpc URL of Bodhi.
+	 */
 	public static String BODHI_URL = "https://admin.fedoraproject.org/updates/"; //$NON-NLS-1$
 	protected HttpClient httpclient;
 
+	/**
+	 * Create a Bodhi client instance. Establishes HTTP connection.
+	 * 
+	 * @throws GeneralSecurityException
+	 * @throws IOException
+	 */
 	public BodhiClient() throws GeneralSecurityException, IOException {
 		HttpSecureProtocol protocol = new HttpSecureProtocol();
 		protocol.setKeyMaterial(SSLUtils.getKeyMaterial());
