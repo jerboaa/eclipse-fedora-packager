@@ -32,7 +32,7 @@ import org.json.JSONObject;
  */
 public class BodhiClient implements IBodhiClient {
 	/**
-	 *  XMLRpc URL of Bodhi.
+	 *  URL of Bodhi.
 	 */
 	public static String BODHI_URL = "https://admin.fedoraproject.org/updates/"; //$NON-NLS-1$
 	protected HttpClient httpclient;
