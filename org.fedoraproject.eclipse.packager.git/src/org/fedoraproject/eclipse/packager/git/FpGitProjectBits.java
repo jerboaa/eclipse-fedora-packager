@@ -164,7 +164,9 @@ public class FpGitProjectBits implements IFpProjectBits {
 				// use shortenRefName() to get rid of refs/*/ prefix
 				branch = gitRepository.shortenRefName(remotes.get(key).getName());
 				branch = mapBranchName(branch); // do the branch name mapping
-				branches.put(branch, branch);
+				if (branch != null) {
+					branches.put(branch, branch);
+				}
 			}
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
