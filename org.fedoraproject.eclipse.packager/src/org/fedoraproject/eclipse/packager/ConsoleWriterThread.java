@@ -19,22 +19,33 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.console.MessageConsoleStream;
 
+/**
+ * Thread for writing output to the console.
+ */
 public class ConsoleWriterThread extends Thread {
 	BufferedReader in;
 	MessageConsoleStream out;
-	private boolean terminate;
+	private boolean terminated;
 
+	/**
+	 * Create a new console writer thread.
+	 * 
+	 * @param in
+	 * 		The InputStream to read from.
+	 * @param out
+	 * 		The Eclipse MessageConsoleStream to write output to.
+	 */
 	public ConsoleWriterThread(InputStream in, MessageConsoleStream out) {
 		this.out = out;
 		this.in = new BufferedReader(new InputStreamReader(in));
-		terminate=false;
+		terminated=false;
 	}
 
 	@Override
 	public void run() {
 		int ch;
 		try {
-			while (!terminate && (ch = in.read()) != -1) {
+			while (!terminated && (ch = in.read()) != -1) {
 				out.write(ch);
 			}
 		} catch (IOException e) {
@@ -45,8 +56,11 @@ public class ConsoleWriterThread extends Thread {
 		}
 	}
 
+	/**
+	 * Close/terminate this ConsoleWriterThread.
+	 */
 	public void close() {
-		terminate=true;
+		terminated = true;
 	}
 
 }

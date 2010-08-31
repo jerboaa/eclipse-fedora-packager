@@ -54,13 +54,17 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	 * Creates a new UserValidationDialog.
 	 * 
 	 * @param parentShell
-	 *            the parent shell
+	 *            The parent shell
 	 * @param location
-	 *            the location
+	 *            The location
 	 * @param defaultName
-	 *            the default user name
+	 *            The default user name
+	 * @param defaultPassword
+	 *            The default password. 
 	 * @param message
-	 *            a message to display to the user
+	 *            A message to display to the user.
+	 * @param pathToImage 
+	 * 	          Path to image icon.
 	 */
 	public UserValidationDialog(Shell parentShell, String location,
 			String defaultName, String defaultPassword, String message,
@@ -78,8 +82,11 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	 *            the location
 	 * @param defaultName
 	 *            the default user name
+	 * @param defaultPassword
 	 * @param message
 	 *            a message to display to the user
+	 * @param pathToImage
+	 *            Path to the image icon.
 	 * @param cachingCheckbox
 	 *            a flag to show the allowCachingButton
 	 */

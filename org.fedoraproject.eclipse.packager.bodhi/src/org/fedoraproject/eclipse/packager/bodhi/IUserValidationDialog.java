@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.bodhi;
 
+/**
+ * Interface for validating user input.
+ *
+ */
 public interface IUserValidationDialog {
 
 	/**
@@ -34,8 +38,18 @@ public interface IUserValidationDialog {
 	 */
 	public abstract boolean getAllowCaching();
 
+	/**
+	 * Open the validation dialog.
+	 * 
+	 * @return The return code of the operation.
+	 */
 	public abstract int open();
 
+	/**
+	 * Determine return code of validation.
+	 * 
+	 * @return The return code.
+	 */
 	public abstract int getReturnCode();
 
 }
