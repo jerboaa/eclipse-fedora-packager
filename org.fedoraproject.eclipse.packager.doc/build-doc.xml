@@ -10,9 +10,9 @@
 	<property name="imageFolder" value="images" />
 
 	<path id="wikitext.tasks.classpath">
-		<fileset dir="/usr/share/eclipse/dropins/mylyn-wikitext/eclipse/plugins">
-			<include name="org.eclipse.mylyn.wikitext.*core*.jar" />
-		</fileset>
+		<fileset dir="/home/sgehwolf/.eclipse/155965261/plugins">
+							<include name="org.eclipse.mylyn.wikitext.*core*.jar" />
+						</fileset>
 	</path>
 
 	<taskdef classpathref="wikitext.tasks.classpath" resource="org/eclipse/mylyn/internal/wikitext/mediawiki/core/tasks/tasks.properties" />

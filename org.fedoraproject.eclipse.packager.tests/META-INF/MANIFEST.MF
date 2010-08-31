@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Fedora Packager Tests Plug-in
 Bundle-SymbolicName: org.fedoraproject.eclipse.packager.tests
-Bundle-Version: 0.1.0.qualifier
+Bundle-Version: 0.1.2.qualifier
 Bundle-Activator: org.fedoraproject.eclipse.packager.tests.TestsPlugin
 Bundle-Vendor: FedoraProject.org
 Require-Bundle: org.eclipse.ui,
