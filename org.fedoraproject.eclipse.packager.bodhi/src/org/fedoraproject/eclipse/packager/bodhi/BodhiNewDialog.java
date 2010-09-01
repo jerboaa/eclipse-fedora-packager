@@ -22,6 +22,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * Class implementing Bodhi updates dialog.
+ */
 public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	protected static final String DIALOG_TITLE = Messages.getString("BodhiNewDialog.0"); //$NON-NLS-1$
 	protected String buildName;

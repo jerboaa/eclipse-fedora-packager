@@ -13,6 +13,10 @@ package org.fedoraproject.eclipse.packager.bodhi;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+/**
+ * String externalization helper.
+ *
+ */
 public class Messages {
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.bodhi.messages"; //$NON-NLS-1$
 
@@ -22,6 +26,11 @@ public class Messages {
 	private Messages() {
 	}
 
+	/**
+	 * Get the requested localized string from messages.properties.
+	 * @param key
+	 * @return The localized String.
+	 */
 	public static String getString(String key) {
 		try {
 			return RESOURCE_BUNDLE.getString(key);

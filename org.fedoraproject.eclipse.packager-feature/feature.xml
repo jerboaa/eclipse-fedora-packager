@@ -2,7 +2,7 @@
 <feature
       id="org.fedoraproject.eclipse.packager"
       label="Fedora Packager Tools"
-      version="0.1.0.qualifier"
+      version="0.1.2.qualifier"
       provider-name="FedoraProject.org"
       os="linux">
 

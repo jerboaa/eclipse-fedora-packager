@@ -39,6 +39,9 @@ import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Handler for pushing Bodhi updates.
+ */
 public class BodhiNewHandler extends CommonHandler {
 
 	protected IBodhiNewDialog dialog;
@@ -166,37 +169,82 @@ public class BodhiNewHandler extends CommonHandler {
 		return null;
 	}
 	
+	
+	/**
+	 * Get Bodhi release name of the current branch.
+	 * 
+	 * @param projectRoot
+	 * @return The release name.
+	 * @throws CoreException
+	 */
 	public String getReleaseName(FedoraProjectRoot projectRoot) throws CoreException {
 		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot.getSpecFile());
 		return projectBits.getCurrentBranchName().replaceAll("-", "");
 	}
 
+	/**
+	 * Get Bodhi build name from spec file.
+	 * 
+	 * @param projectRoot
+	 * @return The build name as specified in the spec file.
+	 * @throws CoreException
+	 */
 	public String getBuildName(FedoraProjectRoot projectRoot) throws CoreException {
 		return FedoraHandlerUtils.rpmQuery(projectRoot, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
 		+ FedoraHandlerUtils.rpmQuery(projectRoot, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
 		+ FedoraHandlerUtils.rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$
 	}
 
+	/**
+	 * Get the Bodhi client.
+	 * 
+	 * @return The bodhi client.
+	 */
 	public IBodhiClient getBodhi() {
 		return bodhi;
 	}
 
+	/**
+	 * Set Bodhi client instance.
+	 * 
+	 * @param bodhi
+	 */
 	public void setBodhi(IBodhiClient bodhi) {
 		this.bodhi = bodhi;
 	}
 
+	/**
+	 * Get user validation dialog.
+	 * 
+	 * @return The user validation dialog.
+	 */
 	public IUserValidationDialog getAuthDialog() {
 		return authDialog;
 	}
 
+	/**
+	 * Set user validation dialog.
+	 * 
+	 * @param authDialog
+	 */
 	public void setAuthDialog(IUserValidationDialog authDialog) {
 		this.authDialog = authDialog;
 	}
 
+	/**
+	 * Get the Bodhi UI dialog for pushing updates.
+	 *  
+	 * @return The UI dialog.
+	 */
 	public IBodhiNewDialog getDialog() {
 		return dialog;
 	}
 
+	/**
+	 * Set the Bodhi UI dialog.
+	 * 
+	 * @param dialog
+	 */
 	public void setDialog(IBodhiNewDialog dialog) {
 		this.dialog = dialog;
 	}
@@ -240,7 +288,7 @@ public class BodhiNewHandler extends CommonHandler {
 				throw new OperationCanceledException();
 			}
 			if (!debug) {
-				monitor.subTask(Messages.getString("BodhiNewHandler.20")); //$NON-NLS-1$
+				monitor.subTask(org.fedoraproject.eclipse.packager.bodhi.Messages.getString("BodhiNewHandler.20")); //$NON-NLS-1$
 				bodhi = new BodhiClient();
 			}
 
@@ -248,7 +296,7 @@ public class BodhiNewHandler extends CommonHandler {
 				throw new OperationCanceledException();
 			}
 			// Login
-			monitor.subTask(Messages.getString("BodhiNewHandler.21")); //$NON-NLS-1$
+			monitor.subTask(org.fedoraproject.eclipse.packager.bodhi.Messages.getString("BodhiNewHandler.21")); //$NON-NLS-1$
 			JSONObject result = bodhi.login(username, password);
 			if (result.has("message")) { //$NON-NLS-1$
 				throw new IOException(result.getString("message")); //$NON-NLS-1$
@@ -258,7 +306,7 @@ public class BodhiNewHandler extends CommonHandler {
 				throw new OperationCanceledException();
 			}
 			// create new update
-			monitor.subTask(Messages.getString("BodhiNewHandler.24")); //$NON-NLS-1$
+			monitor.subTask(org.fedoraproject.eclipse.packager.bodhi.Messages.getString("BodhiNewHandler.24")); //$NON-NLS-1$
 			result = bodhi.newUpdate(buildName, release, type, request, bugs,
 					notes, result.getString("_csrf_token"));
 			status = new MultiStatus(BodhiPlugin.PLUGIN_ID, IStatus.OK, result
@@ -269,7 +317,7 @@ public class BodhiNewHandler extends CommonHandler {
 			}
 			
 			// Logout
-			monitor.subTask(Messages.getString("BodhiNewHandler.28")); //$NON-NLS-1$
+			monitor.subTask(org.fedoraproject.eclipse.packager.bodhi.Messages.getString("BodhiNewHandler.28")); //$NON-NLS-1$
 			bodhi.logout();
 		} catch (GeneralSecurityException e) {
 			e.printStackTrace();
