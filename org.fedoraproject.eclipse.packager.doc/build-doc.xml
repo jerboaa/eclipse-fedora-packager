@@ -10,9 +10,9 @@
 	<property name="imageFolder" value="images" />
 
 	<path id="wikitext.tasks.classpath">
-		<fileset dir="/home/sgehwolf/.eclipse/155965261/plugins">
-							<include name="org.eclipse.mylyn.wikitext.*core*.jar" />
-						</fileset>
+		<fileset dir="/usr/share/eclipse/dropins/mylyn-wikitext/eclipse/plugins">
+					<include name="org.eclipse.mylyn.wikitext.*core*.jar" />
+				</fileset>
 	</path>
 
 	<taskdef classpathref="wikitext.tasks.classpath" resource="org/eclipse/mylyn/internal/wikitext/mediawiki/core/tasks/tasks.properties" />
@@ -31,10 +31,6 @@
 	<target name="all" depends="generate-help, test" />
 
 	<target name="generate-help" depends="init" description="An example to generate Eclipse help content from the wiki">
-		<sequential>
-			<delete failonerror="false">
-				<fileset dir="${basedir}/help/images" />
-			</delete>
 			<mediawiki-to-eclipse-help wikiBaseUrl="${help.doc.url.base}"
 				validate="true"
 				failonvalidationerror="true"
@@ -55,11 +51,6 @@ This document is maintained in a collaborative wiki.  If you wish to update or m
 https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide
     	  		</pageAppendum>
 			</mediawiki-to-eclipse-help>
-			<mkdir dir="userguide/images" />
-			<copy todir="${basedir}/userguide/images" overwrite="true">
-				<fileset dir="images" />
-			</copy>
-		</sequential>
 	</target>
 
 	<target name="test" depends="init" description="verify that all of the HTML files are well-formed XML">
