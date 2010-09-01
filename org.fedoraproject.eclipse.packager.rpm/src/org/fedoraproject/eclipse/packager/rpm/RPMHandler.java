@@ -71,6 +71,7 @@ public abstract class RPMHandler extends CommonHandler {
 			ret = new MessageConsole(name,
 					PackagerPlugin.getImageDescriptor("icons/rpm.gif")); //$NON-NLS-1$
 		}
+		ret.clearConsole();
 		return ret;
 	}
 
