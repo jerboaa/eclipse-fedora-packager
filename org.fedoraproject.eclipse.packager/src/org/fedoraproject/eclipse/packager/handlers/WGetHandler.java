@@ -14,18 +14,32 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.DownloadJob;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.Messages;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 
+/**
+ * Utility class for Upload/DownloadHandlers.
+ *
+ */
 public abstract class WGetHandler extends CommonHandler {
 	
-	protected static final String uploadURL = "https://pkgs.fedoraproject.org/repo/pkgs/upload.cgi"; //$NON-NLS-1$
-	protected static final String downloadURL = "http://pkgs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
-	
+	protected static String uploadURL;
+	protected static String downloadURL;
 	protected IProject project;
+	
+	static {
+		// Statically sets lookaside upload/download URLs according to preferences
+		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
+		WGetHandler.uploadURL = kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL);
+		WGetHandler.downloadURL = kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+	}
+	
+	
 	
 	protected IStatus retrieveSources(FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
 		SourcesFile sourcesFile = fedoraProjectRoot.getSourcesFile();
