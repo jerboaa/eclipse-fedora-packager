@@ -17,7 +17,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
-import org.fedoraproject.eclipse.packager.koji.KojiPlugin;
 
 
 /**
