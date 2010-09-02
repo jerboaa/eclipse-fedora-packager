@@ -6,7 +6,8 @@ import org.fedoraproject.eclipse.packager.koji.preferences.PreferencesConstants;
 
 public class KojiPreferenceTest extends AbstractTest {
 
-	private static final String NEW_KOJI_HOST = "koji.deltacloud.org";
+	private static final String NEW_KOJI_WEB_URL = "http://koji.deltacloud.org";
+	private static final String NEW_KOJI_HUB_URL = "https://koji.deltacloud.org/testxmlrpc";
 	private IPreferenceStore pluginPrefStore;
 	
 	@SuppressWarnings("static-access")
@@ -21,12 +22,19 @@ public class KojiPreferenceTest extends AbstractTest {
 	}
 	
 	public void testKojiHostPreference() {
-		// check default preference should be "koji.fedoraproject.org"
-		String defaultHost = pluginPrefStore.getString(PreferencesConstants.PREF_KOJI_HOST);
-		assertEquals(PreferencesConstants.DEFAULT_KOJI_HOST, defaultHost);
-		// set to different host
-		pluginPrefStore.setValue(PreferencesConstants.PREF_KOJI_HOST, NEW_KOJI_HOST);
-		assertEquals(NEW_KOJI_HOST, pluginPrefStore.getString(PreferencesConstants.PREF_KOJI_HOST));
+		// check default preference
+		String defaultWebUrl = pluginPrefStore.getString(PreferencesConstants.PREF_KOJI_WEB_URL);
+		assertEquals(PreferencesConstants.DEFAULT_KOJI_WEB_URL, defaultWebUrl);
+		// set to different url
+		pluginPrefStore.setValue(PreferencesConstants.PREF_KOJI_WEB_URL, NEW_KOJI_WEB_URL);
+		assertEquals(NEW_KOJI_WEB_URL, pluginPrefStore.getString(PreferencesConstants.PREF_KOJI_WEB_URL));
+		
+		// check default preference
+		String defaultHubUrl = pluginPrefStore.getString(PreferencesConstants.PREF_KOJI_HUB_URL);
+		assertEquals(PreferencesConstants.DEFAULT_KOJI_HUB_URL, defaultHubUrl);
+		// set to different url
+		pluginPrefStore.setValue(PreferencesConstants.PREF_KOJI_HUB_URL, NEW_KOJI_HUB_URL);
+		assertEquals(NEW_KOJI_HUB_URL, pluginPrefStore.getString(PreferencesConstants.PREF_KOJI_HUB_URL));
 	}
 
 }

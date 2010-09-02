@@ -16,6 +16,7 @@ import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.koji.KojiPlugin;
 
 
@@ -31,7 +32,7 @@ public class KojiPreferencePage extends FieldEditorPreferencePage implements
 	 */
 	public KojiPreferencePage() {
 		super(GRID);
-		setPreferenceStore(KojiPlugin.getDefault().getPreferenceStore());
+		setPreferenceStore(PackagerPlugin.getDefault().getPreferenceStore());
 		setDescription(Messages.KojiPreferencesPageDescription);
 	}
 
@@ -49,10 +50,14 @@ public class KojiPreferencePage extends FieldEditorPreferencePage implements
 	protected void createFieldEditors() {
 		final Composite parent = getFieldEditorParent();
 		/* Preference for setting the koji host */
-		StringFieldEditor kojiHostEditor = new StringFieldEditor(
-				PreferencesConstants.PREF_KOJI_HOST, Messages.KojiHostLabel,
+		StringFieldEditor kojiWebURLEditor = new StringFieldEditor(
+				PreferencesConstants.PREF_KOJI_WEB_URL, Messages.KojiWebURLLabel,
 				parent);
-		addField(kojiHostEditor);
+		StringFieldEditor kojiHubURLEditor = new StringFieldEditor(
+				PreferencesConstants.PREF_KOJI_HUB_URL, Messages.KojiHubURLLabel,
+				parent);
+		addField(kojiWebURLEditor);
+		addField(kojiHubURLEditor);
 	}
 	
 }

@@ -15,9 +15,14 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.koji.preferences.PreferencesConstants;
 
+/**
+ * Plug-in responsible for pushing Koji builds.
+ */
 public class KojiPlugin extends PackagerPlugin {
 
-	// The plug-in ID
+	/**
+	 * The plug-in ID.
+	 */
 	public static final String PLUGIN_ID = "org.fedoraproject.eclipse.packager.koji"; //$NON-NLS-1$
 
 	/**
@@ -38,7 +43,8 @@ public class KojiPlugin extends PackagerPlugin {
 	 */
 	@Override
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
-		store.setDefault(PreferencesConstants.PREF_KOJI_HOST, PreferencesConstants.DEFAULT_KOJI_HOST);
+		store.setDefault(PreferencesConstants.PREF_KOJI_WEB_URL, PreferencesConstants.DEFAULT_KOJI_WEB_URL);
+		store.setDefault(PreferencesConstants.PREF_KOJI_HUB_URL, PreferencesConstants.DEFAULT_KOJI_HUB_URL);
 	}
 
 }

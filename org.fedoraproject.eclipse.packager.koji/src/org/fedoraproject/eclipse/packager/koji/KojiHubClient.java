@@ -24,21 +24,32 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SSLUtils;
 import org.fedoraproject.eclipse.packager.koji.preferences.PreferencesConstants;
 
+/**
+ * Class representing the koji client.
+ */
 // TODO Catch all Exceptions and return a unified error message
 public class KojiHubClient implements IKojiHubClient {
 	
-	public static String kojiHubUrl;	// set by setKojiHost
-	public static String kojiWebUrl;	// set by setKojiHost
+	/**
+	 * URL of the Koji Web interface
+	 */
+	public static String kojiHubUrl;	// statically initialized
+	/**
+	 * URL of the Koji Hub/XMLRPC interface
+	 */
+	public static String kojiWebUrl;	// statically initialized
 	private XmlRpcClientConfigImpl config;
 	private XmlRpcClient client;
 
 	static {
-		// set koji hostname from preference
-		IPreferenceStore kojiPrefStore = KojiPlugin.getDefault().getPreferenceStore();
-		initKojiUrls(kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_HOST));
+		// Sets Koji host according to preferences and statically sets kojiHubUrl and kojiWebUrl
+		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
+		KojiHubClient.kojiHubUrl = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_HUB_URL);
+		KojiHubClient.kojiWebUrl = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_WEB_URL);
 	}
 	
 	public KojiHubClient() throws GeneralSecurityException, IOException {
@@ -56,16 +67,6 @@ public class KojiHubClient implements IKojiHubClient {
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Sets Koji host according to preference and adjusts kojiHubUrl and kojiWebUrl
-	 * 
-	 * @param kojiHost
-	 */
-	private static void initKojiUrls(String kojiHost) {
-		KojiHubClient.kojiHubUrl = "https://" + kojiHost+"/kojihub";
-		KojiHubClient.kojiWebUrl = "http://" + kojiHost;
 	}
 	
 	private void setSession(String sessionKey, String sessionID)
