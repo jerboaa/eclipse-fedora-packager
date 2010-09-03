@@ -28,17 +28,29 @@ import org.fedoraproject.eclipse.packager.SourcesFile;
  */
 public abstract class WGetHandler extends CommonHandler {
 	
-	protected static String uploadURL;
-	protected static String downloadURL;
 	protected IProject project;
 	
-	static {
+	/**
+	 * Get download url from preferences
+	 * 
+	 * @return URL as a String.
+	 */
+	public static String getDownlaodUrl() {
 		// Statically sets lookaside upload/download URLs according to preferences
 		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		WGetHandler.uploadURL = kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL);
-		WGetHandler.downloadURL = kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+		return kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
 	}
 	
+	/**
+	 * Get upload url from preferences
+	 * 
+	 * @return URL as a String.
+	 */
+	public static String getUploadUrl() {
+		// Statically sets lookaside upload/download URLs according to preferences
+		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
+		return kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL);
+	}
 	
 	
 	protected IStatus retrieveSources(FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
@@ -55,7 +67,7 @@ public abstract class WGetHandler extends CommonHandler {
 		// Need to download remaining sources from repo
 		IStatus status = null;
 		for (final String source : sourcesToGet) {
-			final String url = downloadURL
+			final String url = WGetHandler.getDownlaodUrl()
 					+ "/" + project.getName() //$NON-NLS-1$
 					+ "/" + source + "/" + sourcesFile.getSource(source) + "/" + source; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			status = download(url, source, monitor);

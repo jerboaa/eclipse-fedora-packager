@@ -171,7 +171,7 @@ public class UploadHandler extends WGetHandler {
 			HttpClient client = new HttpClient();
 			client.getHttpConnectionManager().getParams()
 					.setConnectionTimeout(30000);
-			PostMethod postMethod = new PostMethod(uploadURL);
+			PostMethod postMethod = new PostMethod(WGetHandler.getUploadUrl());
 			NameValuePair[] data = {
 					new NameValuePair(
 							"name", fedoraProjectRoot.getSpecfileModel().getName()), //$NON-NLS-1$
@@ -244,7 +244,7 @@ public class UploadHandler extends WGetHandler {
 			HttpClient client = new HttpClient();
 			client.getHttpConnectionManager().getParams()
 					.setConnectionTimeout(30000);
-			PostMethod postMethod = new PostMethod(uploadURL);
+			PostMethod postMethod = new PostMethod(WGetHandler.getUploadUrl());
 
 			Part[] data = { new StringPart("name", fedoraProjectRoot.getSpecfileModel().getName()), //$NON-NLS-1$
 					new StringPart("md5sum", SourcesFile.getMD5(file)), //$NON-NLS-1$
