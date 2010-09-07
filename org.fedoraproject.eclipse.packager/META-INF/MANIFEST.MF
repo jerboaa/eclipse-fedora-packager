@@ -25,6 +25,6 @@ Bundle-Localization: plugin
 Export-Package: org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.handlers
 Bundle-Vendor: %Bundle-Vendor.0
-Bundle-ClassPath: eclipse-rhelpackager-fragment.jar,
+Bundle-ClassPath: eclipse-packager-fragment.jar,
  .
 Eclipse-ExtensibleAPI: true
