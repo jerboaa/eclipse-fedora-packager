@@ -80,5 +80,11 @@
             name="%command.name.1">
       </command>
    </extension>
+   <extension
+         point="org.eclipse.equinox.preferences.preferences">
+      <initializer
+            class="org.fedoraproject.eclipse.packager.koji.preferences.KojiPluginPreferenceInitializer">
+      </initializer>
+   </extension>
 
 </plugin>

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -89,21 +88,5 @@ public class PackagerPlugin extends AbstractUIPlugin {
 	 */
 	public static ImageDescriptor getImageDescriptor(String pluginId, String path) {
 		return imageDescriptorFromPlugin(pluginId, path);
-	}
-	
-	/** 
-	 * Initializes a preference store with default preference values 
-	 * for this plug-in.
-	 */
-	@Override
-	protected void initializeDefaultPreferences(IPreferenceStore store) {
-		store
-				.setDefault(
-						org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL,
-						org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
-		store
-				.setDefault(
-						org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL,
-						org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
 	}
 }
