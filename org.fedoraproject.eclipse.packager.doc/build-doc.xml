@@ -55,8 +55,8 @@ This document is maintained in a collaborative wiki.  If you wish to update or m
 https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide
     	  		</pageAppendum>
 			</mediawiki-to-eclipse-help>
-			<mkdir dir="userguide/images" />
-            <copy todir="${basedir}/userguide/images" overwrite="true">
+			<mkdir dir="${basedir}/${outputFolder}/images" />
+            <copy todir="${basedir}/${outputFolder}/images" overwrite="true">
                 <fileset dir="images" />
             </copy>
 		</sequential>
