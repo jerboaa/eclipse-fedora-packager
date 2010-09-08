@@ -41,10 +41,10 @@ public class MockBuildHandler extends RPMHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
 		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job("Fedora Packager") {
+		Job job = new Job(Messages.mockBuildHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("MockBuildHandler.27"), IProgressMonitor.UNKNOWN);
+				monitor.beginTask(Messages.mockBuildHandler_testLocalBuildWithMock, IProgressMonitor.UNKNOWN);
 				// build fresh SRPM
 				IStatus result = makeSRPM(fedoraProjectRoot, monitor);
 				if (result.isOK()) {
@@ -68,7 +68,7 @@ public class MockBuildHandler extends RPMHandler {
 			String buildarch = rpmEval("_arch"); //$NON-NLS-1$
 			final String mockcfg = getMockcfg(projectRoot, buildarch);
 
-			monitor.subTask(NLS.bind(Messages.getString("MockBuildHandler.1"), projectRoot.getSpecFile().getName())); //$NON-NLS-1$
+			monitor.subTask(NLS.bind(Messages.mockBuildHandler_callMockMsg, projectRoot.getSpecFile().getName()));
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
@@ -86,7 +86,7 @@ public class MockBuildHandler extends RPMHandler {
 		
 		// make sure mock is installed, bail out otherwise
 		if (!isMockInstalled()) {
-			return handleError(Messages.getString("MockBuildHandlerMockNotInstalled")); //$NON-NLS-1$
+			return handleError(Messages.mockBuildHandler_mockNotInstalled);
 		}
 		try {
 			Specfile specfile = projectRoot.getSpecfileModel();

@@ -32,27 +32,28 @@ public class PrepHandler extends RPMHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
 		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job("Fedora Packager") {
+		Job job = new Job(Messages.prepHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("PrepHandler.1"), //$NON-NLS-1$
+				monitor.beginTask(Messages.prepHandler_attemptApplyPatchMsg,
 						IProgressMonitor.UNKNOWN);
 				DownloadHandler dh = new DownloadHandler();
 				IStatus result = null;
-					// retrieve sources
-					result = dh.doExecute(fedoraProjectRoot, monitor);
-				if (result.isOK()) {
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-					ArrayList<String> flags = new ArrayList<String>();
-					flags.add("--nodeps"); //$NON-NLS-1$
-					flags.add("-bp"); //$NON-NLS-1$
-					result = rpmBuild(flags, monitor);
-				}	
+				// retrieve sources
+				try {
+					dh.execute(e);
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				ArrayList<String> flags = new ArrayList<String>();
+				flags.add("--nodeps"); //$NON-NLS-1$
+				flags.add("-bp"); //$NON-NLS-1$
+				result = rpmBuild(flags, monitor);
 				
-				return result;
-				
+				return result;	
 			}
 		};
 		job.setUser(true);

@@ -10,23 +10,39 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.rpm;
 
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class Messages {
-	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.rpm.messages"; //$NON-NLS-1$
+import org.eclipse.osgi.util.NLS;
 
+/**
+ * 
+ * Utility class for String externalization.
+ *
+ */
+public class Messages extends NLS {
+	
+	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.rpm.messages"; //$NON-NLS-1$
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
 			.getBundle(BUNDLE_NAME);
+	
+	// LocalBuildHandler Strings
+	public static String localBuildHandler_buildForLocalArch;
+	public static String localBuildHandler_jobName;
+	// MockBuildHandler Strings
+	public static String mockBuildHandler_jobName;
+	public static String mockBuildHandler_testLocalBuildWithMock;
+	public static String mockBuildHandler_callMockMsg;
+	public static String mockBuildHandler_mockNotInstalled;
+	// PrepHandler Strings
+	public static String prepHandler_attemptApplyPatchMsg;
+	public static String prepHandler_jobName;
 
-	private Messages() {
+	static {
+		// initialize resource bundle
+		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
-
-	public static String getString(String key) {
-		try {
-			return RESOURCE_BUNDLE.getString(key);
-		} catch (MissingResourceException e) {
-			return '!' + key + '!';
-		}
+	
+	private Messages() {
+		super();
 	}
 }
