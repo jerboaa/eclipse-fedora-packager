@@ -42,6 +42,10 @@ public class DownloadHandler extends WGetHandler {
 		};
 		job.setUser(true);
 		job.schedule();
+		// Set job variable in order to be able to wait for it to finish.
+		// See CommonHandler#waitForJob() and RPMHandler#makeSRPM() for an
+		// example.
+		setJob(job);
 		return null;
 	}
 

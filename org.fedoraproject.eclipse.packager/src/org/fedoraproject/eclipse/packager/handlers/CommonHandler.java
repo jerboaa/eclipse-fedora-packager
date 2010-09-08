@@ -116,6 +116,13 @@ public abstract class CommonHandler extends AbstractHandler {
 		return handleError(e.getMessage(), e, true, showInDialog);
 	}
 
+	/**
+	 * Utility method which allows a handler to wait until a job is
+	 * finished. The private job member variable can be set via
+	 * setJob().
+	 * 
+	 * @return The status of the wait operation.
+	 */
 	public IStatus waitForJob() {
 		while (job.getState() != Job.NONE) {
 			try {
@@ -124,6 +131,16 @@ public abstract class CommonHandler extends AbstractHandler {
 			}
 		}
 		return job.getResult();
+	}
+	
+	/**
+	 * Set CommonHandler's job member. This might be useful in conjunction
+	 * with {@link CommonHandler#waitForJob()}.
+	 * 
+	 * @param j
+	 */
+	public void setJob(Job j) {
+		this.job = j;
 	}
 
 	protected boolean promptForceTag(final String tagName) {

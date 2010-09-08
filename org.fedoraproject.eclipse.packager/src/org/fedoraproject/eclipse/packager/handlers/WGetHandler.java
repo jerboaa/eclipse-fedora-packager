@@ -48,7 +48,13 @@ public abstract class WGetHandler extends CommonHandler {
 	public static String getDownlaodUrl() {
 		// Statically sets lookaside upload/download URLs according to preferences
 		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		return kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+		String downloadUrl = kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+		// If download URL isn't set yet, use default URL
+		if (downloadUrl.equals("")) { //$NON-NLS-1$
+			return org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL;
+		} else {
+			return downloadUrl;
+		}
 	}
 	
 	/**
@@ -59,7 +65,13 @@ public abstract class WGetHandler extends CommonHandler {
 	public static String getUploadUrl() {
 		// Statically sets lookaside upload/download URLs according to preferences
 		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		return kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL);
+		String uploadUrl = kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL);
+		// If upload URL isn't set yet, use default URL
+		if (uploadUrl.equals("")) { //$NON-NLS-1$
+			return org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL;
+		} else {
+			return uploadUrl;
+		}
 	}
 	
 	

@@ -215,6 +215,7 @@ public abstract class RPMHandler extends CommonHandler {
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
+		dh.waitForJob(); // let download job finish, first
 		ArrayList<String> flags = new ArrayList<String>();
 		flags.add("--nodeps"); //$NON-NLS-1$
 		flags.add("-bs"); //$NON-NLS-1$

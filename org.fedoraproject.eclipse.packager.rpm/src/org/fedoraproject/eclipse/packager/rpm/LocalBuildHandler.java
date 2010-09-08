@@ -50,6 +50,9 @@ public class LocalBuildHandler extends RPMHandler {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
+				// wait for download sources job before continuing with
+				// local build
+				dh.waitForJob();
 				try {
 					// search for noarch directive, otherwise use local arch
 					final String arch = FedoraHandlerUtils.rpmQuery(

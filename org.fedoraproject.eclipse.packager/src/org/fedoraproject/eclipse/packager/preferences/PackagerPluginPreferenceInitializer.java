@@ -21,7 +21,8 @@ import org.fedoraproject.eclipse.packager.PackagerPlugin;
 public class PackagerPluginPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	/**
-	 * Set Fedora Packager plug-in default preferences.
+	 * Set Fedora Packager plug-in default preferences. This seems to be called
+	 * rather late, just before the preferences page is rendered.
 	 */
 	@Override
 	public void initializeDefaultPreferences() {
