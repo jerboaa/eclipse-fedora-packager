@@ -10,23 +10,38 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.koji;
 
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-public class Messages {
+import org.eclipse.osgi.util.NLS;
+
+/**
+ * Messages class for String externalization.
+ *
+ */
+public class Messages extends NLS {
+	
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.koji.messages"; //$NON-NLS-1$
-
-	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
-			.getBundle(BUNDLE_NAME);
-
-	private Messages() {
+	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
+	
+	// KojiBuildHandler Strings
+	public static String kojiBuildHandler_tagBeforeSendingBuild;
+	public static String kojiBuildHandler_sendBuildToKoji;
+	public static String kojiBuildHandler_jobName;
+	public static String kojiBuildHandler_kojiBuild;
+	public static String kojiBuildHandler_connectKojiMsg;
+	public static String kojiBuildHandler_kojiLogin;
+	public static String kojiBuildHandler_sendBuildCmd;
+	public static String kojiBuildHandler_kojiLogout;
+	// KojiMessageDialog Strings
+	public static String kojiMessageDialog_buildNumberMsg;
+	public static String kojiMessageDialog_buildResponseMsg;
+	
+	static {
+		// initialize resource bundle
+		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
 
-	public static String getString(String key) {
-		try {
-			return RESOURCE_BUNDLE.getString(key);
-		} catch (MissingResourceException e) {
-			return '!' + key + '!';
-		}
+	private Messages() {
+		super();
 	}
 }

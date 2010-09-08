@@ -23,6 +23,7 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
+import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.SSLUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,9 +75,8 @@ public class BodhiClient implements IBodhiClient {
 
 		int code = httpclient.executeMethod(postMethod);
 		if (code != HttpURLConnection.HTTP_OK) {
-			throw new IOException(
-					Messages.getString("BodhiClient.8") + code + " - " //$NON-NLS-1$ //$NON-NLS-2$
-							+ postMethod.getStatusText());
+			throw new IOException(NLS.bind(Messages.bodhiClient_serverResponseMsg, code + " - " //$NON-NLS-1$
+							+ postMethod.getStatusText()));
 		}
 		return new JSONObject(postMethod.getResponseBodyAsString());
 	}
@@ -88,8 +88,8 @@ public class BodhiClient implements IBodhiClient {
 		int code = httpclient.executeMethod(postMethod);
 		if (code != HttpURLConnection.HTTP_OK) {
 			throw new IOException(
-					Messages.getString("BodhiClient.8") + code + " - " //$NON-NLS-1$ //$NON-NLS-2$
-							+ postMethod.getStatusText());
+					NLS.bind(Messages.bodhiClient_serverResponseMsg, code + " - " //$NON-NLS-1$
+							+ postMethod.getStatusText()));
 		}
 	}
 
@@ -119,9 +119,9 @@ public class BodhiClient implements IBodhiClient {
 				postMethod.getResponseBodyAsString());
 		if (code != HttpURLConnection.HTTP_OK) {
 			throw new IOException(
-					Messages.getString("BodhiClient.8") + code + " - " //$NON-NLS-1$ //$NON-NLS-2$
+					NLS.bind(Messages.bodhiClient_serverResponseMsg, code + " - " //$NON-NLS-1$
 							+ postMethod.getStatusText() + "\nDetails:"
-							+ jsonObject.getString("message"));
+							+ jsonObject.getString("message")));
 		}
 
 		return jsonObject;

@@ -358,7 +358,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 			return errorStatus;
 		} 
 		
-		Job fetchJob = new Job(Messages.FpGitProjectBits_FetchJobName) {
+		Job fetchJob = new Job(Messages.fpGitProjectBits_fetchJobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

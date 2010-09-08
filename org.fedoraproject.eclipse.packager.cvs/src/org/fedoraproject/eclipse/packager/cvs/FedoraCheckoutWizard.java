@@ -30,6 +30,9 @@ import org.eclipse.team.internal.ccvs.core.util.KnownRepositories;
 import org.eclipse.team.internal.ccvs.ui.wizards.CheckoutWizard;
 import org.eclipse.ui.IImportWizard;
 
+/**
+ * Wizzard for checking out CVS Fedora projects.
+ */
 @SuppressWarnings("restriction")
 public class FedoraCheckoutWizard extends CheckoutWizard implements
 		IImportWizard {
@@ -64,7 +67,9 @@ public class FedoraCheckoutWizard extends CheckoutWizard implements
 				+ ";hostname=cvs.fedoraproject.org:/cvs/pkgs"; //$NON-NLS-1$
 			} else {
 				location = ":pserver;username=anonymous;hostname=cvs.fedoraproject.org:/cvs/pkgs"; //$NON-NLS-1$
-				MessageDialog.openWarning(getShell(), Messages.getString("FedoraCheckoutWizard.5"), Messages.getString("FedoraCheckoutWizard.6")); //$NON-NLS-1$ //$NON-NLS-2$
+				MessageDialog.openWarning(getShell(),
+						Messages.fedoraCheckoutWizard_fedoraCVSWarning,
+						Messages.fedoraCheckoutWizard_fedoraCertNotFound);
 			}
 
 			if (!KnownRepositories.getInstance().isKnownRepository(location)) {
@@ -81,12 +86,12 @@ public class FedoraCheckoutWizard extends CheckoutWizard implements
 			e.printStackTrace();
 		} catch (GeneralSecurityException e1) {
 			e1.printStackTrace();
-			MessageDialog.openError(getShell(), Messages.getString("FedoraCheckoutWizard.7"), //$NON-NLS-1$
-					Messages.getString("FedoraCheckoutWizard.8")); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), Messages.fedoraCheckoutWizard_fedoraCVSProblem,
+					Messages.fedoraCheckoutWizard_fedoraCertRetrieveProblem);
 		} catch (IOException e1) {
 			e1.printStackTrace();
-			MessageDialog.openError(getShell(), Messages.getString("FedoraCheckoutWizard.9"), //$NON-NLS-1$
-					Messages.getString("FedoraCheckoutWizard.10")); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), Messages.fedoraCheckoutWizard_fedoraCVSProblem,
+					Messages.fedoraCheckoutWizard_fedoraCertRetrieveProblem);
 		}
 	}
 

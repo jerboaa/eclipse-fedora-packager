@@ -78,12 +78,12 @@ public class UploadHandler extends WGetHandler {
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(resource);
 		// do tasks as job
-		Job job = new Job(Messages.getString("UploadHandler.taskName")) { //$NON-NLS-1$
+		Job job = new Job(Messages.uploadHandler_taskName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				monitor.beginTask(Messages.getString("UploadHandler.taskName"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+				monitor.beginTask(Messages.uploadHandler_taskName, IProgressMonitor.UNKNOWN);
 
 				// ensure file has changed if already listed in sources
 				Map<String, String> sources = sourceFile.getSources();
@@ -92,16 +92,14 @@ public class UploadHandler extends WGetHandler {
 						&& SourcesFile
 								.checkMD5(sources.get(filename), resource)) {
 					// file already in sources
-					return handleOK(NLS.bind(Messages
-							.getString("UploadHandler.versionExists"), filename) //$NON-NLS-1$
+					return handleOK(NLS.bind(Messages.uploadHandler_versionExists, filename)
 							, true);
 				}
 
 				// Do file sanity checks (non-empty, file extensions etc.)
 				final File toAdd = resource.getLocation().toFile();
 				if (!FedoraHandlerUtils.isValidUploadFile(toAdd)) {
-					return handleOK(NLS.bind(org.fedoraproject.eclipse.packager.Messages
-							.getString("UploadHandler.invalidFile"), //$NON-NLS-1$
+					return handleOK(NLS.bind(Messages.uploadHandler_invalidFile,
 							toAdd.getName()), true);
 				}
 
@@ -119,16 +117,14 @@ public class UploadHandler extends WGetHandler {
 				result = updateSources(sourceFile, toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
-					return handleError(Messages
-							.getString("UploadHandler.failUpdatSourceFile")); //$NON-NLS-1$
+					return handleError(Messages.uploadHandler_failUpdatSourceFile);
 				}
 
 				// Handle CVS specific stuff; Update .cvsignore
 				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
-					return handleError(Messages
-							.getString("UploadHandler.failVCSUpdate")); //$NON-NLS-1$
+					return handleError(Messages.uploadHandler_failVCSUpdate);
 				}
 
 				// Do CVS update
@@ -167,7 +163,7 @@ public class UploadHandler extends WGetHandler {
 			}
 			// first check remote status to see if file is already uploaded
 			monitor.subTask(NLS.bind(
-					Messages.getString("UploadHandler.3"), filename)); //$NON-NLS-1$
+					Messages.uploadHandler_checkingRemoteStatus, filename));
 			HttpClient client = new HttpClient();
 			client.getHttpConnectionManager().getParams()
 					.setConnectionTimeout(30000);
@@ -181,7 +177,7 @@ public class UploadHandler extends WGetHandler {
 			int returnCode = client.executeMethod(postMethod);
 			if (returnCode != HttpURLConnection.HTTP_OK) {
 				status = handleError(NLS.bind(
-						Messages.getString("UploadHandler.33"), filename, returnCode)); //$NON-NLS-1$
+						Messages.uploadHandler_uploadFail, filename, returnCode));
 			} else {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
@@ -194,13 +190,13 @@ public class UploadHandler extends WGetHandler {
 				if (response.toLowerCase().equals("available") && !debug) { //$NON-NLS-1$
 					status = handleOK(
 							NLS.bind(
-									Messages.getString("UploadHandler.6"), filename), true); //$NON-NLS-1$
+									Messages.uploadHandler_fileAlreadyUploaded, filename), true);
 				} else if (response.toLowerCase().equals("missing") || debug) { //$NON-NLS-1$
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
 					monitor.subTask(NLS.bind(
-							Messages.getString("UploadHandler.9"), filename)); //$NON-NLS-1$
+							Messages.uploadHandler_progressMsg, filename));
 					status = upload(toAdd, fedoraProjectRoot);
 				} else {
 					status = handleError(response);
@@ -256,7 +252,7 @@ public class UploadHandler extends WGetHandler {
 			int code = client.executeMethod(postMethod);
 			if (code != HttpURLConnection.HTTP_OK) {
 				status = handleError(NLS
-						.bind(Messages.getString("UploadHandler.33"), filename, postMethod.getStatusLine())); //$NON-NLS-1$
+						.bind(Messages.uploadHandler_uploadFail, filename, postMethod.getStatusLine())); //$NON-NLS-1$
 			} else {
 				status = Status.OK_STATUS;
 			}

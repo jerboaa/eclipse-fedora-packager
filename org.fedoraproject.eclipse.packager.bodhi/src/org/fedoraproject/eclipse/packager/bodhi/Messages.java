@@ -10,32 +10,61 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.bodhi;
 
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
+import org.eclipse.osgi.util.NLS;
 
 /**
  * String externalization helper.
  *
  */
-public class Messages {
+public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.bodhi.messages"; //$NON-NLS-1$
-
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
 			.getBundle(BUNDLE_NAME);
+	
+	// BodhiClient Strings
+	public static String bodhiClient_serverResponseMsg;
+	// BodhiNewDialog Strings
+	public static String bodhiNewDialog_dialogTitle;
+	public static String bodhiNewDialog_build;
+	public static String bodhiNewDialog_release;
+	public static String bodhiNewDialog_type;
+	public static String bodhiNewDialog_security;
+	public static String bodhiNewDialog_bugfix;
+	public static String bodhiNewDialog_enhancement;
+	public static String bodhiNewDialog_request;
+	public static String bodhiNewDialog_testing;
+	public static String bodhiNewDialog_stable;
+	public static String bodhiNewDialog_bugIds;
+	public static String bodhiNewDialog_bugIdsMsg;
+	public static String bodhiNewDialog_notes;
+	public static String bodhiNewDialog_invalidBugIds;
+	public static String bodhiNewDialog_invalidBugIdsMsg;
+	// BodhiNewHandler
+	public static String bodhiNewHandler_jobName;
+	public static String bodhiNewHandler_createUpdateMsg;
+	public static String bodhiNewHandler_checkTagMsg;
+	public static String bodhiNewHandler_querySpecFileMsg;
+	public static String bodhiNewHandler_updateLoginMsg;
+	public static String bodhiNewHandler_notCorrectTagFail;
+	public static String bodhiNewHandler_connectToBodhi;
+	public static String bodhiNewHandler_loginBodhi;
+	public static String bodhiNewHandler_sendNewUpdate;
+	public static String bodhiNewHandler_logoutMsg;
+	// UserValidationDialog
+	public static String userValidationDialog_passwordRequired;
+	public static String userValidationDialog_server;
+	public static String userValidationDialog_savePassword;
+	public static String userValidationDialog_password;
+	public static String userValidationDialog_username;
 
-	private Messages() {
+	static {
+		// initialize resource bundle
+		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
-
-	/**
-	 * Get the requested localized string from messages.properties.
-	 * @param key
-	 * @return The localized String.
-	 */
-	public static String getString(String key) {
-		try {
-			return RESOURCE_BUNDLE.getString(key);
-		} catch (MissingResourceException e) {
-			return '!' + key + '!';
-		}
+	
+	private Messages() {
+		super();
 	}
 }

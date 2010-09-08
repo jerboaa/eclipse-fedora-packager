@@ -52,12 +52,12 @@ public class CommitHandler extends CommonHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
-		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
+		Job job = new Job(Messages.commitHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("CommitHandler.3"), 
+				monitor.beginTask(Messages.commitHandler_commitFedoraCVS, 
 						IProgressMonitor.UNKNOWN);
-				monitor.subTask(Messages.getString("CommitHandler.0")); //$NON-NLtS-1$
+				monitor.subTask(Messages.commitHandler_prepCommitMsg);
 				// check all out of sync resources in this project for a specfile
 				IFile specfile = fedoraProjectRoot.getSpecFile();
 				IProject project = specfile.getProject();

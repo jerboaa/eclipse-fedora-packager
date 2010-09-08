@@ -33,7 +33,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 import org.json.JSONException;
@@ -54,12 +53,12 @@ public class BodhiNewHandler extends CommonHandler {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
 		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot.getSpecFile());
-		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
+		Job job = new Job(Messages.bodhiNewHandler_jobName) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("BodhiNewHandler.33"), 
+				monitor.beginTask(Messages.bodhiNewHandler_createUpdateMsg, 
 						IProgressMonitor.UNKNOWN);
-				monitor.subTask(Messages.getString("BodhiNewHandler.0")); //$NON-NLS-1$
+				monitor.subTask(Messages.bodhiNewHandler_checkTagMsg);
 				try {
 					String tag = FedoraHandlerUtils.makeTagName(fedoraProjectRoot);
 					String branchName = projectBits.getCurrentBranchName();
@@ -69,7 +68,7 @@ public class BodhiNewHandler extends CommonHandler {
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
-						monitor.subTask(Messages.getString("BodhiNewHandler.1")); //$NON-NLS-1$
+						monitor.subTask(Messages.bodhiNewHandler_querySpecFileMsg);
 						String clog = getClog(fedoraProjectRoot);
 						String bugIDs = findBug(clog);
 						String buildName = getBuildName(fedoraProjectRoot);
@@ -113,7 +112,7 @@ public class BodhiNewHandler extends CommonHandler {
 								authDialog = new UserValidationDialog(
 										shell, BodhiClient.BODHI_URL, cachedUsername,
 										cachedPassword,
-										Messages.getString("BodhiNewHandler.6"), //$NON-NLS-1$
+										Messages.bodhiNewHandler_updateLoginMsg,
 								"icons/bodhi-icon-48.png"); //$NON-NLS-1$
 								Display.getDefault().syncExec(new Runnable() {
 									@Override
@@ -156,7 +155,7 @@ public class BodhiNewHandler extends CommonHandler {
 							return Status.CANCEL_STATUS;
 						}
 					} else {
-						return handleError(NLS.bind(Messages.getString("BodhiNewHandler.7"), branchName, tag)); //$NON-NLS-1$
+						return handleError(NLS.bind(Messages.bodhiNewHandler_notCorrectTagFail, branchName, tag));
 					}
 				} catch (CoreException e) {
 					e.printStackTrace();
@@ -288,7 +287,7 @@ public class BodhiNewHandler extends CommonHandler {
 				throw new OperationCanceledException();
 			}
 			if (!debug) {
-				monitor.subTask(org.fedoraproject.eclipse.packager.bodhi.Messages.getString("BodhiNewHandler.20")); //$NON-NLS-1$
+				monitor.subTask(Messages.bodhiNewHandler_connectToBodhi);
 				bodhi = new BodhiClient();
 			}
 
@@ -296,7 +295,7 @@ public class BodhiNewHandler extends CommonHandler {
 				throw new OperationCanceledException();
 			}
 			// Login
-			monitor.subTask(org.fedoraproject.eclipse.packager.bodhi.Messages.getString("BodhiNewHandler.21")); //$NON-NLS-1$
+			monitor.subTask(Messages.bodhiNewHandler_loginBodhi);
 			JSONObject result = bodhi.login(username, password);
 			if (result.has("message")) { //$NON-NLS-1$
 				throw new IOException(result.getString("message")); //$NON-NLS-1$
@@ -306,7 +305,7 @@ public class BodhiNewHandler extends CommonHandler {
 				throw new OperationCanceledException();
 			}
 			// create new update
-			monitor.subTask(org.fedoraproject.eclipse.packager.bodhi.Messages.getString("BodhiNewHandler.24")); //$NON-NLS-1$
+			monitor.subTask(Messages.bodhiNewHandler_sendNewUpdate);
 			result = bodhi.newUpdate(buildName, release, type, request, bugs,
 					notes, result.getString("_csrf_token"));
 			status = new MultiStatus(BodhiPlugin.PLUGIN_ID, IStatus.OK, result
@@ -317,7 +316,7 @@ public class BodhiNewHandler extends CommonHandler {
 			}
 			
 			// Logout
-			monitor.subTask(org.fedoraproject.eclipse.packager.bodhi.Messages.getString("BodhiNewHandler.28")); //$NON-NLS-1$
+			monitor.subTask(Messages.bodhiNewHandler_logoutMsg);
 			bodhi.logout();
 		} catch (GeneralSecurityException e) {
 			e.printStackTrace();

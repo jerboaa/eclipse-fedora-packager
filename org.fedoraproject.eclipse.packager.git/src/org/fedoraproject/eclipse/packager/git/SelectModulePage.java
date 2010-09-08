@@ -29,9 +29,9 @@ public class SelectModulePage extends WizardPage {
 	private Text projectText;
 
 	protected SelectModulePage() {
-		super(Messages.SelectModulePage_0);
-		setTitle(Messages.SelectModulePage_0);
-		setDescription(Messages.SelectModulePage_1); 
+		super(Messages.selectModulePage_packageSelection);
+		setTitle(Messages.selectModulePage_packageSelection);
+		setDescription(Messages.selectModulePage_choosePackage); 
 		this.setImageDescriptor(ImageDescriptor.createFromFile(getClass(),
 				"/icons/wizban/newconnect_wizban.png")); //$NON-NLS-1$
 	}
@@ -42,7 +42,7 @@ public class SelectModulePage extends WizardPage {
 		GridLayout layout = new GridLayout();
 		composite.setLayout(layout);
 		Label label = new Label(composite, SWT.NONE);
-		label.setText(Messages.SelectModulePage_2); 
+		label.setText(Messages.selectModulePage_packageName); 
 		projectText = new Text(composite, SWT.BORDER | SWT.SINGLE);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		projectText.setLayoutData(gd);

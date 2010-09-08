@@ -52,7 +52,7 @@ public class ConsoleWriterThread extends Thread {
 			//Log error, but do nothing about it
 			PackagerPlugin.getDefault().getLog().log(new Status(IStatus.WARNING,
 				      PackagerPlugin.PLUGIN_ID, 0,
-				      Messages.ConsoleWriterThread_0, e));
+				      Messages.consoleWriterThread_ioFail, e));
 		}
 	}
 

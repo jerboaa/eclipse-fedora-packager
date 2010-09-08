@@ -34,38 +34,40 @@ public class LocalBuildHandler extends RPMHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
 		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job("Fedora Packager") {
+		Job job = new Job(Messages.localBuildHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("LocalBuildHandler.8"), //$NON-NLS-1$
+				monitor.beginTask(Messages.localBuildHandler_buildForLocalArch,
 						IProgressMonitor.UNKNOWN);
 				DownloadHandler dh = new DownloadHandler();
 				IStatus result = null;
 				// retrieve sources
-				result = dh.doExecute(fedoraProjectRoot, monitor);
-				if (result.isOK()) {
+				try {
+					dh.execute(e);
+				} catch (ExecutionException e1) {
+					e1.printStackTrace();
+				}
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				try {
+					// search for noarch directive, otherwise use local arch
+					final String arch = FedoraHandlerUtils.rpmQuery(
+							fedoraProjectRoot, "ARCH"); //$NON-NLS-1$
+
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-					try {
-						// search for noarch directive, otherwise use local arch
-						final String arch = FedoraHandlerUtils.rpmQuery(fedoraProjectRoot, "ARCH"); //$NON-NLS-1$
+					// perform rpmbuild
+					ArrayList<String> flags = new ArrayList<String>();
+					flags.add("--target"); //$NON-NLS-1$
+					flags.add(arch);
+					flags.add("-ba"); //$NON-NLS-1$
+					result = rpmBuild(flags, monitor);
 
-						if (monitor.isCanceled()) {
-							throw new OperationCanceledException();
-						}
-						// perform rpmbuild
-						ArrayList<String> flags = new ArrayList<String>();
-						flags.add("--target"); //$NON-NLS-1$
-						flags.add(arch);
-						flags.add("-ba"); //$NON-NLS-1$
-						result = rpmBuild(flags, 
-								monitor);
-
-					} catch (CoreException e) {
-						e.printStackTrace();
-						result = handleError(e);
-					}
+				} catch (CoreException e) {
+					e.printStackTrace();
+					result = handleError(e);
 				}
 				monitor.done();
 				return result;

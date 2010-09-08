@@ -14,15 +14,18 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.linuxtools.rpm.ui.editor.parser.Messages;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileSection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
-
+/**
+ * Common handler functionality.
+ */
 public abstract class CommonHandler extends AbstractHandler {
 	protected boolean debug = false;
 	protected Shell shell;
@@ -72,19 +75,19 @@ public abstract class CommonHandler extends AbstractHandler {
 					@Override
 					public void run() {
 						if (isError) {
-							MessageDialog.openError(shell, Messages.getString("FedoraPackager.name"), //$NON-NLS-1$
+							MessageDialog.openError(shell, Messages.commonHandler_fedoraPackagerName, //$NON-NLS-1$
 									message);
 						} else {
 							MessageDialog.openInformation(shell,
-									Messages.getString("FedoraPackager.name"), message); //$NON-NLS-1$
+									Messages.commonHandler_fedoraPackagerName, message); //$NON-NLS-1$
 						}
 					}
 				});
 			} else {
 				if (isError) {
-					MessageDialog.openError(shell, Messages.getString("FedoraPackager.name"), message); //$NON-NLS-1$
+					MessageDialog.openError(shell, Messages.commonHandler_fedoraPackagerName, message); //$NON-NLS-1$
 				} else {
-					MessageDialog.openInformation(shell, Messages.getString("FedoraPackager.name"),//$NON-NLS-1$
+					MessageDialog.openInformation(shell, Messages.commonHandler_fedoraPackagerName,//$NON-NLS-1$
 							message);
 				}
 			}
@@ -126,13 +129,11 @@ public abstract class CommonHandler extends AbstractHandler {
 	protected boolean promptForceTag(final String tagName) {
 		boolean okPressed;
 		if (Display.getCurrent() != null) {
-			okPressed = MessageDialog.openQuestion(shell, Messages.getString("FedoraPackager.name"), //$NON-NLS-1$
-					"Branch is already tagged with " + tagName
-							+ ".\nAttempt to overwrite?");
+			okPressed = MessageDialog.openQuestion(shell, Messages.commonHandler_fedoraPackagerName,
+					NLS.bind(Messages.commonHandler_branchAlreadyTaggedMessage, tagName));
 		} else {
 			YesNoRunnable op = new YesNoRunnable(
-					"Branch is already tagged with " + tagName
-							+ ".\nAttempt to overwrite?");
+					NLS.bind(Messages.commonHandler_branchAlreadyTaggedMessage, tagName));
 			Display.getDefault().syncExec(op);
 			okPressed = op.isOkPressed();
 		}
@@ -149,7 +150,7 @@ public abstract class CommonHandler extends AbstractHandler {
 
 		@Override
 		public void run() {
-			okPressed = MessageDialog.openQuestion(shell,  Messages.getString("FedoraPackager.name"), //$NON-NLS-1$
+			okPressed = MessageDialog.openQuestion(shell,   Messages.commonHandler_fedoraPackagerName, //$NON-NLS-1$
 					question);
 		}
 

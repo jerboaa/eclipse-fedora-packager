@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.Messages;
+import org.fedoraproject.eclipse.packager.cvs.Messages;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
@@ -30,10 +30,10 @@ public class TagHandler extends CommonHandler {
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
-		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
+		Job job = new Job(Messages.tagHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask("Tagging Branch", 
+				monitor.beginTask(Messages.tagHandler_tagTaskName, 
 						IProgressMonitor.UNKNOWN);
 				// Do VCS tagging
 				IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot.getSpecFile());

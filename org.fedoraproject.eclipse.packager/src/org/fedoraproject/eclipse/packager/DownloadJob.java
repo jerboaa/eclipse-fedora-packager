@@ -27,15 +27,17 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * Job class for downloading files from lookaside cache.
+ */
 // TODO Remove and use this class from Rpm specfile editor once it is in released version.
-
 public class DownloadJob extends Job {
 	private IFile file;
 	private URLConnection content;
 	private boolean fileOverride;
 
 	public DownloadJob(IFile file, URLConnection content, boolean override) {
-		super(NLS.bind(Messages.DownloadJob_0, file.getName()));
+		super(NLS.bind(Messages.downloadJob_name, file.getName()));
 		this.file = file;
 		this.content = content;
 		this.fileOverride = override;
@@ -49,7 +51,7 @@ public class DownloadJob extends Job {
 	public IStatus run(IProgressMonitor monitor) {
 		try {
 			monitor.beginTask(
-					NLS.bind(Messages.DownloadJob_0,
+					NLS.bind(Messages.downloadJob_name,
 							file.getName()), content.getContentLength());
 			File tempFile = File.createTempFile(file.getName(), ""); //$NON-NLS-1$
 			FileOutputStream fos = new FileOutputStream(tempFile);

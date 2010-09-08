@@ -110,7 +110,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText(Messages.getString("UserValidationDialog.0")); //$NON-NLS-1$
+		newShell.setText(Messages.userValidationDialog_passwordRequired);
 	}
 
 	/**
@@ -179,7 +179,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 		}
 		if (domain != null) {
 			Label d = new Label(main, SWT.WRAP);
-			d.setText(Messages.getString("UserValidationDialog.1")); //$NON-NLS-1$
+			d.setText(Messages.userValidationDialog_server);
 			data = new GridData();
 			d.setLayoutData(data);
 			Label label = new Label(main, SWT.WRAP);
@@ -200,7 +200,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 		if (cachingCheckbox && domain != null) {
 			allowCachingButton = new Button(main, SWT.CHECK);
 			allowCachingButton
-					.setText(Messages.getString("UserValidationDialog.2")); //$NON-NLS-1$
+					.setText(Messages.userValidationDialog_savePassword);
 			data = new GridData(GridData.FILL_HORIZONTAL
 					| GridData.GRAB_HORIZONTAL);
 			data.horizontalSpan = 3;
@@ -225,7 +225,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	 *            the parent of the widgets
 	 */
 	protected void createPasswordFields(Composite parent) {
-		new Label(parent, SWT.NONE).setText(Messages.getString("UserValidationDialog.3")); //$NON-NLS-1$
+		new Label(parent, SWT.NONE).setText(Messages.userValidationDialog_password);
 
 		passwordField = new Text(parent, SWT.BORDER | SWT.PASSWORD);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
@@ -241,7 +241,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	 *            the parent of the widgets
 	 */
 	protected void createUsernameFields(Composite parent) {
-		new Label(parent, SWT.NONE).setText(Messages.getString("UserValidationDialog.4")); //$NON-NLS-1$
+		new Label(parent, SWT.NONE).setText(Messages.userValidationDialog_username);
 
 		usernameField = new Text(parent, SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);

@@ -50,7 +50,7 @@ public class KojiMessageDialog extends MessageDialog {
 			Image dialogTitleImage, String taskNo, int dialogImageType,
 			String[] dialogButtonLabels, int defaultIndex) {
 		super(parentShell, dialogTitle, dialogTitleImage,
-				NLS.bind(Messages.getString("KojiMessageDialog.0"), taskNo), //$NON-NLS-1$
+				NLS.bind(Messages.kojiMessageDialog_buildNumberMsg, taskNo),
 				dialogImageType, dialogButtonLabels, defaultIndex);
 		this.taskNo = taskNo;
 	}
@@ -67,7 +67,7 @@ public class KojiMessageDialog extends MessageDialog {
 		final String url = KojiHubClient.kojiWebUrl + "/koji/taskinfo?taskID=" //$NON-NLS-1$
 				+ taskNo;
 		taskLink.setText("<form><p>" +  //$NON-NLS-1$
-				Messages.getString("KojiMessageDialog.3") + "</p><p>"+ url //$NON-NLS-1$ //$NON-NLS-2$
+				Messages.kojiMessageDialog_buildResponseMsg + "</p><p>"+ url //$NON-NLS-1$ //$NON-NLS-2$
 						+ "</p></form>", true, true); //$NON-NLS-1$
 		taskLink.addListener(SWT.Selection, new Listener() {
 			@Override

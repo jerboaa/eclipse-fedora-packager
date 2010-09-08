@@ -18,19 +18,25 @@ import org.eclipse.osgi.util.NLS;
  */
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.git.messages"; //$NON-NLS-1$
-	public static String FedoraCheckoutWizard_0;
-	public static String FedoraCheckoutWizard_1;
-	public static String FedoraCheckoutWizard_2;
-	public static String SelectModulePage_0;
-	public static String SelectModulePage_1;
-	public static String SelectModulePage_2;
-	public static String FedoraCheckoutWizard_createLocalBranchesJob;
-	public static String FpGitProjectBits_FetchJobName;
+	
+	// FedoraCheckoutWizard Strings
+	public static String fedoraCheckoutWizard_cloneFail;
+	public static String fedoraCheckoutWizard_cloneCancel;
+	public static String fedoraCheckoutWizard_projectExists;
+	public static String fedoraCheckoutWizard_createLocalBranchesJob;
+	// SelectModulePage Strings
+	public static String selectModulePage_packageSelection;
+	public static String selectModulePage_choosePackage;
+	public static String selectModulePage_packageName;
+	// FpGitProjectBits Strings
+	public static String fpGitProjectBits_fetchJobName;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
 
 	private Messages() {
+		super();
 	}
 }

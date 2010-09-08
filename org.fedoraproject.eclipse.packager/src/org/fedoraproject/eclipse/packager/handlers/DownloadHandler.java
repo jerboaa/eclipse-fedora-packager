@@ -26,19 +26,14 @@ import org.fedoraproject.eclipse.packager.Messages;
  */
 public class DownloadHandler extends WGetHandler {
 
-	public IStatus doExecute(FedoraProjectRoot fedoraProjectRoot,
-			IProgressMonitor monitor) {
-		return retrieveSources(fedoraProjectRoot, monitor);
-	}
-
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
-		Job job = new Job(Messages.getString("FedoraPackager.jobName")) { //$NON-NLS-1$
+		Job job = new Job(Messages.downloadHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("DownloadHandler.0"), //$NON-NLS-1$
+				monitor.beginTask(Messages.downloadHandler_downloadSourceTask,
 						IProgressMonitor.UNKNOWN);
 				IStatus status = retrieveSources(fedoraProjectRoot, monitor);
 				monitor.done();

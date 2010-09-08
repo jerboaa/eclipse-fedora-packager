@@ -108,12 +108,12 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 					.findMember(new Path(page.getPackageName()));
 			if (project != null && project.exists()) {
 				final String errorMessage = NLS.bind(
-						Messages.FedoraCheckoutWizard_0, project.getName());
+						Messages.fedoraCheckoutWizard_projectExists, project.getName());
 				ErrorDialog
 						.openError(
 								getShell(),
 								getWindowTitle(),
-								Messages.FedoraCheckoutWizard_1,
+								Messages.fedoraCheckoutWizard_cloneFail,
 								new Status(
 										IStatus.ERROR,
 										org.fedoraproject.eclipse.packager.git.Activator.PLUGIN_ID,
@@ -176,12 +176,12 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 							"org.eclipse.egit.ui.RepositoriesView"); //$NON-NLS-1$
 			return true;
 		} catch (InterruptedException e) {
-			MessageDialog.openInformation(getShell(), Messages.FedoraCheckoutWizard_1, 
-					Messages.FedoraCheckoutWizard_2);
+			MessageDialog.openInformation(getShell(), Messages.fedoraCheckoutWizard_cloneFail, 
+					Messages.fedoraCheckoutWizard_cloneCancel);
 			return false;
 		} catch (Exception e) {
 			org.fedoraproject.eclipse.packager.git.Activator.handleError(
-					Messages.FedoraCheckoutWizard_1, e, true);
+					Messages.fedoraCheckoutWizard_cloneFail, e, true);
 			return false;
 		}
 	}
@@ -193,7 +193,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 	 * @throws CoreException
 	 */
 	private void createLocalBranches(IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask(Messages.FedoraCheckoutWizard_createLocalBranchesJob,
+		monitor.beginTask(Messages.fedoraCheckoutWizard_createLocalBranchesJob,
 				IProgressMonitor.UNKNOWN);
 
 		try {

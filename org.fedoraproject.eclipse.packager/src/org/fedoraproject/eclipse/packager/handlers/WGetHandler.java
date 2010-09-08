@@ -71,7 +71,7 @@ public abstract class WGetHandler extends CommonHandler {
 		Set<String> sourcesToGet = sourcesFile.getSourcesToDownload();
 	
 		if (sourcesToGet.isEmpty()) {
-			return handleOK(Messages.getString("WGetHandler.nothingToDownload"), false); //$NON-NLS-1$
+			return handleOK(Messages.wGetHandler_nothingToDownload, false);
 		}
 	
 		// Need to download remaining sources from repo
@@ -106,8 +106,7 @@ public abstract class WGetHandler extends CommonHandler {
 			for (String source : sourcesToGet) {
 				failedSources += source + '\n';
 			}
-			return handleError(Messages.getString("WGetHandler.badMd5sum") //$NON-NLS-1$
-					+ failedSources);
+			return handleError(NLS.bind(Messages.wGetHandler_badMd5sum, failedSources));
 		} else {
 			return Status.OK_STATUS;
 		}
@@ -131,7 +130,7 @@ public abstract class WGetHandler extends CommonHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 			return handleError(NLS.bind(
-					Messages.getString("WGetHandler.couldNotCreate"), fileName)); //$NON-NLS-1$
+					Messages.wGetHandler_couldNotCreate, fileName));
 
 		} finally {
 			// refresh folder in resource tree
@@ -139,7 +138,7 @@ public abstract class WGetHandler extends CommonHandler {
 				project.refreshLocal(IResource.DEPTH_ONE, monitor);
 			} catch (CoreException e) {
 				e.printStackTrace();
-				return handleError(Messages.getString("WGetHandler.couldNotRefresh")); //$NON-NLS-1$
+				return handleError(Messages.wGetHandler_couldNotRefresh);
 			}
 		}
 	}

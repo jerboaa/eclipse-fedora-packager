@@ -53,10 +53,10 @@ public class KojiBuildHandler extends CommonHandler {
 				.getValidRoot(e);
 		final IFpProjectBits projectBits = FedoraHandlerUtils
 				.getVcsHandler(resource);
-		job = new Job("Fedora Packager") {
+		job = new Job(Messages.kojiBuildHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("KojiBuildHandler.12"),
+				monitor.beginTask(Messages.kojiBuildHandler_sendBuildToKoji,
 						IProgressMonitor.UNKNOWN);
 				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
 
@@ -91,7 +91,7 @@ public class KojiBuildHandler extends CommonHandler {
 			return false;
 		}
 		YesNoRunnable op = new YesNoRunnable(
-				Messages.getString("KojiBuildHandler.0")); //$NON-NLS-1$
+				Messages.kojiBuildHandler_tagBeforeSendingBuild); //$NON-NLS-1$
 		Display.getDefault().syncExec(op);
 		return op.isOkPressed();
 	}
@@ -117,7 +117,7 @@ public class KojiBuildHandler extends CommonHandler {
 								Image titleImage = descriptor.createImage();
 								KojiMessageDialog msgDialog = new KojiMessageDialog(
 										shell,
-										Messages.getString("KojiBuildHandler.2"), //$NON-NLS-1$
+										Messages.kojiBuildHandler_kojiBuild,
 										titleImage,
 										result.getMessage(),
 										MessageDialog.NONE,
@@ -146,7 +146,7 @@ public class KojiBuildHandler extends CommonHandler {
 				throw new OperationCanceledException();
 			}
 			if (!debug) {
-				monitor.subTask(Messages.getString("KojiBuildHandler.3")); //$NON-NLS-1$
+				monitor.subTask(Messages.kojiBuildHandler_connectKojiMsg);
 				koji = new KojiHubClient();
 			}
 
@@ -155,21 +155,21 @@ public class KojiBuildHandler extends CommonHandler {
 				throw new OperationCanceledException();
 			}
 			// SSL login
-			monitor.subTask(Messages.getString("KojiBuildHandler.5")); //$NON-NLS-1$
+			monitor.subTask(Messages.kojiBuildHandler_kojiLogin);
 			String result = koji.sslLogin();
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 			// push build
-			monitor.subTask(Messages.getString("KojiBuildHandler.6")); //$NON-NLS-1$
+			monitor.subTask(Messages.kojiBuildHandler_sendBuildCmd);
 			result = koji.build(projectBits.getTarget(), scmURL, isScratch());
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 			// logout
-			monitor.subTask(Messages.getString("KojiBuildHandler.8")); //$NON-NLS-1$
+			monitor.subTask(Messages.kojiBuildHandler_kojiLogout);
 			koji.logout();
 			status = new Status(IStatus.OK, KojiPlugin.PLUGIN_ID, result);
 		} catch (XmlRpcException e) {
