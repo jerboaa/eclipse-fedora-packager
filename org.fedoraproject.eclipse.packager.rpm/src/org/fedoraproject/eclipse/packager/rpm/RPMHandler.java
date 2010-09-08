@@ -15,6 +15,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -53,8 +55,7 @@ public abstract class RPMHandler extends CommonHandler {
 	/**
 	 * Name of the console used for displaying rpm build output.
 	 */
-	public static final String CONSOLE_NAME = Messages
-			.getString("RPMHandler.1"); //$NON-NLS-1$
+	public static final String CONSOLE_NAME = Messages.rpmHandler_consoleName;
 
 	protected IResource specfile;
 
@@ -77,7 +78,7 @@ public abstract class RPMHandler extends CommonHandler {
 
 	protected IStatus rpmBuild(List<String> flags, IProgressMonitor monitor) {
 		monitor.subTask(NLS.bind(
-				Messages.getString("RPMHandler.17"), specfile.getName())); //$NON-NLS-1$
+				Messages.rpmHandler_callRpmBuildMsg, specfile.getName()));
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = FedoraHandlerUtils.getRPMDefines(dir);
@@ -119,7 +120,7 @@ public abstract class RPMHandler extends CommonHandler {
 		if (mon == null) {
 			terminateMonitor = true;
 			mon = new NullProgressMonitor();
-			mon.beginTask(Messages.getString("RPMHandlerMockBuild"), 1); //$NON-NLS-1$
+			mon.beginTask(Messages.rpmHandler_runShellCmds, 1);
 		}
 		IStatus status;
 		final MessageConsole console = getConsole(CONSOLE_NAME);
@@ -165,13 +166,12 @@ public abstract class RPMHandler extends CommonHandler {
 					public void run() {
 						MessageDialog.openError(
 								new Shell(),
-								Messages.getString("RPMHandlerScriptCancelled"), //$NON-NLS-1$
-								Messages.getString("RPMHandlerUserWarning")); //$NON-NLS-1$
+								Messages.rpmHandler_scriptCancelled,
+								Messages.rpmHandler_userWarningMsg);
 					}
 
 				});
-				handleError(Messages
-						.getString("RPMHandlerTerminationErrorHandling")); //$NON-NLS-1$
+				handleError(Messages.rpmHandler_terminationMsg);
 				return Status.CANCEL_STATUS;
 			}
 
@@ -203,21 +203,22 @@ public abstract class RPMHandler extends CommonHandler {
 		return result.substring(0, result.indexOf('\n'));
 	}
 
-	protected IStatus makeSRPM(FedoraProjectRoot fedoraProjectRoot,
-			IProgressMonitor monitor) {
+	protected IStatus makeSRPM(ExecutionEvent e, IProgressMonitor monitor) {
 		DownloadHandler dh = new DownloadHandler();
 		IStatus result = null;
 		// retrieve sources
-		result = dh.doExecute(fedoraProjectRoot, monitor);
-		if (result.isOK()) {
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			ArrayList<String> flags = new ArrayList<String>();
-			flags.add("--nodeps"); //$NON-NLS-1$
-			flags.add("-bs"); //$NON-NLS-1$
-			result = rpmBuild(flags, monitor);
+		try {
+			dh.execute(e);
+		} catch (ExecutionException e1) {
+			e1.printStackTrace();
 		}
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		ArrayList<String> flags = new ArrayList<String>();
+		flags.add("--nodeps"); //$NON-NLS-1$
+		flags.add("-bs"); //$NON-NLS-1$
+		result = rpmBuild(flags, monitor);
 		return result;
 	}
 	

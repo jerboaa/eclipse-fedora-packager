@@ -29,12 +29,12 @@ public class SRPMBuildHandler extends RPMHandler {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
 		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job("Fedora Packager") {
+		Job job = new Job(Messages.srpmHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.getString("SRPMBuildHandler.0"), //$NON-NLS-1$
+				monitor.beginTask(Messages.srpmHandler_buildSrpm,
 						IProgressMonitor.UNKNOWN);
-				return makeSRPM(fedoraProjectRoot, monitor);
+				return makeSRPM(e, monitor);
 			}
 		};
 		job.setUser(true);

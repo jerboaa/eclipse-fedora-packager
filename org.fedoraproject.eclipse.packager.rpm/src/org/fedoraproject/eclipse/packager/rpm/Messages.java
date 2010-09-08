@@ -36,6 +36,16 @@ public class Messages extends NLS {
 	// PrepHandler Strings
 	public static String prepHandler_attemptApplyPatchMsg;
 	public static String prepHandler_jobName;
+	// RPMHandler Strings
+	public static String rpmHandler_consoleName;
+	public static String rpmHandler_callRpmBuildMsg;
+	public static String rpmHandler_runShellCmds;
+	public static String rpmHandler_scriptCancelled;
+	public static String rpmHandler_userWarningMsg;
+	public static String rpmHandler_terminationMsg;
+	// SRPMHandler Strings
+	public static String srpmHandler_jobName;
+	public static String srpmHandler_buildSrpm;
 
 	static {
 		// initialize resource bundle
