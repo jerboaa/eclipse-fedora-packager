@@ -61,7 +61,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	// same pattern as fedpkg uses. ATM this pattern is:
 	// BRANCHFILTER = 'f\d\d\/master|master|el\d\/master|olpc\d\/master'
 	private final Pattern BRANCH_PATTERN = Pattern
-			.compile("(?:origin/)?(f)(\\d\\d?)/master|(?:origin/)?(master)|(?:origin/)?(el)(\\d)/master|(?:origin/)?(olpc)(\\d)/master" //$NON-NLS-1$
+			.compile("(?:origin/)?(fc?)(\\d\\d?)/master|(?:origin/)?(master)|(?:origin/)?(el)(\\d)/master|(?:origin/)?(olpc)(\\d)/master" //$NON-NLS-1$
 			);
 	
 	/**
@@ -204,7 +204,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	@Override
 	public String getDist() {
 		String currBranch = getCurrentBranchName();
-		if (currBranch.startsWith("F-")) { //$NON-NLS-1$
+		if (currBranch.startsWith("F-") || currBranch.startsWith("FC-")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return ".fc" + getDistVal(); //$NON-NLS-1$
 		} else if (currBranch.startsWith("EL-")) { //$NON-NLS-1$
 			return ".el" + getDistVal(); //$NON-NLS-1$
@@ -234,7 +234,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	@Override
 	public String getDistVariable() {
 		String currBranch = getCurrentBranchName();
-		if (currBranch.startsWith("F-")) { //$NON-NLS-1$
+		if (currBranch.startsWith("F-") || currBranch.startsWith("FC-")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return "fedora"; //$NON-NLS-1$" +
 		} else if (currBranch.startsWith("EL-")) { //$NON-NLS-1$
 			return "rhel"; //$NON-NLS-1$
@@ -252,7 +252,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	@Override
 	public String getTarget() {
 		String currBranch = getCurrentBranchName();
-		if (currBranch.startsWith("F-")) { //$NON-NLS-1$
+		if (currBranch.startsWith("F-") || currBranch.startsWith("FC-")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return "dist-f" + getDistVal() + "-updates-candidate"; //$NON-NLS-1$" //$NON-NLS-2$
 		} else if (currBranch.startsWith("EL-")) { //$NON-NLS-1$
 			return "dist-" + getDistVal() + "E-epel-testing-candidate"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -406,7 +406,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 		int maxRelease = -1;
 		for (String key : keySet) {
 			branchName = this.branches.get(key);
-			if (branchName.startsWith("F-")) { //$NON-NLS-1$
+			if (branchName.startsWith("F-") || branchName.startsWith("FC-")) { //$NON-NLS-1$ //$NON-NLS-2$
 				// fedora
 				maxRelease = Math.max(maxRelease, Integer.parseInt(branchName.substring("F-".length()))); //$NON-NLS-1$
 			} else if (branchName.startsWith("EL-")) { //$NON-NLS-1$

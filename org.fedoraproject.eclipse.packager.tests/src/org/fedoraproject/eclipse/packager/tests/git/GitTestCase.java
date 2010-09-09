@@ -12,7 +12,7 @@ public class GitTestCase extends TestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
-		project = new GitTestProject("ed");
+		project = new GitTestProject("eclipse-rpm-editor");
 		iProject = project.getProject();
 	}
 

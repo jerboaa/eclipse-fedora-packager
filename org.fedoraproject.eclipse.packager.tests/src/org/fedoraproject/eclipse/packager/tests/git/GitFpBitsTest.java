@@ -15,9 +15,12 @@ public class GitFpBitsTest extends GitTestCase {
 		// make sure we meet pre-condition (we should be on master)
 		assertEquals("devel", projectBits.getCurrentBranchName());
 		GitTestProject testProject = getProject();
-		// switch to remote branch f13
+		// switch to branch f13
 		testProject.checkoutBranch(Constants.R_HEADS + "f13/master");
 		assertEquals("F-13", projectBits.getCurrentBranchName());
+		// switch to branch fc6
+		testProject.checkoutBranch(Constants.R_HEADS + "fc6/master");
+		assertEquals("FC-6", projectBits.getCurrentBranchName());
 	}
 	
 	public void testGetBranchName() {
