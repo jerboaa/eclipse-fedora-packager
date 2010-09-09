@@ -24,13 +24,14 @@ import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 /**
  * Handler for the fedpkg prep command.
- *
+ * 
  */
 public class PrepHandler extends RPMHandler {
-	
+
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
+				.getValidRoot(e);
 		specfile = fedoraProjectRoot.getSpecFile();
 		Job job = new Job(Messages.prepHandler_jobName) {
 			@Override
@@ -39,12 +40,7 @@ public class PrepHandler extends RPMHandler {
 						IProgressMonitor.UNKNOWN);
 				DownloadHandler dh = new DownloadHandler();
 				IStatus result = null;
-				// retrieve sources
-				try {
-					dh.execute(e);
-				} catch (ExecutionException e) {
-					e.printStackTrace();
-				}
+				dh.doExecute(fedoraProjectRoot, monitor);
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
@@ -52,8 +48,8 @@ public class PrepHandler extends RPMHandler {
 				flags.add("--nodeps"); //$NON-NLS-1$
 				flags.add("-bp"); //$NON-NLS-1$
 				result = rpmBuild(flags, monitor);
-				
-				return result;	
+
+				return result;
 			}
 		};
 		job.setUser(true);

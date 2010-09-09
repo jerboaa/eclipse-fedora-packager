@@ -34,7 +34,7 @@ public class SRPMBuildHandler extends RPMHandler {
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(Messages.srpmHandler_buildSrpm,
 						IProgressMonitor.UNKNOWN);
-				return makeSRPM(e, monitor);
+				return makeSRPM(fedoraProjectRoot, monitor);
 			}
 		};
 		job.setUser(true);

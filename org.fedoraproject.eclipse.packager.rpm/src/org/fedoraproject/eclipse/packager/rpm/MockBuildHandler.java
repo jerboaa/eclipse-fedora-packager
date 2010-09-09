@@ -46,7 +46,7 @@ public class MockBuildHandler extends RPMHandler {
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(Messages.mockBuildHandler_testLocalBuildWithMock, IProgressMonitor.UNKNOWN);
 				// build fresh SRPM
-				IStatus result = makeSRPM(e, monitor);
+				IStatus result = makeSRPM(fedoraProjectRoot, monitor);
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();

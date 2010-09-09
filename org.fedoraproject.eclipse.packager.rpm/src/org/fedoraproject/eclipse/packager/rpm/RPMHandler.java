@@ -203,19 +203,14 @@ public abstract class RPMHandler extends CommonHandler {
 		return result.substring(0, result.indexOf('\n'));
 	}
 
-	protected IStatus makeSRPM(ExecutionEvent e, IProgressMonitor monitor) {
+	protected IStatus makeSRPM(FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
 		DownloadHandler dh = new DownloadHandler();
 		IStatus result = null;
 		// retrieve sources
-		try {
-			dh.execute(e);
-		} catch (ExecutionException e1) {
-			e1.printStackTrace();
-		}
+			dh.doExecute(fedoraProjectRoot, monitor);
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		dh.waitForJob(); // let download job finish, first
 		ArrayList<String> flags = new ArrayList<String>();
 		flags.add("--nodeps"); //$NON-NLS-1$
 		flags.add("-bs"); //$NON-NLS-1$

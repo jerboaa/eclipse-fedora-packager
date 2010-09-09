@@ -26,6 +26,20 @@ import org.fedoraproject.eclipse.packager.Messages;
  */
 public class DownloadHandler extends WGetHandler {
 
+	/**
+	 * Retrieves sources. This method is useful because if you try to access
+	 * ExecutionEvent from outside the even loop one will get
+	 * InvalidThreadAccess error.
+	 * 
+	 * @param fedoraProjectRoot
+	 * @param monitor
+	 * @return The status.
+	 */
+	public IStatus doExecute(FedoraProjectRoot fedoraProjectRoot,
+			IProgressMonitor monitor) {
+		return retrieveSources(fedoraProjectRoot, monitor);
+	}
+
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils

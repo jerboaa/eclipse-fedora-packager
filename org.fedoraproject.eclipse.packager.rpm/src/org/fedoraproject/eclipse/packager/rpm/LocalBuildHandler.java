@@ -42,17 +42,10 @@ public class LocalBuildHandler extends RPMHandler {
 				DownloadHandler dh = new DownloadHandler();
 				IStatus result = null;
 				// retrieve sources
-				try {
-					dh.execute(e);
-				} catch (ExecutionException e1) {
-					e1.printStackTrace();
-				}
+				dh.doExecute(fedoraProjectRoot, monitor);
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
-				// wait for download sources job before continuing with
-				// local build
-				dh.waitForJob();
 				try {
 					// search for noarch directive, otherwise use local arch
 					final String arch = FedoraHandlerUtils.rpmQuery(
