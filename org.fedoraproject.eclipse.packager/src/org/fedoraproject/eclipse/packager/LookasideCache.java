@@ -19,11 +19,16 @@ import org.eclipse.jface.util.PropertyChangeEvent;
  * lookaside cache.
  *
  */
-public class LookasideCache implements ILookasideCache {
+public class LookasideCache {
 	
 	private String uploadUrl;	// Lookaside upload URL
 	private String downloadUrl;	// Lookaside download URL
 	private IPreferenceStore prefStore; // Preferences store to use
+	
+	/**
+	 * Common command prefix for Eclipse Fedorapackager command IDs.
+	 */
+	public static final String FEDORA_PACKAGER_CMD_PREFIX = "org.fedoraproject.eclipse.packager"; //$NON-NLS-1$
 	
 	/**
 	 * Create lookaside cache object for the provided Eclipse command.
@@ -33,7 +38,7 @@ public class LookasideCache implements ILookasideCache {
 	 */
 	public LookasideCache(String commandId) {
 		this.prefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		if (commandId.startsWith(ILookasideCache.FEDORA_PACKAGER_CMD_PREFIX)) {
+		if (commandId.startsWith(LookasideCache.FEDORA_PACKAGER_CMD_PREFIX)) {
 			// We want to listen for lookaside preference changes
 			final IPropertyChangeListener propertyChangeListener = new IPropertyChangeListener() {				
 				@Override

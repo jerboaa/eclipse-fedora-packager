@@ -36,7 +36,7 @@ public class FedoraProjectRoot {
 	private IContainer rootContainer;
 	private SourcesFile sourcesFile;
 	private ProjectType type;
-	private ILookasideCache lookAsideCache; // The lookaside cache to be used
+	private LookasideCache lookAsideCache; // The lookaside cache to be used
 
 	/**
 	 * Creates the FedoraProjectRoot using the given container.
@@ -183,7 +183,7 @@ public class FedoraProjectRoot {
 	/**
 	 * @return the lookAsideCache
 	 */
-	public ILookasideCache getLookAsideCache() {
+	public LookasideCache getLookAsideCache() {
 		return lookAsideCache;
 	}
 }

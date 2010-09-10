@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.resources.IFile;
@@ -129,10 +130,14 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	 * @return A map of branch names and according properties required for
 	 * 		   building.
 	 */
+	// TODO: We need to be smarter than this. Won't work for messed up branches
+	//		 file. Probably we should walk the project and look for folders which
+	//       contain "sources" and ".spec" files. We can never be 100% accurate
+	//       so we should make sure that we do proper error checking.
 	private HashMap<String, HashMap<String, String>> getBranches() {
 		HashMap<String, HashMap<String, String>> ret = new HashMap<String, HashMap<String, String>>();
 
-		IFile branchesFile = this.container.getProject().getFolder("common").getFile( //$NON-NLS-1$
+		IFile branchesFile = this.fedoraprojectRoot.getProject().getFolder("common").getFile( //$NON-NLS-1$
 				"branches"); //$NON-NLS-1$
 		InputStream is;
 		try {
@@ -142,17 +147,25 @@ public class FpCVSProjectBits implements IFpProjectBits {
 			List<String> branches = new ArrayList<String>();
 			String line;
 			while ((line = bufReader.readLine()) != null) {
-				branches.add(line);
+				// skip commented lines
+				if (! line.startsWith("#")) {
+					branches.add(line);
+				}
 			}
 
 			for (String branch : branches) {
 				HashMap<String, String> temp = new HashMap<String, String>();
 				StringTokenizer st = new StringTokenizer(branch, ":"); //$NON-NLS-1$
-				String target = st.nextToken();
-				temp.put("target", st.nextToken()); //$NON-NLS-1$
-				temp.put("dist", st.nextToken()); //$NON-NLS-1$
-				temp.put("distvar", st.nextToken()); //$NON-NLS-1$
-				temp.put("distval", st.nextToken()); //$NON-NLS-1$
+				String target = null;
+				try {
+					target = st.nextToken();
+					temp.put("target", st.nextToken()); //$NON-NLS-1$
+					temp.put("dist", st.nextToken()); //$NON-NLS-1$
+					temp.put("distvar", st.nextToken()); //$NON-NLS-1$
+					temp.put("distval", st.nextToken()); //$NON-NLS-1$
+				} catch (NoSuchElementException e) {
+					// ignore cases for which branches file is broken
+				}
 				ret.put(target, temp);
 			}
 		} catch (CoreException e) {
