@@ -76,7 +76,9 @@ public class FedoraHandlerUtils {
 	}
 
 	/**
-	 * Returns a FedoraProjectRoot from the ExecutionEvent.
+	 * Returns a FedoraProjectRoot from the given resource. It finds
+	 * the underlying resource from the given ExecutionEvent and then
+	 * uses the closes container containing the sources file
 	 * 
 	 * @param event
 	 *            The execution event.
@@ -84,26 +86,14 @@ public class FedoraHandlerUtils {
 	 */
 	public static FedoraProjectRoot getValidRoot(ExecutionEvent event) {
 		IResource resource = getResource(event);
-		return getValidRoot(resource);
-	}
-
-	/**
-	 * Returns a FedoraProjectRoot from the given resource. It works by finding
-	 * the closest IContainer containing sources file.
-	 * 
-	 * @param resource
-	 *            The resource to use for determining the base folder.
-	 * @return The calculated FedoraProjectRoot.
-	 */
-	public static FedoraProjectRoot getValidRoot(IResource resource) {
 		if (resource instanceof IFolder || resource instanceof IProject) {
 			// TODO check that spec file and sources file are present
 			if (validateFedorapackageRoot((IContainer) resource)) {
-				return new FedoraProjectRoot((IContainer) resource);
+				return new FedoraProjectRoot((IContainer) resource, event.getCommand().getId());
 			}
 		} else if (resource instanceof IFile) {
 			if (validateFedorapackageRoot(resource.getParent())) {
-				return new FedoraProjectRoot(resource.getParent());
+				return new FedoraProjectRoot(resource.getParent(), event.getCommand().getId());
 			}
 		}
 		return null;
@@ -209,10 +199,11 @@ public class FedoraHandlerUtils {
 	/**
 	 * Returns the IFpProjectBits used to abstract vcs specific things.
 	 * 
-	 * @param project The project for which to get the VCS specific parts.
+	 * @param fedoraprojectRoot The project for which to get the VCS specific parts.
 	 * @return The needed IFpProjectBits.
 	 */
-	public static IFpProjectBits getVcsHandler(IResource project) {
+	public static IFpProjectBits getVcsHandler(FedoraProjectRoot fedoraprojectRoot) {
+		IResource project = fedoraprojectRoot.getProject();
 		ProjectType type = FedoraHandlerUtils.getProjectType(project);
 		IExtensionPoint vcsExtensions = Platform.getExtensionRegistry()
 				.getExtensionPoint(PackagerPlugin.PLUGIN_ID, "vcsContribution"); //$NON-NLS-1$
@@ -229,7 +220,7 @@ public class FedoraHandlerUtils {
 								.createExecutableExtension("class");  //$NON-NLS-1$
 						// Do initialization
 						if (vcsContributor != null) {
-							vcsContributor.initialize(project);
+							vcsContributor.initialize(fedoraprojectRoot);
 						}
 						return vcsContributor;
 					} catch (CoreException e) {
@@ -312,7 +303,7 @@ public class FedoraHandlerUtils {
 		IResource parent = projectRoot.getSpecFile().getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = FedoraHandlerUtils.getRPMDefines(dir);
-		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot.getSpecFile());
+		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot);
 		List<String> distDefines = getDistDefines(projectBits, parent.getName());
 
 		String result = null;

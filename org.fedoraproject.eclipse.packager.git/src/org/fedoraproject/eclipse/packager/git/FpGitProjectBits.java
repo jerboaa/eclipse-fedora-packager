@@ -177,11 +177,11 @@ public class FpGitProjectBits implements IFpProjectBits {
 	/**
 	 * Do instance specific initialization.
 	 * 
-	 * See {@link IFpProjectBits#initialize(IResource)}
+	 * See {@link IFpProjectBits#initialize(FedoraProjectRoot)}
 	 */
 	@Override
-	public void initialize(IResource resource) {
-		this.project = resource.getProject();
+	public void initialize(FedoraProjectRoot fedoraprojectRoot) {
+		this.project = fedoraprojectRoot.getProject();
 		// now set Git Repository object
 		this.gitRepository = getGitRepository();
 		this.branches = getBranches();

@@ -1,6 +1,8 @@
 package org.fedoraproject.eclipse.packager.tests.git;
 
 import org.eclipse.core.resources.IProject;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.ILookasideCache;
 import org.fedoraproject.eclipse.packager.test_utils.GitTestProject;
 
 import junit.framework.TestCase;
@@ -9,11 +11,28 @@ public class GitTestCase extends TestCase {
 	
 	private GitTestProject project;
 	private IProject iProject;
+	private FedoraProjectRoot fedoraprojectRoot;
 	
 	@Override
 	protected void setUp() throws Exception {
 		project = new GitTestProject("eclipse-rpm-editor");
 		iProject = project.getProject();
+		// create a fedoraprojectRoot for this project
+		fedoraprojectRoot = new FedoraProjectRoot(iProject, ILookasideCache.FEDORA_PACKAGER_CMD_PREFIX + ".DownloadHandler");		
+	}
+
+	/**
+	 * @return the fedoraprojectRoot
+	 */
+	public FedoraProjectRoot getFedoraprojectRoot() {
+		return fedoraprojectRoot;
+	}
+
+	/**
+	 * @param fedoraprojectRoot the fedoraprojectRoot to set
+	 */
+	public void setFedoraprojectRoot(FedoraProjectRoot fedoraprojectRoot) {
+		this.fedoraprojectRoot = fedoraprojectRoot;
 	}
 
 	@Override

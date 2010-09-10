@@ -76,13 +76,13 @@ public abstract class RPMHandler extends CommonHandler {
 		return ret;
 	}
 
-	protected IStatus rpmBuild(List<String> flags, IProgressMonitor monitor) {
+	protected IStatus rpmBuild(FedoraProjectRoot fedoraprojectRoot, List<String> flags, IProgressMonitor monitor) {
 		monitor.subTask(NLS.bind(
 				Messages.rpmHandler_callRpmBuildMsg, specfile.getName()));
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = FedoraHandlerUtils.getRPMDefines(dir);
-		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(specfile);
+		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraprojectRoot);
 
 		List<String> distDefines = FedoraHandlerUtils.getDistDefines(projectBits, parent.getName());
 
@@ -214,7 +214,7 @@ public abstract class RPMHandler extends CommonHandler {
 		ArrayList<String> flags = new ArrayList<String>();
 		flags.add("--nodeps"); //$NON-NLS-1$
 		flags.add("-bs"); //$NON-NLS-1$
-		result = rpmBuild(flags, monitor);
+		result = rpmBuild(fedoraProjectRoot, flags, monitor);
 		return result;
 	}
 	

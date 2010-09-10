@@ -47,7 +47,7 @@ public class PrepHandler extends RPMHandler {
 				ArrayList<String> flags = new ArrayList<String>();
 				flags.add("--nodeps"); //$NON-NLS-1$
 				flags.add("-bp"); //$NON-NLS-1$
-				result = rpmBuild(flags, monitor);
+				result = rpmBuild(fedoraProjectRoot, flags, monitor);
 
 				return result;
 			}

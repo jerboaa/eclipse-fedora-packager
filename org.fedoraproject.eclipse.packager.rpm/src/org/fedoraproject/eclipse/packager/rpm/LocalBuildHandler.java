@@ -59,7 +59,7 @@ public class LocalBuildHandler extends RPMHandler {
 					flags.add("--target"); //$NON-NLS-1$
 					flags.add(arch);
 					flags.add("-ba"); //$NON-NLS-1$
-					result = rpmBuild(flags, monitor);
+					result = rpmBuild(fedoraProjectRoot, flags, monitor);
 
 				} catch (CoreException e) {
 					e.printStackTrace();

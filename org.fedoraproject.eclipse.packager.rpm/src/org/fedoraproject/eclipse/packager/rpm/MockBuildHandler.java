@@ -112,7 +112,7 @@ public class MockBuildHandler extends RPMHandler {
 	}
 
 	private String getMockcfg(FedoraProjectRoot projectRoot, String buildarch) {
-		IFpProjectBits projectBits =  FedoraHandlerUtils.getVcsHandler(projectRoot.getSpecFile());
+		IFpProjectBits projectBits =  FedoraHandlerUtils.getVcsHandler(projectRoot);
 		String distvar = projectBits.getDistVariable(); 
 		String distval = projectBits.getDistVal(); 
 		String mockcfg = null;

@@ -94,9 +94,9 @@ public interface IFpProjectBits {
 	/**
 	 * Initialize IFpProjectBits instance
 	 * 
-	 * @param resource The underlying project.
+	 * @param fedoraProjectRoot The underlying fedoraprojectRoot object.
 	 */
-	public void initialize(IResource resource);
+	public void initialize(FedoraProjectRoot fedoraProjectRoot);
 	
 	/**
 	 * Tag a revision of the VCS.

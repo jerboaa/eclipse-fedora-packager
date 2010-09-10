@@ -52,7 +52,7 @@ public class KojiBuildHandler extends CommonHandler {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
 		final IFpProjectBits projectBits = FedoraHandlerUtils
-				.getVcsHandler(resource);
+				.getVcsHandler(fedoraProjectRoot);
 		job = new Job(Messages.kojiBuildHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -139,7 +139,7 @@ public class KojiBuildHandler extends CommonHandler {
 			IProgressMonitor monitor) {
 		IStatus status;
 		IFpProjectBits projectBits = FedoraHandlerUtils
-				.getVcsHandler(fedoraProjectRoot.getSpecFile());
+				.getVcsHandler(fedoraProjectRoot);
 		try {
 			// for testing use the stub instead
 			if (monitor.isCanceled()) {

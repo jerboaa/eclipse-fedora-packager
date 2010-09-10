@@ -36,7 +36,7 @@ public class TagHandler extends CommonHandler {
 				monitor.beginTask(Messages.tagHandler_tagTaskName, 
 						IProgressMonitor.UNKNOWN);
 				// Do VCS tagging
-				IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot.getSpecFile());
+				IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot);
 				IStatus result = projectBits.tagVcs(fedoraProjectRoot, monitor);
 				monitor.done();
 				return result;

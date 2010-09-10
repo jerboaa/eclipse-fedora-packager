@@ -52,7 +52,7 @@ public class BodhiNewHandler extends CommonHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
-		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot.getSpecFile());
+		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot);
 		Job job = new Job(Messages.bodhiNewHandler_jobName) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -177,7 +177,7 @@ public class BodhiNewHandler extends CommonHandler {
 	 * @throws CoreException
 	 */
 	public String getReleaseName(FedoraProjectRoot projectRoot) throws CoreException {
-		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot.getSpecFile());
+		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot);
 		return projectBits.getCurrentBranchName().replaceAll("-", "");
 	}
 

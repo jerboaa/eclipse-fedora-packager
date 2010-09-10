@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.internal.ccvs.core.CVSException;
@@ -62,9 +63,10 @@ import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 @SuppressWarnings("restriction")
 public class FpCVSProjectBits implements IFpProjectBits {
 
-	private IResource project; // The underlying project
+	private FedoraProjectRoot fedoraprojectRoot; // The underlying project root
+	private IResource container; 				 // The underlying container
 	private HashMap<String, HashMap<String, String>> branches; // All branches
-	private boolean initialized = false; // keep track if instance is initialized
+	private boolean initialized = false; 		 // keep track if instance is initialized
 	
 	/**
 	 * See {@link IFpProjectBits#getCurrentBranchName()}
@@ -74,7 +76,30 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		if (!isInitialized()) {
 			return null;
 		}
-		return this.project.getParent().getName();
+		// retrieve current branch name from branch file.
+		// Current implementation is incorrect.
+		IFile branchesFile = this.fedoraprojectRoot.getContainer().getFile(new Path("branch"));
+		if (branchesFile != null) {
+			InputStream is;
+			try {
+				is = branchesFile.getContents();
+				BufferedReader bufReader = new BufferedReader(
+						new InputStreamReader(is));
+				String line = bufReader.readLine();
+				if (line != null) {
+					line = line.trim();
+					if (!line.equals("")) {
+						return line;
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
+		// default to devel
+		return "devel"; //$NON-NLS-1$
 	}
 
 	/**
@@ -107,7 +132,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	private HashMap<String, HashMap<String, String>> getBranches() {
 		HashMap<String, HashMap<String, String>> ret = new HashMap<String, HashMap<String, String>>();
 
-		IFile branchesFile = this.project.getProject().getFolder("common").getFile( //$NON-NLS-1$
+		IFile branchesFile = this.container.getProject().getFolder("common").getFile( //$NON-NLS-1$
 				"branches"); //$NON-NLS-1$
 		InputStream is;
 		try {
@@ -170,7 +195,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	private boolean containsSpec(String branch) throws CoreException {
 		// get CVSProvider
 		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
-				.getProvider(this.project.getProject(),
+				.getProvider(this.container.getProject(),
 						CVSProviderPlugin.getTypeId());
 
 		// get CVSROOT
@@ -180,7 +205,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 
 		// search "branch" for a spec file
 		// FIXME: Make this less hard-coded!
-		return folder.getFile(this.project.getProject().getName() + ".spec") != null;
+		return folder.getFile(this.container.getProject().getName() + ".spec") != null;
 	}
 	
 	/**
@@ -201,7 +226,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		}
 		String ret = null;
 		// get the project for this resource
-		IProject proj = this.project.getProject();
+		IProject proj = this.container.getProject();
 
 		if (CVSTeamProvider.isSharedWithCVS(proj)) {
 			// get CVSProvider
@@ -305,11 +330,12 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	/**
 	 * Do proper initialization of this instance.
 	 * 
-	 * @param project The underlying project.
+	 * @param fedoraProjectRoot The underlying project.
 	 */
 	@Override
-	public void initialize(IResource project) {
-		this.project = project.getProject();
+	public void initialize(FedoraProjectRoot fedoraProjectRoot) {
+		this.fedoraprojectRoot = fedoraProjectRoot;
+		this.container = fedoraProjectRoot.getContainer();
 		this.branches = getBranches();
 		this.initialized = true;
 	}
