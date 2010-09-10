@@ -24,12 +24,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.DownloadJob;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.Messages;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 
 /**
@@ -39,41 +37,6 @@ import org.fedoraproject.eclipse.packager.SourcesFile;
 public abstract class WGetHandler extends CommonHandler {
 	
 	protected IProject project;
-	
-	/**
-	 * Get download url from preferences
-	 * 
-	 * @return URL as a String.
-	 */
-	public static String getDownlaodUrl() {
-		// Statically sets lookaside upload/download URLs according to preferences
-		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		String downloadUrl = kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
-		// If download URL isn't set yet, use default URL
-		if (downloadUrl.equals("")) { //$NON-NLS-1$
-			return org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL;
-		} else {
-			return downloadUrl;
-		}
-	}
-	
-	/**
-	 * Get upload url from preferences
-	 * 
-	 * @return URL as a String.
-	 */
-	public static String getUploadUrl() {
-		// Statically sets lookaside upload/download URLs according to preferences
-		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		String uploadUrl = kojiPrefStore.getString(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL);
-		// If upload URL isn't set yet, use default URL
-		if (uploadUrl.equals("")) { //$NON-NLS-1$
-			return org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL;
-		} else {
-			return uploadUrl;
-		}
-	}
-	
 	
 	protected IStatus retrieveSources(FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
 		SourcesFile sourcesFile = fedoraProjectRoot.getSourcesFile();
@@ -88,11 +51,13 @@ public abstract class WGetHandler extends CommonHandler {
 	
 		// Need to download remaining sources from repo
 		IStatus status = null;
+		// get download URL from lookaside cache 
+		String downloadBaseUrl = fedoraProjectRoot.getLookAsideCache().getDownloadUrl();
 		for (final String source : sourcesToGet) {
-			final String url = WGetHandler.getDownlaodUrl()
+			final String url = downloadBaseUrl
 					+ "/" + project.getName() //$NON-NLS-1$
 					+ "/" + source + "/" + sourcesFile.getSource(source) + "/" + source; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			status = download(url, source, monitor);
+			status = download(fedoraProjectRoot, url, source, monitor);
 			if (!status.isOK()) {
 				// download failed
 				try {
@@ -124,12 +89,12 @@ public abstract class WGetHandler extends CommonHandler {
 		}
 	}
 	
-	private IStatus download(String location, String fileName,
+	private IStatus download(FedoraProjectRoot fedoraProjectRoot, String location, String fileName,
 			IProgressMonitor monitor) {
 		IFile file = null;
 		try {
 			URL url = new URL(location);
-			file = project.getFile(new Path(fileName));
+			file = fedoraProjectRoot.getContainer().getFile(new Path(fileName));
 
 			// connect to repo
 			URLConnection conn = url.openConnection();

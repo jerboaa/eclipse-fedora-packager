@@ -74,9 +74,9 @@ public class UploadHandler extends WGetHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 
 		final IResource resource = FedoraHandlerUtils.getResource(e);
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(resource);
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
-		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(resource);
+		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot);
 		// do tasks as job
 		Job job = new Job(Messages.uploadHandler_taskName) {
 
@@ -167,7 +167,9 @@ public class UploadHandler extends WGetHandler {
 			HttpClient client = new HttpClient();
 			client.getHttpConnectionManager().getParams()
 					.setConnectionTimeout(30000);
-			PostMethod postMethod = new PostMethod(WGetHandler.getUploadUrl());
+			// get upload URL from lookaside cache 
+			String uploadUrl = fedoraProjectRoot.getLookAsideCache().getUploadUrl();
+			PostMethod postMethod = new PostMethod(uploadUrl);
 			NameValuePair[] data = {
 					new NameValuePair(
 							"name", fedoraProjectRoot.getSpecfileModel().getName()), //$NON-NLS-1$
@@ -240,7 +242,9 @@ public class UploadHandler extends WGetHandler {
 			HttpClient client = new HttpClient();
 			client.getHttpConnectionManager().getParams()
 					.setConnectionTimeout(30000);
-			PostMethod postMethod = new PostMethod(WGetHandler.getUploadUrl());
+			// get upload URL from lookaside cache 
+			String uploadUrl = fedoraProjectRoot.getLookAsideCache().getUploadUrl();
+			PostMethod postMethod = new PostMethod(uploadUrl);
 
 			Part[] data = { new StringPart("name", fedoraProjectRoot.getSpecfileModel().getName()), //$NON-NLS-1$
 					new StringPart("md5sum", SourcesFile.getMD5(file)), //$NON-NLS-1$
@@ -252,7 +256,7 @@ public class UploadHandler extends WGetHandler {
 			int code = client.executeMethod(postMethod);
 			if (code != HttpURLConnection.HTTP_OK) {
 				status = handleError(NLS
-						.bind(Messages.uploadHandler_uploadFail, filename, postMethod.getStatusLine())); //$NON-NLS-1$
+						.bind(Messages.uploadHandler_uploadFail, filename, postMethod.getStatusLine()));
 			} else {
 				status = Status.OK_STATUS;
 			}

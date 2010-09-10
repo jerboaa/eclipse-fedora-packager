@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -35,18 +36,23 @@ public class FedoraProjectRoot {
 	private IContainer rootContainer;
 	private SourcesFile sourcesFile;
 	private ProjectType type;
+	private ILookasideCache lookAsideCache; // The lookaside cache to be used
 
 	/**
 	 * Creates the FedoraProjectRoot using the given container.
 	 * 
 	 * @param container
 	 *            The root container either IFolder(cvs) or IProject(git).
+	 * @param cmdId
+	 * 			  The command ID for which a FedoraProjectRoot is requested.
 	 */
-	public FedoraProjectRoot(IContainer container) {
+	public FedoraProjectRoot(IContainer container, String cmdId) {
 		this.rootContainer = container;
 		this.sourcesFile = new SourcesFile(rootContainer.getFile(new Path(
 				"sources"))); //$NON-NLS-1$
 		this.type = FedoraHandlerUtils.getProjectType(container);
+		// set default lookaside cache
+		this.lookAsideCache = new LookasideCache(cmdId);
 	}
 
 	/**
@@ -56,6 +62,15 @@ public class FedoraProjectRoot {
 	 */
 	public IContainer getContainer() {
 		return rootContainer;
+	}
+	
+	/**
+	 * Get the project containing this FedoraProjectRoot.
+	 * 
+	 * @return The project for this FedoraProjectRoot instance.
+	 */
+	public IProject getProject() {
+		return this.rootContainer.getProject();
 	}
 
 	/**
@@ -163,5 +178,12 @@ public class FedoraProjectRoot {
 			return ((IFile) resource).getLocation().toFile();
 		}
 		return null;
+	}
+
+	/**
+	 * @return the lookAsideCache
+	 */
+	public ILookasideCache getLookAsideCache() {
+		return lookAsideCache;
 	}
 }

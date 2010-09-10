@@ -36,10 +36,10 @@ public class NewSourcesHandler extends UploadHandler {
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 
+		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
 		final IResource resource = FedoraHandlerUtils.getResource(e);
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(resource);
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
-		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(resource);
+		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot);
 		// do tasks as job
 		Job job = new Job(Messages.newSourcesHandler_jobName) {
 
