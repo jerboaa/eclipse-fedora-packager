@@ -21,3 +21,6 @@ Import-Package: org.apache.commons.httpclient,
  org.json
 Bundle-Localization: plugin
 Export-Package: org.fedoraproject.eclipse.packager.bodhi
+Bundle-ClassPath: eclipse-packager-fragment-bodhi.jar,
+ .
+Eclipse-ExtensibleAPI: true

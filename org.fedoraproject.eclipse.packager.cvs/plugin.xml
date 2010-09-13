@@ -37,29 +37,6 @@
                </visibleWhen>
             </menu>
             <command
-                  commandId="org.fedoraproject.eclipse.packager.TagCommand"
-                  label="%command.label.5"
-                  mnemonic="%command.mnemonic.5"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <with
-                           variable="activeMenuSelection">
-                        <reference
-                              definitionId="org.fedoraproject.eclipse.packager.cvsproject">
-                        </reference>
-                     </with>
-                     <with
-                           variable="activeMenuEditorInput">
-                        <reference
-                              definitionId="org.fedoraproject.eclipse.packager.cvsproject">
-                        </reference>
-                     </with>
-                  </or>
-               </visibleWhen>
-            </command>
-            <command
                   commandId="org.fedoraproject.eclipse.packager.CommitCommand"
                   label="%command.label.6"
                   mnemonic="%command.mnemonic.6"

@@ -17,3 +17,6 @@ Import-Package: org.eclipse.core.resources,
  org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.handlers,
  org.eclipse.linuxtools.rpm.ui.editor.parser
+Bundle-ClassPath: eclipse-packager-fragment-rpm.jar,
+ .
+Eclipse-ExtensibleAPI: true
