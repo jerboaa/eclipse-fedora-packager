@@ -80,7 +80,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		// retrieve current branch name from branch file.
 		// Current implementation is incorrect.
 		IFile branchesFile = this.fedoraprojectRoot.getContainer().getFile(new Path("branch"));
-		if (branchesFile != null) {
+		if (branchesFile.exists()) {
 			InputStream is;
 			try {
 				is = branchesFile.getContents();
