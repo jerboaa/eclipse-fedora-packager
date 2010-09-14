@@ -117,7 +117,7 @@ public class MockBuildHandler extends RPMHandler {
 		String distval = projectBits.getDistVal(); 
 		String mockcfg = null;
 		if (distvar.equals("rhel")) { //$NON-NLS-1$
-			mockcfg = "fedora-" + distval + "-" + buildarch + "-epel"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			mockcfg = "epel-" + distval + "-" + buildarch; //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			mockcfg = "fedora-" + distval + "-" + buildarch; //$NON-NLS-1$ //$NON-NLS-2$
 			if (distval.equals("4") || distval.equals("5") //$NON-NLS-1$ //$NON-NLS-2$
