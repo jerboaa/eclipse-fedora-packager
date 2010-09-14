@@ -69,19 +69,6 @@
       </command>
    </extension>
 <extension
-         point="org.eclipse.ui.importWizards">
-      <wizard
-            category="org.eclipse.team.cvs.ui.importWizards"
-            class="org.fedoraproject.eclipse.packager.cvs.FedoraCheckoutWizard"
-            icon="icons/newconnect_wiz.gif"
-            id="org.fedoraproject.eclipse.packager.FedoraImportWizard"
-            name="%wizard.name.0">
-         <description>
-            %wizard.description.0
-         </description>
-      </wizard>
-   </extension>
-<extension
       point="org.fedoraproject.eclipse.packager.vcsContribution">
    <vcs
          class="org.fedoraproject.eclipse.packager.cvs.FpCVSProjectBits"
