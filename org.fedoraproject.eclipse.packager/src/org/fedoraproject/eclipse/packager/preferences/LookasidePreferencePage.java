@@ -12,6 +12,7 @@
 package org.fedoraproject.eclipse.packager.preferences;
 
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
@@ -39,7 +40,16 @@ public class LookasidePreferencePage extends FieldEditorPreferencePage implement
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	@Override
-	public void init(IWorkbench workbench) {
+	public synchronized void init(IWorkbench workbench) {
+		IPreferenceStore store = getPreferenceStore();
+		if (store.getString(PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL).equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
+			store.setDefault(PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
+			store.setValue(PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
+		}
+		if (store.getString(PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL).equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
+			store.setDefault(PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
+			store.setValue(PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
+		}
 	}
 	
 	/* (non-Javadoc)

@@ -11,8 +11,7 @@
 package org.fedoraproject.eclipse.packager.preferences;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
-import org.eclipse.core.runtime.preferences.DefaultScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 /**
@@ -25,11 +24,11 @@ public class PackagerPluginPreferenceInitializer extends AbstractPreferenceIniti
 	 * rather late, just before the preferences page is rendered.
 	 */
 	@Override
-	public void initializeDefaultPreferences() {
+	public synchronized void initializeDefaultPreferences() {
 		// set default preferences for this plug-in
-		IEclipsePreferences node = new DefaultScope().getNode(PackagerPlugin.PLUGIN_ID);
-		node.put(PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
-		node.put(PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
+		IPreferenceStore prefStore = PackagerPlugin.getDefault().getPreferenceStore();
+		prefStore.setDefault(PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
+		prefStore.setDefault(PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
 	}
 
 }
