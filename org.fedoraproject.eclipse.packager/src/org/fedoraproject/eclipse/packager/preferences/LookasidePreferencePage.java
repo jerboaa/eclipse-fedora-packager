@@ -42,12 +42,20 @@ public class LookasidePreferencePage extends FieldEditorPreferencePage implement
 	@Override
 	public synchronized void init(IWorkbench workbench) {
 		IPreferenceStore store = getPreferenceStore();
-		if (store.getString(PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL).equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
+		// make sure we have defaults defined properly at any time
+		String currDefault = store.getDefaultString(PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+		if (currDefault.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
 			store.setDefault(PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
+		}
+		currDefault = store.getDefaultString(PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL);
+		if (currDefault.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
+			store.setDefault(PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
+		}
+		// If empty fill with defaults
+		if (store.getString(PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL).equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
 			store.setValue(PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
 		}
 		if (store.getString(PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL).equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
-			store.setDefault(PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
 			store.setValue(PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
 		}
 	}
@@ -58,7 +66,7 @@ public class LookasidePreferencePage extends FieldEditorPreferencePage implement
 	@Override
 	protected void createFieldEditors() {
 		final Composite parent = getFieldEditorParent();
-		/* Preference for setting the koji host */
+		/* Preference for setting the lookaside urls */
 		StringFieldEditor lookasideUploadURLEditor = new StringFieldEditor(
 				PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, Messages.LookasideUploadURLLabel,
 				parent);

@@ -12,6 +12,7 @@
 package org.fedoraproject.eclipse.packager.koji.preferences;
 
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
@@ -39,7 +40,17 @@ public class KojiPreferencePage extends FieldEditorPreferencePage implements
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	@Override
-	public void init(IWorkbench workbench) {
+	public synchronized void init(IWorkbench workbench) {
+		IPreferenceStore store = getPreferenceStore();
+		// make sure we have defaults defined properly at any time
+		String currDefault = store.getDefaultString(PreferencesConstants.PREF_KOJI_WEB_URL);
+		if (currDefault.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
+			store.setDefault(PreferencesConstants.PREF_KOJI_WEB_URL, PreferencesConstants.DEFAULT_KOJI_WEB_URL);
+		}
+		currDefault = store.getDefaultString(PreferencesConstants.PREF_KOJI_HUB_URL);
+		if (currDefault.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
+			store.setDefault(PreferencesConstants.PREF_KOJI_HUB_URL, PreferencesConstants.DEFAULT_KOJI_HUB_URL);
+		}
 	}
 	
 	/* (non-Javadoc)
