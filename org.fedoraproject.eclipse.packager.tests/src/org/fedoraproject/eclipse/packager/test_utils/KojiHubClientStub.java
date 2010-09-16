@@ -31,5 +31,9 @@ public class KojiHubClientStub implements IKojiHubClient {
 	public String sslLogin() throws XmlRpcException, MalformedURLException {
 		return null;
 	}
+	
+	public String getWebUrl() {
+		return "http://www.example.com";
+	}
 
 }

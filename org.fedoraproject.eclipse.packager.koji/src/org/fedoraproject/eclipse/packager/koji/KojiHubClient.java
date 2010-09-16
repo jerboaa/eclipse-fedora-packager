@@ -26,6 +26,7 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SSLUtils;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.koji.preferences.PreferencesConstants;
 
 /**
@@ -37,19 +38,18 @@ public class KojiHubClient implements IKojiHubClient {
 	/**
 	 * URL of the Koji Web interface
 	 */
-	public static String kojiHubUrl;	// statically initialized
+	public String kojiHubUrl;	// statically initialized per instance
 	/**
 	 * URL of the Koji Hub/XMLRPC interface
 	 */
-	public static String kojiWebUrl;	// statically initialized
+	public String kojiWebUrl;	// statically initialized per instance
 	private XmlRpcClientConfigImpl config;
 	private XmlRpcClient client;
 
-	static {
-		// Sets Koji host according to preferences and statically sets kojiHubUrl and kojiWebUrl
-		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		KojiHubClient.kojiHubUrl = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_HUB_URL);
-		KojiHubClient.kojiWebUrl = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_WEB_URL);
+	// This runs right before KojiHubClient()
+	{
+		// do static instance initialization to set kojiWeb-/kojiHubUrl
+		initializeInstance();
 	}
 	
 	public KojiHubClient() throws GeneralSecurityException, IOException {
@@ -58,7 +58,7 @@ public class KojiHubClient implements IKojiHubClient {
 
 		config = new XmlRpcClientConfigImpl();
 		try {
-			config.setServerURL(new URL(KojiHubClient.kojiHubUrl));
+			config.setServerURL(new URL(this.kojiHubUrl));
 			config.setEnabledForExtensions(true);
 			config.setConnectionTimeout(30000);
 			client = new XmlRpcClient();
@@ -66,17 +66,25 @@ public class KojiHubClient implements IKojiHubClient {
 			client.setConfig(config);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
+			FedoraHandlerUtils.handleError(e);
 		}
 	}
 	
+	/**
+	 * @return the kojiWebUrl
+	 */
+	public String getWebUrl() {
+		return kojiWebUrl;
+	}
+
 	private void setSession(String sessionKey, String sessionID)
 			throws MalformedURLException {
-		config.setServerURL(new URL(KojiHubClient.kojiHubUrl + "?session-key=" + sessionKey //$NON-NLS-1$
+		config.setServerURL(new URL(this.kojiHubUrl + "?session-key=" + sessionKey //$NON-NLS-1$
 				+ "&session-id=" + sessionID)); //$NON-NLS-1$
 	}
 
 	private void discardSession() throws MalformedURLException {
-		config.setServerURL(new URL(KojiHubClient.kojiHubUrl));
+		config.setServerURL(new URL(this.kojiHubUrl));
 	}
 
 	/*
@@ -155,6 +163,13 @@ public class KojiHubClient implements IKojiHubClient {
 	public List<Object> getBuildTargets() throws XmlRpcException {
 		Object result = client.execute("getBuildTargets", new Object[0]); //$NON-NLS-1$
 		return Arrays.asList((Object[]) result);
+	}
+	
+	private synchronized void initializeInstance() {
+		// Sets Koji host according to preferences and statically sets kojiHubUrl and kojiWebUrl
+		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
+		this.kojiHubUrl = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_HUB_URL);
+		this.kojiWebUrl = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_WEB_URL);
 	}
 
 }

@@ -51,7 +51,7 @@ public class NewSourcesHandler extends UploadHandler {
 				// Don't do anything if file is empty
 				final File toAdd = resource.getLocation().toFile();
 				if (!FedoraHandlerUtils.isValidUploadFile(toAdd)) {
-					return handleOK(
+					return FedoraHandlerUtils.handleOK(
 							NLS.bind(Messages.newSourcesHandler_invalidFile,
 													toAdd.getName()), true);
 				}
@@ -60,25 +60,26 @@ public class NewSourcesHandler extends UploadHandler {
 				String filename = resource.getName();
 				IStatus result = performUpload(toAdd, filename, monitor,
 						fedoraProjectRoot);
-
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
+				} else { // bail out on error
+					return FedoraHandlerUtils.handleError(result.getMessage());
 				}
 
 				// Update sources file
 				result = updateSources(sourceFile, toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
-					return handleError(Messages.newSourcesHandler_failUpdateSourceFile);
+					return FedoraHandlerUtils.handleError(Messages.newSourcesHandler_failUpdateSourceFile);
 				}
 
 				// Handle CVS specific stuff; Update .cvsignore
 				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
-					return handleError(Messages.newSourcesHandler_failVCSUpdate);
+					return FedoraHandlerUtils.handleError(Messages.newSourcesHandler_failVCSUpdate);
 				}
 
 				// Do CVS update

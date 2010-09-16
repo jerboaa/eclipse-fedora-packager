@@ -122,7 +122,8 @@ public class KojiBuildHandler extends CommonHandler {
 										result.getMessage(),
 										MessageDialog.NONE,
 										new String[] { IDialogConstants.OK_LABEL },
-										0);
+										0,
+										koji);
 								msgDialog.open();
 							}
 						});
@@ -174,16 +175,16 @@ public class KojiBuildHandler extends CommonHandler {
 			status = new Status(IStatus.OK, KojiPlugin.PLUGIN_ID, result);
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			status = FedoraHandlerUtils.handleError(e);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			status = FedoraHandlerUtils.handleError(e);
 		} catch (GeneralSecurityException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			status = FedoraHandlerUtils.handleError(e);
 		} catch (IOException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			status = FedoraHandlerUtils.handleError(e);
 		}
 		return status;
 	}

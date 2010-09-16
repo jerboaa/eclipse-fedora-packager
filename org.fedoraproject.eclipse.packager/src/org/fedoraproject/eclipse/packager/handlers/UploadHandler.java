@@ -21,6 +21,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -92,14 +96,14 @@ public class UploadHandler extends WGetHandler {
 						&& SourcesFile
 								.checkMD5(sources.get(filename), resource)) {
 					// file already in sources
-					return handleOK(NLS.bind(Messages.uploadHandler_versionExists, filename)
+					return FedoraHandlerUtils.handleOK(NLS.bind(Messages.uploadHandler_versionExists, filename)
 							, true);
 				}
 
 				// Do file sanity checks (non-empty, file extensions etc.)
 				final File toAdd = resource.getLocation().toFile();
 				if (!FedoraHandlerUtils.isValidUploadFile(toAdd)) {
-					return handleOK(NLS.bind(Messages.uploadHandler_invalidFile,
+					return FedoraHandlerUtils.handleOK(NLS.bind(Messages.uploadHandler_invalidFile,
 							toAdd.getName()), true);
 				}
 
@@ -117,14 +121,14 @@ public class UploadHandler extends WGetHandler {
 				result = updateSources(sourceFile, toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
-					return handleError(Messages.uploadHandler_failUpdatSourceFile);
+					return FedoraHandlerUtils.handleError(Messages.uploadHandler_failUpdatSourceFile);
 				}
 
 				// Handle CVS specific stuff; Update .cvsignore
 				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
-					return handleError(Messages.uploadHandler_failVCSUpdate);
+					return FedoraHandlerUtils.handleError(Messages.uploadHandler_failVCSUpdate);
 				}
 
 				// Do CVS update
@@ -154,7 +158,6 @@ public class UploadHandler extends WGetHandler {
 	 */
 	protected IStatus performUpload(final File toAdd, final String filename,
 			IProgressMonitor monitor, FedoraProjectRoot fedoraProjectRoot) {
-		IStatus status;
 		try {
 			registerProtocol();
 
@@ -169,6 +172,14 @@ public class UploadHandler extends WGetHandler {
 					.setConnectionTimeout(30000);
 			// get upload URL from lookaside cache 
 			String uploadUrl = fedoraProjectRoot.getLookAsideCache().getUploadUrl();
+			// make sure we have a valid URL, this would fail later anyways
+			try {
+				@SuppressWarnings("unused")
+				URL dummy = new URL(uploadUrl);
+			} catch (MalformedURLException e) {
+				return FedoraHandlerUtils.handleError(NLS.bind(Messages.uploadHandler_invalidUrlError,
+						e.getMessage()));
+			}
 			PostMethod postMethod = new PostMethod(uploadUrl);
 			NameValuePair[] data = {
 					new NameValuePair(
@@ -178,7 +189,7 @@ public class UploadHandler extends WGetHandler {
 			postMethod.setRequestBody(data);
 			int returnCode = client.executeMethod(postMethod);
 			if (returnCode != HttpURLConnection.HTTP_OK) {
-				status = handleError(NLS.bind(
+				return FedoraHandlerUtils.handleError(NLS.bind(
 						Messages.uploadHandler_uploadFail, filename, returnCode));
 			} else {
 				if (monitor.isCanceled()) {
@@ -190,7 +201,7 @@ public class UploadHandler extends WGetHandler {
 
 				// if we're in debug mode, forget this check
 				if (response.toLowerCase().equals("available") && !debug) { //$NON-NLS-1$
-					status = handleOK(
+					return FedoraHandlerUtils.handleOK(
 							NLS.bind(
 									Messages.uploadHandler_fileAlreadyUploaded, filename), true);
 				} else if (response.toLowerCase().equals("missing") || debug) { //$NON-NLS-1$
@@ -199,23 +210,21 @@ public class UploadHandler extends WGetHandler {
 					}
 					monitor.subTask(NLS.bind(
 							Messages.uploadHandler_progressMsg, filename));
-					status = upload(toAdd, fedoraProjectRoot);
+					return upload(toAdd, fedoraProjectRoot);
 				} else {
-					status = handleError(response);
+					return FedoraHandlerUtils.handleError(response);
 				}
 			}
 		} catch (HttpException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			return FedoraHandlerUtils.handleError(e);
 		} catch (IOException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			return FedoraHandlerUtils.handleError(e);
 		} catch (GeneralSecurityException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			return FedoraHandlerUtils.handleError(e);
 		}
-
-		return status;
 	}
 
 	protected void registerProtocol() throws GeneralSecurityException,
@@ -255,27 +264,27 @@ public class UploadHandler extends WGetHandler {
 
 			int code = client.executeMethod(postMethod);
 			if (code != HttpURLConnection.HTTP_OK) {
-				status = handleError(NLS
+				status = FedoraHandlerUtils.handleError(NLS
 						.bind(Messages.uploadHandler_uploadFail, filename, postMethod.getStatusLine()));
 			} else {
 				status = Status.OK_STATUS;
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			status = FedoraHandlerUtils.handleError(e);
 		} catch (HttpException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			status = FedoraHandlerUtils.handleError(e);
 		} catch (IOException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			status = FedoraHandlerUtils.handleError(e);
 		} finally {
 			if (fis != null) {
 				try {
 					fis.close();
 				} catch (IOException e) {
 					e.printStackTrace();
-					status = handleError(e);
+					status = FedoraHandlerUtils.handleError(e);
 				}
 			}
 		}
@@ -352,7 +361,7 @@ public class UploadHandler extends WGetHandler {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			status = FedoraHandlerUtils.handleError(e);
 		} finally {
 			if (pw != null) {
 				pw.close();
@@ -362,7 +371,7 @@ public class UploadHandler extends WGetHandler {
 					br.close();
 				} catch (IOException e) {
 					e.printStackTrace();
-					status = handleError(e);
+					status = FedoraHandlerUtils.handleError(e);
 				}
 			}
 		}

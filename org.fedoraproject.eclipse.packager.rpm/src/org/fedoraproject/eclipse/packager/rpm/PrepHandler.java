@@ -40,9 +40,13 @@ public class PrepHandler extends RPMHandler {
 						IProgressMonitor.UNKNOWN);
 				DownloadHandler dh = new DownloadHandler();
 				IStatus result = null;
-				dh.doExecute(fedoraProjectRoot, monitor);
+				result = dh.doExecute(fedoraProjectRoot, monitor);
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
+				}
+				// do proper error handling if download fails.
+				if (!result.isOK()) {
+					return FedoraHandlerUtils.handleError(result.getMessage());
 				}
 				ArrayList<String> flags = new ArrayList<String>();
 				flags.add("--nodeps"); //$NON-NLS-1$

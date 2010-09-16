@@ -141,13 +141,13 @@ public class BodhiNewHandler extends CommonHandler {
 
 							// success
 							if (result.isOK()) {
-								handleOK(message, true);
+								FedoraHandlerUtils.handleOK(message, true);
 
 								if (authDialog.getAllowCaching()) {
 									storeCredentials(username, password);
 								}
 							} else {
-								handleError(message);
+								FedoraHandlerUtils.handleError(message);
 							}
 							return result;
 						}
@@ -155,11 +155,11 @@ public class BodhiNewHandler extends CommonHandler {
 							return Status.CANCEL_STATUS;
 						}
 					} else {
-						return handleError(NLS.bind(Messages.bodhiNewHandler_notCorrectTagFail, branchName, tag));
+						return FedoraHandlerUtils.handleError(NLS.bind(Messages.bodhiNewHandler_notCorrectTagFail, branchName, tag));
 					}
 				} catch (CoreException e) {
 					e.printStackTrace();
-					return handleError(e);
+					return FedoraHandlerUtils.handleError(e);
 				}
 			}
 		};
@@ -256,7 +256,7 @@ public class BodhiNewHandler extends CommonHandler {
 				node.put("password", password, true); //$NON-NLS-1$
 			} catch (StorageException e) {
 				e.printStackTrace();
-				handleError(e);
+				FedoraHandlerUtils.handleError(e);
 			}
 		}
 	}
@@ -272,7 +272,7 @@ public class BodhiNewHandler extends CommonHandler {
 			}
 		} catch (StorageException e) {
 			e.printStackTrace();
-			handleError(e);
+			FedoraHandlerUtils.handleError(e);
 		}
 		return null;
 	}
@@ -320,16 +320,16 @@ public class BodhiNewHandler extends CommonHandler {
 			bodhi.logout();
 		} catch (GeneralSecurityException e) {
 			e.printStackTrace();
-			status = handleError(e.getMessage());
+			status = FedoraHandlerUtils.handleError(e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace();
-			status = handleError(e.getMessage());
+			status = FedoraHandlerUtils.handleError(e.getMessage());
 		} catch (ParseException e) {
 			e.printStackTrace();
-			status = handleError(e.getMessage());
+			status = FedoraHandlerUtils.handleError(e.getMessage());
 		} catch (JSONException e) {
 			e.printStackTrace();
-			status = handleError(e.getMessage());
+			status = FedoraHandlerUtils.handleError(e.getMessage());
 		}
 
 		return status;

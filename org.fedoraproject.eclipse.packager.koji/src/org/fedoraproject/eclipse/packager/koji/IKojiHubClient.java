@@ -23,5 +23,7 @@ public interface IKojiHubClient {
 
 	public abstract String build(String target, String scmURL, boolean scratch)
 			throws XmlRpcException;
+	
+	public abstract String getWebUrl();
 
 }

@@ -12,6 +12,7 @@ package org.fedoraproject.eclipse.packager.handlers;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Set;
@@ -46,7 +47,7 @@ public abstract class WGetHandler extends CommonHandler {
 		Set<String> sourcesToGet = sourcesFile.getSourcesToDownload();
 	
 		if (sourcesToGet.isEmpty()) {
-			return handleOK(Messages.wGetHandler_nothingToDownload, false);
+			return FedoraHandlerUtils.handleOK(Messages.wGetHandler_nothingToDownload, false);
 		}
 	
 		// Need to download remaining sources from repo
@@ -64,14 +65,14 @@ public abstract class WGetHandler extends CommonHandler {
 					sourcesFile.deleteSource(source);
 				} catch (CoreException e) {
 					e.printStackTrace();
-					handleError(e);
+					return FedoraHandlerUtils.handleError(e);
 				}
 				break;
 			}
 		}
 	
 		if (!status.isOK()) {
-			return handleError(status.getMessage());
+			return FedoraHandlerUtils.handleError(status.getMessage());
 		}
 	
 		// sources downloaded successfully, check MD5
@@ -83,7 +84,7 @@ public abstract class WGetHandler extends CommonHandler {
 			for (String source : sourcesToGet) {
 				failedSources += source + '\n';
 			}
-			return handleError(NLS.bind(Messages.wGetHandler_badMd5sum, failedSources));
+			return FedoraHandlerUtils.handleError(NLS.bind(Messages.wGetHandler_badMd5sum, failedSources));
 		} else {
 			return Status.OK_STATUS;
 		}
@@ -104,18 +105,22 @@ public abstract class WGetHandler extends CommonHandler {
 			} else {
 				return new DownloadJob(file, conn).run(monitor);
 			}
+		} catch (MalformedURLException e) {
+			// Url doesn't seem right
+			return FedoraHandlerUtils.handleError(e);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return handleError(NLS.bind(
+			return FedoraHandlerUtils.handleError(NLS.bind(
 					Messages.wGetHandler_couldNotCreate, fileName));
 
-		} finally {
+		}
+		finally {
 			// refresh folder in resource tree
 			try {
 				project.refreshLocal(IResource.DEPTH_ONE, monitor);
 			} catch (CoreException e) {
 				e.printStackTrace();
-				return handleError(Messages.wGetHandler_couldNotRefresh);
+				return FedoraHandlerUtils.handleError(Messages.wGetHandler_couldNotRefresh);
 			}
 		}
 	}

@@ -98,7 +98,7 @@ public abstract class RPMHandler extends CommonHandler {
 			status = runShellCommand(is, monitor);
 		} catch (IOException e) {
 			e.printStackTrace();
-			handleError(e);
+			FedoraHandlerUtils.handleError(e);
 		}
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
@@ -110,7 +110,7 @@ public abstract class RPMHandler extends CommonHandler {
 					new NullProgressMonitor());
 		} catch (CoreException e) {
 			e.printStackTrace();
-			handleError(e);
+			FedoraHandlerUtils.handleError(e);
 		}
 		return status;
 	}
@@ -171,7 +171,7 @@ public abstract class RPMHandler extends CommonHandler {
 					}
 
 				});
-				handleError(Messages.rpmHandler_terminationMsg);
+				FedoraHandlerUtils.handleError(Messages.rpmHandler_terminationMsg);
 				return Status.CANCEL_STATUS;
 			}
 
@@ -207,9 +207,13 @@ public abstract class RPMHandler extends CommonHandler {
 		DownloadHandler dh = new DownloadHandler();
 		IStatus result = null;
 		// retrieve sources
-			dh.doExecute(fedoraProjectRoot, monitor);
+		result = dh.doExecute(fedoraProjectRoot, monitor);
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
+		}
+		// do proper error handling if download fails.
+		if (!result.isOK()) {
+			return FedoraHandlerUtils.handleError(result.getMessage());
 		}
 		ArrayList<String> flags = new ArrayList<String>();
 		flags.add("--nodeps"); //$NON-NLS-1$

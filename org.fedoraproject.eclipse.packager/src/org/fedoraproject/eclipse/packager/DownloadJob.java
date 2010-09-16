@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -25,7 +26,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
+import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 /**
  * Job class for downloading files from lookaside cache.
@@ -79,13 +86,17 @@ public class DownloadJob extends Job {
 			}
 			tempFile.delete();
 		} catch (FileNotFoundException e) {
-			return Status.CANCEL_STATUS;
+			return FedoraHandlerUtils.handleError(NLS.bind(Messages.downloadJob_fileDoesNotExist,
+					file.getName(), e.getMessage()), false);
+		} catch (UnknownHostException e) {
+			return FedoraHandlerUtils.handleError(NLS.bind(Messages.downloadJob_badHostname,
+					e.getMessage()), false);
 		} catch (CoreException e) {
 			e.printStackTrace();
-			return Status.CANCEL_STATUS;
+			return FedoraHandlerUtils.handleError(e);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return Status.CANCEL_STATUS;
+			return FedoraHandlerUtils.handleError(e);
 		}
 		monitor.done();
 		return Status.OK_STATUS;

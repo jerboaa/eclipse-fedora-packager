@@ -42,9 +42,13 @@ public class LocalBuildHandler extends RPMHandler {
 				DownloadHandler dh = new DownloadHandler();
 				IStatus result = null;
 				// retrieve sources
-				dh.doExecute(fedoraProjectRoot, monitor);
+				result = dh.doExecute(fedoraProjectRoot, monitor);
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
+				}
+				// do proper error handling if download fails.
+				if (!result.isOK()) {
+					return FedoraHandlerUtils.handleError(result.getMessage());
 				}
 				try {
 					// search for noarch directive, otherwise use local arch
@@ -63,7 +67,7 @@ public class LocalBuildHandler extends RPMHandler {
 
 				} catch (CoreException e) {
 					e.printStackTrace();
-					result = handleError(e);
+					result = FedoraHandlerUtils.handleError(e);
 				}
 				monitor.done();
 				return result;

@@ -62,60 +62,6 @@ public abstract class CommonHandler extends AbstractHandler {
 		return recentClog.trim();
 	}
 
-	protected IStatus error(String message) {
-		return new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, message);
-	}
-
-	protected IStatus handleError(final String message, Throwable exception,
-			final boolean isError, boolean showInDialog) {
-		// do not ask for user interaction while in debug mode
-		if (showInDialog && !debug) {
-			if (Display.getCurrent() == null) {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						if (isError) {
-							MessageDialog.openError(shell, Messages.commonHandler_fedoraPackagerName, //$NON-NLS-1$
-									message);
-						} else {
-							MessageDialog.openInformation(shell,
-									Messages.commonHandler_fedoraPackagerName, message); //$NON-NLS-1$
-						}
-					}
-				});
-			} else {
-				if (isError) {
-					MessageDialog.openError(shell, Messages.commonHandler_fedoraPackagerName, message); //$NON-NLS-1$
-				} else {
-					MessageDialog.openInformation(shell, Messages.commonHandler_fedoraPackagerName,//$NON-NLS-1$
-							message);
-				}
-			}
-		}
-		return new Status(isError ? IStatus.ERROR : IStatus.OK,
-				PackagerPlugin.PLUGIN_ID, message, exception);
-	}
-
-	protected IStatus handleError(String message) {
-		return handleError(message, null, true, false);
-	}
-
-	protected IStatus handleError(String message, boolean showInDialog) {
-		return handleError(message, null, true, showInDialog);
-	}
-
-	protected IStatus handleOK(String message, boolean showInDialog) {
-		return handleError(message, null, false, showInDialog);
-	}
-
-	protected IStatus handleError(Exception e) {
-		return handleError(e.getMessage(), e, true, false);
-	}
-
-	protected IStatus handleError(Exception e, boolean showInDialog) {
-		return handleError(e.getMessage(), e, true, showInDialog);
-	}
-
 	/**
 	 * Utility method which allows a handler to wait until a job is
 	 * finished. The private job member variable can be set via

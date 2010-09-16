@@ -75,7 +75,7 @@ public class MockBuildHandler extends RPMHandler {
 			return mockBuild(mockcfg, projectRoot, monitor);
 		} catch (CoreException e) {
 			e.printStackTrace();
-			return handleError(e);
+			return FedoraHandlerUtils.handleError(e);
 		}
 	}
 
@@ -86,7 +86,7 @@ public class MockBuildHandler extends RPMHandler {
 		
 		// make sure mock is installed, bail out otherwise
 		if (!isMockInstalled()) {
-			return handleError(Messages.mockBuildHandler_mockNotInstalled);
+			return FedoraHandlerUtils.handleError(Messages.mockBuildHandler_mockNotInstalled);
 		}
 		try {
 			Specfile specfile = projectRoot.getSpecfileModel();
@@ -103,10 +103,10 @@ public class MockBuildHandler extends RPMHandler {
 					new NullProgressMonitor());
 		} catch (CoreException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			status = FedoraHandlerUtils.handleError(e);
 		} catch (IOException e) {
 			e.printStackTrace();
-			status = handleError(e);
+			status = FedoraHandlerUtils.handleError(e);
 		}
 		return status;
 	}

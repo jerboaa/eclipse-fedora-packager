@@ -39,10 +39,12 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
@@ -51,6 +53,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.EditorPart;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 /**
@@ -325,6 +328,13 @@ public class FedoraHandlerUtils {
 		return result.substring(0, result.indexOf('\n'));
 	}
 	
+	/**
+	 * Get distribution definitions required for RPM build.
+	 * 
+	 * @param projectBits
+	 * @param parentName
+	 * @return A list of required dist-defines.
+	 */
 	public static List<String> getDistDefines(IFpProjectBits projectBits, String parentName) {
 		// substitution for rhel
 		ArrayList<String> distDefines = new ArrayList<String>();
@@ -335,6 +345,111 @@ public class FedoraHandlerUtils {
 		distDefines.add("--define"); //$NON-NLS-1$
 		distDefines.add(distvar + projectBits.getDist()); 
 		return distDefines;
+	}
+	
+	/**
+	 * Create an IStatus error
+	 * 
+	 * @param message
+	 * @return A newly created Status instance.
+	 */
+	public static IStatus error(String message) {
+		return new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, message);
+	}
+
+	/**
+	 * Create a MessageDialog 
+	 * @param message
+	 * @param exception
+	 * @param isError
+	 * @param showInDialog
+	 * @return
+	 */
+	private static IStatus handleError(final String message, Throwable exception,
+			final boolean isError, boolean showInDialog) {
+		// do not ask for user interaction while in debug mode
+		if (showInDialog) {
+			if (Display.getCurrent() == null) {
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						if (isError) {
+							MessageDialog.openError(null, Messages.commonHandler_fedoraPackagerName,
+									message);
+						} else {
+							MessageDialog.openInformation(null,
+									Messages.commonHandler_fedoraPackagerName, message);
+						}
+					}
+				});
+			} else {
+				if (isError) {
+					MessageDialog.openError(null, Messages.commonHandler_fedoraPackagerName, message);
+				} else {
+					MessageDialog.openInformation(null, Messages.commonHandler_fedoraPackagerName,
+							message);
+				}
+			}
+		}
+		return new Status(isError ? IStatus.ERROR : IStatus.OK,
+				PackagerPlugin.PLUGIN_ID, message, exception);
+	}
+
+	/**
+	 * Create a user-friendly IStatus error message.
+	 * 
+	 * @param message
+	 * 		The error which occurred.
+	 * @return The IStatus object.
+	 */
+	public static IStatus handleError(String message) {
+		return handleError(message, null, true, false);
+	}
+
+	/**
+	 * Create a user-friendly IStatus error message.
+	 * @param message
+	 * 		The error which occurred.
+	 * @param showInDialog
+	 * 		Show error inline?
+	 * @return The IStatus object.
+	 */
+	public static IStatus handleError(String message, boolean showInDialog) {
+		return handleError(message, null, true, showInDialog);
+	}
+
+	/**
+	 * Create a user-friendly IStatus message.
+	 * @param message
+	 * 		The message for this status.
+	 * @param showInDialog
+	 * 		Show dialog inline?
+	 * @return The IStatus object.
+	 */
+	public static IStatus handleOK(String message, boolean showInDialog) {
+		return handleError(message, null, false, showInDialog);
+	}
+
+	/**
+	 * Create a user-friendly IStatus error message.
+	 * @param e
+	 * 		The Exception which occurred.
+	 * @return The IStatus object.
+	 */
+	public static IStatus handleError(Exception e) {
+		return handleError(e.getMessage(), e, true, false);
+	}
+
+	/**
+	 * Create a user-friendly IStatus error message.
+	 * @param e
+	 * 		The Exception which occurred.
+	 * @param showInDialog
+	 * 		Show error inline?
+	 * @return The IStatus object.
+	 */
+	public static IStatus handleError(Exception e, boolean showInDialog) {
+		return handleError(e.getMessage(), e, true, showInDialog);
 	}
 
 }

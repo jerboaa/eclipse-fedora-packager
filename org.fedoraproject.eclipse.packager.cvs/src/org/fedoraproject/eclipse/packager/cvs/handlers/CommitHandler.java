@@ -82,7 +82,7 @@ public class CommitHandler extends CommonHandler {
 						cs.add(new IResource[] { specfile });
 					} catch (CoreException e) {
 						e.printStackTrace();
-						return handleError(e);
+						return FedoraHandlerUtils.handleError(e);
 					}
 					// add the most recent entry from the specfile's changelog to the
 					// commit message
@@ -105,7 +105,7 @@ public class CommitHandler extends CommonHandler {
 									manager.remove(cs);
 								} catch (CVSException e) {
 									e.printStackTrace();
-									handleError(e, true);
+									FedoraHandlerUtils.handleError(e, true);
 								}
 							}			
 						});

@@ -16,6 +16,8 @@ public class Messages extends NLS {
 	public static String consoleWriterThread_ioFail;
 	// DownloadJob
 	public static String downloadJob_name;
+	public static String downloadJob_fileDoesNotExist;
+	public static String downloadJob_badHostname;
 	// CommonHandler Strings
 	public static String commonHandler_fedoraPackagerName;
 	public static String commonHandler_branchAlreadyTaggedMessage;
@@ -38,6 +40,7 @@ public class Messages extends NLS {
 	public static String uploadHandler_uploadFail;
 	public static String uploadHandler_fileAlreadyUploaded;
 	public static String uploadHandler_progressMsg;
+	public static String uploadHandler_invalidUrlError;
 	// WGetHandler Strings
 	public static String wGetHandler_nothingToDownload;
 	public static String wGetHandler_badMd5sum;
