@@ -28,7 +28,7 @@ public class KojiHubClientStub implements IKojiHubClient {
 	public void logout() throws MalformedURLException, XmlRpcException {
 	}
 
-	public String sslLogin() throws XmlRpcException, MalformedURLException {
+	public String login() throws XmlRpcException, MalformedURLException {
 		return null;
 	}
 	

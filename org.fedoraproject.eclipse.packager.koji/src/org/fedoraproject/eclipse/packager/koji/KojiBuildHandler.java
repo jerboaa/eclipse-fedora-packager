@@ -155,9 +155,9 @@ public class KojiBuildHandler extends CommonHandler {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			// SSL login
+			// login via SSL if available, otherwise do plain login
 			monitor.subTask(Messages.kojiBuildHandler_kojiLogin);
-			String result = koji.sslLogin();
+			String result = koji.login();
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
