@@ -98,20 +98,10 @@ public class KojiHubClient implements IKojiHubClient {
 	 * @see org.fedoraproject.eclipse.packager.IKojiHubClient#sslLogin()
 	 */
 	@Override
-	public String login() throws XmlRpcException, MalformedURLException {
+	public String sslLogin() throws XmlRpcException, MalformedURLException {
 		ArrayList<String> params = new ArrayList<String>();
 		Object result = null;
-		try {
-			if (isSSLable()) {
-				result = client.execute("sslLogin", params); //$NON-NLS-1$
-			} else {
-				params.add("username"); //FIXME: prompt for username/password?
-				params.add("password");
-				result = client.execute("login", params); //$NON-NLS-1$
-			}
-		} catch (MalformedURLException e) {
-			FedoraHandlerUtils.handleError(e);
-		}
+		result = client.execute("sslLogin", params); //$NON-NLS-1$
 		HashMap<?, ?> hashMap = (HashMap<?, ?>)result;
 		String sessionKey = hashMap.get("session-key").toString(); //$NON-NLS-1$
 		String sessionID = hashMap.get("session-id").toString(); //$NON-NLS-1$
