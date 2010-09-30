@@ -35,6 +35,8 @@ public class Messages extends NLS {
 	// KojiMessageDialog Strings
 	public static String kojiMessageDialog_buildNumberMsg;
 	public static String kojiMessageDialog_buildResponseMsg;
+	// KojiHubClient
+	public static String kojiHubClient_invalidHubUrl;
 	
 	static {
 		// initialize resource bundle

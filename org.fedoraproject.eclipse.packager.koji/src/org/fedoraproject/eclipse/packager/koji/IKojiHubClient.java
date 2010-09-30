@@ -16,7 +16,7 @@ import org.apache.xmlrpc.XmlRpcException;
 
 public interface IKojiHubClient {
 
-	public abstract String sslLogin() throws XmlRpcException,
+	public abstract String login() throws XmlRpcException,
 			MalformedURLException;
 
 	public abstract void logout() throws MalformedURLException, XmlRpcException;

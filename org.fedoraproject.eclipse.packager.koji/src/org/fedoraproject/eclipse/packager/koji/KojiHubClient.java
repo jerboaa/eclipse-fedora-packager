@@ -53,8 +53,14 @@ public class KojiHubClient implements IKojiHubClient {
 	}
 	
 	public KojiHubClient() throws GeneralSecurityException, IOException {
-		// init SSL connection
-		SSLUtils.initSSLConnection();
+		try {
+			if (isSSLable()) {
+				// init SSL connection if available
+				SSLUtils.initSSLConnection();
+			}
+		} catch (MalformedURLException e) {
+			FedoraHandlerUtils.handleError(e);
+		}
 
 		config = new XmlRpcClientConfigImpl();
 		try {
@@ -65,7 +71,6 @@ public class KojiHubClient implements IKojiHubClient {
 			client.setTypeFactory(new KojiTypeFactory(client));
 			client.setConfig(config);
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
 			FedoraHandlerUtils.handleError(e);
 		}
 	}
@@ -93,10 +98,21 @@ public class KojiHubClient implements IKojiHubClient {
 	 * @see org.fedoraproject.eclipse.packager.IKojiHubClient#sslLogin()
 	 */
 	@Override
-	public String sslLogin() throws XmlRpcException, MalformedURLException {
+	public String login() throws XmlRpcException, MalformedURLException {
 		ArrayList<String> params = new ArrayList<String>();
-		Object result = client.execute("sslLogin", params); //$NON-NLS-1$
-		HashMap<?, ?> hashMap = (HashMap<?, ?>) result;
+		Object result = null;
+		try {
+			if (isSSLable()) {
+				result = client.execute("sslLogin", params); //$NON-NLS-1$
+			} else {
+				params.add("username"); //FIXME: prompt for username/password?
+				params.add("password");
+				result = client.execute("login", params); //$NON-NLS-1$
+			}
+		} catch (MalformedURLException e) {
+			FedoraHandlerUtils.handleError(e);
+		}
+		HashMap<?, ?> hashMap = (HashMap<?, ?>)result;
 		String sessionKey = hashMap.get("session-key").toString(); //$NON-NLS-1$
 		String sessionID = hashMap.get("session-id").toString(); //$NON-NLS-1$
 		setSession(sessionKey, sessionID);
@@ -165,11 +181,31 @@ public class KojiHubClient implements IKojiHubClient {
 		return Arrays.asList((Object[]) result);
 	}
 	
+	/**
+	 * Static instance initializer routine.
+	 */
 	private synchronized void initializeInstance() {
 		// Sets Koji host according to preferences and statically sets kojiHubUrl and kojiWebUrl
 		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
 		this.kojiHubUrl = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_HUB_URL);
 		this.kojiWebUrl = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_WEB_URL);
+	}
+	
+	/**
+	 * Determine if SSL should be used for XMLRPC requests. I.e. URLs starting with https://
+	 * will enable SSL, http:// URLs won't. A MalformedURLException will we thrown if URL
+	 * starts with neither.
+	 * 
+	 * @return True if URL starts with <code>https</code>, false if it starts with <code>http</code>.
+	 */
+	private boolean isSSLable() throws MalformedURLException {
+		if (this.kojiHubUrl.startsWith("https")) {
+			return true;
+		} else if (this.kojiHubUrl.startsWith("http")) {
+			return false;
+		} else {
+			throw new MalformedURLException(Messages.kojiHubClient_invalidHubUrl);
+		}
 	}
 
 }
