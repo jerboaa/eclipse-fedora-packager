@@ -68,8 +68,9 @@ public class NewSourcesHandler extends UploadHandler {
 					return FedoraHandlerUtils.handleError(result.getMessage());
 				}
 
-				// Update sources file
-				result = updateSources(sourceFile, toAdd);
+				// Update sources file (replace existing sources, add true as
+				// last parameter)
+				result = updateSources(sourceFile, toAdd, true);
 				if (!result.isOK()) {
 					// fail updating sources file
 					return FedoraHandlerUtils.handleError(Messages.newSourcesHandler_failUpdateSourceFile);
