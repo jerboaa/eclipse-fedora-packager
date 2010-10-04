@@ -84,7 +84,6 @@ public class KojiMessageDialog extends MessageDialog {
 											| IWorkbenchBrowserSupport.STATUS,
 									"koji_task", null, null); //$NON-NLS-1$
 					browser.openURL(new URL(url));
-					close();
 				} catch (PartInitException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
