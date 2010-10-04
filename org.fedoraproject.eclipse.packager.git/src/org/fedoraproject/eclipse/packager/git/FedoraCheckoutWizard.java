@@ -149,10 +149,19 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 			RepositoryCache repoCache = org.eclipse.egit.core.Activator
 					.getDefault().getRepositoryCache();
 			try {
-				this.gitRepository = repoCache.lookupRepository(new File(
-						newProject.getLocation().toOSString() + "/.git")); //$NON-NLS-1$
+				this.gitRepository = repoCache.lookupRepository(clone.getGitDir());
 			} catch (IOException ex) {
-				ex.printStackTrace();
+				// Repo lookup failed, no way we can continue.
+				ErrorDialog
+				.openError(
+						getShell(),
+						getWindowTitle(),
+						Messages.fedoraCheckoutWizard_cloneFail,
+						new Status(
+								IStatus.ERROR,
+								org.fedoraproject.eclipse.packager.git.Activator.PLUGIN_ID,
+								0, ex.getMessage(), null));
+				return false;
 			}
 			
 			// Create local branches
@@ -163,7 +172,16 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 					try {
 						createLocalBranches(monitor);
 					} catch (CoreException e) {
-						e.printStackTrace();
+						ErrorDialog
+						.openError(
+								getShell(),
+								getWindowTitle(),
+								Messages.fedoraCheckoutWizard_cloneFail,
+								new Status(
+										IStatus.ERROR,
+										org.fedoraproject.eclipse.packager.git.Activator.PLUGIN_ID,
+										0, e.getMessage(), null));
+						return;
 					}
 					if (monitor.isCanceled())
 						throw new InterruptedException();
