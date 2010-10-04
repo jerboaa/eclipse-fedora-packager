@@ -47,7 +47,9 @@ import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -124,18 +126,28 @@ public class UploadHandler extends WGetHandler {
 					return FedoraHandlerUtils.handleError(Messages.uploadHandler_failUpdatSourceFile);
 				}
 
-				// Handle CVS specific stuff; Update .cvsignore
+				// Handle VCS specific stuff; Update .gitignore/.cvsignore
 				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
 					return FedoraHandlerUtils.handleError(Messages.uploadHandler_failVCSUpdate);
 				}
 
-				// Do CVS update
+				// Do VCS update
 				result = projectBits.updateVCS(fedoraProjectRoot, monitor);
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
+					}
+				}
+				
+				// Refresh project
+				IProject project = fedoraProjectRoot.getProject();
+				if (project != null) {
+					try {
+						project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+					} catch (CoreException e) {
+						return FedoraHandlerUtils.handleError(e);
 					}
 				}
 				return result;

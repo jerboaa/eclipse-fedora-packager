@@ -14,7 +14,9 @@ import java.io.File;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -76,18 +78,31 @@ public class NewSourcesHandler extends UploadHandler {
 					return FedoraHandlerUtils.handleError(Messages.newSourcesHandler_failUpdateSourceFile);
 				}
 
-				// Handle CVS specific stuff; Update .cvsignore
+				// Handle VCS specific stuff; Update .cvsignore/.gitignore
 				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
 					return FedoraHandlerUtils.handleError(Messages.newSourcesHandler_failVCSUpdate);
 				}
 
-				// Do CVS update
+				// Do VCS update
 				result = projectBits.updateVCS(fedoraProjectRoot, monitor);
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
+					}
+				} else {
+					// fail updating VCS
+					return FedoraHandlerUtils.handleError(Messages.newSourcesHandler_failVCSUpdate);
+				}
+				
+				// Refresh project
+				IProject project = fedoraProjectRoot.getProject();
+				if (project != null) {
+					try {
+						project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+					} catch (CoreException e) {
+						return FedoraHandlerUtils.handleError(e);
 					}
 				}
 				return result;
