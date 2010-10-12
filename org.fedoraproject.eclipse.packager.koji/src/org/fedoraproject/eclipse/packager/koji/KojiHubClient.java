@@ -24,6 +24,15 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.IConsoleView;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SSLUtils;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
@@ -35,6 +44,7 @@ import org.fedoraproject.eclipse.packager.koji.preferences.PreferencesConstants;
 // TODO Catch all Exceptions and return a unified error message
 public class KojiHubClient implements IKojiHubClient {
 	
+	private final String CONSOLE_NAME = KojiPlugin.PLUGIN_ID + ".console";
 	/**
 	 * URL of the Koji Web interface
 	 */
@@ -197,5 +207,49 @@ public class KojiHubClient implements IKojiHubClient {
 			throw new MalformedURLException(Messages.kojiHubClient_invalidHubUrl);
 		}
 	}
+	
+	/**
+	 * Create MessageConsole if not found.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	private MessageConsole findConsole(String name) {
+	      IConsoleManager conMan = ConsolePlugin.getDefault().getConsoleManager();
+	      IConsole[] existing = conMan.getConsoles();
+	      for (int i = 0; i < existing.length; i++)
+	         if (name.equals(existing[i].getName()))
+	            return (MessageConsole) existing[i];
+	      //no console found, so create a new one
+	      MessageConsole myConsole = new MessageConsole(name, null);
+	      conMan.addConsoles(new IConsole[]{myConsole});
+	      return myConsole;
+	 }
+	
+	/**
+	 * Utility method to write to Eclipse console if not present.
+	 * 
+	 * @param message
+	 */
+	public void writeToConsole(String message) {
+		MessageConsole console = findConsole(CONSOLE_NAME);
+		MessageConsoleStream out = console.newMessageStream();
+		out.setActivateOnWrite(true);
+		out.println(message);
+		
+		// Show console view
+		IWorkbenchPage page = PackagerPlugin.getDefault().getWorkbench()
+				.getActiveWorkbenchWindow().getActivePage();
+		String id = IConsoleConstants.ID_CONSOLE_VIEW;
+		IConsoleView view = null;
+		try {
+			view = (IConsoleView) page.showView(id);
+		} catch (PartInitException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		view.display(console);
+	}
+
 
 }

@@ -29,8 +29,10 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
@@ -109,22 +111,35 @@ public class KojiBuildHandler extends CommonHandler {
 				IJobChangeListener listener = new JobChangeAdapter() {
 					@Override
 					public void done(IJobChangeEvent event) {
+						final String taskId = event.getResult().getMessage(); // IStatus message is task ID
 						Display.getDefault().asyncExec(new Runnable() {
 							@Override
 							public void run() {
 								ImageDescriptor descriptor = KojiPlugin
 										.getImageDescriptor("icons/Artwork_DesignService_koji-icon-16.png"); //$NON-NLS-1$
 								Image titleImage = descriptor.createImage();
-								KojiMessageDialog msgDialog = new KojiMessageDialog(
-										shell,
-										Messages.kojiBuildHandler_kojiBuild,
-										titleImage,
-										result.getMessage(),
-										MessageDialog.NONE,
-										new String[] { IDialogConstants.OK_LABEL },
-										0,
-										koji);
-								msgDialog.open();
+								// Make sure we have a proper shell.
+								Shell shell = Display.getDefault()
+										.getActiveShell();
+								if (shell == null) {
+									// Try harder to get a proper shell
+									shell = new Shell(Display.getDefault());
+								}
+								if (!shell.isDisposed()) {
+									KojiMessageDialog msgDialog = new KojiMessageDialog(
+											shell,
+											Messages.kojiBuildHandler_kojiBuild,
+											titleImage,
+											taskId,
+											MessageDialog.NONE,
+											new String[] { IDialogConstants.OK_LABEL },
+											0, koji);
+									msgDialog.open();
+								} else {
+									// Fall back to console output
+									((KojiHubClient) koji)
+											.writeToConsole(NLS.bind(Messages.kojiBuildHandler_fallbackBuildMsg, taskId));
+								}
 							}
 						});
 					}

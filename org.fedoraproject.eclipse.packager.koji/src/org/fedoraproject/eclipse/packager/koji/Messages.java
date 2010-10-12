@@ -32,6 +32,7 @@ public class Messages extends NLS {
 	public static String kojiBuildHandler_kojiLogin;
 	public static String kojiBuildHandler_sendBuildCmd;
 	public static String kojiBuildHandler_kojiLogout;
+	public static String kojiBuildHandler_fallbackBuildMsg;
 	// KojiMessageDialog Strings
 	public static String kojiMessageDialog_buildNumberMsg;
 	public static String kojiMessageDialog_buildResponseMsg;
