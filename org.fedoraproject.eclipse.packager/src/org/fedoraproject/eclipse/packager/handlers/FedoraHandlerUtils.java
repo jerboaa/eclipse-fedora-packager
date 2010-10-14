@@ -343,7 +343,7 @@ public class FedoraHandlerUtils {
 		distDefines.add("--define"); //$NON-NLS-1$
 		distDefines.add("dist " + projectBits.getDist()); //$NON-NLS-1$
 		distDefines.add("--define"); //$NON-NLS-1$
-		distDefines.add(distvar + projectBits.getDistVal()); 
+		distDefines.add(distvar +' ' + projectBits.getDistVal()); 
 		return distDefines;
 	}
 	
