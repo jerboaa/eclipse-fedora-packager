@@ -42,19 +42,20 @@ public class KojiMessageDialog extends MessageDialog {
 	 * @param parentShell
 	 * @param dialogTitle
 	 * @param dialogTitleImage
-	 * @param taskNo
 	 * @param dialogImageType
 	 * @param dialogButtonLabels
 	 * @param defaultIndex
+	 * @param kojiClient 
+	 * @param taskId 
 	 */
 	public KojiMessageDialog(Shell parentShell, String dialogTitle,
-			Image dialogTitleImage, String taskNo, int dialogImageType,
-			String[] dialogButtonLabels, int defaultIndex, IKojiHubClient kojiClient) {
+			Image dialogTitleImage, int dialogImageType,
+			String[] dialogButtonLabels, int defaultIndex, IKojiHubClient kojiClient, String taskId) {
 		super(parentShell, dialogTitle, dialogTitleImage,
-				NLS.bind(Messages.kojiMessageDialog_buildNumberMsg, taskNo),
+				NLS.bind(Messages.kojiMessageDialog_buildNumberMsg, taskId),
 				dialogImageType, dialogButtonLabels, defaultIndex);
-		this.taskNo = taskNo;
 		this.kojiClient = kojiClient;
+		this.taskNo = taskId;
 	}
 
 	@Override

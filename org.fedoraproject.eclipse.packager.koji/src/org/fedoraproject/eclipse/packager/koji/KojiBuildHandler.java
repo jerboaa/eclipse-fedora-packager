@@ -17,7 +17,6 @@ import java.security.GeneralSecurityException;
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -33,6 +32,8 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
@@ -50,18 +51,33 @@ public class KojiBuildHandler extends CommonHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final IResource resource = FedoraHandlerUtils.getResource(e);
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
 		final IFpProjectBits projectBits = FedoraHandlerUtils
 				.getVcsHandler(fedoraProjectRoot);
+		// Fixes Trac ticket #35; Need to have shell variable on heap not
+		// on a thread's stack.
+		shell = getShell(e);
+
+		// Send the build
 		job = new Job(Messages.kojiBuildHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(Messages.kojiBuildHandler_sendBuildToKoji,
 						IProgressMonitor.UNKNOWN);
 				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
-
+				
+				// Initialize koji client
+				try {
+					koji = new KojiHubClient();
+				} catch (GeneralSecurityException e1) {
+					e1.printStackTrace();
+					return FedoraHandlerUtils.handleError(e1);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					return FedoraHandlerUtils.handleError(e1);
+				}
+				
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
@@ -75,13 +91,74 @@ public class KojiBuildHandler extends CommonHandler {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-					status = makeBuildJob(fedoraProjectRoot, monitor);
+					status = newBuild(fedoraProjectRoot, monitor);
+					if (status.isOK()) {
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
+					}
 				}
-
 				monitor.done();
 				return status;
 			}
 		};
+		// Create job listener (for event done)
+		IJobChangeListener listener = new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				final IStatus jobStatus = event.getResult();
+				PlatformUI.getWorkbench().getDisplay().asyncExec(
+						new Runnable() {
+							@Override
+							public void run() {
+								// Only show something on success
+								if (jobStatus.isOK()) {
+									final String taskId = jobStatus
+											.getMessage(); // IStatus message is
+															// task ID
+									ImageDescriptor descriptor = KojiPlugin
+											.getImageDescriptor("icons/Artwork_DesignService_koji-icon-16.png"); //$NON-NLS-1$
+									Image titleImage = descriptor.createImage();
+									if (shell != null && !shell.isDisposed()) {
+										KojiMessageDialog msgDialog = new KojiMessageDialog(
+												shell,
+												Messages.kojiBuildHandler_kojiBuild,
+												titleImage,
+												MessageDialog.NONE,
+												new String[] { IDialogConstants.OK_LABEL },
+												0, koji, taskId);
+										msgDialog.open();
+									} else { // fall back to console print
+										koji
+												.writeToConsole(NLS
+														.bind(
+																Messages.kojiBuildHandler_fallbackBuildMsg,
+																taskId));
+									}
+								} else if (shell != null && !shell.isDisposed()) {
+									// Try to show error
+									MessageDialog
+											.openError(
+													shell,
+													Messages.kojiBuildHandler_kojiBuild,
+													NLS
+															.bind(
+																	Messages.kojiBuildHandler_buildTaskIdError,
+																	jobStatus
+																			.getMessage()));
+								} else {
+									koji
+											.writeToConsole(NLS
+													.bind(
+															Messages.kojiBuildHandler_buildTaskIdError,
+															jobStatus
+																	.getMessage()));
+								}
+							}
+						});
+			}
+		};
+		job.addJobChangeListener(listener);
 		job.setUser(true);
 		job.schedule();
 		return null;
@@ -98,59 +175,6 @@ public class KojiBuildHandler extends CommonHandler {
 		return op.isOkPressed();
 	}
 
-	protected IStatus makeBuildJob(FedoraProjectRoot fedoraProjectRoot,
-			IProgressMonitor monitor) {
-		final IStatus result = newBuild(fedoraProjectRoot, monitor);
-		if (result.isOK()) {
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			if (!debug) {
-				// if build is successfully sent, display the Kojiweb URL in a
-				// dialog
-				IJobChangeListener listener = new JobChangeAdapter() {
-					@Override
-					public void done(IJobChangeEvent event) {
-						final String taskId = event.getResult().getMessage(); // IStatus message is task ID
-						Display.getDefault().asyncExec(new Runnable() {
-							@Override
-							public void run() {
-								ImageDescriptor descriptor = KojiPlugin
-										.getImageDescriptor("icons/Artwork_DesignService_koji-icon-16.png"); //$NON-NLS-1$
-								Image titleImage = descriptor.createImage();
-								// Make sure we have a proper shell.
-								Shell shell = Display.getDefault()
-										.getActiveShell();
-								if (shell == null) {
-									// Try harder to get a proper shell
-									shell = new Shell(Display.getDefault());
-								}
-								if (!shell.isDisposed()) {
-									KojiMessageDialog msgDialog = new KojiMessageDialog(
-											shell,
-											Messages.kojiBuildHandler_kojiBuild,
-											titleImage,
-											taskId,
-											MessageDialog.NONE,
-											new String[] { IDialogConstants.OK_LABEL },
-											0, koji);
-									msgDialog.open();
-								} else {
-									// Fall back to console output
-									((KojiHubClient) koji)
-											.writeToConsole(NLS.bind(Messages.kojiBuildHandler_fallbackBuildMsg, taskId));
-								}
-							}
-						});
-					}
-				};
-
-				job.addJobChangeListener(listener);
-			}
-		}
-		return result;
-	}
-
 	protected IStatus newBuild(FedoraProjectRoot fedoraProjectRoot,
 			IProgressMonitor monitor) {
 		IStatus status;
@@ -161,10 +185,7 @@ public class KojiBuildHandler extends CommonHandler {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			if (!debug) {
-				monitor.subTask(Messages.kojiBuildHandler_connectKojiMsg);
-				koji = new KojiHubClient();
-			}
+			monitor.subTask(Messages.kojiBuildHandler_connectKojiMsg);
 
 			String scmURL = projectBits.getScmUrlForKoji(fedoraProjectRoot);
 			if (monitor.isCanceled()) {
@@ -180,39 +201,60 @@ public class KojiBuildHandler extends CommonHandler {
 			// push build
 			monitor.subTask(Messages.kojiBuildHandler_sendBuildCmd);
 			result = koji.build(projectBits.getTarget(), scmURL, isScratch());
-
+			// if we get an int (that is our taskId)
+			int taskId = -1;
+			try {
+				taskId = Integer.parseInt(result);
+			} catch (NumberFormatException e) {
+				// ignore
+			}
+			if (taskId != -1) {
+				status = new Status(IStatus.OK, KojiPlugin.PLUGIN_ID,
+						new Integer(taskId).toString());
+			} else { // Error
+				status = new Status(IStatus.ERROR, KojiPlugin.PLUGIN_ID, result);
+			}
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 			// logout
 			monitor.subTask(Messages.kojiBuildHandler_kojiLogout);
 			koji.logout();
-			status = new Status(IStatus.OK, KojiPlugin.PLUGIN_ID, result);
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
 			status = FedoraHandlerUtils.handleError(e);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 			status = FedoraHandlerUtils.handleError(e);
-		} catch (GeneralSecurityException e) {
-			e.printStackTrace();
-			status = FedoraHandlerUtils.handleError(e);
-		} catch (IOException e) {
-			e.printStackTrace();
-			status = FedoraHandlerUtils.handleError(e);
-		}
+		}		 
 		return status;
 	}
 
+	/**
+	 * @return The koji client.
+	 */
 	public IKojiHubClient getKoji() {
 		return koji;
 	}
 
+	/**
+	 * Set the koji client.
+	 * @param koji
+	 */
 	public void setKoji(IKojiHubClient koji) {
 		this.koji = koji;
 	}
 
 	protected boolean isScratch() {
 		return false;
+	}
+
+	/**
+	 * @param event
+	 * @return the shell
+	 * @throws ExecutionException
+	 */
+	private Shell getShell(ExecutionEvent event) throws ExecutionException {
+		return HandlerUtil.getActiveShellChecked(event);
 	}
 }
