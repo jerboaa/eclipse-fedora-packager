@@ -25,5 +25,7 @@ public interface IKojiHubClient {
 			throws XmlRpcException;
 	
 	public abstract String getWebUrl();
+	
+	public abstract void writeToConsole(String message);
 
 }
