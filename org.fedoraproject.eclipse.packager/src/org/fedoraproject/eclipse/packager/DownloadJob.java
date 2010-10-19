@@ -63,15 +63,16 @@ public class DownloadJob extends Job {
 			File tempFile = File.createTempFile(file.getName(), ""); //$NON-NLS-1$
 			FileOutputStream fos = new FileOutputStream(tempFile);
 			InputStream is = new BufferedInputStream(content.getInputStream());
-			int b;
+			int bytesRead;
 			boolean canceled = false;
-			while ((b = is.read()) != -1) {
+			byte buf[] = new byte[5 * 1024]; // 5k buffer
+			while ((bytesRead = is.read(buf)) != -1) {
 				if (monitor.isCanceled()) {
 					canceled = true;
 					break;
 				}
-				fos.write(b);
-				monitor.worked(1);
+				fos.write(buf, 0, bytesRead);
+				monitor.worked(bytesRead);
 			}
 			is.close();
 			fos.close();
