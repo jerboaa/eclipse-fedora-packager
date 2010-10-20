@@ -1,0 +1,167 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Fedora Packager User Guide - Using Eclipse Fedorapackager</title>
+		<link type="text/css" rel="stylesheet" href="../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Using Eclipse Fedorapackager</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Eclipse-Fedora-Packager-User-Guide.html" title="Fedora Packager User Guide">
+						<img alt="Previous" border="0" src="../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Feedback-Reporting-Bugs.html" title="Feedback/Reporting Bugs">
+						<img alt="Next" border="0" src="../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Fedora Packager User Guide</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Feedback/Reporting Bugs</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Using_Eclipse_Fedorapackager">Using Eclipse Fedorapackager</h1>
+		<p>Since Fedora 14, the Git version control system for keeping track of files required for Fedora packaging is used. See the 
+			<a href="https://fedoraproject.org/wiki/Dist_Git_Project">dist-git documentation</a> for in depth information about dist-git. Fortunately, how dist-git works when using the Eclipse Fedora Packager plug-in is unimportant. There is only a slightly different approach for doing packaging work compared to what might have been used with CVS instead of Git.
+		</p>
+		<h2 id="Initial_Setup">Initial Setup</h2>
+		<p>This step is only required to be completed once for a new Fedora packager or if using a new machine that does not have required FAS certificates installed. When it is certain the set up is correct it is safe to skip this step. The following explains how to set up those certificates for a 
+			<a href="https://admin.fedoraproject.org/accounts/">FAS account</a>?
+		</p>
+		<p>First, install the <code>fedora-packager</code> RPM package:</p>
+		<pre>
+yum install fedora-packager
+</pre>
+		<p>Then run the following command and simply follow the instructions provided: </p>
+		<pre>
+$ fedora-packager-setup
+</pre>
+		<p>Once this is done Eclipse Fedorapackager is ready for use. Fire up Eclipse. Let's get started. Yay!</p>
+		<h2 id="Importing_a_Fedora_Git_Project">Importing a Fedora Git Project</h2>
+		<p>Getting started is easy. Go to "File" =&gt; "Import" =&gt; "Git" =&gt; "Projects from Fedora Git". This will clone the desired Git repository and create necessary local branches. For convenience, the "Git Repositories" view will also open once the clone process has finished. </p>
+		<p>
+			<img border="0" src="images/ImportFedoraGit.png"/>
+		</p>
+		<p>Here's how the Fedora Git import dialog looks like. Next, specify the package name that will then be prepared for you. </p>
+		<p>
+			<img title="Image:SelectPackageNameGit.png" alt="Image:SelectPackageNameGit.png" border="0" src="images/SelectPackageNameGit.png"/>
+		</p>
+		<p>Once the new project has been created something akin to the following is seen. Note the branches in the Git Repository view and "
+			<a href="eclipse-fedorapackager">master</a>" right beside the project name. In this case, 
+			<i>eclipse-fedorapackager</i> refers to the Git repository name and 
+			<i>master</i> to the currently checked out branch.
+		</p>
+		<p>
+			<img border="0" src="images/GitProjectBranchesView.png"/>
+		</p>
+		<h2 id="Do_Your_Fedora_Packaging_Work">Do Your Fedora Packaging Work</h2>
+		<p>After a Fedora Git project has been created, all files required for packaging the desired release can be found in the corresponding directory. For example, Fedora 13 corresponds to branch 
+			<b>f13/master</b>. Branch 
+			<b>master</b> corresponds to 
+			<b>Fedora rawhide</b>, the current development release of Fedora. WThe following is a brief description of things to consider doing while packaging up some software. Working in a different sequence works, but keep in mind that before trying a Koji build 
+			<b>push your locally committed changes to the public repository</b>.
+		</p>
+		<h3 id="Uploading_Source_Files_Required_for_a_Package">Uploading Source Files Required for a Package</h3>
+		<p>In order to upload new sources in Eclipse Fedorapackager, first download upstream sources and place the downloaded sources in the same folder as the Eclipse project. If this is done outside of Eclipse, don't forget to refresh the project afterwards (F5) so that the file actually shows up. A slick way to download sources is to use RPM editor functionality directly. See its documentation for more information on this. Once the new source file is available in the project, it can be uploaded to the lookaside cache by right-clicking on the file=&gt; Fedora Packager =&gt; Upload This File =&gt; Replace/Add File. This either adds the file to the sources required to build the package or replaces the current content of the <code>sources</code> file to contain a single line with the MD5 sum of the file selected. </p>
+		<p>A valid certificate is required to upload to the lookaside cache. If it has expired, a new one can be created by issuing the following command on a terminal:</p>
+		<pre>
+$ fedora-cert -n
+</pre>
+		<h3 id="Downloading_Source_Files_Required_for_a_Package">Downloading Source Files Required for a Package</h3>
+		<p>To download the required source files for an existing package in order to build it, right-click on the spec-file =&gt; Fedora Packager =&gt; Downloaded Sources. This downloads all sources listed in the file <code>sources</code>.</p>
+		<h3 id="Using_the_Spec-File_Editor">Using the Spec-File Editor</h3>
+		<p>Eclipse Fedora Packager uses the RPM Editor and ChangeLog plug-in from the Eclipse Linux Tools project (
+			<a href="http://www.eclipse.org/linuxtools">http://www.eclipse.org/linuxtools</a>). For instance, a new ChangeLog entry can easily be created in the spec file by using the &lt;CTRL&gt;+&lt;ALT&gt;+C keyboard shortcut (though a good idea is to set appropriate “ChangeLog” preferences first). Using &lt;CTRL&gt;+&lt;SPACE&gt; auto-completes locally installed packages. Also, rpmlint can be run by right-clicking on the spec file =&gt; “Run Rpmlint”. For more information have a look at the spec file editor screencast: 
+			<a href="http://www.eclipse.org/downloads/download.php?file=/technology/linuxtools/videos/specfile-demo.ogg">http://www.eclipse.org/downloads/download.php?file=/technology/linuxtools/videos/specfile-demo.ogg</a> or at the "Specfile Editor User Guide": Help =&gt; Help Contents =&gt; Specfile Editor User Guide.
+		</p>
+		<h3 id="Committing_Changes_to_the_Local_Git_Repository">Committing Changes to the Local Git Repository</h3>
+		<p>After the spec-file, patches etc. have been added/changed, commit those changes to the repository. This is done by:</p>
+		<ol>
+			<li>Selecting the files to commit (alternatively select the Fedora Git project and select desired 
+				<i>unstaged</i> files when the commit dialog is shown)
+			</li>
+			<li>Right-click, "Team" =&gt; "Commit..."</li>
+		</ol>
+		<p>
+			<img border="0" src="images/GitCommit.png"/>
+		</p>
+		<h3 id="Switching_Branches_.28Git_Checkout.29">Switching Branches (Git Checkout)</h3>
+		<p>Switching branches is as easy as double-clicking on the desired local branch to be worked on. The currently checked out branch is indicated to the left of the project name. Make sure to commit, revert, or stash changes before switching to a different branch. Refer to the Git/EGit documentation for more information on this.</p>
+		<h3 id="Prepare_Sources_for_a_Local_Build">Prepare Sources for a Local Build</h3>
+		<p>Eclipse Fedora Packager will download and prepare sources by right-clicking on the spec-file =&gt; “Fedora Packager” =&gt; “Prepare Sources for Build”.</p>
+		<p>
+			<img border="0" src="images/PrepareSourcesForBuild.png"/>
+		</p>
+		<h3 id="Build_RPM_for_a_Local_Architecture">Build RPM for a Local Architecture</h3>
+		<p>This is a great way to test if the spec-file actually builds at all. Once the RPM has been successfully built locally, it is recommended further testing be carried out on the spec-file by completing a build in a chroot'ed environment using {{{mock}}}. Both ways are supported by Eclipse Fedorapackager.</p>
+		<p>The RPM can be built locally by selecting the spec-file =&gt; right-click =&gt; “Fedora Packager” =&gt; “Build for Local Architecture”. Output of the RPM build will appear on the Eclipse console.</p>
+		<p>Using mock-builds is a great way to test the “Requires/BuildRequires” of a spec-file. Select the spec-file =&gt; right-click =&gt; “Fedora Packager” =&gt; “Local Build Using Mock”. Be aware that this may take a long time (&gt;20 minutes) and requires the mock package to be installed. Use Eclipse's “Run in Background” functionality for convenience.</p>
+		<h3 id="Make_Locally_Committed_Changes_Public_.28Git_Push.29">Make Locally Committed Changes Public (Git Push)</h3>
+		<p>The changes are ready to be pushed (or published) publicly when the locally committed changes are satisfying. Remember, Git allows history to be rewritten before changes are made public. See the Git/EGit documentation for more information. To bring the local repository in sync with 
+			<i>origin</i>:
+		</p>
+		<ol>
+			<li>Select the Fedora Git project</li>
+			<li>Right-click, "Team" =&gt; "Push..."</li>
+			<li>Select the Git repository to be pushed to (usually this is kept unchanged)</li>
+			<li>Select the Git references to be pushed</li>
+			<li>Carry out the push operation</li>
+		</ol>
+		<p>The Git push dialog.</p>
+		<p>
+			<img title="Git push dialog" alt="Git push dialog" border="0" src="images/GitPushDialog.png"/>
+		</p>
+		<p>Select the Git references to push. In this example, branches 
+			<i>master</i> and 
+			<i>f14/master</i> will get pushed. Keep in mind that source and destination references are the same for Eclipse Fedora Packager. Clicking the “Add all branches spec” button is a convenience that pushes all commits to all local branches.
+		</p>
+		<p>
+			<img title="Select Git References" alt="Select Git References" border="0" src="images/SelectGitReferencesToPush.png"/>
+		</p>
+		<h3 id="Pushing_a_Build_to_Koji">Pushing a Build to Koji</h3>
+		<p>Once satisfied with a spec file, upload the sources of the package, commit the changes to the local repository, and then push the local changes to the remote repository. When this is done, push a build to Koji by right-clicking the spec file =&gt; “Fedora Packager” =&gt; “Push to Koji”.</p>
+		<p>
+			<img border="0" src="images/EclipseFedoraPackagerPushBuildToKoji.png"/>
+		</p>
+		<p>Eclipse will pop up a message with the Koji URL to track your build. This is an example of how the message may look:</p>
+		<p>
+			<img border="0" src="images/KojiBuildPopupMessage.png"/>
+		</p>
+		<p>This should be enough information to track the builds.</p>
+		<h3 id="Pushing_a_Bohi_Update">Pushing a Bohi Update</h3>
+		<p>After successfully building the RPMs, use Eclipse Fedorapackager to push an update for those packages. To do so, select the spec file =&gt; right click =&gt; "Fedora Packager" =&gt; "Bodhi Update". Similar information is required when using the Bodhi Web interface. Once an update has successfully been created, the pushed update will be visible on the Bodhi updates website. The status up updates can also be tracked there.</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Eclipse-Fedora-Packager-User-Guide.html" title="Fedora Packager User Guide">
+						<img alt="Previous" border="0" src="../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Eclipse-Fedora-Packager-User-Guide.html" title="Fedora Packager User Guide">
+						<img alt="Fedora Packager User Guide" border="0" src="../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Feedback-Reporting-Bugs.html" title="Feedback/Reporting Bugs">
+						<img alt="Next" border="0" src="../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Fedora Packager User Guide</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Feedback/Reporting Bugs</td>
+			</tr>
+		</table>
+	</body>
+</html>

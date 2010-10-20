@@ -1,21 +1,22 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <toc topic="userguide/Eclipse_Fedora_Packager_User_Guide/Eclipse-Fedora-Packager-User-Guide.html" label="Fedora Packager User Guide">
 	<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Eclipse-Fedora-Packager-User-Guide.html" label="What is Eclipse Fedora Packager?"></topic>
-	<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-Git-Support.html" label="Dist-Git Support">
-		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-Git-Support.html#Importing_a_Fedora_Git_Project" label="Importing a Fedora Git Project"></topic>
-		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-Git-Support.html#Do_Your_Fedora_Packaging_Work" label="Do Your Fedora Packaging Work">
-			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-Git-Support.html#Using_the_Spec-File_Editor" label="Using the Spec-File Editor"></topic>
-			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-Git-Support.html#Committing_Changes_to_Your_Local_Git_Repository" label="Committing Changes to Your Local Git Repository"></topic>
-			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-Git-Support.html#Switching_Branches_.28Git_Checkout.29" label="Switching Branches (Git Checkout)"></topic>
-			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-Git-Support.html#Make_Locally_Committed_Changes_Public_.28Git_Push.29" label="Make Locally Committed Changes Public (Git Push)"></topic>
-			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-Git-Support.html#Prepare_Sources_for_a_Local_Build" label="Prepare Sources for a Local Build"></topic>
-			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-Git-Support.html#Build_RPM_for_Your_Local_Architecture" label="Build RPM for Your Local Architecture"></topic>
-			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-Git-Support.html#Pushing_a_Build_to_Koji" label="Pushing a Build to Koji"></topic>
+	<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html" label="Using Eclipse Fedorapackager">
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Initial_Setup" label="Initial Setup"></topic>
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Importing_a_Fedora_Git_Project" label="Importing a Fedora Git Project"></topic>
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Do_Your_Fedora_Packaging_Work" label="Do Your Fedora Packaging Work">
+			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Uploading_Source_Files_Required_for_a_Package" label="Uploading Source Files Required for a Package"></topic>
+			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Downloading_Source_Files_Required_for_a_Package" label="Downloading Source Files Required for a Package"></topic>
+			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Using_the_Spec-File_Editor" label="Using the Spec-File Editor"></topic>
+			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Committing_Changes_to_the_Local_Git_Repository" label="Committing Changes to the Local Git Repository"></topic>
+			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Switching_Branches_.28Git_Checkout.29" label="Switching Branches (Git Checkout)"></topic>
+			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Prepare_Sources_for_a_Local_Build" label="Prepare Sources for a Local Build"></topic>
+			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Build_RPM_for_a_Local_Architecture" label="Build RPM for a Local Architecture"></topic>
+			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Make_Locally_Committed_Changes_Public_.28Git_Push.29" label="Make Locally Committed Changes Public (Git Push)"></topic>
+			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Pushing_a_Build_to_Koji" label="Pushing a Build to Koji"></topic>
+			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Pushing_a_Bohi_Update" label="Pushing a Bohi Update"></topic>
 		</topic>
 	</topic>
 	<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Feedback-Reporting-Bugs.html" label="Feedback/Reporting Bugs"></topic>
-	<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-CVS-Support-Deprecated-.html" label="Dist-CVS Support (Deprecated)">
-		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Dist-CVS-Support-Deprecated-.html#Importing_a_Fedora_CVS_Project" label="Importing a Fedora CVS Project"></topic>
-	</topic>
 	<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Updating-This-Document.html" label="Updating This Document"></topic>
 </toc>
