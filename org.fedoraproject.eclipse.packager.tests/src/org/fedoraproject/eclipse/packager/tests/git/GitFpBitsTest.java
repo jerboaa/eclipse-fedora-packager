@@ -3,7 +3,8 @@ package org.fedoraproject.eclipse.packager.tests.git;
 import org.eclipse.jgit.lib.Constants;
 import org.fedoraproject.eclipse.packager.git.FpGitProjectBits;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.test_utils.GitTestProject;
+import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestCase;
+import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
 
 public class GitFpBitsTest extends GitTestCase {
 
@@ -40,10 +41,6 @@ public class GitFpBitsTest extends GitTestCase {
 		// switch to remote branch f13
 		testProject.checkoutBranch(Constants.R_HEADS + "f13/master");
 		assertEquals(projectBits.getDistVal(), "13");
-	}
-
-	public void testGetScmUrl() {
-		fail("Not yet implemented");
 	}
 
 }

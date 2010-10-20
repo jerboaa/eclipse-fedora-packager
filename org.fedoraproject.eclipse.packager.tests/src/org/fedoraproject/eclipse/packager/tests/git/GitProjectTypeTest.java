@@ -11,6 +11,7 @@
 package org.fedoraproject.eclipse.packager.tests.git;
 
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestCase;
 
 public class GitProjectTypeTest extends GitTestCase {
 	
