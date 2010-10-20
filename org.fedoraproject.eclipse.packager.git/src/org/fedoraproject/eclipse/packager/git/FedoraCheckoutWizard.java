@@ -19,8 +19,10 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -34,6 +36,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jgit.errors.NoRemoteRepositoryException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -61,6 +64,8 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 	 */
 	public FedoraCheckoutWizard() {
 		super();
+		// Set title of wizard window
+		setWindowTitle(Messages.fedoraCheckoutWizard_wizardTitle);
 		// required to show progress info of clone job
 		setNeedsProgressMonitor(true);
 	}
@@ -103,36 +108,59 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 							page.getPackageName()), Constants.R_HEADS + Constants.MASTER,
 					"origin"); //$NON-NLS-1$
 
+			IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
 			// Bail out if project already exists
-			IResource project = ResourcesPlugin.getWorkspace().getRoot()
-					.findMember(new Path(page.getPackageName()));
+			IResource project = wsRoot.findMember(new Path(page.getPackageName()));
 			if (project != null && project.exists()) {
 				final String errorMessage = NLS.bind(
 						Messages.fedoraCheckoutWizard_projectExists, project.getName());
-				ErrorDialog
-						.openError(
-								getShell(),
-								getWindowTitle(),
-								Messages.fedoraCheckoutWizard_cloneFail,
-								new Status(
-										IStatus.ERROR,
-										org.fedoraproject.eclipse.packager.git.Activator.PLUGIN_ID,
-										0, errorMessage, null));
+				cloneFailChecked(errorMessage);
 				// let's give user a chance to fix this minor problem
 				return false;
 			}
-
-			// Perform clone in ModalContext thread with progress
-			// reporting on the wizard.
-			getContainer().run(true, true, new IRunnableWithProgress() {
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					clone.run(monitor);
-					if (monitor.isCanceled())
-						throw new InterruptedException();
+			// Make sure to be created directory does not exist or is
+			// empty
+			File newDir = new File(wsRoot.getLocation().toOSString() +
+			IPath.SEPARATOR + page.getPackageName() );
+			if (newDir.exists() && newDir.isDirectory()) {
+				String contents[] = newDir.list();
+				if (contents.length != 0) {
+					// Refuse to clone, give user a chance to correct
+					final String errorMessage = NLS.bind(
+							Messages.fedoraCheckoutWizard_filesystemResourceExists, page.getPackageName());
+					cloneFailChecked(errorMessage);
+					return false;
 				}
-			});
+			}
+
+			// Make sure we report a nice error if repo not found
+			try {
+				// Perform clone in ModalContext thread with progress
+				// reporting on the wizard.
+				getContainer().run(true, true, new IRunnableWithProgress() {
+					@Override
+					public void run(IProgressMonitor monitor)
+							throws InvocationTargetException,
+							InterruptedException {
+
+						clone.run(monitor);
+						if (monitor.isCanceled())
+							throw new InterruptedException();
+					}
+				});
+			} catch (InvocationTargetException e) {
+				//e.printStackTrace();
+				// if repo wasn't found make this apparent
+				if (e.getCause() instanceof NoRemoteRepositoryException) {
+					// Refuse to clone, give user a chance to correct
+					final String errorMessage = NLS.bind(
+							Messages.fedoraCheckoutWizard_repositoryNotFound, page.getPackageName());
+					cloneFailChecked(errorMessage);
+					return false; // let user correct
+				} else {
+					throw e;
+				}
+			}
 			// Add cloned repository to the list of Git repositories so that it
 			// shows up in the Git repositories view.
 			final RepositoryUtil config = org.eclipse.egit.core.Activator.getDefault().getRepositoryUtil();
@@ -152,15 +180,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 				this.gitRepository = repoCache.lookupRepository(clone.getGitDir());
 			} catch (IOException ex) {
 				// Repo lookup failed, no way we can continue.
-				ErrorDialog
-				.openError(
-						getShell(),
-						getWindowTitle(),
-						Messages.fedoraCheckoutWizard_cloneFail,
-						new Status(
-								IStatus.ERROR,
-								org.fedoraproject.eclipse.packager.git.Activator.PLUGIN_ID,
-								0, ex.getMessage(), null));
+				cloneFailChecked(ex.getMessage());
 				return false;
 			}
 			
@@ -172,15 +192,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 					try {
 						createLocalBranches(monitor);
 					} catch (CoreException e) {
-						ErrorDialog
-						.openError(
-								getShell(),
-								getWindowTitle(),
-								Messages.fedoraCheckoutWizard_cloneFail,
-								new Status(
-										IStatus.ERROR,
-										org.fedoraproject.eclipse.packager.git.Activator.PLUGIN_ID,
-										0, e.getMessage(), null));
+						cloneFailChecked(e.getMessage());
 						return;
 					}
 					if (monitor.isCanceled())
@@ -240,5 +252,22 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Opens error dialog with provided reason in error message.
+	 * 
+	 * @param errorMsg The error message to use.
+	 */
+	private void cloneFailChecked(String errorMsg) {
+		ErrorDialog
+		.openError(
+				getShell(),
+				getWindowTitle(),
+				Messages.fedoraCheckoutWizard_cloneFail,
+				new Status(
+						IStatus.ERROR,
+						org.fedoraproject.eclipse.packager.git.Activator.PLUGIN_ID,
+						0, errorMsg, null));
 	}
 }

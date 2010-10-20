@@ -23,7 +23,10 @@ public class Messages extends NLS {
 	public static String fedoraCheckoutWizard_cloneFail;
 	public static String fedoraCheckoutWizard_cloneCancel;
 	public static String fedoraCheckoutWizard_projectExists;
+	public static String fedoraCheckoutWizard_filesystemResourceExists;
 	public static String fedoraCheckoutWizard_createLocalBranchesJob;
+	public static String fedoraCheckoutWizard_repositoryNotFound;
+	public static String fedoraCheckoutWizard_wizardTitle;
 	// SelectModulePage Strings
 	public static String selectModulePage_packageSelection;
 	public static String selectModulePage_choosePackage;
