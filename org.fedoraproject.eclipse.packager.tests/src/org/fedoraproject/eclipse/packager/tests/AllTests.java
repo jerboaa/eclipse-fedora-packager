@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager.tests;
 import org.fedoraproject.eclipse.packager.tests.cvs.CVSProjectTypeTest;
 import org.fedoraproject.eclipse.packager.tests.cvs.CVSTagTest;
 import org.fedoraproject.eclipse.packager.tests.git.GitProjectTypeTest;
+import org.fedoraproject.eclipse.packager.tests.units.UploadFileValidityTest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
