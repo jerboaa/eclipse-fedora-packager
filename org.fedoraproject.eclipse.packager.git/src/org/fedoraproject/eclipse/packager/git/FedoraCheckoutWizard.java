@@ -263,7 +263,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 		ErrorDialog
 		.openError(
 				getShell(),
-				getWindowTitle(),
+				getWindowTitle() + Messages.fedoraCheckoutWizard_problem,
 				Messages.fedoraCheckoutWizard_cloneFail,
 				new Status(
 						IStatus.ERROR,

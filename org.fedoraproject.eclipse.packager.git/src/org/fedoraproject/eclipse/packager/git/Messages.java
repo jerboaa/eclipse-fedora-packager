@@ -27,6 +27,7 @@ public class Messages extends NLS {
 	public static String fedoraCheckoutWizard_createLocalBranchesJob;
 	public static String fedoraCheckoutWizard_repositoryNotFound;
 	public static String fedoraCheckoutWizard_wizardTitle;
+	public static String fedoraCheckoutWizard_problem;
 	// SelectModulePage Strings
 	public static String selectModulePage_packageSelection;
 	public static String selectModulePage_choosePackage;
