@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
  
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class NewSourcesSWTBotTest {
+public class UploadSourcesSWTBotTest {
  
 	private static SWTWorkbenchBot	bot;
 	private GitTestProject efpProject;
@@ -56,14 +56,14 @@ public class NewSourcesSWTBotTest {
 	}
  
 	/**
-	 * Upload Sources test (Replace existing sources) with empty
+	 * Upload Sources test (Add to existing sources) with empty
 	 * source file.
 	 * 
 	 * @throws Exception
 	 */
 	@SuppressWarnings({ "static-access", "unchecked" })
 	@Test
-	public void cannotUploadEmptySourceFileReplaceSourcesHandler() throws Exception {
+	public void cannotUploadEmptySourceFileAddToSourcesHandler() throws Exception {
 		// Create empty source file and try to upload
 		IResource emptySourceFile;
 		emptySourceFile = createNewFile(EMPTY_FILE_NAME_VALID, null);
@@ -71,13 +71,13 @@ public class NewSourcesSWTBotTest {
 		
 		openPackageExplorerView();
 		
-		// Select source file
+		// Select empty file
 		final SWTBotTreeItem efpItem = bot.tree().expandNode("eclipse-fedorapackager");
 		bot.waitUntil(Conditions.widgetIsEnabled(efpItem));
     	efpItem.select(EMPTY_FILE_NAME_VALID);
-
+		
 		// Click on file and try to upload
-		clickOnReplaceExistingSources();
+		clickOnAddNewSources();
 		// Wait for error to pop up
 		bot.waitUntil(Conditions.shellIsActive("Fedora Packager"));
 		SWTBotShell efpErrorWindow = bot.shell("Fedora Packager");
@@ -94,14 +94,14 @@ public class NewSourcesSWTBotTest {
 	}
 	
 	/**
-	 * Upload Sources test (Replace existing sources) with non-empty
+	 * Upload Sources test (Add to existing sources) with non-empty
 	 * source file which has an invalid extension.
 	 * 
 	 * @throws Exception
 	 */
 	@SuppressWarnings({ "static-access", "unchecked" })
 	@Test
-	public void cannotUploadNonEmptySourceFileWithInvalidExtensionReplaceSourcesHandler() throws Exception {
+	public void cannotUploadNonEmptySourceFileWithInvalidExtensionAddSourcesHandler() throws Exception {
 		// Create non-empty, invalid source file in project
 		IResource invalidSourceFile;
 		invalidSourceFile = createNewFile(NON_EMPTY_FILE_NAME_INVALID, 0x900);
@@ -115,7 +115,7 @@ public class NewSourcesSWTBotTest {
     	efpItem.select(NON_EMPTY_FILE_NAME_INVALID);
 		
 		// Click on file and try to upload
-		clickOnReplaceExistingSources();
+		clickOnAddNewSources();
 		// Wait for error to pop up
 		bot.waitUntil(Conditions.shellIsActive("Fedora Packager"));
 		SWTBotShell efpErrorWindow = bot.shell("Fedora Packager");
@@ -132,21 +132,22 @@ public class NewSourcesSWTBotTest {
 	}
 	
 	/**
-	 * Upload Sources test (Replace existing sources) with valid source
+	 * Upload Sources test (Add to existing sources) with valid source
 	 * file. This assumes a valid ~/.fedora.cert is present.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void canUploadValidSourceFileReplaceSourcesHandler() throws Exception {
+	public void canUploadValidSourceFileAddSourcesHandler() throws Exception {
 		// Create valid source file in project
 		IResource validSourceFile;
 		validSourceFile = createNewFile(VALID_SOURCE_FILENAME_NON_EMPTY, 0x90);
 		assertNotNull(validSourceFile);
 		
 		// Set up expectations
-		final String newSourcesContent = "fcd3dfe8777d16d64235bc7ae6bdcb8a  " + VALID_SOURCE_FILENAME_NON_EMPTY + "\n";
+		final String newLineSources = "fcd3dfe8777d16d64235bc7ae6bdcb8a  " + VALID_SOURCE_FILENAME_NON_EMPTY + "\n";
 		final String newLineGitIgnore = VALID_SOURCE_FILENAME_NON_EMPTY + "\n";
+		final String sourcesFileBefore = readSourcesFile();
 		final String gitIgnoreBefore = readGitIgnore();
 		
 		openPackageExplorerView();
@@ -157,12 +158,12 @@ public class NewSourcesSWTBotTest {
     	efpItem.select(VALID_SOURCE_FILENAME_NON_EMPTY);
 		
 		// Click on file and try to upload
-		clickOnReplaceExistingSources();
+		clickOnAddNewSources();
 		// Wait for upload process to start
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.
-				eclipse.packager.Messages.newSourcesHandler_jobName));
-		SWTBotShell efpUploadWindow = bot.shell(org.fedoraproject.
-				eclipse.packager.Messages.newSourcesHandler_jobName);
+				eclipse.packager.Messages.uploadHandler_taskName));
+		SWTBotShell efpUploadWindow = bot.shell(org.fedoraproject.eclipse.
+				packager.Messages.uploadHandler_taskName);
 		assertNotNull(efpUploadWindow);
 		// Wait for upload process to finish
 		bot.waitUntil(Conditions.shellCloses(efpUploadWindow));
@@ -171,7 +172,7 @@ public class NewSourcesSWTBotTest {
 		final String sourcesFileAfter = readSourcesFile();
 		final String gitIgnoreAfter = readGitIgnore();
 		assertEquals(
-				newSourcesContent,
+				(sourcesFileBefore + newLineSources),
 				sourcesFileAfter
 		);
 		assertEquals(
@@ -182,22 +183,22 @@ public class NewSourcesSWTBotTest {
 		IResource newSource = efpProject.getProject().findMember(new Path(VALID_SOURCE_FILENAME_NON_EMPTY));
 		assertNotNull(newSource);
 	}
- 
+	
 	@After
 	public void tearDown() throws Exception {
 		this.efpProject.dispose();
 	}
 	
 	/**
-	 * Context menu click helper. Click on "Replace existing sources".
+	 * Context menu click helper. Click on "Add to existing sources".
 	 * 
 	 * @throws Exception
 	 */
-	private void clickOnReplaceExistingSources() throws Exception {
+	private void clickOnAddNewSources() throws Exception {
 		// Assumes Packages Explorer view active and bot.tree()
 		// points to its tree.
 		String subMenu = "Upload This File";
-		String menuItem = "Replace existing sources";
+		String menuItem = "Add to existing sources";
 		ContextMenuHelper.clickContextMenu(bot.tree(), "Fedora Packager",
 				subMenu, menuItem);
 	}

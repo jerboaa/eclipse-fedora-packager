@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
  
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class NewSourcesSWTBotTest {
+public class ReplaceSourcesSWTBotTest {
  
 	private static SWTWorkbenchBot	bot;
 	private GitTestProject efpProject;
