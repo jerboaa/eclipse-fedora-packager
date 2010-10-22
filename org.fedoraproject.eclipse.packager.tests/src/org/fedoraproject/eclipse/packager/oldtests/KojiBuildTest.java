@@ -8,33 +8,38 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.tests.cvs;
+package org.fedoraproject.eclipse.packager.oldtests;
 
-
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.fedoraproject.eclipse.packager.cvs.handlers.TagHandler;
-import org.fedoraproject.eclipse.packager.oldtests.AbstractTest;
+import org.fedoraproject.eclipse.packager.koji.KojiBuildHandler;
+import org.fedoraproject.eclipse.packager.tests.utils.KojiHubClientStub;
 
-public class CVSTagTest extends AbstractTest {
-	private IStatus result;
+public class KojiBuildTest extends AbstractTest {
+	private KojiHubClientStub koji;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		
-		handler = new TagHandler();
+		handler = new KojiBuildHandler();
 		handler.setDebug(true);
+		koji = new KojiHubClientStub();
+		((KojiBuildHandler) handler).setKoji(koji);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);
+		handler.waitForJob();
+	}
 
-		result = handler.waitForJob();
+	public void testBuild() throws Exception {
+		assertEquals("1337", handler.waitForJob().getMessage());
 	}
 	
-	public void testNeedWriteAccess() throws Exception {
-		String errMsg = "\"tag\" requires write access to the repository";
-		assertTrue(result.getChildren()[0].getMessage().contains(errMsg));
+	public void testSCMURL() throws Exception {
+		assertEquals("cvs://cvs.fedoraproject.org/cvs/pkgs?rpms/ed/F-10#ed-1_1-1_fc10", koji.scmURL);
 	}
 	
+	public void testTarget() throws Exception {
+		assertEquals("dist-f10-updates-candidate", koji.target);
+	}
 }

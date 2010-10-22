@@ -8,33 +8,30 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.tests.cvs;
+package org.fedoraproject.eclipse.packager.oldtests;
 
-
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.fedoraproject.eclipse.packager.cvs.handlers.TagHandler;
-import org.fedoraproject.eclipse.packager.oldtests.AbstractTest;
+import org.fedoraproject.eclipse.packager.rpm.SRPMBuildHandler;
 
-public class CVSTagTest extends AbstractTest {
-	private IStatus result;
+public class SRPMTest extends AbstractTest {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		
-		handler = new TagHandler();
+		handler = new SRPMBuildHandler();
 		handler.setDebug(true);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
 		handler.execute(null);
+		handler.waitForJob();
+	}
 
-		result = handler.waitForJob();
+	public void testSRPM() throws Exception {
+		branch.refreshLocal(IResource.DEPTH_INFINITE, null);
+		IFile srpm = (IFile) branch.findMember("ed-1.1-1.fc10.src.rpm");
+		assertNotNull(srpm);
+		assertTrue(srpm.getLocation().toFile().length() > 0);
 	}
-	
-	public void testNeedWriteAccess() throws Exception {
-		String errMsg = "\"tag\" requires write access to the repository";
-		assertTrue(result.getChildren()[0].getMessage().contains(errMsg));
-	}
-	
 }

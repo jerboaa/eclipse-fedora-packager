@@ -8,33 +8,30 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.tests.cvs;
+package org.fedoraproject.eclipse.packager.oldtests;
 
 
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.fedoraproject.eclipse.packager.cvs.handlers.TagHandler;
-import org.fedoraproject.eclipse.packager.oldtests.AbstractTest;
+import org.fedoraproject.eclipse.packager.rpm.PrepHandler;
 
-public class CVSTagTest extends AbstractTest {
-	private IStatus result;
+public class PrepTest extends AbstractTest {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		handler = new TagHandler();
+		handler = new PrepHandler();
 		handler.setDebug(true);
 		Shell aShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		handler.setShell(aShell);
-		handler.execute(null);
-
-		result = handler.waitForJob();
+		handler.execute(null);		
+		handler.waitForJob();
 	}
 	
-	public void testNeedWriteAccess() throws Exception {
-		String errMsg = "\"tag\" requires write access to the repository";
-		assertTrue(result.getChildren()[0].getMessage().contains(errMsg));
+	public void testSourceFolder() throws Exception {
+		IContainer folder = (IContainer) branch.findMember("ed-1.1");
+		assertNotNull(folder);
+		assertTrue(folder.members().length > 0);
 	}
-	
 }
