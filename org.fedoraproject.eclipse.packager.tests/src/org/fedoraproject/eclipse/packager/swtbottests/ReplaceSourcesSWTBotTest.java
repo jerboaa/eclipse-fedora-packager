@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,8 +24,10 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.fedoraproject.eclipse.packager.swtbottests.utils.ContextMenuHelper;
+import org.fedoraproject.eclipse.packager.swtbottests.utils.PackageExplorerHelper;
 import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
 import org.junit.After;
 import org.junit.Before;
@@ -34,8 +38,15 @@ import org.junit.runner.RunWith;
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class ReplaceSourcesSWTBotTest {
  
-	private static SWTWorkbenchBot	bot;
+	private static SWTWorkbenchBot bot;
 	private GitTestProject efpProject;
+	
+	// the successful upload test requires ~/.fedora.cert
+	private File fedoraCert = new File(System.getProperty("user.home") + 
+		IPath.SEPARATOR + ".fedora.cert");
+	private File tmpExistingFedoraCert; // temporary reference to already existing ~/.fedora.cert
+	private boolean fedoraCertExisted = false;
+	
 	// Filenames used for this test
 	private final String EMPTY_FILE_NAME_VALID = "REMOVE_ME.tar";
 	private final String NON_EMPTY_FILE_NAME_INVALID = "REMOVE_ME.exe";
@@ -45,6 +56,8 @@ public class ReplaceSourcesSWTBotTest {
 	public static void beforeClass() throws Exception {
 		bot = new SWTWorkbenchBot();
 		bot.viewByTitle("Welcome").close();
+		// Make sure we have the Package Explorer view open and shown
+		openPackageExplorerView();
 	}
 	
 	@Before
@@ -69,11 +82,12 @@ public class ReplaceSourcesSWTBotTest {
 		emptySourceFile = createNewFile(EMPTY_FILE_NAME_VALID, null);
 		assertNotNull(emptySourceFile);
 		
-		openPackageExplorerView();
+		SWTBotTree packagerTree = getPackageExplorerTree();
 		
 		// Select source file
-		final SWTBotTreeItem efpItem = bot.tree().expandNode("eclipse-fedorapackager");
-		bot.waitUntil(Conditions.widgetIsEnabled(efpItem));
+		final SWTBotTreeItem efpItem = PackageExplorerHelper.getProjectItem(packagerTree,
+				"eclipse-fedorapackager");
+		efpItem.expand();
     	efpItem.select(EMPTY_FILE_NAME_VALID);
 
 		// Click on file and try to upload
@@ -107,12 +121,13 @@ public class ReplaceSourcesSWTBotTest {
 		invalidSourceFile = createNewFile(NON_EMPTY_FILE_NAME_INVALID, 0x900);
 		assertNotNull(invalidSourceFile);
 		
-		openPackageExplorerView();
+		SWTBotTree packagerTree = getPackageExplorerTree();
 		
 		// Select source file
-		final SWTBotTreeItem efpItem = bot.tree().expandNode("eclipse-fedorapackager");
-		bot.waitUntil(Conditions.widgetIsEnabled(efpItem));
-    	efpItem.select(NON_EMPTY_FILE_NAME_INVALID);
+		final SWTBotTreeItem efpItem = PackageExplorerHelper.getProjectItem(packagerTree,
+		"eclipse-fedorapackager");
+		efpItem.expand();
+		efpItem.select(NON_EMPTY_FILE_NAME_INVALID);
 		
 		// Click on file and try to upload
 		clickOnReplaceExistingSources();
@@ -133,12 +148,18 @@ public class ReplaceSourcesSWTBotTest {
 	
 	/**
 	 * Upload Sources test (Replace existing sources) with valid source
-	 * file. This assumes a valid ~/.fedora.cert is present.
+	 * file. This assumes a valid ~/.fedora.cert_tests is present or
+	 * system property "eclipseFedoraPackagerTestsCertificate" is set to
+	 * the path to a valid .fedora.cert. The latter takes precedence.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
 	public void canUploadValidSourceFileReplaceSourcesHandler() throws Exception {
+		
+		// Set up .fedora.cert, return may be null
+		tmpExistingFedoraCert = setupFedoraCert();
+		
 		// Create valid source file in project
 		IResource validSourceFile;
 		validSourceFile = createNewFile(VALID_SOURCE_FILENAME_NON_EMPTY, 0x90);
@@ -149,12 +170,13 @@ public class ReplaceSourcesSWTBotTest {
 		final String newLineGitIgnore = VALID_SOURCE_FILENAME_NON_EMPTY + "\n";
 		final String gitIgnoreBefore = readGitIgnore();
 		
-		openPackageExplorerView();
+		SWTBotTree packagerTree = getPackageExplorerTree();
 		
 		// Select source file to be uploaded
-		final SWTBotTreeItem efpItem = bot.tree().expandNode("eclipse-fedorapackager");
-		bot.waitUntil(Conditions.widgetIsEnabled(efpItem));
-    	efpItem.select(VALID_SOURCE_FILENAME_NON_EMPTY);
+		final SWTBotTreeItem efpItem = PackageExplorerHelper.getProjectItem(packagerTree,
+		"eclipse-fedorapackager");
+		efpItem.expand();
+		efpItem.select(VALID_SOURCE_FILENAME_NON_EMPTY);
 		
 		// Click on file and try to upload
 		clickOnReplaceExistingSources();
@@ -181,11 +203,22 @@ public class ReplaceSourcesSWTBotTest {
 		// Make sure sources file is still around
 		IResource newSource = efpProject.getProject().findMember(new Path(VALID_SOURCE_FILENAME_NON_EMPTY));
 		assertNotNull(newSource);
+		
+		// reestablish .fedora.cert handled by tearDown() to make sure
+		// cert files are cleaned up properly
 	}
  
 	@After
 	public void tearDown() throws Exception {
 		this.efpProject.dispose();
+		// clean up some temp .fedora.cert
+		if (tmpExistingFedoraCert != null) {
+			reestablishFedoraCert();
+		}
+		// remove ~/.fedora.cert if it didn't exist
+		if (!fedoraCertExisted && fedoraCert.exists()) {
+			fedoraCert.delete();
+		}
 	}
 	
 	/**
@@ -234,19 +267,26 @@ public class ReplaceSourcesSWTBotTest {
 	 * Opens Window => Show View => Other... => Java => Package Explorer
 	 * view.
 	 */
-	private void openPackageExplorerView() throws Exception {
+	private static void openPackageExplorerView() throws Exception {
 		// Open Package Explorer view
 		bot.menu("Window").menu("Show View").menu("Other...").click();
 		SWTBotShell shell = bot.shell("Show View");
 		shell.activate();
 		bot.tree().expandNode("Java").select("Package Explorer");
 		bot.button("OK").click();
+	}
+	
+	/**
+	 * Assumes Package Explorer view is shown on the current perspective.
+	 * 
+	 * @return The tree of the Package Explorer view
+	 */
+	private SWTBotTree getPackageExplorerTree() {
 		// Make sure view is active
-		SWTBotView packageExplorer = bot.activeView();
-		assertEquals("Package Explorer", packageExplorer.getTitle());
-		assertTrue(packageExplorer.isActive());
-		packageExplorer.setFocus();
+		SWTBotView packageExplorer = bot.viewByTitle("Package Explorer");
 		packageExplorer.show();
+		packageExplorer.setFocus();
+		return packageExplorer.bot().tree();
 	}
 	
 	/**
@@ -291,6 +331,107 @@ public class ReplaceSourcesSWTBotTest {
 			fail("Could not read from file " + name);
 		}
 		return result.toString();
+	}
+	
+	/**
+	 * We need a valid .fedora.cert for doing a successful upload.
+	 * This will first look for a system property called
+	 * "eclipseFedoraPackagerTestsCertificate" and if set uses the
+	 * file pointed to by it as ~/.fedora.cert. If this property
+	 * is not set, ~/.fedora.cert_tests will be used instead. If
+	 * nothing succeeds, fail.
+	 * 
+	 * @return A File handle to a copy of an already existing
+	 * 			~/.fedora.cert or null if there wasn't any.
+	 */
+	private File setupFedoraCert() {
+		// move away potentially existing ~/.fedora.cert
+		File oldFedoraCertMovedAway = null;
+		if (fedoraCert.exists()) {
+			fedoraCertExisted = true;
+			try {
+				oldFedoraCertMovedAway = File.createTempFile(".fedora", ".cert");
+				FileInputStream fsIn = new FileInputStream(fedoraCert);
+				FileOutputStream fsOut = new FileOutputStream(oldFedoraCertMovedAway);
+				int buf;
+				// copy stuff
+				while ( (buf = fsIn.read()) != -1 ) {
+					fsOut.write(buf);
+				}
+				fsIn.close();
+				fsOut.close();
+			} catch (IOException e) {
+				fail("Unable to setup test: (~/.fedora.cert)!");
+			}
+		}
+		// Use template cert to copy to ~/.fedora.cert
+		String certTemplatePath = System.getProperty("eclipseFedoraPackagerTestsCertificate");
+		if (certTemplatePath == null) {
+			// try ~/.fedora.cert_tests
+			File fedoraCertTests = new File(System.getProperty("user.home") +
+					IPath.SEPARATOR + ".fedora.cert_tests");
+			if (fedoraCertTests.exists()) {
+				certTemplatePath = fedoraCertTests.getAbsolutePath();
+			} else {
+				// can't continue - fail
+				fail("System property \"eclipseFedoraPackagerTestsCertificate\" " +
+						"needs to be configured or ~/.fedora.cert_tests be present" +
+						" in order for this test to work.");
+			}
+		}
+		// certTemplatePath must not be null at this point
+		assertNotNull(certTemplatePath);
+		
+		// Copy things over
+		File fedoraCertTests = new File(certTemplatePath);
+		try {
+			FileInputStream fsIn = new FileInputStream(fedoraCertTests);
+			FileOutputStream fsOut = new FileOutputStream(fedoraCert);
+			int buf;
+			// copy stuff
+			while ( (buf = fsIn.read()) != -1 ) {
+				fsOut.write(buf);
+			}
+			fsIn.close();
+			fsOut.close();
+		} catch (IOException e) {
+			fail("Unable to setup test: (~/.fedora.cert)!");
+		}
+		
+		// if there was a ~/.fedora.cert return a File handle to it,
+		// null otherwise
+		if (fedoraCertExisted) {
+			return oldFedoraCertMovedAway;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Reestablish moved away ~/.fedora.cert
+	 * 
+	 * @param oldFedoraCertMovedAway The File handle to a copy of ~/.fedora.cert
+	 * 								 before any tests were run.
+	 */
+	private void reestablishFedoraCert() {
+		// Do this only if old file still exists
+		if (tmpExistingFedoraCert.exists()) {
+			try {
+				FileInputStream fsIn = new FileInputStream(tmpExistingFedoraCert);
+				FileOutputStream fsOut = new FileOutputStream(fedoraCert);
+				int buf;
+				// copy stuff
+				while ( (buf = fsIn.read()) != -1 ) {
+					fsOut.write(buf);
+				}
+				fsIn.close();
+				fsOut.close();
+				// remove temorary file
+				tmpExistingFedoraCert.delete();				
+			} catch (IOException e) {
+				fail("copying back ~/.fedora.cert");
+			}
+		}
 	}
  
 }
