@@ -19,7 +19,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory;
-import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
@@ -27,7 +26,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.fedoraproject.eclipse.packager.swtbottests.utils.ContextMenuHelper;
-import org.fedoraproject.eclipse.packager.swtbottests.utils.PackageExplorerHelper;
+import org.fedoraproject.eclipse.packager.swtbottests.utils.PackageExplorer;
 import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
 import org.junit.After;
 import org.junit.Before;
@@ -57,7 +56,7 @@ public class ReplaceSourcesSWTBotTest {
 		bot = new SWTWorkbenchBot();
 		bot.viewByTitle("Welcome").close();
 		// Make sure we have the Package Explorer view open and shown
-		openPackageExplorerView();
+		PackageExplorer.openView();
 	}
 	
 	@Before
@@ -82,16 +81,16 @@ public class ReplaceSourcesSWTBotTest {
 		emptySourceFile = createNewFile(EMPTY_FILE_NAME_VALID, null);
 		assertNotNull(emptySourceFile);
 		
-		SWTBotTree packagerTree = getPackageExplorerTree();
+		SWTBotTree packagerTree = PackageExplorer.getTree();
 		
 		// Select source file
-		final SWTBotTreeItem efpItem = PackageExplorerHelper.getProjectItem(packagerTree,
+		final SWTBotTreeItem efpItem = PackageExplorer.getProjectItem(packagerTree,
 				"eclipse-fedorapackager");
 		efpItem.expand();
     	efpItem.select(EMPTY_FILE_NAME_VALID);
 
 		// Click on file and try to upload
-		clickOnReplaceExistingSources();
+		clickOnReplaceExistingSources(packagerTree);
 		// Wait for error to pop up
 		bot.waitUntil(Conditions.shellIsActive("Fedora Packager"));
 		SWTBotShell efpErrorWindow = bot.shell("Fedora Packager");
@@ -121,16 +120,16 @@ public class ReplaceSourcesSWTBotTest {
 		invalidSourceFile = createNewFile(NON_EMPTY_FILE_NAME_INVALID, 0x900);
 		assertNotNull(invalidSourceFile);
 		
-		SWTBotTree packagerTree = getPackageExplorerTree();
+		SWTBotTree packagerTree = PackageExplorer.getTree();
 		
 		// Select source file
-		final SWTBotTreeItem efpItem = PackageExplorerHelper.getProjectItem(packagerTree,
+		final SWTBotTreeItem efpItem = PackageExplorer.getProjectItem(packagerTree,
 		"eclipse-fedorapackager");
 		efpItem.expand();
 		efpItem.select(NON_EMPTY_FILE_NAME_INVALID);
 		
 		// Click on file and try to upload
-		clickOnReplaceExistingSources();
+		clickOnReplaceExistingSources(packagerTree);
 		// Wait for error to pop up
 		bot.waitUntil(Conditions.shellIsActive("Fedora Packager"));
 		SWTBotShell efpErrorWindow = bot.shell("Fedora Packager");
@@ -170,16 +169,16 @@ public class ReplaceSourcesSWTBotTest {
 		final String newLineGitIgnore = VALID_SOURCE_FILENAME_NON_EMPTY + "\n";
 		final String gitIgnoreBefore = readGitIgnore();
 		
-		SWTBotTree packagerTree = getPackageExplorerTree();
+		SWTBotTree packagerTree = PackageExplorer.getTree();
 		
 		// Select source file to be uploaded
-		final SWTBotTreeItem efpItem = PackageExplorerHelper.getProjectItem(packagerTree,
+		final SWTBotTreeItem efpItem = PackageExplorer.getProjectItem(packagerTree,
 		"eclipse-fedorapackager");
 		efpItem.expand();
 		efpItem.select(VALID_SOURCE_FILENAME_NON_EMPTY);
 		
 		// Click on file and try to upload
-		clickOnReplaceExistingSources();
+		clickOnReplaceExistingSources(packagerTree);
 		// Wait for upload process to start
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.
 				eclipse.packager.Messages.newSourcesHandler_jobName));
@@ -224,14 +223,13 @@ public class ReplaceSourcesSWTBotTest {
 	/**
 	 * Context menu click helper. Click on "Replace existing sources".
 	 * 
+	 * @param Tree of Package Explorer view.
 	 * @throws Exception
 	 */
-	private void clickOnReplaceExistingSources() throws Exception {
-		// Assumes Packages Explorer view active and bot.tree()
-		// points to its tree.
+	private void clickOnReplaceExistingSources(SWTBotTree packagerTree) throws Exception {
 		String subMenu = "Upload This File";
 		String menuItem = "Replace existing sources";
-		ContextMenuHelper.clickContextMenu(bot.tree(), "Fedora Packager",
+		ContextMenuHelper.clickContextMenu(packagerTree, "Fedora Packager",
 				subMenu, menuItem);
 	}
 	
@@ -261,32 +259,6 @@ public class ReplaceSourcesSWTBotTest {
 					"' for test.");
 		}
 		return result;
-	}
-	
-	/**
-	 * Opens Window => Show View => Other... => Java => Package Explorer
-	 * view.
-	 */
-	private static void openPackageExplorerView() throws Exception {
-		// Open Package Explorer view
-		bot.menu("Window").menu("Show View").menu("Other...").click();
-		SWTBotShell shell = bot.shell("Show View");
-		shell.activate();
-		bot.tree().expandNode("Java").select("Package Explorer");
-		bot.button("OK").click();
-	}
-	
-	/**
-	 * Assumes Package Explorer view is shown on the current perspective.
-	 * 
-	 * @return The tree of the Package Explorer view
-	 */
-	private SWTBotTree getPackageExplorerTree() {
-		// Make sure view is active
-		SWTBotView packageExplorer = bot.viewByTitle("Package Explorer");
-		packageExplorer.show();
-		packageExplorer.setFocus();
-		return packageExplorer.bot().tree();
 	}
 	
 	/**

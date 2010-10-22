@@ -7,12 +7,13 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
-import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.fedoraproject.eclipse.packager.swtbottests.utils.ContextMenuHelper;
+import org.fedoraproject.eclipse.packager.swtbottests.utils.PackageExplorer;
 import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
 import org.junit.After;
 import org.junit.Before;
@@ -30,6 +31,7 @@ public class PrepSourcesSWTBotTest {
 	public static void beforeClass() throws Exception {
 		bot = new SWTWorkbenchBot();
 		bot.viewByTitle("Welcome").close();
+		PackageExplorer.openView();
 	}
 	
 	@Before
@@ -50,15 +52,16 @@ public class PrepSourcesSWTBotTest {
 	@Test
 	public void canPrepareSourcesForLocalBuild() throws Exception {
 		
-		openPackageExplorerView();
+		SWTBotTree packagerTree = PackageExplorer.getTree();
 		
 		// Select spec file
-		final SWTBotTreeItem edItem = bot.tree().expandNode("ed");
-		bot.waitUntil(Conditions.widgetIsEnabled(edItem));
-    	edItem.select("ed.spec");
+		final SWTBotTreeItem edItem = PackageExplorer.getProjectItem(
+				packagerTree, "ed");
+		edItem.expand();
+		edItem.select("ed.spec");
 		
 		// Click prepare sources context menu item
-		clickOnPrepareSources();
+		clickOnPrepareSources(packagerTree);
 		// Wait for upload process to start
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.
 				eclipse.packager.rpm.Messages.prepHandler_jobName));
@@ -86,33 +89,13 @@ public class PrepSourcesSWTBotTest {
 	/**
 	 * Context menu click helper. Click on "Prepare Sources for Build".
 	 * 
+	 * @param Tree of Package Explorer view.
 	 * @throws Exception
 	 */
-	private void clickOnPrepareSources() throws Exception {
-		// Assumes Packages Explorer view active and bot.tree()
-		// points to its tree.
+	private void clickOnPrepareSources(SWTBotTree packagerTree) throws Exception {
 		String menuItem = "Prepare Sources for Build";
-		ContextMenuHelper.clickContextMenu(bot.tree(), "Fedora Packager",
+		ContextMenuHelper.clickContextMenu(packagerTree, "Fedora Packager",
 				menuItem);
-	}
-	
-	/**
-	 * Opens Window => Show View => Other... => Java => Package Explorer
-	 * view.
-	 */
-	private void openPackageExplorerView() throws Exception {
-		// Open Package Explorer view
-		bot.menu("Window").menu("Show View").menu("Other...").click();
-		SWTBotShell shell = bot.shell("Show View");
-		shell.activate();
-		bot.tree().expandNode("Java").select("Package Explorer");
-		bot.button("OK").click();
-		// Make sure view is active
-		SWTBotView packageExplorer = bot.activeView();
-		assertEquals("Package Explorer", packageExplorer.getTitle());
-		assertTrue(packageExplorer.isActive());
-		packageExplorer.setFocus();
-		packageExplorer.show();
 	}
  
 }

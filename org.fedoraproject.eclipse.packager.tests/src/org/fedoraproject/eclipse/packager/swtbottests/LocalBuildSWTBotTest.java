@@ -7,12 +7,13 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
-import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.fedoraproject.eclipse.packager.swtbottests.utils.ContextMenuHelper;
+import org.fedoraproject.eclipse.packager.swtbottests.utils.PackageExplorer;
 import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
 import org.junit.After;
 import org.junit.Before;
@@ -35,6 +36,7 @@ public class LocalBuildSWTBotTest {
 	public static void beforeClass() throws Exception {
 		bot = new SWTWorkbenchBot();
 		bot.viewByTitle("Welcome").close();
+		PackageExplorer.openView();
 	}
 	
 	@Before
@@ -55,15 +57,17 @@ public class LocalBuildSWTBotTest {
 	@Test
 	public void canBuildForLocalArchitecture() throws Exception {
 		
-		openPackageExplorerView();
+		// get tree of Package Explorer view
+		SWTBotTree packagerTree = PackageExplorer.getTree();
 		
 		// Select spec file
-		final SWTBotTreeItem edItem = bot.tree().expandNode("ed");
-		bot.waitUntil(Conditions.widgetIsEnabled(edItem));
-    	edItem.select("ed.spec");
+		final SWTBotTreeItem edItem = PackageExplorer.getProjectItem(
+				packagerTree, "ed");
+		edItem.expand();
+		edItem.select("ed.spec");
 		
 		// Click local build context menu item
-		clickOnBuildForLocalArchitecture();
+		clickOnBuildForLocalArchitecture(packagerTree);
 		// Wait for upload process to start
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.
 				eclipse.packager.rpm.Messages.localBuildHandler_jobName));
@@ -82,7 +86,8 @@ public class LocalBuildSWTBotTest {
 			}
 		}
 		assertNotNull(buildFolder);
-		assertTrue("Expected ed rpm to be created in " + buildFolder.getName(), buildFolder.members().length > 0);
+		assertTrue("Expected ed rpm to be created in " + buildFolder.getName(),
+				buildFolder.members().length > 0);
 	}
  
 	@After
@@ -93,33 +98,13 @@ public class LocalBuildSWTBotTest {
 	/**
 	 * Context menu click helper. Click on "Build for Local Architecture".
 	 * 
+	 * @param Tree of Package Explorer view.
 	 * @throws Exception
 	 */
-	private void clickOnBuildForLocalArchitecture() throws Exception {
-		// Assumes Packages Explorer view active and bot.tree()
-		// points to its tree.
+	private void clickOnBuildForLocalArchitecture(SWTBotTree packagerTree) throws Exception {
 		String menuItem = "Build for Local Architecture";
-		ContextMenuHelper.clickContextMenu(bot.tree(), "Fedora Packager",
+		ContextMenuHelper.clickContextMenu(packagerTree, "Fedora Packager",
 				menuItem);
-	}
-	
-	/**
-	 * Opens Window => Show View => Other... => Java => Package Explorer
-	 * view.
-	 */
-	private void openPackageExplorerView() throws Exception {
-		// Open Package Explorer view
-		bot.menu("Window").menu("Show View").menu("Other...").click();
-		SWTBotShell shell = bot.shell("Show View");
-		shell.activate();
-		bot.tree().expandNode("Java").select("Package Explorer");
-		bot.button("OK").click();
-		// Make sure view is active
-		SWTBotView packageExplorer = bot.activeView();
-		assertEquals("Package Explorer", packageExplorer.getTitle());
-		assertTrue(packageExplorer.isActive());
-		packageExplorer.setFocus();
-		packageExplorer.show();
 	}
  
 }

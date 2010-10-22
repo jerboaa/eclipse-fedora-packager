@@ -1,8 +1,6 @@
 package org.fedoraproject.eclipse.packager.swtbottests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -10,12 +8,12 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.waits.Conditions;
-import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
-import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
-import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.fedoraproject.eclipse.packager.swtbottests.utils.ContextMenuHelper;
+import org.fedoraproject.eclipse.packager.swtbottests.utils.PackageExplorer;
 import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
 import org.junit.After;
 import org.junit.Before;
@@ -33,6 +31,7 @@ public class DownloadSourcesSWTBotTest {
 	public static void beforeClass() throws Exception {
 		bot = new SWTWorkbenchBot();
 		bot.viewByTitle("Welcome").close();
+		PackageExplorer.openView();
 	}
 	
 	@Before
@@ -52,28 +51,17 @@ public class DownloadSourcesSWTBotTest {
 	@SuppressWarnings("static-access")
 	@Test
 	public void canDownloadSources() throws Exception {
-		// Open Package Explorer view
-		bot.menu("Window").menu("Show View").menu("Other...").click();
- 
-		SWTBotShell shell = bot.shell("Show View");
-		shell.activate();
-		bot.tree().expandNode("Java").select("Package Explorer");
-		bot.button("OK").click();
-		// Make sure view is active
-		SWTBotView packageExplorer = bot.activeView();
-		assertEquals("Package Explorer", packageExplorer.getTitle());
-		assertTrue(packageExplorer.isActive());
+		// Get Package Explorer tree
+		SWTBotTree packagerTree = PackageExplorer.getTree();
 		
-		// Select spec-file (run in UI thread, to make sure selection works
-		// properly)
-		UIThreadRunnable
-        .syncExec(new VoidResult() {
-            public void run() {
-            	bot.tree().expandNode("ed").select("ed.spec");
-        }});
-		
+		// Select spec-file
+		final SWTBotTreeItem edItem = PackageExplorer.getProjectItem(
+				packagerTree, "ed");
+		edItem.expand();
+		edItem.select("ed.spec");
+
 		// Trigger context menu "Fedora Packager" => "Download Sources"
-		clickOnDownloadSources();
+		clickOnDownloadSources(packagerTree);
 		
 		// Wait for download dialog to finish, but first wait until it opens
 		bot.waitUntil(Conditions.shellIsActive("Fedora Packager"));
@@ -92,15 +80,15 @@ public class DownloadSourcesSWTBotTest {
 	}
 	
 	/**
-	 * Context menu click helper.
+	 * Context menu click helper. Simulates click of 
+	 * "Fedora Packager" => "Download Sources"
 	 * 
+	 * @param Tree of Package Explorer view.
 	 * @throws Exception
 	 */
-	private void clickOnDownloadSources() throws Exception {
-		// Assumes Packages Explorer view active and bot.tree()
-		// points to its tree.
+	private void clickOnDownloadSources(SWTBotTree packagerTree) throws Exception {
 		String menuString = "Download Sources";
-		ContextMenuHelper.clickContextMenu(bot.tree(), "Fedora Packager",
+		ContextMenuHelper.clickContextMenu(packagerTree, "Fedora Packager",
 				menuString);
 	}
  
