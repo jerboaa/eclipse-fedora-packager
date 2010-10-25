@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
+import org.fedoraproject.eclipse.packager.oldtests.utils.AbstractTest;
 
 public class DownloadTest extends AbstractTest {
 	@Override

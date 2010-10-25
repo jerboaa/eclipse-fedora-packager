@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.cvs.handlers.TagHandler;
-import org.fedoraproject.eclipse.packager.oldtests.AbstractTest;
+import org.fedoraproject.eclipse.packager.oldtests.utils.AbstractTest;
 
 public class CVSTagTest extends AbstractTest {
 	private IStatus result;

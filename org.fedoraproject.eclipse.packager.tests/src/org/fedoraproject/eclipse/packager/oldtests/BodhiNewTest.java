@@ -14,9 +14,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiNewHandler;
-import org.fedoraproject.eclipse.packager.tests.utils.BodhiClientStub;
-import org.fedoraproject.eclipse.packager.tests.utils.BodhiNewDialogStub;
-import org.fedoraproject.eclipse.packager.tests.utils.UserValidationDialogStub;
+import org.fedoraproject.eclipse.packager.oldtests.utils.AbstractTest;
+import org.fedoraproject.eclipse.packager.oldtests.utils.BodhiClientStub;
+import org.fedoraproject.eclipse.packager.oldtests.utils.BodhiNewDialogStub;
+import org.fedoraproject.eclipse.packager.oldtests.utils.UserValidationDialogStub;
 
 public class BodhiNewTest extends AbstractTest {
 	private BodhiClientStub bodhi;

@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.fedoraproject.eclipse.packager.oldtests.utils.AbstractTest;
 import org.fedoraproject.eclipse.packager.rpm.LocalBuildHandler;
 
 public class LocalBuildTest extends AbstractTest {

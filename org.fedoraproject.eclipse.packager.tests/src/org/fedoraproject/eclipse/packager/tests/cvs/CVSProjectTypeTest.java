@@ -13,7 +13,7 @@ package org.fedoraproject.eclipse.packager.tests.cvs;
 import junit.framework.TestCase;
 import org.eclipse.core.resources.IProject;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.tests.utils.CVSTestProject;
+import org.fedoraproject.eclipse.packager.tests.cvs.utils.CVSTestProject;
 
 public class CVSProjectTypeTest extends TestCase {
 	private CVSTestProject project;

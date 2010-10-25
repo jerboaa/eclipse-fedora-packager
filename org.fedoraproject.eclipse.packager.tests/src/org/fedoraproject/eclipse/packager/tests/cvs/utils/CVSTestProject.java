@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.tests.utils;
+package org.fedoraproject.eclipse.packager.tests.cvs.utils;
 
 import java.lang.reflect.InvocationTargetException;
 

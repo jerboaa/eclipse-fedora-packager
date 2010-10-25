@@ -8,14 +8,14 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.oldtests;
+package org.fedoraproject.eclipse.packager.oldtests.utils;
 
 import junit.framework.TestCase;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
-import org.fedoraproject.eclipse.packager.tests.utils.CVSTestProject;
+import org.fedoraproject.eclipse.packager.tests.cvs.utils.CVSTestProject;
 
 public abstract class AbstractTest extends TestCase {
 

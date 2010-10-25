@@ -3,6 +3,7 @@ package org.fedoraproject.eclipse.packager.oldtests;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.fedoraproject.eclipse.packager.koji.KojiPlugin;
 import org.fedoraproject.eclipse.packager.koji.preferences.PreferencesConstants;
+import org.fedoraproject.eclipse.packager.oldtests.utils.AbstractTest;
 
 public class KojiPreferenceTest extends AbstractTest {
 

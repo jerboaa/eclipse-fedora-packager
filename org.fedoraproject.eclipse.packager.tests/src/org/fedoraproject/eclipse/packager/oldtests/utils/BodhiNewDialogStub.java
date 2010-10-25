@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.tests.utils;
+package org.fedoraproject.eclipse.packager.oldtests.utils;
 
 import org.eclipse.jface.window.Window;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiNewHandler;
