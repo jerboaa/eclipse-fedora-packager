@@ -4,5 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.ws.commons.util"/>
+	<classpathentry kind="lib" path="/usr/share/java/easymock2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
