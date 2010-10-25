@@ -53,7 +53,7 @@ import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
  * Handler to perform a Koji build.
  * 
  */
-public class KojiBuildHandler extends CommonHandler implements IMockedBuildHandler {
+public class KojiBuildHandler extends CommonHandler {
 	@SuppressWarnings("unused")
 	private String dist;
 	private IKojiHubClient koji;
