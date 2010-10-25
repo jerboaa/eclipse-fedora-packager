@@ -32,10 +32,20 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.IConsoleView;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
@@ -43,11 +53,89 @@ import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
  * Handler to perform a Koji build.
  * 
  */
-public class KojiBuildHandler extends CommonHandler {
+public class KojiBuildHandler extends CommonHandler implements IMockedBuildHandler {
 	@SuppressWarnings("unused")
 	private String dist;
-	protected IKojiHubClient koji;
+	private IKojiHubClient koji;
 	private Job job;
+	
+	///////////////////////////////////////////////////////////////
+	// FIXME: This is used for testing only and is super-ugly, but mocking
+	//        things in conjunction with SWTBotTests doesn't work. We really
+	//        need to refactor this.
+	//        Better ideas very welcome!
+	/**
+	 * Indicates if stub or real client should be returned by getKoji()
+	 */
+	public static boolean inTestingMode = false;
+	private static IKojiHubClient kojiStub = new IKojiHubClient() {
+		private final String CONSOLE_NAME = "Fedora Packager";
+		
+		public String build(String target, String scmURL, boolean scratch) throws XmlRpcException {
+			try {
+				// pretend to do some work, sleep
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return "1337";
+		}
+
+		public void logout() throws MalformedURLException, XmlRpcException {
+		}
+
+		public String sslLogin() throws XmlRpcException, MalformedURLException {
+			return null;
+		}
+		
+		public String getWebUrl() {
+			return "http://www.example.com";
+		}
+
+		/**
+		 * Create MessageConsole if not found.
+		 * 
+		 * @param name
+		 * @return
+		 */
+		private MessageConsole findConsole(String name) {
+		      IConsoleManager conMan = ConsolePlugin.getDefault().getConsoleManager();
+		      IConsole[] existing = conMan.getConsoles();
+		      for (int i = 0; i < existing.length; i++)
+		         if (name.equals(existing[i].getName()))
+		            return (MessageConsole) existing[i];
+		      //no console found, so create a new one
+		      MessageConsole myConsole = new MessageConsole(name, null);
+		      conMan.addConsoles(new IConsole[]{myConsole});
+		      return myConsole;
+		 }
+		
+		/**
+		 * Utility method to write to Eclipse console if not present.
+		 * 
+		 * @param message
+		 */
+		public void writeToConsole(String message) {
+			MessageConsole console = findConsole(CONSOLE_NAME);
+			MessageConsoleStream out = console.newMessageStream();
+			out.setActivateOnWrite(true);
+			out.println(message);
+			
+			// Show console view
+			IWorkbenchPage page = PackagerPlugin.getDefault().getWorkbench()
+					.getActiveWorkbenchWindow().getActivePage();
+			String id = IConsoleConstants.ID_CONSOLE_VIEW;
+			IConsoleView view = null;
+			try {
+				view = (IConsoleView) page.showView(id);
+			} catch (PartInitException e) {
+				e.printStackTrace();
+			}
+			view.display(console);
+		}
+	};
+	// end of stub client for testing
+	///////////////////////////////////////////////////////////////
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
@@ -231,10 +319,20 @@ public class KojiBuildHandler extends CommonHandler {
 	}
 
 	/**
-	 * @return The koji client.
+	 * ATM this is the preferred way to get the koji client instance.
+	 * When in testing mode, this will return the stubbed client.
+	 * 
+	 * @return The real or the stubbed koji client depending on the
+	 *         mode (inTestingMode)
 	 */
 	public IKojiHubClient getKoji() {
-		return koji;
+		if (!inTestingMode) {
+			// return actual client
+			return koji;
+		} else {
+			// return stub for testing
+			return kojiStub;
+		}
 	}
 
 	/**
