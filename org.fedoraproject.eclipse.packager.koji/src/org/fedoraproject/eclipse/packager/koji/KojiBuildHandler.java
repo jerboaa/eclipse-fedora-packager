@@ -69,7 +69,7 @@ public class KojiBuildHandler extends CommonHandler {
 				
 				// Initialize koji client
 				try {
-					koji = new KojiHubClient();
+					setKoji(new KojiHubClient());
 				} catch (GeneralSecurityException e1) {
 					e1.printStackTrace();
 					return FedoraHandlerUtils.handleError(e1);
@@ -126,10 +126,10 @@ public class KojiBuildHandler extends CommonHandler {
 												titleImage,
 												MessageDialog.NONE,
 												new String[] { IDialogConstants.OK_LABEL },
-												0, koji, taskId);
+												0, getKoji(), taskId);
 										msgDialog.open();
 									} else { // fall back to console print
-										koji
+										getKoji()
 												.writeToConsole(NLS
 														.bind(
 																Messages.kojiBuildHandler_fallbackBuildMsg,
@@ -147,7 +147,7 @@ public class KojiBuildHandler extends CommonHandler {
 																	jobStatus
 																			.getMessage()));
 								} else {
-									koji
+									getKoji()
 											.writeToConsole(NLS
 													.bind(
 															Messages.kojiBuildHandler_buildTaskIdError,
@@ -193,14 +193,14 @@ public class KojiBuildHandler extends CommonHandler {
 			}
 			// login via SSL
 			monitor.subTask(Messages.kojiBuildHandler_kojiLogin);
-			String result = koji.sslLogin();
+			String result = getKoji().sslLogin();
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 			// push build
 			monitor.subTask(Messages.kojiBuildHandler_sendBuildCmd);
-			result = koji.build(projectBits.getTarget(), scmURL, isScratch());
+			result = getKoji().build(projectBits.getTarget(), scmURL, isScratch());
 			// if we get an int (that is our taskId)
 			int taskId = -1;
 			try {
@@ -219,7 +219,7 @@ public class KojiBuildHandler extends CommonHandler {
 			}
 			// logout
 			monitor.subTask(Messages.kojiBuildHandler_kojiLogout);
-			koji.logout();
+			getKoji().logout();
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
 			status = FedoraHandlerUtils.handleError(e);
