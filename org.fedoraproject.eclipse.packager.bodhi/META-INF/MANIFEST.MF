@@ -20,7 +20,8 @@ Import-Package: org.apache.commons.httpclient,
  org.fedoraproject.eclipse.packager.handlers,
  org.json
 Bundle-Localization: plugin
-Export-Package: org.fedoraproject.eclipse.packager.bodhi
+Export-Package: org.fedoraproject.eclipse.packager.bodhi,
+ org.fedoraproject.eclipse.packager.bodhi.stubs
 Bundle-ClassPath: eclipse-packager-fragment-bodhi.jar,
  .
 Eclipse-ExtensibleAPI: true

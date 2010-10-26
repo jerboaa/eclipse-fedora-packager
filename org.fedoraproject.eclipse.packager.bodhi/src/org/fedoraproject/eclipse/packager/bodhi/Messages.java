@@ -52,6 +52,7 @@ public class Messages extends NLS {
 	public static String bodhiNewHandler_loginBodhi;
 	public static String bodhiNewHandler_sendNewUpdate;
 	public static String bodhiNewHandler_logoutMsg;
+	public static String bodhiNewHandler_updateResponseTitle;
 	// UserValidationDialog
 	public static String userValidationDialog_passwordRequired;
 	public static String userValidationDialog_server;

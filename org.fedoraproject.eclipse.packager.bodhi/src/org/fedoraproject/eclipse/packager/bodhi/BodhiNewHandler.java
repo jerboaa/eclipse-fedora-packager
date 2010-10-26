@@ -28,11 +28,18 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.bodhi.stubs.BodhiClientStub;
+import org.fedoraproject.eclipse.packager.bodhi.stubs.BodhiNewDialogStub;
+import org.fedoraproject.eclipse.packager.bodhi.stubs.UserValidationDialogStub;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 import org.json.JSONException;
@@ -47,12 +54,29 @@ public class BodhiNewHandler extends CommonHandler {
 	protected IUserValidationDialog authDialog;
 	protected IBodhiClient bodhi;
 
+    ///////////////////////////////////////////////////////////////
+	// FIXME: This is used for testing only and is super-ugly, but mocking
+	//        things in conjunction with SWTBotTests doesn't work. We really
+	//        need to refactor this.
+	//        Better ideas very welcome!
+	/**
+	 * Indicates if stub or fleshed out objects are returned.
+	 */
+	public static boolean inTestingMode = false;
+	// stubs
+	private IBodhiNewDialog bodhiDialogStub = new BodhiNewDialogStub(this);
+	private IUserValidationDialog validationDialogStub = new UserValidationDialogStub();
+	private IBodhiClient bodhiClientStub = new BodhiClientStub();
 	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
 		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot);
+		// Need to have shell variable on heap not on a thread's stack.
+		// Hence, the instance variable "shell".
+		shell = getShell(e);
+		
 		Job job = new Job(Messages.bodhiNewHandler_jobName) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -69,6 +93,8 @@ public class BodhiNewHandler extends CommonHandler {
 							throw new OperationCanceledException();
 						}
 						monitor.subTask(Messages.bodhiNewHandler_querySpecFileMsg);
+						// Parsing changelog from spec-file seems to be broken
+						// This always returns "". See #49
 						String clog = getClog(fedoraProjectRoot);
 						String bugIDs = findBug(clog);
 						String buildName = getBuildName(fedoraProjectRoot);
@@ -78,22 +104,24 @@ public class BodhiNewHandler extends CommonHandler {
 							throw new OperationCanceledException();
 						}
 						// if debugging, want to use stub
-						if (!debug) {
-							dialog = new BodhiNewDialog(shell, buildName,
-									release, bugIDs, clog);
-							Display.getDefault().syncExec(new Runnable() {
-								@Override
-								public void run() {
-									dialog.open();
-								}						
-							});
+						if (!inTestingMode) {
+							setDialog(new BodhiNewDialog(shell, buildName,
+									release, bugIDs, clog));
+						} else {
+							setDialog(bodhiDialogStub);
 						}
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								getDialog().open();
+							}
+						});
 
-						if (dialog.getReturnCode() == Window.OK) {
-							String type = dialog.getType();
-							String request = dialog.getRequest();
-							String bugs = dialog.getBugs();
-							String notes = dialog.getNotes();
+						if (getDialog().getReturnCode() == Window.OK) {
+							String type = getDialog().getType();
+							String request = getDialog().getRequest();
+							String bugs = getDialog().getBugs();
+							String notes = getDialog().getNotes();
 
 							String cachedUsername = retrievePreference("username"); //$NON-NLS-1$
 							String cachedPassword = null;
@@ -108,26 +136,28 @@ public class BodhiNewHandler extends CommonHandler {
 							if (monitor.isCanceled()) {
 								throw new OperationCanceledException();
 							}
-							if (!debug) {
-								authDialog = new UserValidationDialog(
+							if (!inTestingMode) {
+								setAuthDialog(new UserValidationDialog(
 										shell, BodhiClient.BODHI_URL, cachedUsername,
 										cachedPassword,
 										Messages.bodhiNewHandler_updateLoginMsg,
-								"icons/bodhi-icon-48.png"); //$NON-NLS-1$
-								Display.getDefault().syncExec(new Runnable() {
-									@Override
-									public void run() {
-										authDialog.open();
-									}							
-								});
+								"icons/bodhi-icon-48.png")); //$NON-NLS-1$
+							} else {
+								setAuthDialog(validationDialogStub);
 							}
-							if (authDialog.getReturnCode() != Window.OK) {
+							Display.getDefault().syncExec(new Runnable() {
+								@Override
+								public void run() {
+									getAuthDialog().open();
+								}
+							});
+							if (getAuthDialog().getReturnCode() != Window.OK) {
 								// Canceled
 								return Status.CANCEL_STATUS;
 							}
 
-							String username = authDialog.getUsername();
-							String password = authDialog.getPassword();
+							String username = getAuthDialog().getUsername();
+							String password = getAuthDialog().getPassword();
 
 							IStatus result = newUpdate(buildName, release,
 									type, request, bugs, notes, username,
@@ -138,12 +168,22 @@ public class BodhiNewHandler extends CommonHandler {
 							for (IStatus child : result.getChildren()) {
 								message += "\n" + child.getMessage(); //$NON-NLS-1$
 							}
+							final String successMsg = message;
 
 							// success
 							if (result.isOK()) {
-								FedoraHandlerUtils.handleOK(message, true);
+								// Show info about the update
+								PlatformUI.getWorkbench().getDisplay()
+										.asyncExec(new Runnable() {
+											@Override
+											public void run() {
+												MessageDialog.openInformation(
+														shell, Messages.bodhiNewHandler_updateResponseTitle,
+														successMsg);
+											}
+										});
 
-								if (authDialog.getAllowCaching()) {
+								if (getAuthDialog().getAllowCaching()) {
 									storeCredentials(username, password);
 								}
 							} else {
@@ -167,8 +207,8 @@ public class BodhiNewHandler extends CommonHandler {
 		job.schedule();
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * Get Bodhi release name of the current branch.
 	 * 
@@ -197,10 +237,15 @@ public class BodhiNewHandler extends CommonHandler {
 	/**
 	 * Get the Bodhi client.
 	 * 
-	 * @return The bodhi client.
+	 * @return The real bodhi client or a stubbed client
+	 *         depending if inTestingMode returns true or false.
 	 */
 	public IBodhiClient getBodhi() {
-		return bodhi;
+		if (!inTestingMode) {
+			return bodhi;
+		} else {
+			return bodhiClientStub;
+		}
 	}
 
 	/**
@@ -218,7 +263,11 @@ public class BodhiNewHandler extends CommonHandler {
 	 * @return The user validation dialog.
 	 */
 	public IUserValidationDialog getAuthDialog() {
-		return authDialog;
+		if (!inTestingMode) {
+			return authDialog;
+		} else {
+			return validationDialogStub;
+		}
 	}
 
 	/**
@@ -236,7 +285,11 @@ public class BodhiNewHandler extends CommonHandler {
 	 * @return The UI dialog.
 	 */
 	public IBodhiNewDialog getDialog() {
-		return dialog;
+		if (!inTestingMode) {
+			return dialog;
+		} else {
+			return bodhiDialogStub;
+		}
 	}
 
 	/**
@@ -286,9 +339,11 @@ public class BodhiNewHandler extends CommonHandler {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			if (!debug) {
-				monitor.subTask(Messages.bodhiNewHandler_connectToBodhi);
-				bodhi = new BodhiClient();
+			monitor.subTask(Messages.bodhiNewHandler_connectToBodhi);
+			if (!inTestingMode) {
+				setBodhi(new BodhiClient());
+			} else {
+				setBodhi(bodhiClientStub);
 			}
 
 			if (monitor.isCanceled()) {
@@ -296,7 +351,7 @@ public class BodhiNewHandler extends CommonHandler {
 			}
 			// Login
 			monitor.subTask(Messages.bodhiNewHandler_loginBodhi);
-			JSONObject result = bodhi.login(username, password);
+			JSONObject result = getBodhi().login(username, password);
 			if (result.has("message")) { //$NON-NLS-1$
 				throw new IOException(result.getString("message")); //$NON-NLS-1$
 			}
@@ -306,10 +361,18 @@ public class BodhiNewHandler extends CommonHandler {
 			}
 			// create new update
 			monitor.subTask(Messages.bodhiNewHandler_sendNewUpdate);
-			result = bodhi.newUpdate(buildName, release, type, request, bugs,
+			result = getBodhi().newUpdate(buildName, release, type, request, bugs,
 					notes, result.getString("_csrf_token"));
-			status = new MultiStatus(BodhiPlugin.PLUGIN_ID, IStatus.OK, result
-					.getString("tg_flash"), null); //$NON-NLS-1$
+			// Note bodhi's "tg_flash" appears to be the Turbo Gears flash message
+			// which shows up in the Web interface indicating something happened
+			String bodhiRespStatus = "";
+			if (result.has("tg_flash")) {
+				bodhiRespStatus = result.getString("tg_flash");
+			}
+			status = new MultiStatus(BodhiPlugin.PLUGIN_ID, IStatus.OK,
+					bodhiRespStatus, null);
+			// Collect update info from JSON response: "update" key in the JSON
+			// response seems to be the title of the new update.
 			if (result.has("update")) { //$NON-NLS-1$
 				((MultiStatus) status).add(new Status(IStatus.OK,
 						BodhiPlugin.PLUGIN_ID, result.getString("update"))); //$NON-NLS-1$
@@ -317,7 +380,7 @@ public class BodhiNewHandler extends CommonHandler {
 			
 			// Logout
 			monitor.subTask(Messages.bodhiNewHandler_logoutMsg);
-			bodhi.logout();
+			getBodhi().logout();
 		} catch (GeneralSecurityException e) {
 			e.printStackTrace();
 			status = FedoraHandlerUtils.handleError(e.getMessage());
@@ -335,6 +398,12 @@ public class BodhiNewHandler extends CommonHandler {
 		return status;
 	}
 
+	/**
+	 * Parse bugs listed in a changelog string
+	 * 
+	 * @param clog
+	 * @return A comma separated list of bugs, or the empty string.
+	 */
 	private String findBug(String clog) {
 		String bugs = ""; //$NON-NLS-1$
 		Pattern p = Pattern.compile("#([0-9]*)"); //$NON-NLS-1$
@@ -355,6 +424,15 @@ public class BodhiNewHandler extends CommonHandler {
 		} catch (IllegalArgumentException e) {
 			return null; // invalid path
 		}
+	}
+	
+	/**
+	 * @param event
+	 * @return the shell
+	 * @throws ExecutionException
+	 */
+	private Shell getShell(ExecutionEvent event) throws ExecutionException {
+		return HandlerUtil.getActiveShellChecked(event);
 	}
 
 }
