@@ -27,6 +27,10 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.koji.IKojiHubClient;
 
+/**
+ * @deprecated This stub is unused. Only exists for old tests.
+ *
+ */
 public class KojiHubClientStub implements IKojiHubClient {
 	public String target;
 	public String scmURL;
