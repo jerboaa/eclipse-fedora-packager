@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<!-- You need to add
+   -Dlog4j.configuration=file:///absolute/path/to/this/file/log4j.xml
+   to your Eclipse run configuration in order to avoid log4j warnings -->
+   
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+  <appender name="console" class="org.apache.log4j.ConsoleAppender"> 
+    <param name="Target" value="System.out"/> 
+    <layout class="org.apache.log4j.PatternLayout"> 
+      <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/> 
+    </layout> 
+  </appender>
+
+  <root> 
+    <priority value ="debug" /> 
+    <appender-ref ref="console" /> 
+  </root>
+  
+</log4j:configuration>
