@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.fedoraproject.eclipse.packager.tests_feature"
+      label="Feature for building EFP test"
+      version="0.1.8.qualifier"
+      provider-name="Fedoraproject.org">
+
+   <description url="http://fedorahosted.org/eclipse-fedorapackager">
+      Eclipse Fedora Packager is an Eclipse plugin helping 
+      Fedora contributors interacting with 
+      Fedora infrastructure - Koji, Bodhi, Git and more.
+   </description>
+
+   <copyright url="epl-v10.html">
+      %copyright
+   </copyright>
+
+   <license url="license.html">
+      %license
+   </license>
+
+   <plugin
+         id="org.fedoraproject.eclipse.packager.tests"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
