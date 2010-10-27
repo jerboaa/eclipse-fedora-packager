@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.fedoraproject.eclipse.packager"
-      label="Fedora Packager Tools"
+      label="Eclipse Fedora Packager Tools"
       version="0.1.8.qualifier"
       provider-name="FedoraProject.org"
       os="linux">
 
    <description url="http://fedorahosted.org/eclipse-fedorapackager">
-      Fedorapackager is an Eclipse plugin helping 
-      Fedora contributors with their interaction 
-      with the Fedora infrastructure - Koji, Bodhi, CVS and etc.
+      Eclipse Fedora Packager is an Eclipse plugin helping 
+      Fedora contributors interacting with Fedora infrastructure
+      such as Koji, Bodhi and Fedora Git.
    </description>
 
    <copyright url="epl-v10.html">
