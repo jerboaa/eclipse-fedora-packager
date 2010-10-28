@@ -9,6 +9,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
+import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
@@ -79,8 +80,10 @@ public class LocalBuildSWTBotTest {
 		SWTBotShell efpJobWindow = bot.shell(org.fedoraproject.
 				eclipse.packager.rpm.Messages.localBuildHandler_jobName);
 		assertNotNull(efpJobWindow);
-		// Wait for upload process to finish
+		// Wait for upload process to finish, extend timeout
+		SWTBotPreferences.TIMEOUT = 5 * 5000;
 		bot.waitUntil(Conditions.shellCloses(efpJobWindow));
+		SWTBotPreferences.TIMEOUT = 5000;
 		
 		// Assert success
 		IFolder buildFolder = null;
