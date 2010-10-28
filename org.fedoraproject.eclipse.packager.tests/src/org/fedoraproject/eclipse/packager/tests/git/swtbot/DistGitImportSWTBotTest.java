@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -20,8 +21,10 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.eclipse.finder.waits.Conditions;
+import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,7 +46,11 @@ public class DistGitImportSWTBotTest {
 	public static void beforeClass() throws Exception {
 		tmpExistingFedoraCert = moveAwayFedoraCert();
 		bot = new SWTWorkbenchBot();
-		bot.viewByTitle("Welcome").close();
+		try {
+			bot.viewByTitle("Welcome").close();
+		} catch (WidgetNotFoundException e) {
+			// ignore
+		}
 	}
  
 	/**
@@ -74,8 +81,6 @@ public class DistGitImportSWTBotTest {
 		assertNotNull(edProject);
 		IResource edSpecFile = edProject.findMember(new Path("ed.spec"));
 		assertNotNull(edSpecFile);
-		// Delete project again
-		this.edProject.delete(true, new NullProgressMonitor());
 	}
 	
 	/**
@@ -109,6 +114,18 @@ public class DistGitImportSWTBotTest {
 		assertNotNull(test);
 		// FIXME: Assert that proper error message is shown
 	}*/
+	
+	@After
+	public void tearDown() {
+		// Delete imported project if it worked
+		if (this.edProject != null) {
+			try {
+				this.edProject.delete(true, new NullProgressMonitor());
+			} catch (CoreException e) {
+				// ignore
+			}
+		}
+	}
 	
 	@AfterClass
 	public static void cleanUp() {

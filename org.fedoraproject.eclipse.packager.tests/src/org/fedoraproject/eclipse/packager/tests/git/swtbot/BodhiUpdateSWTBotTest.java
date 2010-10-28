@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
@@ -14,6 +15,7 @@ import org.fedoraproject.eclipse.packager.bodhi.BodhiNewHandler;
 import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
 import org.fedoraproject.eclipse.packager.tests.utils.swtbot.ContextMenuHelper;
 import org.fedoraproject.eclipse.packager.tests.utils.swtbot.PackageExplorer;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,7 +30,11 @@ public class BodhiUpdateSWTBotTest {
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		bot = new SWTWorkbenchBot();
-		bot.viewByTitle("Welcome").close();
+		try {
+			bot.viewByTitle("Welcome").close();
+		} catch (WidgetNotFoundException e) {
+			// ignore
+		}
 		// Make sure we have the Package Explorer view open and shown
 		PackageExplorer.openView();
 	}
@@ -71,6 +77,11 @@ public class BodhiUpdateSWTBotTest {
 				packager.bodhi.Messages.bodhiNewHandler_updateResponseTitle);
 		assertNotNull(updateMsgWindow);
 		updateMsgWindow.close();
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+		this.efpProject.dispose();
 	}
 	
 	/**
