@@ -95,9 +95,9 @@ public class MockSWTBotTest {
 				eclipse.packager.rpm.Messages.mockBuildHandler_jobName);
 		assertNotNull(efpJobWindow);
 		// Wait for mock build to finish, this takes a while so increase timeout
-		SWTBotPreferences.TIMEOUT = 30000;
+		SWTBotPreferences.TIMEOUT = 5 * 60 * 1000; // set this to 5 minutes for now
 		bot.waitUntil(Conditions.shellCloses(efpJobWindow));
-		// reset timeout to default
+		// reset timeout to default (5 secs)
 		SWTBotPreferences.TIMEOUT = 5000;
 		
 		// Assert success

@@ -71,7 +71,9 @@ public class KojiBuildSWTBotTest {
 	 * uses KojiHubClientStub. This assumes a valid ~/.fedora.cert_tests is
 	 * present or system property "eclipseFedoraPackagerTestsCertificate"
 	 * is set to the path to a valid .fedora.cert. The latter takes
-	 * precedence.
+	 * precedence. This test also requires ~/.fedora-upload-ca.cert and
+	 * ~/.fedora-server-ca.cert.  It's up to you to get them somewhere
+	 * (fedora-packager-setup, maybe).
 	 * 
 	 * @throws Exception
 	 */
