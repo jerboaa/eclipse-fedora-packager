@@ -23,6 +23,7 @@ import org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.eclipse.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
+import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -74,7 +75,9 @@ public class DistGitImportSWTBotTest {
  
 		bot.button("Finish").click();
 		// Wait for import operation to finish
+		SWTBotPreferences.TIMEOUT = 3 * 5000;
 		bot.waitUntil(Conditions.shellCloses(importDialog));
+		SWTBotPreferences.TIMEOUT = 5000; // reset timeout
 		// Find newly created project
 		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
 		edProject = (IProject)wsRoot.findMember(new Path("ed"));
@@ -117,8 +120,14 @@ public class DistGitImportSWTBotTest {
 	
 	@After
 	public void tearDown() {
-		// Delete imported project if it worked
-		if (this.edProject != null) {
+		if (this.edProject == null) {
+			// Test may have raised an exception before lookup would have
+			// occured
+			IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
+			edProject = (IProject) wsRoot.findMember(new Path("ed"));
+		}
+		// Delete potentially existing project
+		if (edProject != null) {
 			try {
 				this.edProject.delete(true, new NullProgressMonitor());
 			} catch (CoreException e) {
