@@ -1,0 +1,18 @@
+Eclipse Fedora Packager NG
+--------------------------
+
+This is a total rewrite of Eclipse Fedora Packager. The current version of this
+tool is located at http://fedorahosted.org/eclipse-fedorapackager.
+
+
+What is Eclipse Fedora Packager?
+--------------------------------
+
+Eclipse Fedora Packager is a set of Eclipse plug-ins to support Fedora
+packagers in their task of packaging RPMs for Fedora. It provides an RPM spec
+file editor and various other tools to interact with Fedora infrastructure such
+as Koji and Bodhi.
+
+Since this is a rewrite almost from scratch it is not recommended to use it
+until further notice. The old version of this tool is shipped with Fedora since
+F14. Maybe this will replace it some day.
