@@ -57,9 +57,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.Messages;
-import org.fedoraproject.eclipse.packager.SSLUtils;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 
 /**
@@ -243,7 +243,10 @@ public class UploadHandler extends WGetHandler {
 			IOException, NoSuchAlgorithmException, KeyStoreException,
 			KeyManagementException, CertificateException {
 		HttpSecureProtocol protocol = new HttpSecureProtocol();
-		protocol.setKeyMaterial(SSLUtils.getKeyMaterial());
+		protocol.setKeyMaterial(new FedoraSSL(
+				new File(FedoraSSL.DEFAULT_CERT_FILE),
+				new File(FedoraSSL.DEFAULT_UPLOAD_CA_CERT),
+				new File(FedoraSSL.DEFAULT_SERVER_CA_CERT)).getFedoraCertKeyMaterial());
 		protocol.setTrustMaterial(TrustMaterial.TRUST_ALL);
 		Protocol.registerProtocol("https", new Protocol("https", //$NON-NLS-1$ //$NON-NLS-2$
 				(ProtocolSocketFactory) protocol, 443));
