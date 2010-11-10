@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.koji;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
-import java.security.GeneralSecurityException;
+import java.util.HashMap;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -32,22 +32,13 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleConstants;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.IConsoleView;
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.koji.stubs.KojiHubClientStub;
 
 /**
  * Handler to perform a Koji build.
@@ -68,74 +59,7 @@ public class KojiBuildHandler extends CommonHandler {
 	 * Indicates if stub or real client should be returned by getKoji()
 	 */
 	public static boolean inTestingMode = false;
-	private static IKojiHubClient kojiStub = new IKojiHubClient() {
-		private final String CONSOLE_NAME = "Fedora Packager";
-		
-		public String build(String target, String scmURL, boolean scratch) throws XmlRpcException {
-			try {
-				// pretend to do some work, sleep
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			return "1337";
-		}
-
-		public void logout() throws MalformedURLException, XmlRpcException {
-		}
-
-		public String sslLogin() throws XmlRpcException, MalformedURLException {
-			return null;
-		}
-		
-		public String getWebUrl() {
-			return "http://www.example.com";
-		}
-
-		/**
-		 * Create MessageConsole if not found.
-		 * 
-		 * @param name
-		 * @return
-		 */
-		private MessageConsole findConsole(String name) {
-		      IConsoleManager conMan = ConsolePlugin.getDefault().getConsoleManager();
-		      IConsole[] existing = conMan.getConsoles();
-		      for (int i = 0; i < existing.length; i++)
-		         if (name.equals(existing[i].getName()))
-		            return (MessageConsole) existing[i];
-		      //no console found, so create a new one
-		      MessageConsole myConsole = new MessageConsole(name, null);
-		      conMan.addConsoles(new IConsole[]{myConsole});
-		      return myConsole;
-		 }
-		
-		/**
-		 * Utility method to write to Eclipse console if not present.
-		 * 
-		 * @param message
-		 */
-		public void writeToConsole(String message) {
-			MessageConsole console = findConsole(CONSOLE_NAME);
-			MessageConsoleStream out = console.newMessageStream();
-			out.setActivateOnWrite(true);
-			out.println(message);
-			
-			// Show console view
-			IWorkbenchPage page = PackagerPlugin.getDefault().getWorkbench()
-					.getActiveWorkbenchWindow().getActivePage();
-			String id = IConsoleConstants.ID_CONSOLE_VIEW;
-			IConsoleView view = null;
-			try {
-				view = (IConsoleView) page.showView(id);
-			} catch (PartInitException e) {
-				e.printStackTrace();
-			}
-			view.display(console);
-		}
-	};
-	// end of stub client for testing
-	///////////////////////////////////////////////////////////////
+	private static IKojiHubClient kojiStub = new KojiHubClientStub();
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
@@ -156,14 +80,11 @@ public class KojiBuildHandler extends CommonHandler {
 				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
 				
 				// Initialize koji client
+				setKoji(new KojiHubClient());
 				try {
-					setKoji(new KojiHubClient());
-				} catch (GeneralSecurityException e1) {
-					e1.printStackTrace();
-					return FedoraHandlerUtils.handleError(e1);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-					return FedoraHandlerUtils.handleError(e1);
+					getKoji().setUrlsFromPreferences();
+				} catch (KojiHubClientInitException e) {
+					FedoraHandlerUtils.handleError(e);
 				}
 				
 				if (monitor.isCanceled()) {
@@ -281,14 +202,34 @@ public class KojiBuildHandler extends CommonHandler {
 			}
 			// login via SSL
 			monitor.subTask(Messages.kojiBuildHandler_kojiLogin);
-			String result = getKoji().sslLogin();
+			HashMap<?, ?> sessionData = null;
+			try {
+				sessionData = getKoji().login();
+			} catch (KojiHubClientLoginException e) {
+				e.printStackTrace();
+				return FedoraHandlerUtils.handleError(e);
+			}
+			// store session in URL
+			try {
+				// FIXME: Are we always getting an int?
+				Object sessionId = sessionData.get("session-id");
+				String sid = null;
+				if (sessionId instanceof Integer) {
+					sid = ((Integer)sessionId).toString();
+				}
+				getKoji().saveSessionInfo((String)sessionData.get("session-key"), sid);
+			} catch (MalformedURLException e) {
+				return FedoraHandlerUtils.handleError(e);
+			} catch (ClassCastException e) {
+				return FedoraHandlerUtils.handleError(e);
+			}
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 			// push build
 			monitor.subTask(Messages.kojiBuildHandler_sendBuildCmd);
-			result = getKoji().build(projectBits.getTarget(), scmURL, isScratch());
+			String result = getKoji().build(projectBits.getTarget(), scmURL, isScratch());
 			// if we get an int (that is our taskId)
 			int taskId = -1;
 			try {
@@ -311,10 +252,7 @@ public class KojiBuildHandler extends CommonHandler {
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
 			status = FedoraHandlerUtils.handleError(e);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			status = FedoraHandlerUtils.handleError(e);
-		}		 
+		}
 		return status;
 	}
 
