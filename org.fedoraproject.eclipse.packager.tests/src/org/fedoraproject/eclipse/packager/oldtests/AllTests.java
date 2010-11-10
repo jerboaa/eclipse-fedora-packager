@@ -32,7 +32,6 @@ public class AllTests extends TestSuite {
 		suite.addTestSuite(DownloadTest.class);
 		suite.addTestSuite(LocalBuildTest.class);
 		suite.addTestSuite(PrepTest.class);
-		suite.addTestSuite(KojiBuildTest.class);
 		suite.addTestSuite(SRPMTest.class);
 		suite.addTestSuite(KojiPreferenceTest.class);
 		suite.addTestSuite(UploadFileValidityTest.class);
