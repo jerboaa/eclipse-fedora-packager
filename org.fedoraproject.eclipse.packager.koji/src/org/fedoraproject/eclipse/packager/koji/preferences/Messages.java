@@ -14,9 +14,11 @@ import org.eclipse.osgi.util.NLS;
 
 public final class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.koji.preferences.messages"; //$NON-NLS-1$
-	public static String KojiWebURLLabel;
-	public static String KojiHubURLLabel;
-	public static String KojiPreferencesPageDescription;
+	public static String kojiPreferencesPage_kojiWebURLLabel;
+	public static String kojiPreferencesPage_kojiHubURLLabel;
+	public static String kojiPreferencesPage_description;
+	public static String kojiPreferencesPage_kojiWebURLInvalidMsg;
+	public static String kojiPreferencesPage_kojiHubURLInvalidMsg;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
