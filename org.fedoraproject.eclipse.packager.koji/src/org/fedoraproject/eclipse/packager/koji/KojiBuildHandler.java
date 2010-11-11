@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.koji;
 
-import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 
@@ -79,8 +78,9 @@ public class KojiBuildHandler extends CommonHandler {
 						IProgressMonitor.UNKNOWN);
 				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
 				
-				// Initialize koji client
-				setKoji(new KojiHubClient());
+				// Initialize koji client. Type of client instantiated is
+				// determined by command id.
+				setKojiClient(e.getCommand().getId());
 				try {
 					getKoji().setUrlsFromPreferences();
 				} catch (KojiHubClientInitException e) {
@@ -274,11 +274,17 @@ public class KojiBuildHandler extends CommonHandler {
 	}
 
 	/**
-	 * Set the koji client.
-	 * @param koji
+	 * Set the koji client. Pass in hint in order to be able to use different
+	 * client depending on actual cmdId.
+	 * 
+	 * @param cmdId Command ID which triggered this handler. This is useful
+	 *              for Koji client implementations for different authentication
+	 *              schemes. E.g. username and password authentication client.
+	 *              We only need to override this method if there's more than one
+	 *              authentication scheme supported.
 	 */
-	public void setKoji(IKojiHubClient koji) {
-		this.koji = koji;
+	public void setKojiClient(String cmdId) {
+		this.koji = new KojiHubClient();
 	}
 
 	protected boolean isScratch() {
