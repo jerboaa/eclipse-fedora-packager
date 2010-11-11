@@ -1,4 +1,3 @@
-Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Fedora Packager Tests Plug-in
 Bundle-SymbolicName: org.fedoraproject.eclipse.packager.tests
