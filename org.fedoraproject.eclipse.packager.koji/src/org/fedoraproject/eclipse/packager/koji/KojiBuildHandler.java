@@ -286,6 +286,13 @@ public class KojiBuildHandler extends CommonHandler {
 	public void setKojiClient(String cmdId) {
 		this.koji = new KojiHubClient();
 	}
+	
+	/**
+	 * Setter for Koji client instance variable
+	 */
+	protected void setKojiClient(IKojiHubClient client) {
+		this.koji = client;
+	}
 
 	protected boolean isScratch() {
 		return false;
