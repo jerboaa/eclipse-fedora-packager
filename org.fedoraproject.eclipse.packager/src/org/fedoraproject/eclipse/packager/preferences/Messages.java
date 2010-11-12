@@ -14,9 +14,13 @@ import org.eclipse.osgi.util.NLS;
 
 public final class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.preferences.messages"; //$NON-NLS-1$
-	public static String LookasideUploadURLLabel;
-	public static String LookasideDownloadURLLabel;
-	public static String LookasidePreferencesPageDescription;
+	
+	public static String lookasidePreferencesPage_lookasideUploadURLLabel;
+	public static String lookasidePreferencesPage_lookasideDownloadURLLabel;
+	public static String lookasidePreferencesPage_description;
+	public static String lookasidePreferencesPage_invalidDownloadURLMsg;
+	public static String lookasidePreferencesPage_invalidUploadURLMsg;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -11,9 +11,11 @@
 
 package org.fedoraproject.eclipse.packager.preferences;
 
+import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -26,6 +28,9 @@ import org.fedoraproject.eclipse.packager.PackagerPlugin;
  */
 public class LookasidePreferencePage extends FieldEditorPreferencePage implements
 		IWorkbenchPreferencePage {
+
+	private StringFieldEditor lookasideUploadURLEditor;
+	private StringFieldEditor lookasideDownloadURLEditor;
 	
 	/**
 	 * default constructor
@@ -33,7 +38,7 @@ public class LookasidePreferencePage extends FieldEditorPreferencePage implement
 	public LookasidePreferencePage() {
 		super(GRID);
 		setPreferenceStore(PackagerPlugin.getDefault().getPreferenceStore());
-		setDescription(Messages.LookasidePreferencesPageDescription);
+		setDescription(Messages.lookasidePreferencesPage_description);
 	}
 
 	/* (non-Javadoc)
@@ -67,14 +72,46 @@ public class LookasidePreferencePage extends FieldEditorPreferencePage implement
 	protected void createFieldEditors() {
 		final Composite parent = getFieldEditorParent();
 		/* Preference for setting the lookaside urls */
-		StringFieldEditor lookasideUploadURLEditor = new StringFieldEditor(
-				PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, Messages.LookasideUploadURLLabel,
+		lookasideUploadURLEditor = new StringFieldEditor(
+				PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, Messages.lookasidePreferencesPage_lookasideUploadURLLabel,
 				parent);
-		StringFieldEditor lookasideDownloadURLEditor = new StringFieldEditor(
-				PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL, Messages.LookasideDownloadURLLabel,
+		lookasideDownloadURLEditor = new StringFieldEditor(
+				PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL, Messages.lookasidePreferencesPage_lookasideDownloadURLLabel,
 				parent);
 		addField(lookasideUploadURLEditor);
 		addField(lookasideDownloadURLEditor);
+	}
+	
+	/**
+	 * Validate fields for sane values.
+	 */
+	@Override
+	public void checkState() {
+		super.checkState();
+		// Upload URL has to be https
+		if (lookasideUploadURLEditor.getStringValue() != null
+				&& !lookasideUploadURLEditor.getStringValue().startsWith("https://")) {  //$NON-NLS-1$
+			setErrorMessage(Messages.lookasidePreferencesPage_invalidUploadURLMsg);
+			setValid(false);
+		} else if (lookasideDownloadURLEditor.getStringValue() != null &&
+				!lookasideDownloadURLEditor.getStringValue().startsWith("http")) { //$NON-NLS-1$
+			setErrorMessage(Messages.lookasidePreferencesPage_invalidDownloadURLMsg);
+			setValid(false);
+		} else {
+			setErrorMessage(null);
+			setValid(true);
+		}
+	}
+	
+	/**
+	 * Register validation listener for field editors.
+	 */
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		super.propertyChange(event);
+		if (event.getProperty().equals(FieldEditor.VALUE)) {
+			checkState();
+		}
 	}
 	
 }
