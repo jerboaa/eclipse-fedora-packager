@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name.0
 Bundle-SymbolicName: org.fedoraproject.eclipse.packager;singleton:=true
-Bundle-Version: 0.1.8.qualifier
+Bundle-Version: 0.1.9.qualifier
 Bundle-Activator: org.fedoraproject.eclipse.packager.PackagerPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime;bundle-version="3.3.0",
