@@ -72,9 +72,9 @@ public class BodhiUpdateSWTBotTest {
 		
 		// Assert success. I.e. look for the update popup message
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.eclipse.
-				packager.bodhi.Messages.bodhiNewHandler_updateResponseTitle));
+				packager.bodhi.Messages.bodhiUpdateInfoDialog_updateResponseTitle));
 		SWTBotShell updateMsgWindow = bot.shell(org.fedoraproject.eclipse.
-				packager.bodhi.Messages.bodhiNewHandler_updateResponseTitle);
+				packager.bodhi.Messages.bodhiUpdateInfoDialog_updateResponseTitle);
 		assertNotNull(updateMsgWindow);
 		updateMsgWindow.close();
 	}

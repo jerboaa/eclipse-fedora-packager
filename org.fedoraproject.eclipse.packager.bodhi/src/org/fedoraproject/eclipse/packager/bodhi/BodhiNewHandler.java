@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
@@ -165,11 +164,18 @@ public class BodhiNewHandler extends CommonHandler {
 
 
 							String message = result.getMessage();
+							String buildNameCandidate = "N/A";  //$NON-NLS-1$
 							for (IStatus child : result.getChildren()) {
-								message += "\n" + child.getMessage(); //$NON-NLS-1$
+								// If successful we should have gotten the build name in
+								// response as part of child status messages
+								if (child.getMessage().equals(buildName)) {
+									buildNameCandidate = buildName;
+								} else {
+									message += "\n" + child.getMessage(); //$NON-NLS-1$
+								}
 							}
 							final String successMsg = message;
-
+							final String bodhiBuildName = buildNameCandidate;
 							// success
 							if (result.isOK()) {
 								// Show info about the update
@@ -177,9 +183,8 @@ public class BodhiNewHandler extends CommonHandler {
 										.asyncExec(new Runnable() {
 											@Override
 											public void run() {
-												MessageDialog.openInformation(
-														shell, Messages.bodhiNewHandler_updateResponseTitle,
-														successMsg);
+												BodhiUpdateInfoDialog infoDialog = new BodhiUpdateInfoDialog(shell, bodhiBuildName, successMsg);
+												infoDialog.open();
 											}
 										});
 
