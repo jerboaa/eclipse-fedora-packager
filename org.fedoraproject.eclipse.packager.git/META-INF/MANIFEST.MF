@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Git support for Eclipse Fedora Packager
+Bundle-Name: %Bundle-Name.0
 Bundle-SymbolicName: org.fedoraproject.eclipse.packager.git;singleton:=true
 Bundle-Version: 0.1.9.qualifier
 Bundle-Activator: org.fedoraproject.eclipse.packager.git.Activator
-Bundle-Vendor: Fedoraproject.org
+Bundle-Vendor: %Bundle-Vendor.0
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
