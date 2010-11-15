@@ -518,11 +518,12 @@ public class FpCVSProjectBits implements IFpProjectBits {
 
 		CVSTag tag = null;
 		try {
-		tag = new CVSTag(tagName, CVSTag.VERSION);
-		ICVSRemoteResource remoteResource = CVSWorkspaceRoot.getRemoteResourceFor(specfile).forTag(tag);
-		if (remoteResource == null) {
-			return false;
-		}
+			tag = new CVSTag(tagName, CVSTag.VERSION);
+			ICVSRemoteResource remoteResource = CVSWorkspaceRoot
+					.getRemoteResourceFor(specfile).forTag(tag);
+			if (remoteResource == null) {
+				return false;
+			}
 		} catch (CVSException e) {
 			e.printStackTrace();
 		}
