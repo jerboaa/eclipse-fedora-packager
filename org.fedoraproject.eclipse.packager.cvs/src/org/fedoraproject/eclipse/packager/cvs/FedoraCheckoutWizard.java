@@ -39,6 +39,9 @@ public class FedoraCheckoutWizard extends CheckoutWizard implements
 
 	private List<ICVSRepositoryLocation> others;
 
+	/**
+	 * Default constructor
+	 */
 	public FedoraCheckoutWizard() {
 		super();
 		others = new ArrayList<ICVSRepositoryLocation>();
