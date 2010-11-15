@@ -211,11 +211,20 @@ public class KojiBuildHandler extends CommonHandler {
 			}
 			// store session in URL
 			try {
-				// FIXME: Are we always getting an int?
 				Object sessionId = sessionData.get("session-id");
 				String sid = null;
 				if (sessionId instanceof Integer) {
 					sid = ((Integer)sessionId).toString();
+				} else if (sessionId instanceof String) {
+					// if we get a String it should be convertible to an int
+					try {
+						Integer.parseInt((String)sessionId);
+						sid = (String)sessionId;
+					} catch (NumberFormatException e) {
+						// something is wrong should have gotten an int or String
+						// FIXME: Externalize
+						return FedoraHandlerUtils.handleError("Login routine returned unexpected Session ID: '" + sessionId.toString());
+					}
 				}
 				getKoji().saveSessionInfo((String)sessionData.get("session-key"), sid);
 			} catch (MalformedURLException e) {
