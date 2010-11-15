@@ -184,7 +184,6 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 		try {
 			view = (IConsoleView) page.showView(id);
 		} catch (PartInitException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		view.display(console);
