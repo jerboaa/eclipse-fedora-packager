@@ -7,7 +7,10 @@ package org.fedoraproject.eclipse.packager.koji;
  */
 public class KojiHubClientInitException extends Exception {
 
-	public KojiHubClientInitException(Exception e) {
+	/**
+	 * @param e
+	 */
+	public KojiHubClientInitException(final Exception e) {
 		super(e);
 	}
 
