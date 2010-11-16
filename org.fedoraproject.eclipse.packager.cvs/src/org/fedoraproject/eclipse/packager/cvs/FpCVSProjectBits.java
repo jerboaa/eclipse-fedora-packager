@@ -558,4 +558,12 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		}
 		return "";
 	}
+	
+	/**
+	 * Getter for internal use.
+	 * @return The FedoraProjectRoot for this branch
+	 */
+	protected FedoraProjectRoot getFedoraProjectRoot() {
+		return this.fedoraprojectRoot;
+	}
 }
