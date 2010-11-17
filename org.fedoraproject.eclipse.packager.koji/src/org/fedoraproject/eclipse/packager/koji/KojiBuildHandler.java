@@ -48,6 +48,7 @@ public class KojiBuildHandler extends CommonHandler {
 	private String dist;
 	private IKojiHubClient koji;
 	private Job job;
+	private MessageDialog kojiMsgDialog;
 	
 	///////////////////////////////////////////////////////////////
 	// FIXME: This is used for testing only and is super-ugly, but mocking
@@ -125,18 +126,10 @@ public class KojiBuildHandler extends CommonHandler {
 									final String taskId = jobStatus
 											.getMessage(); // IStatus message is
 															// task ID
-									ImageDescriptor descriptor = KojiPlugin
-											.getImageDescriptor("icons/Artwork_DesignService_koji-icon-16.png"); //$NON-NLS-1$
-									Image titleImage = descriptor.createImage();
 									if (shell != null && !shell.isDisposed()) {
-										KojiMessageDialog msgDialog = new KojiMessageDialog(
-												shell,
-												Messages.kojiBuildHandler_kojiBuild,
-												titleImage,
-												MessageDialog.NONE,
-												new String[] { IDialogConstants.OK_LABEL },
-												0, getKoji(), taskId);
-										msgDialog.open();
+										// create and open customized MessageDialog
+										setKojiMsgDialog(e.getCommand().getId(), taskId);
+										getKojiMsgDialog().open();
 									} else { // fall back to console print
 										getKoji()
 												.writeToConsole(NLS
@@ -280,6 +273,40 @@ public class KojiBuildHandler extends CommonHandler {
 			// return stub for testing
 			return kojiStub;
 		}
+	}
+
+	/**
+	 * @return the kojiMsgDialog
+	 */
+	public MessageDialog getKojiMsgDialog() {
+		return kojiMsgDialog;
+	}
+
+	/**
+	 * Set the MessageDialog for build status reporting.
+	 * 
+	 * @param CmdId The command ID which triggered this handler.
+	 * @param taskId The task ID to use for the message.
+	 */
+	public void setKojiMsgDialog(String CmdId, String taskId) {
+		ImageDescriptor descriptor = KojiPlugin
+			.getImageDescriptor("icons/Artwork_DesignService_koji-icon-16.png"); //$NON-NLS-1$
+		Image titleImage = descriptor.createImage();
+		KojiMessageDialog msgDialog = new KojiMessageDialog(
+				shell,
+				Messages.kojiBuildHandler_kojiBuild,
+				titleImage,
+				MessageDialog.NONE,
+				new String[] { IDialogConstants.OK_LABEL },
+				0, getKoji(), taskId);
+		this.kojiMsgDialog = msgDialog;
+	}
+	
+	/**
+	 * Protected setter for kojiMsgDialog.
+	 */
+	protected void setKojiMsgDialog(MessageDialog msgDialog) {
+		this.kojiMsgDialog = msgDialog;
 	}
 
 	/**
