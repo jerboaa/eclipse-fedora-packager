@@ -95,14 +95,14 @@ public class KojiHubClient extends AbstractKojiHubClient {
 		if (preference.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
 			setHubUrl(PreferencesConstants.DEFAULT_KOJI_HUB_URL);
 		} else {
-			setHubUrl(kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_HUB_URL));
+			setHubUrl(preference);
 		}
 		preference = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_WEB_URL);
 		// Eclipse does not seem to store default preference values in metadata.
 		if (preference.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
-			setHubUrl(PreferencesConstants.DEFAULT_KOJI_WEB_URL);
+			setWebUrl(PreferencesConstants.DEFAULT_KOJI_WEB_URL);
 		} else {
-			setHubUrl(kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_WEB_URL));
+			setWebUrl(preference);
 		}	
 	}
 
