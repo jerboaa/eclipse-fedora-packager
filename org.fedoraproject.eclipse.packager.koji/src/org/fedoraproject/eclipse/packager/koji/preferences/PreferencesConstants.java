@@ -27,7 +27,7 @@ public final class PreferencesConstants {
 	 * Default URL of the build system's Web interface
 	 */
 	public static final String DEFAULT_KOJI_WEB_URL = 
-		"http://koji.fedoraproject.org"; //$NON-NLS-1$ //$NON-NLS-2$
+		"http://koji.fedoraproject.org/koji"; //$NON-NLS-1$ //$NON-NLS-2$
 	
 	/**
 	 * Default URL of the build system's Hub/XMLRPC interface
