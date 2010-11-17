@@ -135,7 +135,6 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 	 */
 	@Override
 	public String build(String target, String scmURL, boolean scratch) throws XmlRpcException {
-		System.out.println("send build command for target: " + target);
 		ArrayList<Object> params = new ArrayList<Object>();
 		params.add(scmURL);
 		params.add(target);
