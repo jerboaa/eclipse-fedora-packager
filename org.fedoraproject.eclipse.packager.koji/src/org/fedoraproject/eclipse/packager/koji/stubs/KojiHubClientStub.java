@@ -49,7 +49,7 @@ public class KojiHubClientStub implements IKojiHubClient {
 	public URL getWebUrl() {
 		URL url = null;
 		try {
-			url = new URL("http://www.example.com/");
+			url = new URL("http://www.example.com/test");
 		} catch (MalformedURLException e) {
 			// ignore
 		}
