@@ -67,7 +67,7 @@ public class KojiMessageDialog extends MessageDialog {
 	@Override
 	protected Control createCustomArea(Composite parent) {
 		FormText taskLink = new FormText(parent, SWT.NONE);
-		final String url = kojiClient.getWebUrl() + "/koji/taskinfo?taskID=" //$NON-NLS-1$
+		final String url = kojiClient.getWebUrl().toString() + "/taskinfo?taskID=" //$NON-NLS-1$
 				+ taskNo;
 		taskLink.setText("<form><p>" +  //$NON-NLS-1$
 				Messages.kojiMessageDialog_buildResponseMsg + "</p><p>"+ url //$NON-NLS-1$ //$NON-NLS-2$
