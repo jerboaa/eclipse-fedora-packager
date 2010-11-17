@@ -41,6 +41,7 @@ import org.fedoraproject.eclipse.packager.bodhi.stubs.BodhiNewDialogStub;
 import org.fedoraproject.eclipse.packager.bodhi.stubs.UserValidationDialogStub;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -335,6 +336,21 @@ public class BodhiNewHandler extends CommonHandler {
 		return null;
 	}
 
+	/**
+	 * FIXME: Passing things around wrapped in an IStatus seems pretty convoluted.
+	 * There's got to be a better way of doing this.
+	 * 
+	 * @param buildName
+	 * @param release
+	 * @param type
+	 * @param request
+	 * @param bugs
+	 * @param notes
+	 * @param username
+	 * @param password
+	 * @param monitor
+	 * @return
+	 */
 	protected IStatus newUpdate(String buildName, String release, String type,
 			String request, String bugs, String notes, String username,
 			String password, IProgressMonitor monitor) {
@@ -376,11 +392,26 @@ public class BodhiNewHandler extends CommonHandler {
 			}
 			status = new MultiStatus(BodhiPlugin.PLUGIN_ID, IStatus.OK,
 					bodhiRespStatus, null);
-			// Collect update info from JSON response: "update" key in the JSON
-			// response seems to be the title of the new update.
-			if (result.has("update")) { //$NON-NLS-1$
-				((MultiStatus) status).add(new Status(IStatus.OK,
-						BodhiPlugin.PLUGIN_ID, result.getString("update"))); //$NON-NLS-1$
+			/* 
+			 * Luke Macken <lmacken@redhat.com> as to what the "save" JSON method
+			 * call returns:
+			 *  
+			 * The save method will return a dictionary of updates that were
+			 * created with the update.  So, you could also grab the update title
+			 * (which is just a comma-delimeted list of n-v-r's) via 
+			 * result['updates'][0]['title'], or something of the sort.
+			 */
+			// If we've got "updates" in the response we should be OK for extracting
+			// the update title.
+			if (result.has("updates")) { //$NON-NLS-1$
+				JSONArray updates = result.getJSONArray("updates");
+				if (updates.length() > 0) {
+					JSONObject update = updates.getJSONObject(0);
+					if (update.has("title")) {
+						((MultiStatus) status).add(new Status(IStatus.OK,
+								BodhiPlugin.PLUGIN_ID, update.getString("title"))); //$NON-NLS-1$
+					}
+				}
 			}
 			
 			// Logout

@@ -45,7 +45,8 @@ public class BodhiClientStub implements IBodhiClient {
 		this.bugs = bugs;
 		this.notes = notes;
 		return new JSONObject("{\"tg_flash\": \"Update created\"," +
-				"\"update\": \"Update id: 7331\"}");
+				"\"update\": \"Update id: 7331\"," +
+				"\"updates\": [ { \"title\": \"" + buildName + "\", \"something-else\": 12 } ] }");
 	}
 
 	public void logout() throws IOException, HttpException, ParseException {
