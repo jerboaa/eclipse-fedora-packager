@@ -89,6 +89,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 		try {
 			// make sure it's a named branch
 			if (!isNamedBranch(this.gitRepository.getFullBranch())) {
+				// FIXME: Do better error reporting!
 				return null; // unknown branch!
 			}
 			// get the current head target
