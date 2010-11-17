@@ -37,6 +37,7 @@ public class FedoraProjectRoot {
 	private SourcesFile sourcesFile;
 	private ProjectType type;
 	private LookasideCache lookAsideCache; // The lookaside cache to be used
+	private String commandId; // The invoking command
 
 	/**
 	 * Creates the FedoraProjectRoot using the given container.
@@ -53,6 +54,7 @@ public class FedoraProjectRoot {
 		this.type = FedoraHandlerUtils.getProjectType(container);
 		// set default lookaside cache
 		this.lookAsideCache = new LookasideCache(cmdId);
+		this.commandId = cmdId;
 	}
 
 	/**
@@ -185,5 +187,15 @@ public class FedoraProjectRoot {
 	 */
 	public LookasideCache getLookAsideCache() {
 		return lookAsideCache;
+	}
+
+	/**
+	 * Get the command ID string of the invoking command which
+	 * instantiated this FedoraProjectRoot instance.
+	 * 
+	 * @return the invoking command ID
+	 */
+	public String getCommandId() {
+		return commandId;
 	}
 }
