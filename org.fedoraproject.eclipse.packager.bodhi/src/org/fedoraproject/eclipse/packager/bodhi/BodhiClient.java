@@ -116,6 +116,8 @@ public class BodhiClient implements IBodhiClient {
 				new NameValuePair("request", request), //$NON-NLS-1$
 				new NameValuePair("bugs", bugs), //$NON-NLS-1$
 				new NameValuePair("_csrf_token", csrfToken), //$NON-NLS-1$
+				// explicitly turn on autokarma
+				new NameValuePair("autokarma", "true"), //$NON-NLS-1$ //$NON-NLS-2$
 				new NameValuePair("notes", notes) }; //$NON-NLS-1$
 		postMethod.setRequestBody(data);
 		int code = httpclient.executeMethod(postMethod);
