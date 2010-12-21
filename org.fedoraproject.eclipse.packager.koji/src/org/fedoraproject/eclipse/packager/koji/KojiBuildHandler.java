@@ -93,9 +93,10 @@ public class KojiBuildHandler extends CommonHandler {
 				}
 				IStatus status = Status.OK_STATUS;
 				if (projectBits.needsTag()) {
-					// Do VCS tagging
-					promptForTag();
-					status = projectBits.tagVcs(fedoraProjectRoot, monitor);
+					// Do VCS tagging if so requested.
+					if (promptForTag()) {
+						status = projectBits.tagVcs(fedoraProjectRoot, monitor);
+					}
 				}
 				if (status.isOK()) {
 					if (monitor.isCanceled()) {
