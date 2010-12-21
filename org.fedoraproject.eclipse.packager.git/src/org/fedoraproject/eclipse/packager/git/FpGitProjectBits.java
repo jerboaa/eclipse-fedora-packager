@@ -11,11 +11,7 @@
 package org.fedoraproject.eclipse.packager.git;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -25,7 +21,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.NotSupportedException;
@@ -58,7 +53,8 @@ public class FpGitProjectBits implements IFpProjectBits {
 	
 	private IResource project; // The underlying project
 	private HashMap<String, String> branches; // All branches
-	private Repository gitRepository; // The Git repository for this project
+	//private Repository gitRepository; // The Git repository for this project
+	private Git git; // The Git repository abstraction for this project
 	private boolean initialized = false; // keep track if instance is initialized
 	
 	// String regexp pattern used for branch mapping this should basically be the
@@ -92,12 +88,11 @@ public class FpGitProjectBits implements IFpProjectBits {
 		String currentBranch = null;
 		try {
 			// make sure it's a named branch
-			if (!isNamedBranch(this.gitRepository.getFullBranch())) {
-				// FIXME: Do better error reporting!
+			if (!isNamedBranch(this.git.getRepository().getFullBranch())) {
 				return null; // unknown branch!
 			}
 			// get the current head target
-			currentBranch = this.gitRepository.getBranch();
+			currentBranch = this.git.getRepository().getBranch();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -144,8 +139,8 @@ public class FpGitProjectBits implements IFpProjectBits {
 	private String getCommitHash() {
 		String commitHash = null;
 		try {
-			String currentBranchRefString = gitRepository.getFullBranch();
-			Ref ref = gitRepository.getRef(currentBranchRefString);
+			String currentBranchRefString = git.getRepository().getFullBranch();
+			Ref ref = git.getRepository().getRef(currentBranchRefString);
 			commitHash = ref.getObjectId().getName();
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
@@ -161,13 +156,13 @@ public class FpGitProjectBits implements IFpProjectBits {
 	private HashMap<String, String> getBranches() {
 		HashMap<String, String> branches = new HashMap<String, String>();
 		try {
-			Map<String, Ref> remotes = gitRepository.getRefDatabase().getRefs(
+			Map<String, Ref> remotes = git.getRepository().getRefDatabase().getRefs(
 					Constants.R_REMOTES);
 			Set<String> keyset = remotes.keySet();
 			String branch;
 			for (String key : keyset) {
 				// use shortenRefName() to get rid of refs/*/ prefix
-				branch = gitRepository.shortenRefName(remotes.get(key).getName());
+				branch = Repository.shortenRefName(remotes.get(key).getName());
 				branch = mapBranchName(branch); // do the branch name mapping
 				if (branch != null) {
 					branches.put(branch, branch);
@@ -188,7 +183,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	public void initialize(FedoraProjectRoot fedoraprojectRoot) {
 		this.project = fedoraprojectRoot.getProject();
 		// now set Git Repository object
-		this.gitRepository = getGitRepository();
+		this.git = new Git(getGitRepository());
 		this.branches = getBranches();
 		this.initialized = true;
 	}
@@ -338,53 +333,8 @@ public class FpGitProjectBits implements IFpProjectBits {
 	 * TODO: Clean this up a little
 	 */
 	private IStatus performPull() {
-		IStatus errorStatus = new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Fail"); //$NON-NLS-1$
-		if (!isInitialized()) {
-			return errorStatus;
-		}
-		final Transport transport;
-		URIish uri = null;
-		List<RefSpec> mRefSpecs = new ArrayList<RefSpec>();
-		final List<RefSpec> refSpecs;
-		try {
-			final RefSpec singleRefSpec = new RefSpec(this.gitRepository.getFullBranch() + ":" + Constants.R_REMOTES + "origin/" + this.gitRepository.getBranch());  //$NON-NLS-1$//$NON-NLS-2$
-			mRefSpecs.add(singleRefSpec);
-			uri = new URIish(getScmUrl());
-			refSpecs = Collections.unmodifiableList(mRefSpecs);
-			transport = Transport.open(this.gitRepository, uri);
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
-			return errorStatus;
-		} catch (final NotSupportedException e) {
-			e.printStackTrace();
-			return errorStatus;
-		}	catch (IOException e1) {
-			e1.printStackTrace();
-			return errorStatus;
-		} 
-		
-		Job fetchJob = new Job(Messages.fpGitProjectBits_fetchJobName) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				FetchResult result = null;
-				try {
-					result = transport.fetch(NullProgressMonitor.INSTANCE, refSpecs);
-				} catch (NotSupportedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (TransportException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				String resultMsg = result.getMessages();
-				return new Status(IStatus.INFO, Activator.PLUGIN_ID, resultMsg);
-			}
-			
-		};
-		fetchJob.setUser(true);
-		fetchJob.schedule();
-		return fetchJob.getResult(); // TODO: Do merging!
+		//FIXME: NO-OP. Use git.pull() API
+		return null;
 	}
 	
 	/**
@@ -448,13 +398,13 @@ public class FpGitProjectBits implements IFpProjectBits {
 			return false; // If we are not initialized we can't go any further!
 		}
 		// Look at tags and see if we can find the tag in question.
-		Map<String, Ref> remotes = this.gitRepository.getTags();
+		Map<String, Ref> remotes = this.git.getRepository().getTags();
 		if (remotes != null) {
 			Set<String> keyset = remotes.keySet();
 			String currentTag;
 			for (String key : keyset) {
 				// use shortenRefName() to get rid of refs/*/ prefix
-				currentTag = this.gitRepository.shortenRefName(remotes.get(key)
+				currentTag = Repository.shortenRefName(remotes.get(key)
 						.getName());
 				if (tag.equals(currentTag)) {
 					return true; // tag found
@@ -475,24 +425,8 @@ public class FpGitProjectBits implements IFpProjectBits {
 		if (!isInitialized()) {
 			return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Git tag error. Not initialized!");
 		}
-		//TODO fix to use latest jgit which has removed Tag object.
-//		Tag newTag = new Tag(this.gitRepository);
-//		try {
-//			newTag.setTag(FedoraHandlerUtils.makeTagName(projectRoot));
-//			newTag.setMessage("Automatic Eclipse Fedorapackager tag");
-//			// use FAS username as identity which did the tagging
-//			newTag.setAuthor(new PersonIdent(FedoraHandlerUtils
-//					.getUsernameFromCert()));
-//			newTag.setObjId(this.gitRepository.resolve(this.gitRepository
-//					.getFullBranch()));
-//			TagOperation top = new TagOperation(this.gitRepository, newTag,
-//					false);
-//			top.execute(monitor);
-			return new Status(IStatus.OK, Activator.PLUGIN_ID, "Tag succeeded!");
-//		} catch (Exception e) {
-//			return new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage());
-//		}
-		// TODO: Extend and do a commit & push!
+		//FIXME: no-op ATM. use git.tag().
+		return new Status(IStatus.OK, Activator.PLUGIN_ID, "Tag succeeded!");
 	}
 
 	/**
