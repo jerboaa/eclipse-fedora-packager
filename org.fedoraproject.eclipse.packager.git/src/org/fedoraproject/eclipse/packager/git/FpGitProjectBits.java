@@ -27,12 +27,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.egit.core.project.RepositoryMapping;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.NullProgressMonitor;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.Transport;
@@ -500,5 +504,26 @@ public class FpGitProjectBits implements IFpProjectBits {
 	public boolean needsTag() {
 		return false;
 	}
+
+	@Override
+	public boolean hasLocalChanges(FedoraProjectRoot fedoraProjectRoot) {
+		if (!isInitialized()) {
+			return true; // If we are not initialized we can't go any further!
+		}
+		try {
+			RevWalk rw = new RevWalk(gitRepository);
+			ObjectId objHead = gitRepository.resolve(gitRepository.getBranch());				
+		    RevCommit commitHead = rw.parseCommit(objHead); ;
+			ObjectId objHead1 = gitRepository.resolve("origin/"+gitRepository.getBranch());				 //$NON-NLS-1$
+		    RevCommit commitHead1 = rw.parseCommit(objHead1);
+			return !commitHead.equals(commitHead1);
+		} catch (NoWorkTreeException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+
 
 }

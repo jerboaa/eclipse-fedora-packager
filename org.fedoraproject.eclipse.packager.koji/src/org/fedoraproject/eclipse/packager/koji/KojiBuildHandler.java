@@ -98,6 +98,11 @@ public class KojiBuildHandler extends CommonHandler {
 						status = projectBits.tagVcs(fedoraProjectRoot, monitor);
 					}
 				}
+				if (projectBits.hasLocalChanges(fedoraProjectRoot)) {
+					// if there are local commits we should not build because our hash will be wrong.
+					return new Status(IStatus.CANCEL, KojiPlugin.PLUGIN_ID, "Could not initiate build: There are unpushed changes in your repo");
+				}
+				
 				if (status.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();

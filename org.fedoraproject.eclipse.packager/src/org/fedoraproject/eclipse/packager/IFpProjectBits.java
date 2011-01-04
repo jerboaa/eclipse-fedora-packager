@@ -128,4 +128,12 @@ public interface IFpProjectBits {
 	 * @return The scm url as expected by koji.
 	 */
 	public String getScmUrlForKoji(FedoraProjectRoot fedoraProjectRoot);
+
+	/**
+	 * Checks whether there are local changes.
+	 * @param fedoraProjectRoot The project root to check for local changes.
+	 * 
+	 * @return Whether there are local changes or not.
+	 */
+	public boolean hasLocalChanges(FedoraProjectRoot fedoraProjectRoot);
 }

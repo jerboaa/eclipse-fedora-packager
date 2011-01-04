@@ -566,4 +566,10 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	protected FedoraProjectRoot getFedoraProjectRoot() {
 		return this.fedoraprojectRoot;
 	}
+
+	@Override
+	public boolean hasLocalChanges(FedoraProjectRoot fedoraProjectRoot) {
+		//TODO implement
+		return false;
+	}
 }
