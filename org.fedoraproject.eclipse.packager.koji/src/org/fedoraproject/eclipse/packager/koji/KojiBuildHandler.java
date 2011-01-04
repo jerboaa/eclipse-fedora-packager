@@ -100,7 +100,7 @@ public class KojiBuildHandler extends CommonHandler {
 				}
 				if (projectBits.hasLocalChanges(fedoraProjectRoot)) {
 					// if there are local commits we should not build because our hash will be wrong.
-					return new Status(IStatus.CANCEL, KojiPlugin.PLUGIN_ID, "Could not initiate build: There are unpushed changes in your repo");
+					return new Status(IStatus.CANCEL, KojiPlugin.PLUGIN_ID, Messages.KojiBuildHandler_unpushedChanges);
 				}
 				
 				if (status.isOK()) {
@@ -178,7 +178,7 @@ public class KojiBuildHandler extends CommonHandler {
 			return false;
 		}
 		YesNoRunnable op = new YesNoRunnable(
-				Messages.kojiBuildHandler_tagBeforeSendingBuild); //$NON-NLS-1$
+				Messages.kojiBuildHandler_tagBeforeSendingBuild);
 		Display.getDefault().syncExec(op);
 		return op.isOkPressed();
 	}
@@ -210,7 +210,7 @@ public class KojiBuildHandler extends CommonHandler {
 			}
 			// store session in URL
 			try {
-				Object sessionId = sessionData.get("session-id");
+				Object sessionId = sessionData.get("session-id"); //$NON-NLS-1$
 				String sid = null;
 				if (sessionId instanceof Integer) {
 					sid = ((Integer)sessionId).toString();
@@ -221,11 +221,10 @@ public class KojiBuildHandler extends CommonHandler {
 						sid = (String)sessionId;
 					} catch (NumberFormatException e) {
 						// something is wrong should have gotten an int or String
-						// FIXME: Externalize
-						return FedoraHandlerUtils.handleError("Login routine returned unexpected Session ID: '" + sessionId.toString());
+						return FedoraHandlerUtils.handleError(Messages.KojiBuildHandler_unexpectedSessionId + sessionId.toString());
 					}
 				}
-				getKoji().saveSessionInfo((String)sessionData.get("session-key"), sid);
+				getKoji().saveSessionInfo((String)sessionData.get("session-key"), sid); //$NON-NLS-1$
 			} catch (MalformedURLException e) {
 				return FedoraHandlerUtils.handleError(e);
 			} catch (ClassCastException e) {

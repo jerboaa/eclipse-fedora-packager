@@ -24,6 +24,8 @@ public class Messages extends NLS {
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 	
 	// KojiBuildHandler Strings
+	public static String KojiBuildHandler_unexpectedSessionId;
+	public static String KojiBuildHandler_unpushedChanges;
 	public static String kojiBuildHandler_tagBeforeSendingBuild;
 	public static String kojiBuildHandler_sendBuildToKoji;
 	public static String kojiBuildHandler_jobName;
