@@ -32,6 +32,7 @@ public class Messages extends NLS {
 	public static String selectModulePage_packageSelection;
 	public static String selectModulePage_choosePackage;
 	public static String selectModulePage_packageName;
+	public static String selectModulePage_workingSets;
 	// FpGitProjectBits Strings
 	public static String fpGitProjectBits_fetchJobName;
 	

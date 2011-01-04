@@ -47,6 +47,7 @@ import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
@@ -58,6 +59,8 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 
 	private SelectModulePage page;
 	private Repository gitRepository;
+
+	private IStructuredSelection selection;
 
 	/**
 	 * Creates the wizards and sets that it needs progress monitor.
@@ -75,6 +78,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 		// get Fedora username from cert
 		page = new SelectModulePage();
 		addPage(page);
+		page.init(selection);
 	}
 
 	@Override
@@ -95,7 +99,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		// nothing
+		this.selection = selection;
 	}
 
 	@Override
@@ -172,7 +176,13 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 			ConnectProviderOperation connect = new ConnectProviderOperation(
 					newProject);
 			connect.execute(null);
-			
+
+			// Add new project to working sets, if requested
+			IWorkingSet[] workingSets = page.getWorkingSets();
+			if (workingSets.length > 0) {
+				PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(newProject, workingSets);
+			}
+
 			// Find repo we've just created and set gitRepo
 			RepositoryCache repoCache = org.eclipse.egit.core.Activator
 					.getDefault().getRepositoryCache();
