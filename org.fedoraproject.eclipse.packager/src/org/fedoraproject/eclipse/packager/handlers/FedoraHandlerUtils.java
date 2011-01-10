@@ -294,11 +294,28 @@ public class FedoraHandlerUtils {
 		return "anonymous"; //$NON-NLS-1$
 	}
 	
+	/**
+	 * Creates a tag name as expected from Fedora infrastructure based on the N-V-R and return its string representation.
+	 * @param projectRoot Container used for retrieving needed data.
+	 * @return The tag name.
+	 * @throws CoreException
+	 */
 	public static String makeTagName(FedoraProjectRoot projectRoot) throws CoreException {
+		return getNVR(projectRoot).replaceAll("\\.", "_");  //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	/**
+	 * Returns the N-V-R retrieved from the .spec file in the project root.
+	 * 
+	 * @param projectRoot Container used to retrieve the needed data.
+	 * @return N-V-R(Name-Value-Release) retrieved.
+	 * @throws CoreException
+	 */
+	public static String getNVR(FedoraProjectRoot projectRoot) throws CoreException {
 		String name = rpmQuery(projectRoot, "NAME").replaceAll("^[0-9]+", "");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String version = rpmQuery(projectRoot, "VERSION");  //$NON-NLS-1$
 		String release = rpmQuery(projectRoot, "RELEASE");  //$NON-NLS-1$
-		return (name + "-" + version + "-" + release).replaceAll("\\.", "_");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		return (name + "-" + version + "-" + release);  //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public static String rpmQuery(FedoraProjectRoot projectRoot, String format)
