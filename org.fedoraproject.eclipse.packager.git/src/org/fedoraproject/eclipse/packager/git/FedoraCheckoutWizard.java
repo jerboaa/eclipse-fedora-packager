@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.RepositoryUtil;
-import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -106,11 +105,11 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 	public boolean performFinish() {
 		try {
 			final URIish uri = new URIish(getGitURL());
-			final CloneOperation clone = new CloneOperation(uri, true,
+			final CloneOperation2 clone = new CloneOperation2(uri, true,
 					new ArrayList<Ref>(), new File(ResourcesPlugin
 							.getWorkspace().getRoot().getLocation().toFile(),
 							page.getPackageName()), Constants.R_HEADS + Constants.MASTER,
-					"origin"); //$NON-NLS-1$
+					"origin", 0); //$NON-NLS-1$
 
 			IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
 			// Bail out if project already exists
@@ -244,8 +243,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 			for (String key : keyset) {
 				// use shortenRefName() to get rid of refs/*/ prefix
 				Ref origRef = remotes.get(key);
-				branch = this.gitRepository.shortenRefName(origRef
-						.getName());
+				branch = Repository.shortenRefName(origRef.getName());
 				// omit "origin
 				branch = branch.substring("origin".length()); //$NON-NLS-1$
 				// create local branches
