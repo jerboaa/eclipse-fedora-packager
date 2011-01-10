@@ -35,7 +35,7 @@ import org.fedoraproject.eclipse.packager.PackagerPlugin;
  */
 public abstract class AbstractKojiHubClient implements IKojiHubClient {
 	
-	private final String CONSOLE_NAME = KojiPlugin.PLUGIN_ID + ".console";
+	private final String CONSOLE_NAME = KojiPlugin.PLUGIN_ID + ".console"; //$NON-NLS-1$
 	/**
 	 * URL of the Koji Hub/XMLRPC interface
 	 */
@@ -112,6 +112,7 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 	 * 
 	 * @see org.fedoraproject.eclipse.packager.IKojiHubClient#sslLogin()
 	 */
+	@Override
 	public abstract HashMap<?, ?> login() throws KojiHubClientLoginException;
 
 	/*
@@ -126,25 +127,39 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 		discardSession();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/**
 	 * @see
-	 * org.fedoraproject.eclipse.packager.IKojiHubClient#build(java.lang.String,
-	 * java.lang.String)
+	 * org.fedoraproject.eclipse.packager.koji.IKojiHubClient#build(java.lang.String,
+	 * java.lang.String, java.lang.String, boolean)
 	 */
 	@Override
-	public String build(String target, String scmURL, boolean scratch) throws XmlRpcException {
+	public String build(String target, String scmURL, String nvr, boolean scratch) throws XmlRpcException {
 		ArrayList<Object> params = new ArrayList<Object>();
 		params.add(scmURL);
 		params.add(target);
 		if (scratch) {
 			Map<String, Boolean> scratchParam = new HashMap<String, Boolean>();
-			scratchParam.put("scratch", true);
+			scratchParam.put("scratch", true); //$NON-NLS-1$
 			params.add(scratchParam);
+		} else if(nvr != null){
+			Map buildInfo = getBuild(nvr);
+			if (buildInfo != null && buildInfo.get("state").equals(Integer.valueOf(1))) { //$NON-NLS-1$
+				return "Build already exists (id="+buildInfo.get("task_id")+", state=COMPLETE)";
+			}
 		}
 		Object result = xmlRpcClient.execute("build", params); //$NON-NLS-1$
 		return result.toString();
+	}
+	
+	/**
+	 * @see
+	 * org.fedoraproject.eclipse.packager.koji.IKojiHubClient#getBuild(java.lang.String)
+	 */
+	@Override
+	public Map getBuild(String nvr) throws XmlRpcException {
+		ArrayList<Object> params = new ArrayList<Object>();
+		params.add(nvr);
+		return (Map) xmlRpcClient.execute("getBuild", params); //$NON-NLS-1$
 	}
 	
 	/**
@@ -170,6 +185,7 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 	 * 
 	 * @param message
 	 */
+	@Override
 	public void writeToConsole(String message) {
 		MessageConsole console = findConsole(CONSOLE_NAME);
 		MessageConsoleStream out = console.newMessageStream();

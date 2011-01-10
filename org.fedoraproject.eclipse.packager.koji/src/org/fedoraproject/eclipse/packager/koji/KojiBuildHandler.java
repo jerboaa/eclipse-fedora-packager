@@ -16,6 +16,7 @@ import java.util.HashMap;
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -65,6 +66,7 @@ public class KojiBuildHandler extends CommonHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
+		
 		final IFpProjectBits projectBits = FedoraHandlerUtils
 				.getVcsHandler(fedoraProjectRoot);
 		// Fixes Trac ticket #35; Need to have shell variable on heap not
@@ -236,7 +238,13 @@ public class KojiBuildHandler extends CommonHandler {
 			}
 			// push build
 			monitor.subTask(Messages.kojiBuildHandler_sendBuildCmd);
-			String result = getKoji().build(projectBits.getTarget(), scmURL, isScratch());
+			String nvr= null;
+			try {
+				nvr = FedoraHandlerUtils.getNVR(fedoraProjectRoot);
+			} catch (CoreException e1) {
+				e1.printStackTrace();
+			}
+			String result = getKoji().build(projectBits.getTarget(), scmURL, nvr, isScratch());
 			// if we get an int (that is our taskId)
 			int taskId = -1;
 			try {
@@ -247,8 +255,8 @@ public class KojiBuildHandler extends CommonHandler {
 			if (taskId != -1) {
 				status = new Status(IStatus.OK, KojiPlugin.PLUGIN_ID,
 						new Integer(taskId).toString());
-			} else { // Error
-				status = new Status(IStatus.ERROR, KojiPlugin.PLUGIN_ID, result);
+			} else{ // Error
+				status = new Status(IStatus.INFO, KojiPlugin.PLUGIN_ID, result);
 			}
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();

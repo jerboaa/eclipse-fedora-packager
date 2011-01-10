@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager.koji;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.xmlrpc.XmlRpcException;
 
@@ -43,11 +44,12 @@ public interface IKojiHubClient {
 	 * 
 	 * @param target
 	 * @param scmURL
+	 * @param nvr 
 	 * @param scratch
 	 * @return The remote server's response.
 	 * @throws XmlRpcException
 	 */
-	public String build(String target, String scmURL, boolean scratch)
+	public String build(String target, String scmURL, String nvr, boolean scratch)
 			throws XmlRpcException;
 	
 	/**
@@ -104,4 +106,6 @@ public interface IKojiHubClient {
 	 */
 	public void saveSessionInfo(String sessionKey, String sessionID)
 		throws MalformedURLException;
+
+	public Map getBuild(String nvr) throws XmlRpcException;
 }

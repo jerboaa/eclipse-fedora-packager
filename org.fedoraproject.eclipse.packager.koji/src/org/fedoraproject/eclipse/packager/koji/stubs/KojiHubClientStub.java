@@ -26,7 +26,7 @@ import org.fedoraproject.eclipse.packager.koji.KojiHubClientLoginException;
 public class KojiHubClientStub implements IKojiHubClient {
 	private final String CONSOLE_NAME = "Fedora Packager";
 	
-	public String build(String target, String scmURL, boolean scratch) throws XmlRpcException {
+	public String build(String target, String scmURL, String nvr,  boolean scratch) throws XmlRpcException {
 		try {
 			// pretend to do some work, sleep
 			Thread.sleep(5000);
@@ -125,5 +125,11 @@ public class KojiHubClientStub implements IKojiHubClient {
 	public void saveSessionInfo(String sessionKey, String sessionID)
 			throws MalformedURLException {
 		// do nothing		
+	}
+
+	@Override
+	public Map getBuild(String nvr) throws XmlRpcException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
