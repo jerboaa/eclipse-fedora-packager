@@ -22,20 +22,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.project.RepositoryMapping;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.jgit.errors.NotSupportedException;
-import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.NullProgressMonitor;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.transport.FetchResult;
-import org.eclipse.jgit.transport.RefSpec;
-import org.eclipse.jgit.transport.Transport;
-import org.eclipse.jgit.transport.URIish;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
@@ -53,7 +47,6 @@ public class FpGitProjectBits implements IFpProjectBits {
 	
 	private IResource project; // The underlying project
 	private HashMap<String, String> branches; // All branches
-	//private Repository gitRepository; // The Git repository for this project
 	private Git git; // The Git repository abstraction for this project
 	private boolean initialized = false; // keep track if instance is initialized
 	
@@ -445,10 +438,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 			return true; // If we are not initialized we can't go any further!
 		}
 		try {
-			RevWalk rw = new RevWalk(gitRepository);
-			ObjectId objHead = gitRepository.resolve(gitRepository.getBranch());				
+			RevWalk rw = new RevWalk(git.getRepository());
+			ObjectId objHead = git.getRepository().resolve(git.getRepository().getBranch());				
 		    RevCommit commitHead = rw.parseCommit(objHead); ;
-			ObjectId objHead1 = gitRepository.resolve("origin/"+gitRepository.getBranch());				 //$NON-NLS-1$
+			ObjectId objHead1 = git.getRepository().resolve("origin/" + git.getRepository().getBranch());				 //$NON-NLS-1$
 		    RevCommit commitHead1 = rw.parseCommit(objHead1);
 			return !commitHead.equals(commitHead1);
 		} catch (NoWorkTreeException e) {

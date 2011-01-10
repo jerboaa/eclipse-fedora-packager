@@ -14,8 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -35,12 +34,19 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jgit.api.CreateBranchCommand;
+import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ListBranchCommand;
+import org.eclipse.jgit.api.ListBranchCommand.ListMode;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
+import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.errors.NoRemoteRepositoryException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.RefUpdate;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
@@ -57,7 +63,7 @@ import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 
 	private SelectModulePage page;
-	private Repository gitRepository;
+	private Git git;
 
 	private IStructuredSelection selection;
 
@@ -186,7 +192,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 			RepositoryCache repoCache = org.eclipse.egit.core.Activator
 					.getDefault().getRepositoryCache();
 			try {
-				this.gitRepository = repoCache.lookupRepository(clone.getGitDir());
+				this.git = new Git(repoCache.lookupRepository(clone.getGitDir()));
 			} catch (IOException ex) {
 				// Repo lookup failed, no way we can continue.
 				cloneFailChecked(ex.getMessage());
@@ -236,29 +242,55 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 				IProgressMonitor.UNKNOWN);
 
 		try {
-			Map<String, Ref> remotes = this.gitRepository.getRefDatabase()
-					.getRefs(Constants.R_REMOTES);
-			Set<String> keyset = remotes.keySet();
-			String branch;
-			for (String key : keyset) {
-				// use shortenRefName() to get rid of refs/*/ prefix
-				Ref origRef = remotes.get(key);
-				branch = Repository.shortenRefName(origRef.getName());
-				// omit "origin
-				branch = branch.substring("origin".length()); //$NON-NLS-1$
-				// create local branches
-				String newRefName = Constants.R_HEADS + branch;
-
-				RefUpdate updateRef = this.gitRepository.updateRef(newRefName);
-				ObjectId startAt = new RevWalk(this.gitRepository).parseCommit(this.gitRepository
-							.resolve(origRef.getName()));
-				updateRef.setNewObjectId(startAt);
-				updateRef.setRefLogMessage(
-						"branch: Created from " + origRef.getName(), false); //$NON-NLS-1$
-				updateRef.update();
+			// get a list of branches
+			ListBranchCommand branchList = git.branchList();
+			branchList.setListMode(ListMode.REMOTE); // want all remote branches
+			List<Ref> remoteRefs = branchList.call();
+			for (Ref remoteRef: remoteRefs) {
+				CreateBranchCommand branchCreateCmd = git.branchCreate();
+				String name = remoteRef.getName();
+				System.out.println(name); // name is "refs/remotes/origin/f13/master"
+				branchCreateCmd.setName(name);
+				RevWalk walk = new RevWalk(git.getRepository());
+				RevCommit startCommit = walk.parseCommit(remoteRef.getObjectId());
+				branchCreateCmd.setStartPoint(startCommit);
+				branchCreateCmd.setUpstreamMode(SetupUpstreamMode.TRACK);
+				branchCreateCmd.call();
 			}
+//			
+//			
+//			Map<String, Ref> remotes = this.gitRepository.getRefDatabase()
+//					.getRefs(Constants.R_REMOTES);
+//			Set<String> keyset = remotes.keySet();
+//			String branch;
+//			for (String key : keyset) {
+//				// use shortenRefName() to get rid of refs/*/ prefix
+//				Ref origRef = remotes.get(key);
+//				branch = this.gitRepository.shortenRefName(origRef
+//						.getName());
+//				// omit "origin
+//				branch = branch.substring("origin".length()); //$NON-NLS-1$
+//				// create local branches
+//				String newRefName = Constants.R_HEADS + branch;
+//
+//				RefUpdate updateRef = this.gitRepository.updateRef(newRefName);
+//				ObjectId startAt = new RevWalk(this.gitRepository).parseCommit(this.gitRepository
+//							.resolve(origRef.getName()));
+//				updateRef.setNewObjectId(startAt);
+//				updateRef.setRefLogMessage(
+//						"branch: Created from " + origRef.getName(), false); //$NON-NLS-1$
+//				updateRef.update();
+//			}
 		} catch (IOException ioException) {
 			ioException.printStackTrace();
+		} catch (JGitInternalException e) {
+			e.printStackTrace();
+		} catch (RefAlreadyExistsException e) {
+			e.printStackTrace();
+		} catch (RefNotFoundException e) {
+			e.printStackTrace();
+		} catch (InvalidRefNameException e) {
+			e.printStackTrace();
 		}
 	}
 	

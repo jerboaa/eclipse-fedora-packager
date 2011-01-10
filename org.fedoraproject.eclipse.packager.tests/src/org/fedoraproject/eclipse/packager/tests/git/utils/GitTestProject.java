@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.egit.core.op.BranchOperation;
-import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.RepositoryUtil;
@@ -36,6 +35,7 @@ import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.URIish;
+import org.fedoraproject.eclipse.packager.git.CloneOperation2;
 
 public class GitTestProject {	
 	private IProject project;
@@ -43,7 +43,7 @@ public class GitTestProject {
 	
 	public GitTestProject(String packageName) throws CoreException, URISyntaxException, InvocationTargetException, InterruptedException {
 		final URIish uri = new URIish(getGitURL(packageName));
-		final CloneOperation clone = new CloneOperation(uri, true,
+		final CloneOperation2 clone = new CloneOperation2(uri, true,
 				new ArrayList<Ref>(), new File(ResourcesPlugin
 						.getWorkspace().getRoot().getLocation().toFile(),
 						packageName), Constants.R_HEADS + Constants.MASTER,
@@ -143,7 +143,7 @@ public class GitTestProject {
 			for (String key : keyset) {
 				// use shortenRefName() to get rid of refs/*/ prefix
 				Ref origRef = remotes.get(key);
-				branch = this.gitRepo.shortenRefName(origRef
+				branch = Repository.shortenRefName(origRef
 						.getName());
 				// omit "origin
 				branch = branch.substring("origin".length()); //$NON-NLS-1$
