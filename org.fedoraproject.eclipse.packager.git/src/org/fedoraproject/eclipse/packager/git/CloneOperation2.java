@@ -44,6 +44,9 @@ import org.eclipse.osgi.util.NLS;
 
 /**
  * Clones a repository from a remote location to a local location.
+ * 
+ * FIXME: Remove in favour of upstream's CloneOperation once it supports
+ *        appropriate constructor.
  */
 public class CloneOperation2 {
 	private final URIish uri;
