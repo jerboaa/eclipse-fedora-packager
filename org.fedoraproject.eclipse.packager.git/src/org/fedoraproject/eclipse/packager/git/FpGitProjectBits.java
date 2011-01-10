@@ -435,6 +435,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	@Override
 	public boolean hasLocalChanges(FedoraProjectRoot fedoraProjectRoot) {
 		if (!isInitialized()) {
+			// FIXME: raise exception instead.
 			return true; // If we are not initialized we can't go any further!
 		}
 		try {

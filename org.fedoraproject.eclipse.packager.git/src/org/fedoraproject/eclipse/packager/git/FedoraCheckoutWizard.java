@@ -46,8 +46,6 @@ import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.errors.NoRemoteRepositoryException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IImportWizard;
@@ -232,7 +230,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 	}
 	
 	/**
-	 * Create local branches based on remotes. Don't do checkouts.
+	 * Create local branches based on existing remotes (uses the JGit API).
 	 * 
 	 * @param monitor
 	 * @throws CoreException
@@ -242,47 +240,33 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 				IProgressMonitor.UNKNOWN);
 
 		try {
-			// get a list of branches
+			// get a list of remote branches
 			ListBranchCommand branchList = git.branchList();
 			branchList.setListMode(ListMode.REMOTE); // want all remote branches
 			List<Ref> remoteRefs = branchList.call();
 			for (Ref remoteRef: remoteRefs) {
-				CreateBranchCommand branchCreateCmd = git.branchCreate();
 				String name = remoteRef.getName();
-				System.out.println(name); // name is "refs/remotes/origin/f13/master"
-				branchCreateCmd.setName(name);
-				RevWalk walk = new RevWalk(git.getRepository());
-				RevCommit startCommit = walk.parseCommit(remoteRef.getObjectId());
-				branchCreateCmd.setStartPoint(startCommit);
-				branchCreateCmd.setUpstreamMode(SetupUpstreamMode.TRACK);
-				branchCreateCmd.call();
+				int index = (Constants.R_REMOTES + "origin/").length(); //$NON-NLS-1$
+				// Remove "refs/remotes/origin/" part in branch name
+				name = name.substring(index);
+				// Use "f14"-like branch naming
+				if (name.endsWith("/" + Constants.MASTER)) { //$NON-NLS-1$
+					index = name.indexOf("/" + Constants.MASTER); //$NON-NLS-1$
+					name = name.substring(0, index);
+				}
+				// Create all remote branches, except "master"
+				if (!name.equals(Constants.MASTER)) {
+					CreateBranchCommand branchCreateCmd = git.branchCreate();
+					branchCreateCmd.setName(name);
+					// Need to set starting point this way in order for tracking
+					// to work properly. See: https://bugs.eclipse.org/bugs/show_bug.cgi?id=333899
+					branchCreateCmd.setStartPoint(remoteRef.getName());
+					// Add remote tracking config in order to not confuse
+					// fedpkg
+					branchCreateCmd.setUpstreamMode(SetupUpstreamMode.TRACK);
+					branchCreateCmd.call();
+				}
 			}
-//			
-//			
-//			Map<String, Ref> remotes = this.gitRepository.getRefDatabase()
-//					.getRefs(Constants.R_REMOTES);
-//			Set<String> keyset = remotes.keySet();
-//			String branch;
-//			for (String key : keyset) {
-//				// use shortenRefName() to get rid of refs/*/ prefix
-//				Ref origRef = remotes.get(key);
-//				branch = this.gitRepository.shortenRefName(origRef
-//						.getName());
-//				// omit "origin
-//				branch = branch.substring("origin".length()); //$NON-NLS-1$
-//				// create local branches
-//				String newRefName = Constants.R_HEADS + branch;
-//
-//				RefUpdate updateRef = this.gitRepository.updateRef(newRefName);
-//				ObjectId startAt = new RevWalk(this.gitRepository).parseCommit(this.gitRepository
-//							.resolve(origRef.getName()));
-//				updateRef.setNewObjectId(startAt);
-//				updateRef.setRefLogMessage(
-//						"branch: Created from " + origRef.getName(), false); //$NON-NLS-1$
-//				updateRef.update();
-//			}
-		} catch (IOException ioException) {
-			ioException.printStackTrace();
 		} catch (JGitInternalException e) {
 			e.printStackTrace();
 		} catch (RefAlreadyExistsException e) {
