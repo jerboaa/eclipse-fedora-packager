@@ -53,8 +53,11 @@ public class FpGitProjectBits implements IFpProjectBits {
 	// String regexp pattern used for branch mapping this should basically be the
 	// same pattern as fedpkg uses. ATM this pattern is:
 	// BRANCHFILTER = 'f\d\d\/master|master|el\d\/master|olpc\d\/master'
+	// Severin, 2011-01-11: Make '/master' postfix of branch name optional.
 	private final Pattern BRANCH_PATTERN = Pattern
-			.compile("(?:origin/)?(fc?)(\\d\\d?)/master|(?:origin/)?(master)|(?:origin/)?(el)(\\d)/master|(?:origin/)?(olpc)(\\d)/master" //$NON-NLS-1$
+			.compile("(?:origin/)?(fc?)(\\d\\d?)(?:/master)?|" + //$NON-NLS-1$
+					"(?:origin/)?(master)|(?:origin/)?(el)(\\d)(?:/master)?|" + //$NON-NLS-1$
+					"(?:origin/)?(olpc)(\\d)(?:/master)?" //$NON-NLS-1$
 			);
 	
 	/**
