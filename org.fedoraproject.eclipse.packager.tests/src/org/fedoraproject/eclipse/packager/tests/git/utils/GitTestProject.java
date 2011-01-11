@@ -47,7 +47,7 @@ public class GitTestProject {
 				new ArrayList<Ref>(), new File(ResourcesPlugin
 						.getWorkspace().getRoot().getLocation().toFile(),
 						packageName), Constants.R_HEADS + Constants.MASTER,
-				"origin");
+				"origin", 0);
 		clone.run(null); // clone project
 		// Add cloned repository to the list of Git repositories so that it
 		// shows up in the Git repositories view.
