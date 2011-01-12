@@ -24,10 +24,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.errors.NoWorkTreeException;
+import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
@@ -443,11 +446,24 @@ public class FpGitProjectBits implements IFpProjectBits {
 		}
 		try {
 			RevWalk rw = new RevWalk(git.getRepository());
-			ObjectId objHead = git.getRepository().resolve(git.getRepository().getBranch());				
-		    RevCommit commitHead = rw.parseCommit(objHead); ;
-			ObjectId objHead1 = git.getRepository().resolve("origin/" + git.getRepository().getBranch());				 //$NON-NLS-1$
-		    RevCommit commitHead1 = rw.parseCommit(objHead1);
-			return !commitHead.equals(commitHead1);
+			String branchName = git.getRepository().getBranch();
+			ObjectId objHead = git.getRepository().resolve(branchName);
+			// get remote ref from config
+			String trackingRemoteBranch = git
+					.getRepository()
+					.getConfig()
+					.getString(ConfigConstants.CONFIG_BRANCH_SECTION,
+							branchName, ConfigConstants.CONFIG_KEY_MERGE);
+			if (trackingRemoteBranch != null) {
+				trackingRemoteBranch = trackingRemoteBranch.substring(Constants.R_HEADS.length());
+			} else {
+				// no config yet, assume plain brach name.
+				trackingRemoteBranch = branchName;
+			}
+			RevCommit commitHead = rw.parseCommit(objHead); ;
+			ObjectId objRemoteTrackingHead = git.getRepository().resolve("origin/" + trackingRemoteBranch);				 //$NON-NLS-1$
+		    RevCommit remoteCommitHead = rw.parseCommit(objRemoteTrackingHead);
+			return !commitHead.equals(remoteCommitHead);
 		} catch (NoWorkTreeException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
