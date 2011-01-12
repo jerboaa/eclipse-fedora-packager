@@ -1,6 +1,5 @@
 package org.fedoraproject.eclipse.packager.tests.git;
 
-import org.eclipse.jgit.lib.Constants;
 import org.fedoraproject.eclipse.packager.git.FpGitProjectBits;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestCase;
@@ -15,11 +14,14 @@ public class GitFpBitsTest extends GitTestCase {
 		assertEquals("devel", projectBits.getCurrentBranchName());
 		GitTestProject testProject = getProject();
 		// switch to branch f13
-		testProject.checkoutBranch(Constants.R_HEADS + "f13/master");
+		testProject.checkoutBranch("f13");
 		assertEquals("F-13", projectBits.getCurrentBranchName());
 		// switch to branch fc6
-		testProject.checkoutBranch(Constants.R_HEADS + "fc6/master");
+		testProject.checkoutBranch("fc6");
 		assertEquals("FC-6", projectBits.getCurrentBranchName());
+		// switch to f14 branch, which uses old naming scheme
+		testProject.checkoutBranch("f14/master");
+		assertEquals("F-14", projectBits.getCurrentBranchName());
 	}
 	
 	public void testGetBranchName() {
@@ -39,7 +41,7 @@ public class GitFpBitsTest extends GitTestCase {
 		assertEquals(projectBits.getDistVal(), "15");
 		GitTestProject testProject = getProject();
 		// switch to remote branch f13
-		testProject.checkoutBranch(Constants.R_HEADS + "f13/master");
+		testProject.checkoutBranch("f13");
 		assertEquals(projectBits.getDistVal(), "13");
 	}
 

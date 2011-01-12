@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -24,22 +23,28 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.egit.core.op.BranchOperation;
-import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.RepositoryUtil;
+import org.eclipse.egit.core.op.ConnectProviderOperation;
+import org.eclipse.jgit.api.CheckoutCommand;
+import org.eclipse.jgit.api.CreateBranchCommand;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ListBranchCommand;
+import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
+import org.eclipse.jgit.api.ListBranchCommand.ListMode;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
+import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.URIish;
 import org.fedoraproject.eclipse.packager.git.CloneOperation2;
 
 public class GitTestProject {	
 	private IProject project;
-	private Repository gitRepo;
+	private Git gitRepo;
 	
 	public GitTestProject(String packageName) throws CoreException, URISyntaxException, InvocationTargetException, InterruptedException {
 		final URIish uri = new URIish(getGitURL(packageName));
@@ -65,9 +70,9 @@ public class GitTestProject {
 		RepositoryCache repoCache = org.eclipse.egit.core.Activator
 				.getDefault().getRepositoryCache();
 		try {
-			this.gitRepo = repoCache.lookupRepository(new File(this.project
+			this.gitRepo = new Git(repoCache.lookupRepository(new File(this.project
 					.getProject().getLocation().toOSString()
-					+ "/.git"));
+					+ "/.git")));
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
@@ -92,7 +97,7 @@ public class GitTestProject {
 	/**
 	 * @return the gitRepo
 	 */
-	public Repository getGitRepo() {
+	public Git getGitRepo() {
 		return this.gitRepo;
 	}
 	
@@ -102,17 +107,27 @@ public class GitTestProject {
 	 * @param refName
 	 *            full name of branch
 	 * @throws CoreException
+	 * @throws InvalidRefNameException 
+	 * @throws RefNotFoundException 
+	 * @throws RefAlreadyExistsException 
+	 * @throws JGitInternalException 
 	 */
-	public void checkoutBranch(String refName) throws CoreException {
-		try {
-			if (this.gitRepo.getRefDatabase().getRef(refName) == null) {
-				System.err.println("Reference: '" + refName + "' does not exist!");
+	public void checkoutBranch(String branchName) throws JGitInternalException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException {
+		boolean branchExists = false;
+			ListBranchCommand lsBranchCmd = this.gitRepo.branchList();
+			for (Ref branch: lsBranchCmd.call()) {
+				if (Repository.shortenRefName(branch.getName()).equals(branchName)) {
+					branchExists = true;
+					break; // short circuit
+				}
+			}
+			if (!branchExists) {
+				System.err.println("Branch: '" + branchName + "' does not exist!");
 				return;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		new BranchOperation(this.gitRepo, refName).execute(null);
+		CheckoutCommand checkoutCmd = this.gitRepo.checkout();
+		checkoutCmd.setName(Constants.R_HEADS + branchName);
+		checkoutCmd.call();
 	}
 
 	/**
@@ -136,30 +151,45 @@ public class GitTestProject {
 				IProgressMonitor.UNKNOWN);
 
 		try {
-			Map<String, Ref> remotes = this.gitRepo.getRefDatabase()
-					.getRefs(Constants.R_REMOTES);
-			Set<String> keyset = remotes.keySet();
-			String branch;
-			for (String key : keyset) {
-				// use shortenRefName() to get rid of refs/*/ prefix
-				Ref origRef = remotes.get(key);
-				branch = Repository.shortenRefName(origRef
-						.getName());
-				// omit "origin
-				branch = branch.substring("origin".length()); //$NON-NLS-1$
-				// create local branches
-				String newRefName = Constants.R_HEADS + branch;
-
-				RefUpdate updateRef = this.gitRepo.updateRef(newRefName);
-				ObjectId startAt = new RevWalk(this.gitRepo).parseCommit(this.gitRepo
-							.resolve(origRef.getName()));
-				updateRef.setNewObjectId(startAt);
-				updateRef.setRefLogMessage(
-						"branch: Created from " + origRef.getName(), false); //$NON-NLS-1$
-				updateRef.update();
+			// get a list of remote branches
+			ListBranchCommand branchList = this.gitRepo.branchList();
+			branchList.setListMode(ListMode.REMOTE); // want all remote branches
+			List<Ref> remoteRefs = branchList.call();
+			for (Ref remoteRef: remoteRefs) {
+				String name = remoteRef.getName();
+				int index = (Constants.R_REMOTES + "origin/").length(); //$NON-NLS-1$
+				// Remove "refs/remotes/origin/" part in branch name
+				name = name.substring(index);
+				// Use "f14"-like branch naming, yet have the f14 branch
+				// use the "f14/master"-like branch naming scheme.
+				// We want to make sure both work and don't produce NPEs later on.
+				if (name.endsWith("/" + Constants.MASTER) && !name.startsWith("f14")) { //$NON-NLS-1$
+					index = name.indexOf("/" + Constants.MASTER); //$NON-NLS-1$
+					name = name.substring(0, index);
+				}
+				// Create all remote branches, except "master"
+				if (!name.equals(Constants.MASTER)) {
+					CreateBranchCommand branchCreateCmd = this.gitRepo.branchCreate();
+					branchCreateCmd.setName(name);
+					// Need to set starting point this way in order for tracking
+					// to work properly. See: https://bugs.eclipse.org/bugs/show_bug.cgi?id=333899
+					branchCreateCmd.setStartPoint(remoteRef.getName());
+					// Add remote tracking config in order to not confuse
+					// fedpkg
+					branchCreateCmd.setUpstreamMode(SetupUpstreamMode.TRACK);
+					branchCreateCmd.call();
+				}
 			}
-		} catch (IOException ioException) {
-			ioException.printStackTrace();
+		} catch (JGitInternalException e) {
+			e.printStackTrace();
+		} catch (RefAlreadyExistsException e) {
+			e.printStackTrace();
+		} catch (RefNotFoundException e) {
+			e.printStackTrace();
+		} catch (InvalidRefNameException e) {
+			e.printStackTrace();
 		}
+		
+		monitor.done();
 	}
 }
