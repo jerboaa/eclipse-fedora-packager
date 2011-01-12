@@ -112,7 +112,7 @@ public class GitTestProject {
 	 * @throws RefAlreadyExistsException 
 	 * @throws JGitInternalException 
 	 */
-	public void checkoutBranch(String branchName) throws JGitInternalException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException {
+	public void checkoutBranch(String branchName) throws JGitInternalException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CoreException {
 		boolean branchExists = false;
 			ListBranchCommand lsBranchCmd = this.gitRepo.branchList();
 			for (Ref branch: lsBranchCmd.call()) {
@@ -128,6 +128,8 @@ public class GitTestProject {
 		CheckoutCommand checkoutCmd = this.gitRepo.checkout();
 		checkoutCmd.setName(Constants.R_HEADS + branchName);
 		checkoutCmd.call();
+		// refresh after checkout
+		project.refreshLocal(IResource.DEPTH_INFINITE, null);
 	}
 
 	/**
