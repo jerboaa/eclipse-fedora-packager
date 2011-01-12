@@ -46,7 +46,7 @@ public class DownloadSourcesSWTBotTest {
 	public void setUp() throws Exception {
 		// Import ed and switch to F13 branch
 		edProject = new GitTestProject("ed");
-		edProject.checkoutBranch(Constants.R_HEADS + "f13/master");
+		edProject.checkoutBranch("f13");
 		IResource edSpec = edProject.getProject().findMember(new Path("ed.spec"));
 		assertNotNull(edSpec);
 	}

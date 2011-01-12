@@ -47,7 +47,7 @@ public class PrepSourcesSWTBotTest {
 		// Import ed
 		edProject = new GitTestProject("ed");
 		// use F13 branch of ed
-		edProject.checkoutBranch(Constants.R_HEADS + "f13/master");
+		edProject.checkoutBranch("f13");
 		IResource edSpec = edProject.getProject().findMember(new Path("ed.spec"));
 		assertNotNull(edSpec);
 	}

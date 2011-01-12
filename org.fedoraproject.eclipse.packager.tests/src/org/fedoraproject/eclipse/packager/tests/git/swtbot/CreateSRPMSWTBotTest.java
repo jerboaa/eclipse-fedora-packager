@@ -47,7 +47,7 @@ public class CreateSRPMSWTBotTest {
 		// Import ed
 		edProject = new GitTestProject("ed");
 		// use F10 branch of ed
-		edProject.checkoutBranch(Constants.R_HEADS + "f10/master");
+		edProject.checkoutBranch("f10");
 		IResource edSpec = edProject.getProject().findMember(new Path("ed.spec"));
 		assertNotNull(edSpec);
 	}
