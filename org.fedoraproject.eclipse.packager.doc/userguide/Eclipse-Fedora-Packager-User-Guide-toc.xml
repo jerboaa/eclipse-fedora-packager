@@ -4,7 +4,7 @@
 	<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html" label="Using Eclipse Fedorapackager">
 		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Initial_Setup" label="Initial Setup"></topic>
 		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Importing_a_Fedora_Git_Project" label="Importing a Fedora Git Project"></topic>
-		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Do_Your_Fedora_Packaging_Work" label="Do Your Fedora Packaging Work">
+		<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Fedora_Packaging_Work" label="Fedora Packaging Work">
 			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Uploading_Source_Files_Required_for_a_Package" label="Uploading Source Files Required for a Package"></topic>
 			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Downloading_Source_Files_Required_for_a_Package" label="Downloading Source Files Required for a Package"></topic>
 			<topic href="userguide/Eclipse_Fedora_Packager_User_Guide/Using-Eclipse-Fedorapackager.html#Using_the_Spec-File_Editor" label="Using the Spec-File Editor"></topic>
