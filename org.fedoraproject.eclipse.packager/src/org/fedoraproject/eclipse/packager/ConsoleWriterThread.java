@@ -43,10 +43,11 @@ public class ConsoleWriterThread extends Thread {
 
 	@Override
 	public void run() {
-		int ch;
 		try {
-			while (!terminated && (ch = in.read()) != -1) {
-				out.write(ch);
+			String line = null;
+			// Use line based IO. Fixes Trac #42 (localized language problem).
+			while (!terminated && (line = in.readLine()) != null) {
+				out.write(line + '\n');
 			}
 		} catch (IOException e) {
 			//Log error, but do nothing about it
