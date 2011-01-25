@@ -44,10 +44,20 @@ public class ConsoleWriterThread extends Thread {
 	@Override
 	public void run() {
 		try {
+			long count = 0;
+			long maxChars = Runtime.getRuntime().freeMemory() / 32;
 			String line = null;
 			// Use line based IO. Fixes Trac #42 (localized language problem).
 			while (!terminated && (line = in.readLine()) != null) {
 				out.write(line + '\n');
+				count += line.length() + 1;
+				// Clear console every X characters.
+				// X = available Memory / 32 (char == 16 bit); So 1/16 of available
+				// memory seem to be good. May adjust as needed. Fixes Trac #55.
+				if (count > maxChars) {
+					count = 0;
+					out.getConsole().clearConsole();
+				}
 			}
 		} catch (IOException e) {
 			//Log error, but do nothing about it
