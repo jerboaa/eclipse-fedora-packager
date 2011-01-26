@@ -22,17 +22,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.project.RepositoryMapping;
+import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.FetchResult;
+import org.eclipse.jgit.transport.RefSpec;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
@@ -438,6 +441,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 		return false;
 	}
 
+	/**
+	 * Determine if there are unpushed changes on the current branch.
+	 * @return If there are unpushed changes.
+	 */
 	@Override
 	public boolean hasLocalChanges(FedoraProjectRoot fedoraProjectRoot) {
 		if (!isInitialized()) {
@@ -445,23 +452,49 @@ public class FpGitProjectBits implements IFpProjectBits {
 			return true; // If we are not initialized we can't go any further!
 		}
 		try {
-			RevWalk rw = new RevWalk(git.getRepository());
-			String branchName = git.getRepository().getBranch();
-			ObjectId objHead = git.getRepository().resolve(branchName);
 			// get remote ref from config
+			String branchName = git.getRepository().getBranch();
 			String trackingRemoteBranch = git
-					.getRepository()
-					.getConfig()
-					.getString(ConfigConstants.CONFIG_BRANCH_SECTION,
-							branchName, ConfigConstants.CONFIG_KEY_MERGE);
+			.getRepository()
+			.getConfig()
+			.getString(ConfigConstants.CONFIG_BRANCH_SECTION,
+					branchName, ConfigConstants.CONFIG_KEY_MERGE);
+			///////////////////////////////////////////////////////////
+			// FIXME: Temp work-around for Eclipse EGit/JGit BZ #317411
+			FetchCommand fetch = git.fetch();
+			fetch.setRemote("origin"); //$NON-NLS-1$
+			fetch.setTimeout(0);
+			// Fetch refs for current branch; account for f14 + f14/master like
+			// branch names. Need to fetch into remotes/origin/f14/master since
+			// this is what is later used for local changes comparison.
+			String fetchBranchSpec = Constants.R_HEADS + branchName + ":" + //$NON-NLS-1$
+				Constants.R_REMOTES + "origin/" + branchName; //$NON-NLS-1$
 			if (trackingRemoteBranch != null) {
+				// have f14/master like branch
 				trackingRemoteBranch = trackingRemoteBranch.substring(Constants.R_HEADS.length());
-			} else {
+				fetchBranchSpec = Constants.R_HEADS + trackingRemoteBranch + ":" + //$NON-NLS-1$
+					Constants.R_REMOTES + "origin/" + trackingRemoteBranch; //$NON-NLS-1$
+			}
+			RefSpec spec = new RefSpec(fetchBranchSpec);
+			fetch.setRefSpecs(spec);
+			try {
+				fetch.call();
+			} catch (JGitInternalException e) {
+				e.printStackTrace();
+			} catch (InvalidRemoteException e) {
+				e.printStackTrace();
+			}
+			//--- End temp work-around for EGit/JGit bug.
+			
+			RevWalk rw = new RevWalk(git.getRepository());
+			ObjectId objHead = git.getRepository().resolve(branchName);
+			if (trackingRemoteBranch == null) {
 				// no config yet, assume plain brach name.
 				trackingRemoteBranch = branchName;
 			}
-			RevCommit commitHead = rw.parseCommit(objHead); ;
-			ObjectId objRemoteTrackingHead = git.getRepository().resolve("origin/" + trackingRemoteBranch);				 //$NON-NLS-1$
+			RevCommit commitHead = rw.parseCommit(objHead);
+			ObjectId objRemoteTrackingHead = git.getRepository().resolve("origin/" +  //$NON-NLS-1$
+					trackingRemoteBranch);				
 		    RevCommit remoteCommitHead = rw.parseCommit(objRemoteTrackingHead);
 			return !commitHead.equals(remoteCommitHead);
 		} catch (NoWorkTreeException e) {
