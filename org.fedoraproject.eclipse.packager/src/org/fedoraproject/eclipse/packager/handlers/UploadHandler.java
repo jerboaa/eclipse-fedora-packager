@@ -28,6 +28,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -57,10 +58,10 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.httpclient_utils.IProgressListener;
 import org.fedoraproject.eclipse.packager.httpclient_utils.CoutingRequestEntity;
@@ -87,12 +88,12 @@ public class UploadHandler extends WGetHandler {
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot);
 		// do tasks as job
-		Job job = new Job(Messages.uploadHandler_taskName) {
+		Job job = new Job(FedoraPackagerText.get().uploadHandler_taskName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				monitor.beginTask(Messages.uploadHandler_taskName, IProgressMonitor.UNKNOWN);
+				monitor.beginTask(FedoraPackagerText.get().uploadHandler_taskName, IProgressMonitor.UNKNOWN);
 
 				// ensure file has changed if already listed in sources
 				Map<String, String> sources = sourceFile.getSources();
@@ -101,14 +102,14 @@ public class UploadHandler extends WGetHandler {
 						&& SourcesFile
 								.checkMD5(sources.get(filename), resource)) {
 					// file already in sources
-					return FedoraHandlerUtils.handleOK(NLS.bind(Messages.uploadHandler_versionExists, filename)
+					return FedoraHandlerUtils.handleOK(MessageFormat.format(FedoraPackagerText.get().uploadHandler_versionExists, filename)
 							, true);
 				}
 
 				// Do file sanity checks (non-empty, file extensions etc.)
 				final File toAdd = resource.getLocation().toFile();
 				if (!FedoraHandlerUtils.isValidUploadFile(toAdd)) {
-					return FedoraHandlerUtils.handleOK(NLS.bind(Messages.uploadHandler_invalidFile,
+					return FedoraHandlerUtils.handleOK(MessageFormat.format(FedoraPackagerText.get().uploadHandler_invalidFile,
 							toAdd.getName()), true);
 				}
 
@@ -126,14 +127,14 @@ public class UploadHandler extends WGetHandler {
 				result = updateSources(sourceFile, toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
-					return FedoraHandlerUtils.handleError(Messages.uploadHandler_failUpdatSourceFile);
+					return FedoraHandlerUtils.handleError(FedoraPackagerText.get().uploadHandler_failUpdatSourceFile);
 				}
 
 				// Handle VCS specific stuff; Update .gitignore/.cvsignore
 				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
-					return FedoraHandlerUtils.handleError(Messages.uploadHandler_failVCSUpdate);
+					return FedoraHandlerUtils.handleError(FedoraPackagerText.get().uploadHandler_failVCSUpdate);
 				}
 
 				// Do VCS update
@@ -185,8 +186,8 @@ public class UploadHandler extends WGetHandler {
 				throw new OperationCanceledException();
 			}
 			// first check remote status to see if file is already uploaded
-			monitor.subTask(NLS.bind(
-					Messages.uploadHandler_checkingRemoteStatus, filename));
+			monitor.subTask(MessageFormat.format(
+					FedoraPackagerText.get().uploadHandler_checkingRemoteStatus, filename));
 
 			// get upload URL from lookaside cache 
 			String uploadUrl = fedoraProjectRoot.getLookAsideCache().getUploadUrl();
@@ -195,7 +196,8 @@ public class UploadHandler extends WGetHandler {
 				@SuppressWarnings("unused")
 				URL dummy = new URL(uploadUrl);
 			} catch (MalformedURLException e) {
-				return FedoraHandlerUtils.handleError(NLS.bind(Messages.uploadHandler_invalidUrlError,
+				return FedoraHandlerUtils.handleError(MessageFormat.format(
+						FedoraPackagerText.get().uploadHandler_invalidUrlError,
 						e.getMessage()));
 			}
 			//HttpPost httppost = new HttpPost(uploadUrl); // TODO use this!
@@ -243,8 +245,8 @@ public class UploadHandler extends WGetHandler {
             
             // TODO: use EntityUtils.comsume(resEntity);!!!
 			if (returnCode != HttpURLConnection.HTTP_OK) {
-				return FedoraHandlerUtils.handleError(NLS.bind(
-						Messages.uploadHandler_uploadFail, filename, returnCode));
+				return FedoraHandlerUtils.handleError(MessageFormat.format(
+						FedoraPackagerText.get().uploadHandler_uploadFail, filename, returnCode));
 			} else {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
@@ -257,14 +259,14 @@ public class UploadHandler extends WGetHandler {
 				// if we're in debug mode, forget this check
 				if (resString.toLowerCase().equals("available") && !debug) { //$NON-NLS-1$
 					return FedoraHandlerUtils.handleOK(
-							NLS.bind(
-									Messages.uploadHandler_fileAlreadyUploaded, filename), true);
+							MessageFormat.format(
+									FedoraPackagerText.get().uploadHandler_fileAlreadyUploaded, filename), true);
 				} else if (resString.toLowerCase().equals("missing") || debug) { //$NON-NLS-1$
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
-					monitor.subTask(NLS.bind(
-							Messages.uploadHandler_progressMsg, filename));
+					monitor.subTask(MessageFormat.format(
+							FedoraPackagerText.get().uploadHandler_progressMsg, filename));
 					return upload(toAdd, fedoraProjectRoot);
 				} else {
 					return FedoraHandlerUtils.handleError(resString);
@@ -334,8 +336,9 @@ public class UploadHandler extends WGetHandler {
 
 			int code = client.executeMethod(postMethod);
 			if (code != HttpURLConnection.HTTP_OK) {
-				status = FedoraHandlerUtils.handleError(NLS
-						.bind(Messages.uploadHandler_uploadFail, filename, postMethod.getStatusLine()));
+				status = FedoraHandlerUtils.handleError(MessageFormat.format(
+						FedoraPackagerText.get().uploadHandler_uploadFail,
+						filename, postMethod.getStatusLine()));
 			} else {
 				status = Status.OK_STATUS;
 			}

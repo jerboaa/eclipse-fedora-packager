@@ -15,8 +15,8 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.Messages;
 
 /**
  * Class responsible for downloading source files
@@ -44,10 +44,10 @@ public class DownloadHandler extends WGetHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
-		Job job = new Job(Messages.downloadHandler_jobName) {
+		Job job = new Job(FedoraPackagerText.get().downloadHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.downloadHandler_downloadSourceTask,
+				monitor.beginTask(FedoraPackagerText.get().downloadHandler_downloadSourceTask,
 						IProgressMonitor.UNKNOWN);
 				IStatus status = retrieveSources(fedoraProjectRoot, monitor);
 				monitor.done();

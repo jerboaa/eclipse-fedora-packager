@@ -11,6 +11,7 @@
 package org.fedoraproject.eclipse.packager.handlers;
 
 import java.io.File;
+import java.text.MessageFormat;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -21,11 +22,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.osgi.util.NLS;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.SourcesFile;
-import org.fedoraproject.eclipse.packager.Messages;
 
 /**
  * Uploads new sources. Does not check if sources changed.
@@ -43,18 +43,18 @@ public class NewSourcesHandler extends UploadHandler {
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot);
 		// do tasks as job
-		Job job = new Job(Messages.newSourcesHandler_jobName) {
+		Job job = new Job(FedoraPackagerText.get().newSourcesHandler_jobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				monitor.beginTask(Messages.newSourcesHandler_taskName, IProgressMonitor.UNKNOWN);
+				monitor.beginTask(FedoraPackagerText.get().newSourcesHandler_taskName, IProgressMonitor.UNKNOWN);
 
 				// Don't do anything if file is empty
 				final File toAdd = resource.getLocation().toFile();
 				if (!FedoraHandlerUtils.isValidUploadFile(toAdd)) {
 					return FedoraHandlerUtils.handleOK(
-							NLS.bind(Messages.newSourcesHandler_invalidFile,
+							MessageFormat.format(FedoraPackagerText.get().newSourcesHandler_invalidFile,
 													toAdd.getName()), true);
 				}
 
@@ -75,14 +75,14 @@ public class NewSourcesHandler extends UploadHandler {
 				result = updateSources(sourceFile, toAdd, true);
 				if (!result.isOK()) {
 					// fail updating sources file
-					return FedoraHandlerUtils.handleError(Messages.newSourcesHandler_failUpdateSourceFile);
+					return FedoraHandlerUtils.handleError(FedoraPackagerText.get().newSourcesHandler_failUpdateSourceFile);
 				}
 
 				// Handle VCS specific stuff; Update .cvsignore/.gitignore
 				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
 				if (!result.isOK()) {
 					// fail updating sources file
-					return FedoraHandlerUtils.handleError(Messages.newSourcesHandler_failVCSUpdate);
+					return FedoraHandlerUtils.handleError(FedoraPackagerText.get().newSourcesHandler_failVCSUpdate);
 				}
 
 				// Do VCS update
@@ -93,7 +93,7 @@ public class NewSourcesHandler extends UploadHandler {
 					}
 				} else {
 					// fail updating VCS
-					return FedoraHandlerUtils.handleError(Messages.newSourcesHandler_failVCSUpdate);
+					return FedoraHandlerUtils.handleError(FedoraPackagerText.get().newSourcesHandler_failVCSUpdate);
 				}
 				
 				// Refresh project

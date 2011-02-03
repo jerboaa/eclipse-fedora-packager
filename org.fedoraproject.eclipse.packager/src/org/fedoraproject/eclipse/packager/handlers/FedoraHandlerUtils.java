@@ -51,9 +51,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.EditorPart;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 /**
@@ -391,19 +391,19 @@ public class FedoraHandlerUtils {
 					@Override
 					public void run() {
 						if (isError) {
-							MessageDialog.openError(null, Messages.commonHandler_fedoraPackagerName,
+							MessageDialog.openError(null, FedoraPackagerText.get().commonHandler_fedoraPackagerName,
 									message);
 						} else {
 							MessageDialog.openInformation(null,
-									Messages.commonHandler_fedoraPackagerName, message);
+									FedoraPackagerText.get().commonHandler_fedoraPackagerName, message);
 						}
 					}
 				});
 			} else {
 				if (isError) {
-					MessageDialog.openError(null, Messages.commonHandler_fedoraPackagerName, message);
+					MessageDialog.openError(null, FedoraPackagerText.get().commonHandler_fedoraPackagerName, message);
 				} else {
-					MessageDialog.openInformation(null, Messages.commonHandler_fedoraPackagerName,
+					MessageDialog.openInformation(null, FedoraPackagerText.get().commonHandler_fedoraPackagerName,
 							message);
 				}
 			}

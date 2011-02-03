@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.MessageFormat;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -25,10 +26,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.DownloadJob;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 
 /**
@@ -47,7 +47,7 @@ public abstract class WGetHandler extends CommonHandler {
 		Set<String> sourcesToGet = sourcesFile.getSourcesToDownload();
 	
 		if (sourcesToGet.isEmpty()) {
-			return FedoraHandlerUtils.handleOK(Messages.wGetHandler_nothingToDownload, false);
+			return FedoraHandlerUtils.handleOK(FedoraPackagerText.get().wGetHandler_nothingToDownload, false);
 		}
 	
 		// Need to download remaining sources from repo
@@ -84,7 +84,7 @@ public abstract class WGetHandler extends CommonHandler {
 			for (String source : sourcesToGet) {
 				failedSources += source + '\n';
 			}
-			return FedoraHandlerUtils.handleError(NLS.bind(Messages.wGetHandler_badMd5sum, failedSources));
+			return FedoraHandlerUtils.handleError(MessageFormat.format(FedoraPackagerText.get().wGetHandler_badMd5sum, failedSources));
 		} else {
 			return Status.OK_STATUS;
 		}
@@ -110,8 +110,8 @@ public abstract class WGetHandler extends CommonHandler {
 			return FedoraHandlerUtils.handleError(e);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return FedoraHandlerUtils.handleError(NLS.bind(
-					Messages.wGetHandler_couldNotCreate, fileName));
+			return FedoraHandlerUtils.handleError(MessageFormat.format(
+					FedoraPackagerText.get().wGetHandler_couldNotCreate, fileName));
 
 		}
 		finally {
@@ -120,7 +120,7 @@ public abstract class WGetHandler extends CommonHandler {
 				project.refreshLocal(IResource.DEPTH_ONE, monitor);
 			} catch (CoreException e) {
 				e.printStackTrace();
-				return FedoraHandlerUtils.handleError(Messages.wGetHandler_couldNotRefresh);
+				return FedoraHandlerUtils.handleError(FedoraPackagerText.get().wGetHandler_couldNotRefresh);
 			}
 		}
 	}

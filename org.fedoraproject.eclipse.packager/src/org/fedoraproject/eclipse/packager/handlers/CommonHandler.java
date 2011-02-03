@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.handlers;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -19,8 +21,8 @@ import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileSection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 /**
@@ -92,11 +94,11 @@ public abstract class CommonHandler extends AbstractHandler {
 	protected boolean promptForceTag(final String tagName) {
 		boolean okPressed;
 		if (Display.getCurrent() != null) {
-			okPressed = MessageDialog.openQuestion(shell, Messages.commonHandler_fedoraPackagerName,
-					NLS.bind(Messages.commonHandler_branchAlreadyTaggedMessage, tagName));
+			okPressed = MessageDialog.openQuestion(shell, FedoraPackagerText.get().commonHandler_fedoraPackagerName,
+			MessageFormat.format(FedoraPackagerText.get().commonHandler_branchAlreadyTaggedMessage, tagName));
 		} else {
 			YesNoRunnable op = new YesNoRunnable(
-					NLS.bind(Messages.commonHandler_branchAlreadyTaggedMessage, tagName));
+					MessageFormat.format(FedoraPackagerText.get().commonHandler_branchAlreadyTaggedMessage, tagName));
 			Display.getDefault().syncExec(op);
 			okPressed = op.isOkPressed();
 		}
@@ -113,7 +115,7 @@ public abstract class CommonHandler extends AbstractHandler {
 
 		@Override
 		public void run() {
-			okPressed = MessageDialog.openQuestion(shell,   Messages.commonHandler_fedoraPackagerName, //$NON-NLS-1$
+			okPressed = MessageDialog.openQuestion(shell, FedoraPackagerText.get().commonHandler_fedoraPackagerName, //$NON-NLS-1$
 					question);
 		}
 
