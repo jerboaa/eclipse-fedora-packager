@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hc-client mime
+Bundle-SymbolicName: org.apache.http.entity.mime
+Bundle-Version: 1.0.0
+Bundle-Vendor: Apache.org
+Export-Package: org.apache.http.entity.mime,
+ org.apache.http.entity.mime.content
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.apache.http,
+ org.apache.http.message,
+ org.apache.http.protocol,
+ org.apache.http.util
