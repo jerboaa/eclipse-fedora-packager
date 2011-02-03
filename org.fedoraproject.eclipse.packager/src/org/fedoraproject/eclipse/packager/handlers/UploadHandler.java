@@ -22,8 +22,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
@@ -33,16 +31,19 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -61,6 +62,8 @@ import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.Messages;
 import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.httpclient_utils.IProgressListener;
+import org.fedoraproject.eclipse.packager.httpclient_utils.CoutingRequestEntity;
 
 /**
  * Class responsible for uploading source files (VCS independent bits).
@@ -170,8 +173,13 @@ public class UploadHandler extends WGetHandler {
 	 */
 	protected IStatus performUpload(final File toAdd, final String filename,
 			IProgressMonitor monitor, FedoraProjectRoot fedoraProjectRoot) {
+		
+		HttpParams params = new BasicHttpParams();
+		params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 30000L);
+		HttpClient client = new DefaultHttpClient(params);
+		
 		try {
-			registerProtocol();
+			//registerProtocol();
 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -179,9 +187,7 @@ public class UploadHandler extends WGetHandler {
 			// first check remote status to see if file is already uploaded
 			monitor.subTask(NLS.bind(
 					Messages.uploadHandler_checkingRemoteStatus, filename));
-			HttpClient client = new HttpClient();
-			client.getHttpConnectionManager().getParams()
-					.setConnectionTimeout(30000);
+
 			// get upload URL from lookaside cache 
 			String uploadUrl = fedoraProjectRoot.getLookAsideCache().getUploadUrl();
 			// make sure we have a valid URL, this would fail later anyways
@@ -192,14 +198,50 @@ public class UploadHandler extends WGetHandler {
 				return FedoraHandlerUtils.handleError(NLS.bind(Messages.uploadHandler_invalidUrlError,
 						e.getMessage()));
 			}
-			PostMethod postMethod = new PostMethod(uploadUrl);
-			NameValuePair[] data = {
-					new NameValuePair(
-							"name", fedoraProjectRoot.getSpecfileModel().getName()), //$NON-NLS-1$
-					new NameValuePair("md5sum", SourcesFile.getMD5(toAdd)), //$NON-NLS-1$
-					new NameValuePair("filename", filename) }; //$NON-NLS-1$
-			postMethod.setRequestBody(data);
-			int returnCode = client.executeMethod(postMethod);
+			//HttpPost httppost = new HttpPost(uploadUrl); // TODO use this!
+			HttpPost post = new HttpPost("http://upload-cgi.yyz.redhat.com/cgi-bin/upload.cgi");
+			//FileBody binUploadFile = new FileBody(toAdd);
+
+			// See if we need to upload anything
+            MultipartEntity reqEntity = new MultipartEntity();
+            reqEntity.addPart("filename", new StringBody(filename));
+            reqEntity.addPart("name", new StringBody(fedoraProjectRoot.getSpecfileModel().getName()));
+            reqEntity.addPart("md5sum", new StringBody(SourcesFile.getMD5(toAdd)));
+			
+			// not sure why it's content-length * 2, but that's what it is...
+			final double totalSize = reqEntity.getContentLength() * 2;
+
+            IProgressListener progL = new IProgressListener() {
+				
+				public void transferred(long num) {
+					// TODO: use monitor
+					System.out.println(String.format("Wrote %.2f%%", (((double)num)/totalSize)*100));
+				}
+			};
+			CoutingRequestEntity countingEntity = new CoutingRequestEntity(reqEntity, progL);
+            post.setEntity(countingEntity); 
+			
+            HttpResponse response = client.execute(post);
+            HttpEntity resEntity = response.getEntity();
+            int returnCode = response.getStatusLine().getStatusCode();
+            
+            System.out.println("----------------------------------------");
+            System.out.println(response.getStatusLine());
+            if (resEntity != null) {
+                System.out.println("Response content length: " + resEntity.getContentLength());
+                System.out.println("Chunked?: " + resEntity.isChunked());
+                if (resEntity != null) {
+                    InputStream instream = resEntity.getContent();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(instream));
+                    String line;
+                    // print response
+                    while ((line = in.readLine()) != null) {
+                    	System.out.println(line);
+                    }
+                }
+            }
+            
+            // TODO: use EntityUtils.comsume(resEntity);!!!
 			if (returnCode != HttpURLConnection.HTTP_OK) {
 				return FedoraHandlerUtils.handleError(NLS.bind(
 						Messages.uploadHandler_uploadFail, filename, returnCode));
@@ -207,16 +249,17 @@ public class UploadHandler extends WGetHandler {
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();
 				}
-				InputStream responseStream = postMethod
-						.getResponseBodyAsStream();
-				String response = parseResponse(responseStream);
+				String resString = "N/A";
+				if (resEntity != null) {
+					resString = parseResponse(resEntity);
+				}
 
 				// if we're in debug mode, forget this check
-				if (response.toLowerCase().equals("available") && !debug) { //$NON-NLS-1$
+				if (resString.toLowerCase().equals("available") && !debug) { //$NON-NLS-1$
 					return FedoraHandlerUtils.handleOK(
 							NLS.bind(
 									Messages.uploadHandler_fileAlreadyUploaded, filename), true);
-				} else if (response.toLowerCase().equals("missing") || debug) { //$NON-NLS-1$
+				} else if (resString.toLowerCase().equals("missing") || debug) { //$NON-NLS-1$
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
@@ -224,33 +267,45 @@ public class UploadHandler extends WGetHandler {
 							Messages.uploadHandler_progressMsg, filename));
 					return upload(toAdd, fedoraProjectRoot);
 				} else {
-					return FedoraHandlerUtils.handleError(response);
+					return FedoraHandlerUtils.handleError(resString);
 				}
 			}
-		} catch (HttpException e) {
-			e.printStackTrace();
-			return FedoraHandlerUtils.handleError(e);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return FedoraHandlerUtils.handleError(e);
-		} catch (GeneralSecurityException e) {
+		} /*catch (GeneralSecurityException e) {
 			e.printStackTrace();
 			return FedoraHandlerUtils.handleError(e);
+		}*/ finally {
+			// When HttpClient instance is no longer needed,
+            // shut down the connection manager to ensure
+            // immediate deallocation of all system resources
+            client.getConnectionManager().shutdown();
 		}
 	}
 
-	protected void registerProtocol() throws GeneralSecurityException,
-			IOException, NoSuchAlgorithmException, KeyStoreException,
-			KeyManagementException, CertificateException {
-		HttpSecureProtocol protocol = new HttpSecureProtocol();
-		protocol.setKeyMaterial(new FedoraSSL(
-				new File(FedoraSSL.DEFAULT_CERT_FILE),
-				new File(FedoraSSL.DEFAULT_UPLOAD_CA_CERT),
-				new File(FedoraSSL.DEFAULT_SERVER_CA_CERT)).getFedoraCertKeyMaterial());
-		protocol.setTrustMaterial(TrustMaterial.TRUST_ALL);
-		Protocol.registerProtocol("https", new Protocol("https", //$NON-NLS-1$ //$NON-NLS-2$
-				(ProtocolSocketFactory) protocol, 443));
-	}
+	/**
+	 * Set up SSL context.
+	 * 
+	 * @throws GeneralSecurityException
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws KeyManagementException
+	 * @throws CertificateException
+	 */
+//	protected void registerProtocol() throws GeneralSecurityException,
+//			IOException, NoSuchAlgorithmException, KeyStoreException,
+//			KeyManagementException, CertificateException {
+//		HttpSecureProtocol protocol = new HttpSecureProtocol();
+//		protocol.setKeyMaterial(new FedoraSSL(
+//				new File(FedoraSSL.DEFAULT_CERT_FILE),
+//				new File(FedoraSSL.DEFAULT_UPLOAD_CA_CERT),
+//				new File(FedoraSSL.DEFAULT_SERVER_CA_CERT)).getFedoraCertKeyMaterial());
+//		protocol.setTrustMaterial(TrustMaterial.TRUST_ALL);
+//		Protocol.registerProtocol("https", new Protocol("https", //$NON-NLS-1$ //$NON-NLS-2$
+//				(ProtocolSocketFactory) protocol, 443));
+//	}
 
 	protected IStatus upload(File file, FedoraProjectRoot fedoraProjectRoot) {
 		IStatus status;
@@ -306,23 +361,25 @@ public class UploadHandler extends WGetHandler {
 		return status;
 	}
 
-	protected String parseResponse(InputStream responseStream)
+	/**
+	 * Helper to read response from response entity.
+	 * 
+	 * @param responseEntity
+	 * @return
+	 * @throws IOException
+	 */
+	protected String parseResponse(HttpEntity responseEntity)
 			throws IOException {
+		
 		BufferedReader br = new BufferedReader(new InputStreamReader(
-				responseStream));
-
+				responseEntity.getContent()));
 		String responseText = ""; //$NON-NLS-1$
 		String line;
-		try {
+		line = br.readLine();
+		while (line != null) {
+			responseText += line + "\n"; //$NON-NLS-1$
 			line = br.readLine();
-			while (line != null) {
-				responseText += line + "\n"; //$NON-NLS-1$
-				line = br.readLine();
-			}
-		} finally {
-			br.close();
 		}
-
 		return responseText.trim();
 	}
 	
