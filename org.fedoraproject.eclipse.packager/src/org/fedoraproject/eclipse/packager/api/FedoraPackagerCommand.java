@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager.api;
 import java.text.MessageFormat;
 import java.util.concurrent.Callable;
 
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 
 /**
@@ -69,7 +70,7 @@ public abstract class FedoraPackagerCommand<T> implements Callable<T> {
 	protected void checkCallable() throws IllegalStateException {
 		if (!callable)
 			throw new IllegalStateException(MessageFormat.format(
-					"Can't call %s at this point.",//TODO externalize
+					FedoraPackagerText.get().commandWasCalledInTheWrongState,
 					this.getClass().getName()));
 	}
 
