@@ -2,7 +2,7 @@
 <feature
       id="org.fedoraproject.eclipse.packager.tests"
       label="Feature for building EFP test"
-      version="0.1.8.qualifier"
+      version="0.1.12.qualifier"
       provider-name="Fedoraproject.org">
 
    <description url="http://fedorahosted.org/eclipse-fedorapackager">
