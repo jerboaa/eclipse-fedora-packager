@@ -12,6 +12,8 @@ package org.fedoraproject.eclipse.packager.koji;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,6 +115,8 @@ public class KojiHubClient extends AbstractKojiHubClient {
 	private HashMap<?, ?> doSslLogin() throws KojiHubClientLoginException {
 		// prepare XMLRPC
 		setupXmlRpcConfig();
+		// setup for SSL login
+		setupSSLLoginXMLRPCConfig();
 		setupXmlRpcClient();
 		// do the login
 		ArrayList<String> params = new ArrayList<String>();
@@ -143,6 +147,28 @@ public class KojiHubClient extends AbstractKojiHubClient {
 		} catch (IOException e) {
 			throw new KojiHubClientInitException(e);
 		}
+	}
+	
+	/**
+	 * As of 2011-02-08 we need to use a different URL for SSL login. This
+	 * method sets the server URL appropriately.
+	 * 
+	 * @throws KojiHubClientLoginException
+	 */
+	private void setupSSLLoginXMLRPCConfig() throws KojiHubClientLoginException {
+		if (this.xmlRpcConfig == null ) {
+			throw new KojiHubClientLoginException(
+					new IllegalStateException("xmlRpcConfig needs to be initialized!"));
+			// TODO: externalize!
+		}
+		URL sslLoginUrl = null;
+		try {
+			sslLoginUrl = new URL(getHubUrl().toString() + "/ssllogin"); //$NON-NLS-1$
+		} catch (MalformedURLException e) {
+			// Ignore. If hub URL was invalid an exception should have been
+			// thrown earlier.
+		}
+		this.xmlRpcConfig.setServerURL(sslLoginUrl);
 	}
 	
 }

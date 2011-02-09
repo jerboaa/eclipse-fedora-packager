@@ -35,8 +35,9 @@ public class KojiHubClientTest {
 	 */
 	@Test
 	public void canLoginUsingSSLCertificate() throws Exception {
-		// Use SSL enabled server for SSL login
-		String sslKojiHostURL = "https://koji.fedoraproject.org/kojihub";
+		// Use SSL enabled server for SSL login. Note that the only url doing
+		// SSL server side is kojiHubURL + /ssllogin
+		String sslKojiHostURL = "https://koji.fedoraproject.org/kojihub/ssllogin";
 		kojiClient.setHubUrl(sslKojiHostURL);
 		// Logging in to koji should return session data
 		HashMap<?, ?> sessionData = kojiClient.login();
