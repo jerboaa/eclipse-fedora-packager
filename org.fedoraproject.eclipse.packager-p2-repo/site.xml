@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.fedoraproject.eclipse.packager_0.1.12.qualifier.jar" id="org.fedoraproject.eclipse.packager" version="0.1.12.qualifier">
+      <category name="Eclipse Fedora Packager"/>
+   </feature>
+   <category-def name="Eclipse Fedora Packager" label="Eclipse Fedora Packager">
+      <description>
+         Eclipse Fedora Packager is an Eclipse plug-in, which helps
+         Fedora contributors to interact with Fedora infrastructure
+         such as Koji, Bodhi and Git.
+      </description>
+   </category-def>
+</site>
