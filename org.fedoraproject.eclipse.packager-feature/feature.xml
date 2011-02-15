@@ -3,8 +3,7 @@
       id="org.fedoraproject.eclipse.packager"
       label="Eclipse Fedora Packager Tools"
       version="0.1.12.qualifier"
-      provider-name="FedoraProject.org"
-      os="linux">
+      provider-name="Fedoraproject.org">
 
    <description url="http://fedorahosted.org/eclipse-fedorapackager">
       Eclipse Fedora Packager is an Eclipse plugin helping 
