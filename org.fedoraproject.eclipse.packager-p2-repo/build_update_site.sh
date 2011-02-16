@@ -1,6 +1,8 @@
 #!/bin/bash
 #
 # Automate Eclipse Fedora Packager update site creation.
+# More info on p2 composite repositories is here:
+#  http://wiki.eclipse.org/Equinox/p2/Composite_Repositories_%28new%29
 #
 # Example call: ./build_update_site.sh master /usr/lib64/eclipse
 #
