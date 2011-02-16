@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-Name: %bundleName
-Bundle-Vendor: %bundleProvider
-Bundle-ManifestVersion: 2
-Bundle-Localization: plugin
-Bundle-SymbolicName: org.apache.commons.ssl.source
-Bundle-Version: 0.3.10.qualifier
-Eclipse-SourceBundle: org.apache.commons.ssl;version="0.3.10.qualifier"
-

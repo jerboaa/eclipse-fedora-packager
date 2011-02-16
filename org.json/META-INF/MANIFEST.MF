@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: JSON Plug-in
-Bundle-SymbolicName: org.json
-Bundle-Version: 0.1.0
-Bundle-Vendor: FedoraProject.org
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Export-Package: org.json
