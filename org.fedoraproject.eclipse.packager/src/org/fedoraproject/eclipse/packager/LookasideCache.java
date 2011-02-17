@@ -54,7 +54,7 @@ public class LookasideCache {
 	/**
 	 * Set the downloadUrl. Uses default URL if empty.
 	 */
-	private void setDownloadUrl(String downloadUrl) {
+	public void setDownloadUrl(String downloadUrl) {
 		// If download URL isn't set yet, use default URL
 		if (downloadUrl.equals("")) { //$NON-NLS-1$
 			downloadUrl = org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL;
@@ -76,7 +76,7 @@ public class LookasideCache {
 	/**
 	 * Set the uploadUrl. Uses default URL if empty.
 	 */
-	private void setUploadUrl(String uploadUrl) {
+	public void setUploadUrl(String uploadUrl) {
 		// If upload URL isn't set yet, use default URL
 		if (uploadUrl.equals("")) { //$NON-NLS-1$
 			uploadUrl = org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL;
