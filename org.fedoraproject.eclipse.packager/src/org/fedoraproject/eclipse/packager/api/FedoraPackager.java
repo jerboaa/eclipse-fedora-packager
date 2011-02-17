@@ -1,16 +1,19 @@
 package org.fedoraproject.eclipse.packager.api;
 
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.LookasideCache;
+import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.UploadSourceCommand;
-import org.fedoraproject.eclipse.packager.handlers.UploadHandler;
 
 /**
  * 
- * @author sgehwolf
+ * @author Severin Gehwolf
  *
  */
 public class FedoraPackager {
 	private final FedoraProjectRoot root;
+	private final SourcesFile sources;
+	private final LookasideCache lookasideCache;
 	
 	/**
 	 * @param root
@@ -19,12 +22,21 @@ public class FedoraPackager {
 		if (root == null)
 			throw new NullPointerException();
 		this.root = root;
+		this.sources = null;
+		this.lookasideCache = null;
 	}
 	
 	/**
 	 * @return An upload source command.
 	 */
-	public UploadSourceCommand upload() {
+	public UploadSourceCommand uploadSources() {
 		return new UploadSourceCommand(root);
+	}
+	
+	/**
+	 * @return An download source command.
+	 */
+	public DownloadSourceCommand downloadSources() {
+		return new DownloadSourceCommand(root, sources, lookasideCache);
 	}
 }
