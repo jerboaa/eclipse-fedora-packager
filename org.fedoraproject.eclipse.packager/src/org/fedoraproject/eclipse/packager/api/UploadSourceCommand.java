@@ -26,6 +26,7 @@ public class UploadSourceCommand extends
 	private URL uploadURL;
 	private File fileToUpload;
 	private HttpResponse response;
+	private boolean replaceSource = false;
 	
 	/**
 	 * @param projectRoot
@@ -51,6 +52,14 @@ public class UploadSourceCommand extends
 	 */
 	public void setFileToUpload(File fileToUpload) {
 		this.fileToUpload = fileToUpload;
+	}
+
+	/**
+	 * @param replaceSource Set to true if sources should be replaced in
+	 * sources file.
+	 */
+	public void setReplaceSource(boolean replaceSource) {
+		this.replaceSource = replaceSource;
 	}
 
 	/**
