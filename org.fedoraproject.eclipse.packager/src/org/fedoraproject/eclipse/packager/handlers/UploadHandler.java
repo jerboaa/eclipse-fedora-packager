@@ -195,7 +195,7 @@ public class UploadHandler extends WGetHandler {
 					FedoraPackagerText.get().uploadHandler_checkingRemoteStatus, filename));
 
 			// get upload URL from lookaside cache 
-			String uploadUrl = fedoraProjectRoot.getLookAsideCache().getUploadUrl();
+			String uploadUrl = fedoraProjectRoot.getLookAsideCache().getUploadUrl().toString();
 			// make sure we have a valid URL, this would fail later anyways
 			try {
 				@SuppressWarnings("unused")

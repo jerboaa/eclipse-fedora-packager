@@ -10,20 +10,46 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Class responsible for Upload/Download Url management of the
+ * Class responsible for management of the
  * lookaside cache.
  *
  */
 public class LookasideCache {
 	
-	private String uploadUrl;	// Lookaside upload URL
-	private String downloadUrl;	// Lookaside download URL
-	private IPreferenceStore prefStore; // Preferences store to use
+	/**
+	 * Default upload URL for the Fedora lookaside cache
+	 */
+	public static final String DEFAULT_FEDORA_UPLOAD_URL = "https://pkgs.fedoraproject.org/repo/pkgs/upload.cgi"; //$NON-NLS-1$
+	/**
+	 * Default download URL for the Fedora lookaside cache
+	 */
+	public static final String DEFAULT_FEDORA_DOWNLOAD_URL = "http://pkgs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
+	
+	private Map<CacheType, URL[]> urlMap;
+	private static final int UPLOAD_URL_INDEX = 0;
+	private static final int DOWNLOAD_URL_INDEX = 1;
+	private CacheType type;
+	
+	/**
+	 * Allow for various types of lookaside caches. E.g. Fedora, EPEL, etc.
+	 * For now only FEDORA is supported.
+	 */
+	public enum CacheType {
+		/**
+		 * Fedora lookaside cache type.
+		 */
+		FEDORA,
+		/**
+		 * EPEL lookaside cache type.
+		 */
+		EPEL
+	}
 	
 	/**
 	 * Common command prefix for Eclipse Fedorapackager command IDs.
@@ -31,113 +57,67 @@ public class LookasideCache {
 	public static final String FEDORA_PACKAGER_CMD_PREFIX = "org.fedoraproject.eclipse.packager"; //$NON-NLS-1$
 	
 	/**
-	 * Create lookaside cache object for the provided Eclipse command.
+	 * Create lookaside cache of the requested type.
 	 * 
-	 * @param commandId The ID of the command for which a LookasideCache object
-	 * 					should be created.
+	 * @param type The cache type to create.
 	 */
-	public LookasideCache(String commandId) {
-		initializeLookaside(commandId);
+	public LookasideCache(CacheType type) {
+		this.urlMap = new HashMap<CacheType, URL[]>();
+		URL[] urls = new URL[2];
+		switch (type) {
+			case FEDORA:
+				try {
+					urls[UPLOAD_URL_INDEX] = new URL(DEFAULT_FEDORA_UPLOAD_URL);
+					urls[DOWNLOAD_URL_INDEX] = new URL(DEFAULT_FEDORA_DOWNLOAD_URL);
+				} catch (MalformedURLException e) {
+					//ignore
+				}
+				break;
+			default:
+				// default to Fedora
+				try {
+					urls[UPLOAD_URL_INDEX] = new URL(DEFAULT_FEDORA_UPLOAD_URL);
+					urls[DOWNLOAD_URL_INDEX] = new URL(DEFAULT_FEDORA_DOWNLOAD_URL);
+				} catch (MalformedURLException e) {
+					//ignore
+				}
+				break;
+		}
+		this.urlMap.put(type, urls);
+		
 	}
 
 	/**
-	 * @return the downloadUrl
+	 * @return the proper download URL for this lookaside cache type.
 	 */
-	public String getDownloadUrl() {
-		// make sure we don't return an empty string
-		if (downloadUrl.equals("")) { //$NON-NLS-1$
-			return org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL;
-		}
-		return downloadUrl;
+	public URL getDownloadUrl() {
+		return this.urlMap.get(this.type)[DOWNLOAD_URL_INDEX];
 	}
 
 	/**
-	 * Set the downloadUrl. Uses default URL if empty.
-	 */
-	public void setDownloadUrl(String downloadUrl) {
-		// If download URL isn't set yet, use default URL
-		if (downloadUrl.equals("")) { //$NON-NLS-1$
-			downloadUrl = org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL;
-		}
-		this.downloadUrl = downloadUrl;
-	}
-
-	/**
-	 * @return the uploadUrl
-	 */
-	public String getUploadUrl() {
-		// make sure we don't return an empty string
-		if (uploadUrl.equals("")) { //$NON-NLS-1$
-			return org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL;
-		}
-		return uploadUrl;
-	}
-
-	/**
-	 * Set the uploadUrl. Uses default URL if empty.
-	 */
-	public void setUploadUrl(String uploadUrl) {
-		// If upload URL isn't set yet, use default URL
-		if (uploadUrl.equals("")) { //$NON-NLS-1$
-			uploadUrl = org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL;
-		}
-		this.uploadUrl = uploadUrl;
-	}
-	
-	/**
-	 * Synchronized initialization helper to set up a LookasideCache instance.
+	 * Set the downloadUrl for this lookaside cache type.
 	 * 
-	 * @param commandId
+	 * @param downloadUrl The new download URL. 
+	 * @throws MalformedURLException If the new URL is invalid.
 	 */
-	private synchronized void initializeLookaside(String commandId) {
-		this.prefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		if (commandId.startsWith(LookasideCache.FEDORA_PACKAGER_CMD_PREFIX)) {
-			// We want to listen for lookaside preference changes
-			final IPropertyChangeListener propertyChangeListener = new IPropertyChangeListener() {				
-				@Override
-				public void propertyChange(PropertyChangeEvent event) {
-					String property = event.getProperty();
-					String newValue = (String)event.getNewValue();
-					if (property.equals(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL)) {
-						// update download URL
-						// TODO: check if we have sane values
-						prefStore.setValue(property, newValue);
-						setDownloadUrl(newValue);
-					}
-					if (property.equals(org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL)) {
-						// update upload URL
-						// TODO: check if we have sane values
-						prefStore.setValue(property, newValue);
-						setUploadUrl(newValue);
-					}
-				}
-			};
-			// attach listener
-			this.prefStore.addPropertyChangeListener(propertyChangeListener);
-			// Set the download URL if not == ""
-			String property = org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL;
-			String currPref = this.prefStore.getString(property);
-			if (currPref.equals("")) { //$NON-NLS-1$
-				String newValue = this.prefStore.getDefaultString(property);
-				if (newValue.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
-					newValue = org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL;
-					this.prefStore.setValue(property, newValue);
-				}
-				currPref = newValue;
-			}
-			setDownloadUrl(currPref);
-			// Set the upload URL if not == ""
-			property = org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL;
-			currPref = this.prefStore.getString(property);
-			if (currPref.equals("")) { //$NON-NLS-1$
-				String newValue = this.prefStore.getDefaultString(property);
-				if (newValue.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
-					newValue = org.fedoraproject.eclipse.packager.preferences.PreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL;
-					this.prefStore.setValue(property, newValue);
-				}
-				currPref = newValue;
-			}
-			setUploadUrl(currPref);
-		}
+	public void setDownloadUrl(String downloadUrl) throws MalformedURLException {
+		this.urlMap.get(this.type)[DOWNLOAD_URL_INDEX] = new URL(downloadUrl);
+	}
+
+	/**
+	 * @return the uploadUrl for this lookaside cache type.
+	 */
+	public URL getUploadUrl() {
+		return this.urlMap.get(this.type)[UPLOAD_URL_INDEX];
+	}
+
+	/**
+	 * Set the uploadUrl for this lookaside cache type.
+	 * 
+	 * @param uploadUrl The new upload URL. 
+	 * @throws MalformedURLException If the new URL is invalid.
+	 */
+	public void setUploadUrl(String uploadUrl) throws MalformedURLException {
+		this.urlMap.get(this.type)[UPLOAD_URL_INDEX] = new URL(uploadUrl);
 	}
 }

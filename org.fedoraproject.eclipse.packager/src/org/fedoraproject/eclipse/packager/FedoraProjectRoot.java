@@ -36,6 +36,7 @@ public class FedoraProjectRoot {
 	private IContainer rootContainer;
 	private SourcesFile sourcesFile;
 	private ProjectType type;
+	// FIXME: Remove lookaside cache here!
 	private LookasideCache lookAsideCache; // The lookaside cache to be used
 	private String commandId; // The invoking command
 
@@ -52,8 +53,6 @@ public class FedoraProjectRoot {
 		this.sourcesFile = new SourcesFile(rootContainer.getFile(new Path(
 				"sources"))); //$NON-NLS-1$
 		this.type = FedoraHandlerUtils.getProjectType(container);
-		// set default lookaside cache
-		this.lookAsideCache = new LookasideCache(cmdId);
 		this.commandId = cmdId;
 	}
 

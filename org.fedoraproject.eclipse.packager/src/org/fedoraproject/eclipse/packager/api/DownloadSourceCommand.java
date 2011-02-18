@@ -1,6 +1,7 @@
 package org.fedoraproject.eclipse.packager.api;
 
 import java.io.File;
+import java.net.MalformedURLException;
 
 import org.apache.http.HttpResponse;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
@@ -43,8 +44,9 @@ public class DownloadSourceCommand extends
 	/**
 	 * @param downloadURL The URL to the download resource
 	 * @return this instance.
+	 * @throws MalformedURLException If an invalid URL has been provided.
 	 */
-	public DownloadSourceCommand setDownloadURL(String downloadURL) {
+	public DownloadSourceCommand setDownloadURL(String downloadURL) throws MalformedURLException {
 		this.lookasideCache.setDownloadUrl(downloadURL);
 		return this;
 	}

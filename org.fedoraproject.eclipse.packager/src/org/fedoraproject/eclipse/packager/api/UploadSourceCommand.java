@@ -42,8 +42,9 @@ public class UploadSourceCommand extends
 	/**
 	 * @param uploadURL the uploadURL to set. Optional.
 	 * @return this instance.
+	 * @throws MalformedURLException If the provided URL was not well formed.
 	 */
-	public UploadSourceCommand setUploadURL(String uploadURL) {
+	public UploadSourceCommand setUploadURL(String uploadURL) throws MalformedURLException {
 		this.lookasideCache.setUploadUrl(uploadURL);
 		return this;
 	}

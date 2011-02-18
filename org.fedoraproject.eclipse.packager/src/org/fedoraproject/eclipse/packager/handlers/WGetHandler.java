@@ -53,7 +53,7 @@ public abstract class WGetHandler extends CommonHandler {
 		// Need to download remaining sources from repo
 		IStatus status = null;
 		// get download URL from lookaside cache 
-		String downloadBaseUrl = fedoraProjectRoot.getLookAsideCache().getDownloadUrl();
+		String downloadBaseUrl = fedoraProjectRoot.getLookAsideCache().getDownloadUrl().toString();
 		for (final String source : sourcesToGet) {
 			final String url = downloadBaseUrl
 					+ "/" + project.getName() //$NON-NLS-1$
