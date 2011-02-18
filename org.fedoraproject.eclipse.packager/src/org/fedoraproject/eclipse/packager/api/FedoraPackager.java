@@ -23,6 +23,8 @@ public class FedoraPackager {
 			throw new NullPointerException();
 		this.root = root;
 		this.sources = null;
+		// FIXME: figure out which project we are from persisent property
+		// and instantiate a proper cache.
 		this.lookasideCache = null;
 	}
 	
