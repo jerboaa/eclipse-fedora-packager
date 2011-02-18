@@ -30,7 +30,7 @@ public class FedoraPackager {
 	 * @return An upload source command.
 	 */
 	public UploadSourceCommand uploadSources() {
-		return new UploadSourceCommand(root);
+		return new UploadSourceCommand(root, sources, lookasideCache);
 	}
 	
 	/**
