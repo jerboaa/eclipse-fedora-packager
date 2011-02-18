@@ -5,7 +5,9 @@ import java.io.File;
 import org.apache.http.HttpResponse;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.LookasideCache;
+import org.fedoraproject.eclipse.packager.LookasideCache.CacheType;
 import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 
 /**
  * A class used to execute a {@code download sources} command. It has setters
@@ -22,6 +24,7 @@ public class DownloadSourceCommand extends
 	private HttpResponse response;
 	private SourcesFile sources;
 	private LookasideCache lookasideCache;
+	private CacheType lookasideType;
 	
 	/**
 	 * @param projectRoot The project root abstraction.
@@ -33,14 +36,27 @@ public class DownloadSourceCommand extends
 		super(projectRoot);
 		this.sources = sources;
 		this.lookasideCache = lookasideCache;
+		// Default to Fedora lookaside cache type
+		this.lookasideType = CacheType.FEDORA;
 	}
 	
 	/**
-	 * @param downloadURL The URL for the download resource
+	 * @param downloadURL The URL to the download resource
 	 * @return this instance.
 	 */
 	public DownloadSourceCommand setDownloadURL(String downloadURL) {
 		this.lookasideCache.setDownloadUrl(downloadURL);
+		return this;
+	}
+	
+	/**
+	 * Specify the lookaside cache type.
+	 * 
+	 * @param type Usually FEDORA, may be EPEL or something else.
+	 * @return this instance
+	 */
+	public DownloadSourceCommand setLookasideType(CacheType type) {
+		this.lookasideType = type;
 		return this;
 	}
 
@@ -57,9 +73,10 @@ public class DownloadSourceCommand extends
 	 * Executes the {@code UploadSources} command. Each instance of this class
 	 * should only be used for one invocation of the command. Don't call this
 	 * method twice on an instance.
+	 * 
 	 */
 	@Override
-	public HttpResponse call() throws Exception {
+	public HttpResponse call() {
 		// Don't allow this very same instance to be called twice.
 		checkCallable();
 		// TODO Implement
