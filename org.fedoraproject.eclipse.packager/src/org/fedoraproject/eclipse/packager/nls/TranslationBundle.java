@@ -157,6 +157,7 @@ public abstract class TranslationBundle {
 	 * @exception TranslationStringMissingException see {@link TranslationStringMissingException}
 	 */
 	void load(Locale locale) throws TranslationBundleLoadingException {
+		@SuppressWarnings("rawtypes")
 		Class bundleClass = getClass();
 		try {
 			resourceBundle = ResourceBundle.getBundle(bundleClass.getName(), locale);

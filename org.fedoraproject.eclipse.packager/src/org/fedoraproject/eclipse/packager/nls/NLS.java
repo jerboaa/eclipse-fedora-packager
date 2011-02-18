@@ -69,7 +69,7 @@ import org.fedoraproject.eclipse.packager.errors.TranslationStringMissingExcepti
  */
 public class NLS {
 	/** The root locale constant. It is defined here because the Locale.ROOT is not defined in Java 5 */
-	public static final Locale ROOT_LOCALE = new Locale("", "", "");
+	public static final Locale ROOT_LOCALE = new Locale("", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 	private static final InheritableThreadLocal<NLS> local = new InheritableThreadLocal<NLS>() {
 		protected NLS initialValue() {
@@ -119,6 +119,7 @@ public class NLS {
 	}
 
 	final private Locale locale;
+	@SuppressWarnings("rawtypes")
 	final private ConcurrentHashMap<Class, TranslationBundle> map = new ConcurrentHashMap<Class, TranslationBundle>();
 
 	private NLS(Locale locale) {

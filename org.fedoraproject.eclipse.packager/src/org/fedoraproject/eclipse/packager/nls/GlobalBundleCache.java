@@ -64,6 +64,7 @@ import org.fedoraproject.eclipse.packager.errors.TranslationStringMissingExcepti
  * same translation bundle as long as its locale doesn't change.
  */
 class GlobalBundleCache {
+	@SuppressWarnings("rawtypes")
 	private static final Map<Locale, Map<Class, TranslationBundle>> cachedBundles
 		= new HashMap<Locale, Map<Class, TranslationBundle>>();
 
@@ -82,6 +83,7 @@ class GlobalBundleCache {
 	 * @exception TranslationBundleLoadingException see {@link TranslationBundle#load(Locale)}
 	 * @exception TranslationStringMissingException see {@link TranslationBundle#load(Locale)}
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	static synchronized <T extends TranslationBundle> T lookupBundle(Locale locale, Class<T> type) {
 		try {
 			Map<Class, TranslationBundle> bundles = cachedBundles.get(locale);
