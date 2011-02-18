@@ -6,6 +6,8 @@ import java.net.URL;
 
 import org.apache.http.HttpResponse;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.LookasideCache;
+import org.fedoraproject.eclipse.packager.SourcesFile;
 
 /**
  * A class used to execute a {@code upload sources} command. It has setters for
@@ -18,48 +20,51 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 public class UploadSourceCommand extends
 		FedoraPackagerCommand<HttpResponse> {
 
-	/**
-	 * Default upload URL if everything else fails.
-	 */
-	public static final String DEFAULT_UPLOAD_URL = 
-		"https://pkgs.fedoraproject.org/repo/pkgs/upload.cgi"; //$NON-NLS-1$
-	private URL uploadURL;
+	private final LookasideCache lookasideCache;
+	private final SourcesFile sources;
 	private File fileToUpload;
 	private HttpResponse response;
 	private boolean replaceSource = false;
 	
 	/**
-	 * @param projectRoot
+	 * @param projectRoot The project root.
+	 * @param cache The lookaside instance.
+	 * @param sources The sources file instance.
+	 * 
 	 */
-	public UploadSourceCommand(FedoraProjectRoot projectRoot) {
+	public UploadSourceCommand(FedoraProjectRoot projectRoot,
+			SourcesFile sources, LookasideCache cache) {
 		super(projectRoot);
-		try {
-			this.uploadURL = new URL(DEFAULT_UPLOAD_URL);
-		} catch (MalformedURLException e) {
-			// ignore
-		}
+		this.sources = sources;
+		this.lookasideCache = cache;
 	}
 	
 	/**
 	 * @param uploadURL the uploadURL to set. Optional.
+	 * @return this instance.
 	 */
-	public void setUploadURL(URL uploadURL) {
-		this.uploadURL = uploadURL;
+	public UploadSourceCommand setUploadURL(String uploadURL) {
+		this.lookasideCache.setUploadUrl(uploadURL);
+		return this;
 	}
 
 	/**
 	 * @param fileToUpload the fileToUpload to set. Required.
+	 * @return this instance.
 	 */
-	public void setFileToUpload(File fileToUpload) {
+	public UploadSourceCommand setFileToUpload(File fileToUpload) {
 		this.fileToUpload = fileToUpload;
+		return this;
 	}
 
 	/**
 	 * @param replaceSource Set to true if sources should be replaced in
 	 * sources file.
+	 * @return this instance.
 	 */
-	public void setReplaceSource(boolean replaceSource) {
+	public UploadSourceCommand setReplaceSource(boolean replaceSource) {
 		this.replaceSource = replaceSource;
+		return this;
 	}
 
 	/**
@@ -72,6 +77,8 @@ public class UploadSourceCommand extends
 		// Don't allow this very same instance to be called twice.
 		checkCallable();
 		// TODO Implement
+		// don't allow this instance to be called twice
+		this.setCallable(false); 
 		return null;
 	}
 
