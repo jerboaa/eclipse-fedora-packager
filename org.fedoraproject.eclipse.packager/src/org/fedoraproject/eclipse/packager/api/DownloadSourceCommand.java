@@ -36,17 +36,21 @@ public class DownloadSourceCommand extends
 	}
 	
 	/**
-	 * @param uploadURL the uploadURL to set. Optional.
+	 * @param uploadURL the uploadURL to set.
+	 * @return this instance.
 	 */
-	public void setUploadURL(String uploadURL) {
+	public DownloadSourceCommand setUploadURL(String uploadURL) {
 		this.lookasideCache.setUploadUrl(uploadURL);
+		return this;
 	}
 
 	/**
 	 * @param fileToUpload the fileToUpload to set. Required.
+	 * @return this instance.
 	 */
-	public void setFileToUpload(File fileToUpload) {
+	public DownloadSourceCommand setFileToUpload(File fileToUpload) {
 		this.fileToDownload = fileToUpload;
+		return this;
 	}
 
 	/**
