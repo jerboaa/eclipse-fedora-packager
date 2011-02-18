@@ -29,7 +29,7 @@ public class UploadSourceCommandTest {
 	private static final String exampleUploadFile =
 		"resources/callgraph-factorial.zip"; // $NON-NLS$
 	private static final String LOOKASIDE_CACHE_URL_FOR_TESTING =
-		"http://upload-cgi.yyz.redhat.com/cgi-bin/upload.cgi"; //$NON-NLS$
+		"http://upload-cgi/cgi-bin/upload.cgi"; //$NON-NLS$
 	
 	/**
 	 * Set up a Fedora project and run the command.
