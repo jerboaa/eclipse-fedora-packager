@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.RepositoryUtil;
@@ -52,6 +53,7 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 /**
@@ -176,6 +178,10 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 					.getProject(page.getPackageName());
 			newProject.create(null);
 			newProject.open(null);
+			// Set persistent property so that we know when to show the context
+			// menu item.
+			newProject.setPersistentProperty(PackagerPlugin.PROJECT_PROP,
+					"true" /* unused value */); //$NON-NLS-1$
 			ConnectProviderOperation connect = new ConnectProviderOperation(
 					newProject);
 			connect.execute(null);

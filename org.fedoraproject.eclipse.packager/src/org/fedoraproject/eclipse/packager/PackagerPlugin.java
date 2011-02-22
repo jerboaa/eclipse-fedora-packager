@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager;
 
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -22,9 +23,16 @@ public class PackagerPlugin extends AbstractUIPlugin {
 	
 	/** The symbolic plugin ID.	 */
 	public static final String PLUGIN_ID = "org.fedoraproject.eclipse.packager"; //$NON-NLS-1$
-
 	// The shared instance
 	private static PackagerPlugin plugin;
+	
+	// Persistent property things
+	
+	// Type values for persistent property types
+	/** Git type for persistent property types */
+	public static final String PROJECT_KEY = "project"; //$NON-NLS-1$
+	/** Qualified name for the type property */
+	public static final QualifiedName PROJECT_PROP = new QualifiedName(PLUGIN_ID, PROJECT_KEY);
 
 	/**
 	 * The constructor

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?><!--
-    Copyright (c) 2010 Red Hat Inc. and others.
+    Copyright (c) 2010-2011 Red Hat Inc. and others.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -14,40 +14,53 @@
    <extension-point id="vcsContribution" name="VCS interaction" schema="schema/vcsContribution.exsd"/>
    
    <extension point="org.eclipse.core.expressions.definitions">
-      <definition id="org.fedoraproject.eclipse.packager.gitproject">
-         <iterate ifEmpty="false">
-            <adapt type="org.eclipse.core.resources.IResource">
-               <test
-                  args="org.eclipse.team.core.repository,org.eclipse.egit.core.GitProvider"
-                  property="org.eclipse.core.resources.projectPersistentProperty">
-               </test>
-            </adapt>
+      <definition
+            id="org.fedoraproject.eclipse.packager.project">
+          <or>
+              <!-- Filtering should eventually be only done by the persistent
+                   property. -->
+              <reference
+                  definitionId="org.fedoraproject.eclipse.packager.gitproject">
+              </reference>
+              <reference
+                  definitionId="org.fedoraproject.eclipse.packager.persistentProperty">
+              </reference>
+          </or>
+      </definition>
+      <definition
+            id="org.fedoraproject.eclipse.packager.persistentProperty">
+          <iterate
+               ifEmpty="false">
+            <or>
+               <adapt
+                     type="org.eclipse.core.resources.IProject">
+                  <test
+                        args="org.fedoraproject.eclipse.packager.project"
+                        property="org.eclipse.core.resources.projectPersistentProperty">
+                  </test>
+               </adapt>
+               <adapt
+                     type="org.eclipse.core.resources.IResource">
+                  <test
+                        args="org.fedoraproject.eclipse.packager.project"
+                        property="org.eclipse.core.resources.projectPersistentProperty">
+                  </test>
+               </adapt>
+           </or>
          </iterate>
       </definition>
       <definition
-            id="org.fedoraproject.eclipse.packager.project">
-         <and>
-            <reference
-                  definitionId="org.fedoraproject.eclipse.packager.gitproject">
-            </reference>
-            <!--
-            <reference
-                  definitionId="org.fedoraproject.eclipse.packager.project.FedoraPackagerProvider">
-            </reference>
-            -->
-         </and>
-      </definition>
-      <definition
-            id="org.fedoraproject.eclipse.packager.project.FedoraPackagerProvider">
+            id="org.fedoraproject.eclipse.packager.gitproject">
          <iterate
-               ifEmpty="true"> <!-- TODO: Create persistent property and set this to false --> 
-            <adapt
-                  type="org.eclipse.core.resources.IResource">
-               <test
-                     args="org.fedoraproject.eclipse.packager.properties.FedoraPackagerProject"
+               ifEmpty="false">
+               <!-- Show fedora packager menu item for backwards compatibility
+                    on all GitProvider projects -->
+               <adapt type="org.eclipse.core.resources.IResource">
+                  <test
+                     args="org.eclipse.team.core.repository,org.eclipse.egit.core.GitProvider"
                      property="org.eclipse.core.resources.projectPersistentProperty">
-               </test>
-            </adapt>
+                  </test>
+               </adapt>
          </iterate>
       </definition>
    </extension>
