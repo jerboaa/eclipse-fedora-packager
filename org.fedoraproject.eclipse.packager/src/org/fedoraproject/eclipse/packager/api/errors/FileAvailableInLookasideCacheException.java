@@ -9,11 +9,18 @@ public class FileAvailableInLookasideCacheException extends
 
 	private static final long serialVersionUID = -1682359355021803771L;
 
-	FileAvailableInLookasideCacheException(String message, Throwable cause) {
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public FileAvailableInLookasideCacheException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	FileAvailableInLookasideCacheException(String message) {
+	/**
+	 * @param message
+	 */
+	public FileAvailableInLookasideCacheException(String message) {
 		super(message);
 	}
 }

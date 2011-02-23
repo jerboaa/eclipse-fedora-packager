@@ -6,9 +6,11 @@ import java.net.URL;
 
 import org.apache.http.HttpResponse;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.LookasideCache;
 import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 
 /**
@@ -66,24 +68,28 @@ public class UploadSourceCommand extends
 		this.replaceSource = replaceSource;
 		return this;
 	}
+	
 
 	/**
-	 * Executes the {@code UploadSources} command. Each instance of this class
-	 * should only be used for one invocation of the command. Don't call this
-	 * method twice on an instance.
+	 * Implementation of the {@code UploadSources} command.
 	 * 
 	 * @throws FileAvailableInLookasideCacheException If the to-be-uploaded file
 	 * is still missing from the lookaside cache.
 	 */
 	@Override
-	public HttpResponse call(IProgressMonitor monitor)
+	protected HttpResponse doCall(IProgressMonitor monitor)
 		throws FileAvailableInLookasideCacheException {
-		// Don't allow this very same instance to be called twice.
-		checkCallable();
-		// TODO Implement
-		// don't allow this instance to be called twice
-		this.setCallable(false); 
+		//TODO implement
 		return null;
+	}
+	
+	@SuppressWarnings("static-access")
+	@Override
+	protected void checkConfiguration() throws IllegalStateException {
+		if (this.fileToUpload == null) {
+			throw new IllegalStateException(
+					FedoraPackagerText.get().uploadSourceCommand_uploadFileUnspecified);
+		}
 	}
 
 }

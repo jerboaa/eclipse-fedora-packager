@@ -44,17 +44,8 @@ public class LookasideCache {
 		/**
 		 * Fedora lookaside cache type.
 		 */
-		FEDORA,
-		/**
-		 * EPEL lookaside cache type.
-		 */
-		EPEL
+		FEDORA
 	}
-	
-	/**
-	 * Common command prefix for Eclipse Fedorapackager command IDs.
-	 */
-	public static final String FEDORA_PACKAGER_CMD_PREFIX = "org.fedoraproject.eclipse.packager"; //$NON-NLS-1$
 	
 	/**
 	 * Create lookaside cache of the requested type.

@@ -15,7 +15,7 @@ public class FedoraPackagerText extends TranslationBundle {
 		return NLS.getBundleFor(FedoraPackagerText.class);
 	}
 
-	/***/ /****/ public String commandWasCalledInTheWrongState;
+	/****/ public String commandWasCalledInTheWrongState;
 	// ConsoleWriterThread
 	/****/ public static String consoleWriterThread_ioFail;
 	// DownloadJob
@@ -50,4 +50,8 @@ public class FedoraPackagerText extends TranslationBundle {
 	/****/ public static String wGetHandler_badMd5sum;
 	/****/ public static String wGetHandler_couldNotCreate;
 	/****/ public static String wGetHandler_couldNotRefresh;
+	// UploadCommand
+	/****/ public static String uploadSourceCommand_uploadFileUnspecified;
+	// DownloadSourceCommand
+	/****/ public String downloadSourceCommand_nothingToDownload;
 }
