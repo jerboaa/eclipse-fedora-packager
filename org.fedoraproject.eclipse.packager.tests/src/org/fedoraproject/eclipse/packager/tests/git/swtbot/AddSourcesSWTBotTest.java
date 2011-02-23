@@ -108,7 +108,7 @@ public class AddSourcesSWTBotTest {
 		Widget errorMessageWidget = errorDialogBot.widget(
 				WidgetMatcherFactory.allOf(
 				WidgetMatcherFactory.withText(
-						NLS.bind(org.fedoraproject.eclipse.packager.Messages.
+						NLS.bind(org.fedoraproject.eclipse.packager.FedoraPackagerText.get().
 								uploadHandler_invalidFile, EMPTY_FILE_NAME_VALID))));
 		assertNotNull(errorMessageWidget);
 		efpErrorWindow.close();
@@ -147,7 +147,7 @@ public class AddSourcesSWTBotTest {
 		Widget errorMessageWidget = errorDialogBot.widget(
 				WidgetMatcherFactory.allOf(
 				WidgetMatcherFactory.withText(
-						NLS.bind(org.fedoraproject.eclipse.packager.Messages.
+						NLS.bind(org.fedoraproject.eclipse.packager.FedoraPackagerText.get().
 								uploadHandler_invalidFile, NON_EMPTY_FILE_NAME_INVALID))));
 		assertNotNull(errorMessageWidget);
 		efpErrorWindow.close();
@@ -161,6 +161,7 @@ public class AddSourcesSWTBotTest {
 	 * 
 	 * @throws Exception
 	 */
+	@SuppressWarnings("static-access")
 	@Test
 	public void canUploadValidSourceFileAddSourcesHandler() throws Exception {
 		
@@ -190,9 +191,9 @@ public class AddSourcesSWTBotTest {
 		clickOnAddNewSources(packagerTree);
 		// Wait for upload process to start
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.
-				eclipse.packager.Messages.uploadHandler_taskName));
+				eclipse.packager.FedoraPackagerText.get().uploadHandler_taskName));
 		SWTBotShell efpUploadWindow = bot.shell(org.fedoraproject.eclipse.
-				packager.Messages.uploadHandler_taskName);
+				packager.FedoraPackagerText.get().uploadHandler_taskName);
 		assertNotNull(efpUploadWindow);
 		// Wait for upload process to finish
 		bot.waitUntil(Conditions.shellCloses(efpUploadWindow));
