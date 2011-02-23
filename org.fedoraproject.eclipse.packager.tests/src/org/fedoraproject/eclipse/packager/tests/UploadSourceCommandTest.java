@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.UploadSourceCommand;
-import org.fedoraproject.eclipse.packager.api.errors.FileMissingFromLookasideCacheException;
+import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +52,7 @@ public class UploadSourceCommandTest {
 	public void shouldThrowMalformedURLException() throws Exception {
 		UploadSourceCommand uploadCmd = packager.uploadSources();
 		try {
-			uploadCmd.setUploadURL("bad bad url");
+			uploadCmd.setUploadURL("very bad url");
 			fail("UploadSourceCommand.setUploadURL should not accept invalid URLs!");
 		} catch (MalformedURLException e) {
 			// pass
@@ -62,25 +62,27 @@ public class UploadSourceCommandTest {
 	/**
 	 * Uploading sources in Fedora entails two requests. First a POST is fired
 	 * with filename and MD5 as parameters and the server returns if the
-	 * resource is "missing" or "available". If and only if the server responded
-	 * with "missing" a second request is created to actually upload the missing
-	 * file. This test checks for the first part of this transaction.
+	 * resource is "missing" or "available". Should sources be already
+	 * available, an FileAvailableInLookasideCacheException should be thrown.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
 	public void canDetermineIfSourceIsAvailable() throws Exception {
-		UploadSourceCommand uploadCmd = packager.uploadSources();
 		String fileName = FileLocator.toFileURL(
 				FileLocator.find(TestsPlugin.getDefault().getBundle(),
 						new Path(exampleUploadFile), null)).getFile();
 		File file = new File(fileName);
+		UploadSourceCommand uploadCmd = packager.uploadSources();
+		uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING)
+			.setFileToUpload(file).call();
+		uploadCmd = packager.uploadSources();
 		try {
 			uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING)
 				.setFileToUpload(file).call();
-			// should be missing
-			fail("File should not be present in lookaside cache.");
-		} catch (FileMissingFromLookasideCacheException e) {
+			// File already available
+			fail("File should be present in lookaside cache.");
+		} catch (FileAvailableInLookasideCacheException e) {
 			//pass
 		}
 	}
@@ -95,7 +97,7 @@ public class UploadSourceCommandTest {
 		try {
 		uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING).setFileToUpload(file)
 				.call();
-		} catch (FileMissingFromLookasideCacheException e) {
+		} catch (FileAvailableInLookasideCacheException e) {
 			//pass
 		}
 	}
