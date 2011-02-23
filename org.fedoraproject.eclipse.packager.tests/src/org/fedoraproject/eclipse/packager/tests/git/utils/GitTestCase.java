@@ -17,7 +17,7 @@ public class GitTestCase extends TestCase {
 		project = new GitTestProject("eclipse-rpm-editor");
 		iProject = project.getProject();
 		// create a fedoraprojectRoot for this project
-		fedoraprojectRoot = new FedoraProjectRoot(iProject, LookasideCache.FEDORA_PACKAGER_CMD_PREFIX + ".DownloadHandler");		
+		fedoraprojectRoot = new FedoraProjectRoot(iProject, "org.fedoraproject.eclipse.packager.DownloadHandler");		
 	}
 
 	/**

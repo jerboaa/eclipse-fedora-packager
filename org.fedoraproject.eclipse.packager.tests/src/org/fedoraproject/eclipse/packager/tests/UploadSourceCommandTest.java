@@ -96,10 +96,11 @@ public class UploadSourceCommandTest {
 						new Path(exampleUploadFile), null)).getFile();
 		File file = new File(fileName);
 		try {
-		uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING).setFileToUpload(file)
+			uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING).setFileToUpload(file)
 				.call(new NullProgressMonitor());
 		} catch (FileAvailableInLookasideCacheException e) {
-			//pass
+			// File should not be available
+			fail("File should have been missing!");
 		}
 	}
 
