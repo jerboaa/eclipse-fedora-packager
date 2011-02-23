@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
+import org.fedoraproject.eclipse.packager.LookasideCache.CacheType;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils.ProjectType;
 
@@ -36,9 +37,7 @@ public class FedoraProjectRoot {
 	private IContainer rootContainer;
 	private SourcesFile sourcesFile;
 	private ProjectType type;
-	// FIXME: Remove lookaside cache here!
-	private LookasideCache lookAsideCache; // The lookaside cache to be used
-	private String commandId; // The invoking command
+	private LookasideCache lookAsideCache; // The lookaside cache abstraction
 
 	/**
 	 * Creates the FedoraProjectRoot using the given container.
@@ -48,12 +47,12 @@ public class FedoraProjectRoot {
 	 * @param cmdId
 	 * 			  The command ID for which a FedoraProjectRoot is requested.
 	 */
-	public FedoraProjectRoot(IContainer container, String cmdId) {
+	public FedoraProjectRoot(IContainer container, String cmdId /* unused */) {
 		this.rootContainer = container;
 		this.sourcesFile = new SourcesFile(rootContainer.getFile(new Path(
 				"sources"))); //$NON-NLS-1$
 		this.type = FedoraHandlerUtils.getProjectType(container);
-		this.commandId = cmdId;
+		this.lookAsideCache = new LookasideCache(CacheType.FEDORA);
 	}
 
 	/**
@@ -186,15 +185,5 @@ public class FedoraProjectRoot {
 	 */
 	public LookasideCache getLookAsideCache() {
 		return lookAsideCache;
-	}
-
-	/**
-	 * Get the command ID string of the invoking command which
-	 * instantiated this FedoraProjectRoot instance.
-	 * 
-	 * @return the invoking command ID
-	 */
-	public String getCommandId() {
-		return commandId;
 	}
 }

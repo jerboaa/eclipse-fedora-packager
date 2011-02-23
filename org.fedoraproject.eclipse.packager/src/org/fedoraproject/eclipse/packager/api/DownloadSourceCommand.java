@@ -25,20 +25,16 @@ public class DownloadSourceCommand extends
 	private HttpResponse response;
 	private SourcesFile sources;
 	private LookasideCache lookasideCache;
-	private CacheType lookasideType;
 	
 	/**
 	 * @param projectRoot The project root abstraction.
 	 * @param sources The sources file abstraction.
 	 * @param lookasideCache The lookaside cache abstraction.
 	 */
-	public DownloadSourceCommand(FedoraProjectRoot projectRoot, SourcesFile sources,
-			LookasideCache lookasideCache) {
+	public DownloadSourceCommand(FedoraProjectRoot projectRoot) {
 		super(projectRoot);
-		this.sources = sources;
-		this.lookasideCache = lookasideCache;
-		// Default to Fedora lookaside cache type
-		this.lookasideType = CacheType.FEDORA;
+		this.sources = projectRoot.getSourcesFile();
+		this.lookasideCache = projectRoot.getLookAsideCache();
 	}
 	
 	/**
@@ -48,17 +44,6 @@ public class DownloadSourceCommand extends
 	 */
 	public DownloadSourceCommand setDownloadURL(String downloadURL) throws MalformedURLException {
 		this.lookasideCache.setDownloadUrl(downloadURL);
-		return this;
-	}
-	
-	/**
-	 * Specify the lookaside cache type.
-	 * 
-	 * @param type Usually FEDORA, may be EPEL or something else.
-	 * @return this instance
-	 */
-	public DownloadSourceCommand setLookasideType(CacheType type) {
-		this.lookasideType = type;
 		return this;
 	}
 

@@ -8,7 +8,7 @@ import org.apache.http.HttpResponse;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.LookasideCache;
 import org.fedoraproject.eclipse.packager.SourcesFile;
-import org.fedoraproject.eclipse.packager.api.errors.FileMissingFromLookasideCacheException;
+import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 
 /**
  * A class used to execute a {@code upload sources} command. It has setters for
@@ -33,11 +33,10 @@ public class UploadSourceCommand extends
 	 * @param sources The sources file instance.
 	 * 
 	 */
-	public UploadSourceCommand(FedoraProjectRoot projectRoot,
-			SourcesFile sources, LookasideCache cache) {
+	public UploadSourceCommand(FedoraProjectRoot projectRoot) {
 		super(projectRoot);
-		this.sources = sources;
-		this.lookasideCache = cache;
+		this.sources = projectRoot.getSourcesFile();
+		this.lookasideCache = projectRoot.getLookAsideCache();
 	}
 	
 	/**
@@ -74,11 +73,11 @@ public class UploadSourceCommand extends
 	 * should only be used for one invocation of the command. Don't call this
 	 * method twice on an instance.
 	 * 
-	 * @throws FileMissingFromLookasideCacheException If the to-be-uploaded file
+	 * @throws FileAvailableInLookasideCacheException If the to-be-uploaded file
 	 * is still missing from the lookaside cache.
 	 */
 	@Override
-	public HttpResponse call() throws FileMissingFromLookasideCacheException {
+	public HttpResponse call() throws FileAvailableInLookasideCacheException {
 		// Don't allow this very same instance to be called twice.
 		checkCallable();
 		// TODO Implement

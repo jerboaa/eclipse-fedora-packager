@@ -84,7 +84,7 @@ public class LookasideCache {
 				break;
 		}
 		this.urlMap.put(type, urls);
-		
+		this.type = type;
 	}
 
 	/**
