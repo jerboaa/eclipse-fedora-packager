@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.http.HttpResponse;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.LookasideCache;
 import org.fedoraproject.eclipse.packager.SourcesFile;
@@ -29,8 +30,6 @@ public class UploadSourceCommand extends
 	
 	/**
 	 * @param projectRoot The project root.
-	 * @param cache The lookaside instance.
-	 * @param sources The sources file instance.
 	 * 
 	 */
 	public UploadSourceCommand(FedoraProjectRoot projectRoot) {
@@ -77,7 +76,8 @@ public class UploadSourceCommand extends
 	 * is still missing from the lookaside cache.
 	 */
 	@Override
-	public HttpResponse call() throws FileAvailableInLookasideCacheException {
+	public HttpResponse call(IProgressMonitor monitor)
+		throws FileAvailableInLookasideCacheException {
 		// Don't allow this very same instance to be called twice.
 		checkCallable();
 		// TODO Implement

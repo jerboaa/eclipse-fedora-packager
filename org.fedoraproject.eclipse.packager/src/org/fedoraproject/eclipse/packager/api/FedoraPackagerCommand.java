@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager.api;
 import java.text.MessageFormat;
 import java.util.concurrent.Callable;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 
@@ -25,18 +26,18 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
  * {@link FedoraProjectRoot} this command should work with.
  * <p>
  * Finally this class stores a state telling whether it is allowed to call
- * {@link #call()} on this instance. Instances of {@link FedoraPackagerCommand}
- * can only be used for one single successful call to {@link #call()}.
+ * {@link #call(IProgressMonitor)} on this instance. Instances of {@link FedoraPackagerCommand}
+ * can only be used for one single successful call to {@link #call(IProgressMonitor)}.
  * Afterwards this instance may not be used anymore to set/modify any properties
- * or to call {@link #call()} again. This is achieved by setting the 
+ * or to call {@link #call(IProgressMonitor)} again. This is achieved by setting the 
  * {@link #callable} property to false after the successful execution of
- * {@link #call()} and to check the state (by calling {@link #checkCallable()})
- * before setting of properties and inside {@link #call()}.
+ * {@link #call(IProgressMonitor)} and to check the state (by calling {@link #checkCallable()})
+ * before setting of properties and inside {@link #call(IProgressMonitor)}.
  *
  * @param <T>
- *            the return type which is expected from {@link #call()}
+ *            the return type which is expected from {@link #call(IProgressMonitor)}
  */
-public abstract class FedoraPackagerCommand<T> implements Callable<T> {
+public abstract class FedoraPackagerCommand<T> {
 	
 	/**
 	 * The project root to work with.
@@ -80,4 +81,15 @@ public abstract class FedoraPackagerCommand<T> implements Callable<T> {
 	protected void setCallable(boolean callable) {
 		this.callable = callable;
 	}
+	
+	/**
+	 * The main method for each FedoraPackager command. Calling this method
+	 * starts commands execution.
+	 * 
+	 * @param monitor The Eclipse progress monitor.
+	 * @return The generic return type.
+	 * @throws Exception If an error occurs carrying out the command.
+	 * 
+	 */
+	public abstract T call(IProgressMonitor monitor) throws Exception;
 }

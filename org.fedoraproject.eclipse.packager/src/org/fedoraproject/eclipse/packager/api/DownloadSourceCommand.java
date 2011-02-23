@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 
 import org.apache.http.HttpResponse;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.LookasideCache;
 import org.fedoraproject.eclipse.packager.LookasideCache.CacheType;
@@ -63,10 +64,11 @@ public class DownloadSourceCommand extends
 	 * 
 	 */
 	@Override
-	public HttpResponse call() {
+	public HttpResponse call(IProgressMonitor monitor) {
 		// Don't allow this very same instance to be called twice.
 		checkCallable();
 		// TODO Implement
+		setCallable(false);
 		return null;
 	}
 

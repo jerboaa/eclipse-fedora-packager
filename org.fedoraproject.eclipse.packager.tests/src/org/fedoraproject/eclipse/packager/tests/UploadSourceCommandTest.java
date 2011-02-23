@@ -7,6 +7,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
@@ -75,11 +76,11 @@ public class UploadSourceCommandTest {
 		File file = new File(fileName);
 		UploadSourceCommand uploadCmd = packager.uploadSources();
 		uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING)
-			.setFileToUpload(file).call();
+			.setFileToUpload(file).call(new NullProgressMonitor());
 		uploadCmd = packager.uploadSources();
 		try {
 			uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING)
-				.setFileToUpload(file).call();
+				.setFileToUpload(file).call(new NullProgressMonitor());
 			// File already available
 			fail("File should be present in lookaside cache.");
 		} catch (FileAvailableInLookasideCacheException e) {
@@ -96,7 +97,7 @@ public class UploadSourceCommandTest {
 		File file = new File(fileName);
 		try {
 		uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING).setFileToUpload(file)
-				.call();
+				.call(new NullProgressMonitor());
 		} catch (FileAvailableInLookasideCacheException e) {
 			//pass
 		}
