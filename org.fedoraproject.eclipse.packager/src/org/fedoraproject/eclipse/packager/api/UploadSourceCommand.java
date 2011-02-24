@@ -22,7 +22,7 @@ import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCac
  * 
  */
 public class UploadSourceCommand extends
-		FedoraPackagerCommand<HttpResponse> {
+		FedoraPackagerCommand<UploadSourceResult> {
 
 	private final LookasideCache lookasideCache;
 	private final SourcesFile sources;
@@ -77,7 +77,7 @@ public class UploadSourceCommand extends
 	 * is still missing from the lookaside cache.
 	 */
 	@Override
-	public HttpResponse call(IProgressMonitor monitor)
+	public UploadSourceResult call(IProgressMonitor monitor)
 		throws FileAvailableInLookasideCacheException {
 		//TODO implement
 		return null;
