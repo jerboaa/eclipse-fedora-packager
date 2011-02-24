@@ -11,11 +11,13 @@
 package org.fedoraproject.eclipse.packager.api;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 
@@ -35,6 +37,9 @@ import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
  * {@link #callable} property to false after the successful execution of
  * {@link #call(IProgressMonitor)} and to check the state (by calling {@link #checkCallable()})
  * before setting of properties and inside {@link #call(IProgressMonitor)}.
+ * 
+ * Implementers of this class are responsible for calling listeners
+ * appropriately.
  *
  * @param <T>
  *            the return type which is expected from {@link #call(IProgressMonitor)}
@@ -45,6 +50,11 @@ public abstract class FedoraPackagerCommand<T> {
 	 * The project root to work with.
 	 */
 	final protected FedoraProjectRoot projectRoot;
+	
+	/**
+	 * 
+	 */
+	final protected ArrayList<ICommandListener> cmdListeners;
 	
 	/**
 	 * a state which tells whether it is allowed to call {@link #call()} on this
@@ -60,6 +70,9 @@ public abstract class FedoraPackagerCommand<T> {
 	 */
 	protected FedoraPackagerCommand(FedoraProjectRoot projectRoot) {
 		this.projectRoot = projectRoot;
+		this.cmdListeners = new ArrayList<ICommandListener>();
+		// per default add config and state checker
+		this.cmdListeners.add(new CheckConfigListener(this));
 	}
 	
 	/**
@@ -85,12 +98,46 @@ public abstract class FedoraPackagerCommand<T> {
 	}
 	
 	/**
+	 * Call pre-exec command listeners in order they have been
+	 * added.
+	 * 
+	 * @throws CommandListenerException If any listener detected a problem.
+	 * 
+	 */
+	protected void callPreExecListeners() throws CommandListenerException {
+		for (ICommandListener listener: cmdListeners) {
+			listener.preExecution();
+		}
+	}
+	
+	/**
+	 * Call pre-exec command listeners in order they have been
+	 * added.
+	 * 
+	 * @throws CommandListenerException If any listener detected a problem.
+	 */
+	protected void callPostExecListeners() throws CommandListenerException {
+		for (ICommandListener listener: cmdListeners) {
+			listener.preExecution();
+		}
+	}
+	
+	/**
 	 * Configuration checking routine. This should check if all required
 	 * parameters in order to successfully execute the command is present.
 	 * 
 	 * @throws IllegalStateException
 	 */
 	protected abstract void checkConfiguration() throws CommandMisconfiguredException;
+
+	/**
+	 * Add/register a command listener.
+	 * 
+	 * @param listener
+	 */
+	public void addCommandListener(ICommandListener listener) {
+		this.cmdListeners.add(listener);
+	}
 
 	/**
 	 * Executes the specific command. Each instance of this

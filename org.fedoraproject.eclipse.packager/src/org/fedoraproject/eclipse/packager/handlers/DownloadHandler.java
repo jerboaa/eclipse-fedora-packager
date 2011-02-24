@@ -24,9 +24,11 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.api.ChecksumValidListener;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceResult;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
@@ -51,6 +53,8 @@ public class DownloadHandler extends AbstractHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				DownloadSourceCommand download = fp.downloadSources();
+				ChecksumValidListener md5sumListener = new ChecksumValidListener(fedoraProjectRoot);
+				download.addCommandListener(md5sumListener); // want md5sum checking
 				DownloadSourceResult result = null;
 				try {
 					// TODO set download URL from preferences.
@@ -68,10 +72,13 @@ public class DownloadHandler extends AbstractHandler {
 					return Status.OK_STATUS;
 				} catch (DownloadFailedException e) {
 					return FedoraHandlerUtils.handleError(e);
-				} catch (InvalidCheckSumException e) {
-					return FedoraHandlerUtils.handleError(e.getMessage(), false);
 				} catch (CommandMisconfiguredException e) {
 					// This shouldn't happen, but report error anyway
+					return FedoraHandlerUtils.handleError(e);
+				} catch (CommandListenerException e) {
+					if (e.getCause() instanceof InvalidCheckSumException) {
+						return FedoraHandlerUtils.handleError(e.getCause().getMessage(), false);
+					}
 					return FedoraHandlerUtils.handleError(e);
 				} finally {
 					monitor.done();

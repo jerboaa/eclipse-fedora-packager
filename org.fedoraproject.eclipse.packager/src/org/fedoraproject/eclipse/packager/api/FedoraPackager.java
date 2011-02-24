@@ -31,4 +31,13 @@ public class FedoraPackager {
 	public DownloadSourceCommand downloadSources() {
 		return new DownloadSourceCommand(root);
 	}
+	
+	/**
+	 * Get the underlying Fedora project root
+	 * 
+	 * @return The Fedora project root.
+	 */
+	public FedoraProjectRoot getFedoraProjectRoot() {
+		return this.root;
+	}
 }

@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
@@ -54,7 +55,7 @@ public class PrepHandler extends RPMHandler {
 					// TODO handle appropriately
 				} catch (DownloadFailedException e1) {
 					// TODO handle appropriately
-				} catch (InvalidCheckSumException e1) {
+				} catch (CommandListenerException e1) {
 					// TODO handle appropriately
 				} catch (CommandMisconfiguredException e1) {
 					// TODO handle appropriately

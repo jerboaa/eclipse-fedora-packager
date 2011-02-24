@@ -2,7 +2,6 @@ package org.fedoraproject.eclipse.packager.tests.git.utils;
 
 import org.eclipse.core.resources.IProject;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.LookasideCache;
 
 import junit.framework.TestCase;
 
