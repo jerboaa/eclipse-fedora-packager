@@ -77,7 +77,7 @@ public class UploadSourceCommand extends
 	 * is still missing from the lookaside cache.
 	 */
 	@Override
-	protected HttpResponse doCall(IProgressMonitor monitor)
+	public HttpResponse call(IProgressMonitor monitor)
 		throws FileAvailableInLookasideCacheException {
 		//TODO implement
 		return null;

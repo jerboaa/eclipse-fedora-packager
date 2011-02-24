@@ -16,6 +16,8 @@ import java.util.concurrent.Callable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 
 /**
  * Common superclass of all commands in the package 
@@ -83,42 +85,21 @@ public abstract class FedoraPackagerCommand<T> {
 	}
 	
 	/**
-	 * The main implementation for each FedoraPackager command. This method is
-	 * beeing called from {@link #call(IProgressMonitor)}.
-	 * 
-	 * @param monitor The Eclipse progress monitor.
-	 * @return The generic return type.
-	 * @throws Exception If an error occurs carrying out the command.
-	 * 
-	 */
-	protected abstract T doCall(IProgressMonitor monitor) throws Exception;
-	
-	/**
 	 * Configuration checking routine. This should check if all required
-	 * parameters in order to execute the command is present.
+	 * parameters in order to successfully execute the command is present.
 	 * 
 	 * @throws IllegalStateException
 	 */
-	protected abstract void checkConfiguration() throws IllegalStateException;
+	protected abstract void checkConfiguration() throws CommandMisconfiguredException;
 
 	/**
-	 * Wrapper for command execution. See {@link #doCall(IProgressMonitor)} for
-	 * implementation details about the specific command. Each instance of this
+	 * Executes the specific command. Each instance of this
 	 * class should only be used for one invocation of the command. Don't call
 	 * this method twice on an instance.
 	 * 
 	 * @param monitor
 	 * @return The result of executing the command.
-	 * @throws Exception
+	 * @throws FedoraPackagerAPIException indicating the error which occurred.
 	 */
-	public T call(IProgressMonitor monitor) throws Exception {
-		// Don't allow this very same instance to be called twice.
-		checkCallable();
-		// Make sure this command has been properly configured
-		checkConfiguration();
-		// Call command implementation
-		T retVal = doCall(monitor);
-		setCallable(false);
-		return retVal;
-	}
+	public abstract T call(IProgressMonitor monitor) throws FedoraPackagerAPIException;
 }

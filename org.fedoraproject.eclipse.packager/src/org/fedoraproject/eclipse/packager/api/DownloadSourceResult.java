@@ -1,7 +1,8 @@
 package org.fedoraproject.eclipse.packager.api;
 
 /**
- * Represents the result of a {@code DownloadSourceCommand}
+ * Represents the result of a {@code DownloadSourceCommand}.
+ * This may be more useful in future.
  */
 public class DownloadSourceResult implements ICommandResult {
 	

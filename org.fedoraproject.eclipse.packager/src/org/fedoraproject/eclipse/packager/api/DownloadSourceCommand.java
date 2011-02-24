@@ -22,6 +22,7 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.LookasideCache;
 import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
@@ -63,11 +64,21 @@ public class DownloadSourceCommand extends
 	 * Implementation of the {@code DownloadSourcesCommand}.
 	 * 
 	 * @throws SourcesUpToDateException
-	 *             If the source files are already up-to-date.
+	 *             If the source files are already downloaded and up-to-date.
+	 * @throws InvalidCheckSumException
+	 *             If the checksum check failed for any source file.
+	 * @throws CommandMisconfiguredException
+	 *             If the command was not properly configured when it was
+	 *             called.
+	 * @throws DownloadFailedException
+	 * 	           If the download of some source failed.
 	 */
 	@Override
-	protected DownloadSourceResult doCall(IProgressMonitor monitor)
-		throws SourcesUpToDateException, DownloadFailedException, InvalidCheckSumException {
+	public DownloadSourceResult call(IProgressMonitor monitor)
+		throws SourcesUpToDateException, DownloadFailedException,
+				InvalidCheckSumException, CommandMisconfiguredException {
+		checkCallable();
+		checkConfiguration();
 		// Check if there are any sources to download (i.e. md5 does not match or
 		// files are not present in the current Fedora project root).
 		Set<String> sourcesToGet = sources.getSourcesToDownload();
@@ -114,11 +125,12 @@ public class DownloadSourceCommand extends
 			checkMD5Sums();
 			result.setSuccessful(true);
 		}
+		setCallable(false);
 		return result;
 	}
 
 	@Override
-	protected void checkConfiguration() throws IllegalStateException {
+	protected void checkConfiguration() throws CommandMisconfiguredException {
 		// We are good to go with the defaults. No-Op.
 	}
 	
