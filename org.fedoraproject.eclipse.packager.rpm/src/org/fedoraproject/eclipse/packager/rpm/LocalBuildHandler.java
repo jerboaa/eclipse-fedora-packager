@@ -20,7 +20,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
+import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
+import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
+import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
+import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
 /**
@@ -33,23 +38,28 @@ public class LocalBuildHandler extends RPMHandler {
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
+		final FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
 		specfile = fedoraProjectRoot.getSpecFile();
 		Job job = new Job(Messages.localBuildHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(Messages.localBuildHandler_buildForLocalArch,
 						IProgressMonitor.UNKNOWN);
-				DownloadHandler dh = new DownloadHandler();
-				IStatus result = null;
-				// retrieve sources
-				result = dh.doExecute(fedoraProjectRoot, monitor);
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
+				// First download sources
+				DownloadSourceCommand downloadCmd = fp.downloadSources();
+				
+				try {
+					downloadCmd.call(monitor);
+				} catch (SourcesUpToDateException e1) {
+					// TODO handle appropriately
+				} catch (DownloadFailedException e1) {
+					// TODO handle appropriately
+				} catch (InvalidCheckSumException e1) {
+					// TODO handle appropriately
+				} catch (CommandMisconfiguredException e1) {
+					// TODO handle appropriately
 				}
-				// do proper error handling if download fails.
-				if (!result.isOK()) {
-					return FedoraHandlerUtils.handleError(result.getMessage());
-				}
+				IStatus result;
 				try {
 					// search for noarch directive, otherwise use local arch
 					final String arch = FedoraHandlerUtils.rpmQuery(

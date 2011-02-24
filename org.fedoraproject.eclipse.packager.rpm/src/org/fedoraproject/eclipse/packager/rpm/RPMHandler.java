@@ -40,6 +40,12 @@ import org.fedoraproject.eclipse.packager.ConsoleWriterThread;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
+import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
+import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
+import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
 import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
 import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
@@ -204,17 +210,22 @@ public abstract class RPMHandler extends CommonHandler {
 	}
 
 	protected IStatus makeSRPM(FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
-		DownloadHandler dh = new DownloadHandler();
-		IStatus result = null;
-		// retrieve sources
-		result = dh.doExecute(fedoraProjectRoot, monitor);
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
+		final FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
+		// First download sources
+		DownloadSourceCommand downloadCmd = fp.downloadSources();
+		
+		try {
+			downloadCmd.call(monitor);
+		} catch (SourcesUpToDateException e1) {
+			// TODO handle appropriately
+		} catch (DownloadFailedException e1) {
+			// TODO handle appropriately
+		} catch (InvalidCheckSumException e1) {
+			// TODO handle appropriately
+		} catch (CommandMisconfiguredException e1) {
+			// TODO handle appropriately
 		}
-		// do proper error handling if download fails.
-		if (!result.isOK()) {
-			return FedoraHandlerUtils.handleError(result.getMessage());
-		}
+		IStatus result;
 		ArrayList<String> flags = new ArrayList<String>();
 		flags.add("--nodeps"); //$NON-NLS-1$
 		flags.add("-bs"); //$NON-NLS-1$

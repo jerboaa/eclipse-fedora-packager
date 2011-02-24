@@ -19,6 +19,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
+import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
+import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
+import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
 import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
 import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
 
@@ -32,22 +38,28 @@ public class PrepHandler extends RPMHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
 				.getValidRoot(e);
+		final FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
 		specfile = fedoraProjectRoot.getSpecFile();
 		Job job = new Job(Messages.prepHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(Messages.prepHandler_attemptApplyPatchMsg,
 						IProgressMonitor.UNKNOWN);
-				DownloadHandler dh = new DownloadHandler();
-				IStatus result = null;
-				result = dh.doExecute(fedoraProjectRoot, monitor);
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
+				// First download sources
+				DownloadSourceCommand downloadCmd = fp.downloadSources();
+				
+				try {
+					downloadCmd.call(monitor);
+				} catch (SourcesUpToDateException e1) {
+					// TODO handle appropriately
+				} catch (DownloadFailedException e1) {
+					// TODO handle appropriately
+				} catch (InvalidCheckSumException e1) {
+					// TODO handle appropriately
+				} catch (CommandMisconfiguredException e1) {
+					// TODO handle appropriately
 				}
-				// do proper error handling if download fails.
-				if (!result.isOK()) {
-					return FedoraHandlerUtils.handleError(result.getMessage());
-				}
+				IStatus result;
 				ArrayList<String> flags = new ArrayList<String>();
 				flags.add("--nodeps"); //$NON-NLS-1$
 				flags.add("-bp"); //$NON-NLS-1$
