@@ -54,7 +54,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
  * Wizard to checkout package content from Fedora Git.
@@ -92,7 +92,7 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 	}
 
 	private String getGitURL() {
-		String username = FedoraHandlerUtils.getUsernameFromCert();
+		String username = FedoraPackagerUtils.getUsernameFromCert();
 		String packageName = page.getPackageName();
 		if (username.equals("anonymous")) { //$NON-NLS-1$
 			return "git://pkgs.fedoraproject.org/" + packageName + ".git"; //$NON-NLS-1$ //$NON-NLS-2$

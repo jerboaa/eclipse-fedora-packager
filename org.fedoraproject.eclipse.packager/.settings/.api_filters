@@ -8,13 +8,4 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="src/org/fedoraproject/eclipse/packager/FedoraProjectRoot.java" type="org.fedoraproject.eclipse.packager.FedoraProjectRoot">
-        <filter id="643842064">
-            <message_arguments>
-                <message_argument value="LookasideCache"/>
-                <message_argument value="FedoraProjectRoot"/>
-                <message_argument value="getLookAsideCache()"/>
-            </message_arguments>
-        </filter>
-    </resource>
 </component>

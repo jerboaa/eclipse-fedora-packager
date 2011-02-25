@@ -51,7 +51,8 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
  * CVS specific FpProject bits. Implementation of
@@ -407,7 +408,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		monitor.subTask("Generating Tag Name from Specfile");
 		final String tagName;
 		try {
-			tagName = FedoraHandlerUtils.makeTagName(projectRoot);
+			tagName = RPMUtils.makeTagName(projectRoot);
 		} catch (CoreException e) {
 			e.printStackTrace();
 			return new Status(IStatus.ERROR, CVSPlugin.PLUGIN_ID, e.getMessage());
@@ -529,7 +530,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		}
 		String createdTag = null;
 		try {
-			createdTag = FedoraHandlerUtils.makeTagName(fedoraProjectRoot);
+			createdTag = RPMUtils.makeTagName(fedoraProjectRoot);
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -551,7 +552,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	@Override
 	public String getScmUrlForKoji(FedoraProjectRoot projectRoot) {
 		try {
-			return getScmUrl()+"#"+FedoraHandlerUtils.makeTagName(projectRoot);
+			return getScmUrl() + "#" + RPMUtils.makeTagName(projectRoot);
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

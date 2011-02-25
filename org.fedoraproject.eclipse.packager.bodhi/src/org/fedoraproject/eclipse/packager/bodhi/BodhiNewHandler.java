@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.CoreException;
@@ -36,11 +37,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.bodhi.stubs.BodhiClientStub;
 import org.fedoraproject.eclipse.packager.bodhi.stubs.BodhiNewDialogStub;
 import org.fedoraproject.eclipse.packager.bodhi.stubs.UserValidationDialogStub;
-import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,11 +51,12 @@ import org.json.JSONObject;
 /**
  * Handler for pushing Bodhi updates.
  */
-public class BodhiNewHandler extends CommonHandler {
+public class BodhiNewHandler extends AbstractHandler {
 
 	protected IBodhiNewDialog dialog;
 	protected IUserValidationDialog authDialog;
 	protected IBodhiClient bodhi;
+	protected Shell shell;
 
     ///////////////////////////////////////////////////////////////
 	// FIXME: This is used for testing only and is super-ugly, but mocking
@@ -70,9 +74,16 @@ public class BodhiNewHandler extends CommonHandler {
 	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
-				.getValidRoot(e);
-		final IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraProjectRoot);
+		final FedoraProjectRoot fedoraProjectRoot;
+		try {
+			fedoraProjectRoot = FedoraPackagerUtils
+					.getValidRoot(e);
+		} catch (InvalidProjectRootException e1) {
+			// TODO Handle appropriately
+			e1.printStackTrace();
+			return null;
+		}
+		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
 		// Need to have shell variable on heap not on a thread's stack.
 		// Hence, the instance variable "shell".
 		shell = getShell(e);
@@ -84,7 +95,7 @@ public class BodhiNewHandler extends CommonHandler {
 						IProgressMonitor.UNKNOWN);
 				monitor.subTask(Messages.bodhiNewHandler_checkTagMsg);
 				try {
-					String tag = FedoraHandlerUtils.makeTagName(fedoraProjectRoot);
+					String tag = RPMUtils.makeTagName(fedoraProjectRoot);
 					String branchName = projectBits.getCurrentBranchName();
 
 					// ensure branch is tagged properly before proceeding
@@ -95,7 +106,7 @@ public class BodhiNewHandler extends CommonHandler {
 						monitor.subTask(Messages.bodhiNewHandler_querySpecFileMsg);
 						// Parsing changelog from spec-file seems to be broken
 						// This always returns "". See #49
-						String clog = getClog(fedoraProjectRoot);
+						String clog = "";
 						String bugIDs = findBug(clog);
 						String buildName = getBuildName(fedoraProjectRoot);
 						String release = getReleaseName(fedoraProjectRoot);
@@ -223,7 +234,7 @@ public class BodhiNewHandler extends CommonHandler {
 	 * @throws CoreException
 	 */
 	public String getReleaseName(FedoraProjectRoot projectRoot) throws CoreException {
-		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(projectRoot);
+		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(projectRoot);
 		return projectBits.getCurrentBranchName().replaceAll("-", "");
 	}
 
@@ -235,9 +246,9 @@ public class BodhiNewHandler extends CommonHandler {
 	 * @throws CoreException
 	 */
 	public String getBuildName(FedoraProjectRoot projectRoot) throws CoreException {
-		return FedoraHandlerUtils.rpmQuery(projectRoot, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-		+ FedoraHandlerUtils.rpmQuery(projectRoot, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-		+ FedoraHandlerUtils.rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$
+		return RPMUtils.rpmQuery(projectRoot, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
+		+ RPMUtils.rpmQuery(projectRoot, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
+		+ RPMUtils.rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$
 	}
 
 	/**

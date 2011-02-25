@@ -16,7 +16,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
  * Handler for the fedpkg srpm command.
@@ -26,8 +27,15 @@ public class SRPMBuildHandler extends RPMHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
-				.getValidRoot(e);
+		final FedoraProjectRoot fedoraProjectRoot;
+		try {
+			fedoraProjectRoot = FedoraPackagerUtils
+					.getValidRoot(e);
+		} catch (InvalidProjectRootException e1) {
+			// TODO Handle this appropriately
+			e1.printStackTrace();
+			return null;
+		}
 		specfile = fedoraProjectRoot.getSpecFile();
 		Job job = new Job(Messages.srpmHandler_jobName) {
 			@Override

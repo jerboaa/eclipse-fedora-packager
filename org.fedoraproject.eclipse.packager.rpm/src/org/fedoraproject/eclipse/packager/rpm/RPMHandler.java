@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
@@ -47,15 +48,15 @@ import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredExcepti
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
-import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
-import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
  * Handler containing common functionality for implementations using rpm calls. 
  *
  */
-public abstract class RPMHandler extends CommonHandler {
+public abstract class RPMHandler extends AbstractHandler {
 	protected static final QualifiedName KEY = new QualifiedName(
 			RPMPlugin.PLUGIN_ID, "source"); //$NON-NLS-1$
 
@@ -88,10 +89,10 @@ public abstract class RPMHandler extends CommonHandler {
 				Messages.rpmHandler_callRpmBuildMsg, specfile.getName()));
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
-		List<String> defines = FedoraHandlerUtils.getRPMDefines(dir);
-		IFpProjectBits projectBits = FedoraHandlerUtils.getVcsHandler(fedoraprojectRoot);
+		List<String> defines = RPMUtils.getRPMDefines(dir);
+		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraprojectRoot);
 
-		List<String> distDefines = FedoraHandlerUtils.getDistDefines(projectBits, parent.getName());
+		List<String> distDefines = RPMUtils.getDistDefines(projectBits, parent.getName());
 
 		defines.add(0, "rpmbuild"); //$NON-NLS-1$
 		defines.addAll(distDefines);

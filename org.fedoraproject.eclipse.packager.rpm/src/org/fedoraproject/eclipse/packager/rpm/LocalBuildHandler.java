@@ -26,8 +26,11 @@ import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
  * Handler for building locally.
@@ -38,7 +41,14 @@ public class LocalBuildHandler extends RPMHandler {
 	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
+		final FedoraProjectRoot fedoraProjectRoot;
+		try {
+			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(e);
+		} catch (InvalidProjectRootException e2) {
+			// TODO Handle this appropriately
+			e2.printStackTrace();
+			return null;
+		}
 		final FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
 		specfile = fedoraProjectRoot.getSpecFile();
 		Job job = new Job(Messages.localBuildHandler_jobName) {
@@ -63,7 +73,7 @@ public class LocalBuildHandler extends RPMHandler {
 				IStatus result;
 				try {
 					// search for noarch directive, otherwise use local arch
-					final String arch = FedoraHandlerUtils.rpmQuery(
+					final String arch = RPMUtils.rpmQuery(
 							fedoraProjectRoot, "ARCH"); //$NON-NLS-1$
 
 					if (monitor.isCanceled()) {

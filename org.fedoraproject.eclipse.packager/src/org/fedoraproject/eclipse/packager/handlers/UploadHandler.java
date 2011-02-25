@@ -68,8 +68,8 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.SourcesFile;
-import org.fedoraproject.eclipse.packager.httpclient_utils.IProgressListener;
-import org.fedoraproject.eclipse.packager.httpclient_utils.CoutingRequestEntity;
+import org.fedoraproject.eclipse.packager.utils.httpclient.CoutingRequestEntity;
+import org.fedoraproject.eclipse.packager.utils.httpclient.IProgressListener;
 
 /**
  * Class responsible for uploading source files (VCS independent bits).

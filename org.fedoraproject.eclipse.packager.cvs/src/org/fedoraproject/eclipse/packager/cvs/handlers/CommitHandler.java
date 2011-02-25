@@ -12,6 +12,7 @@ package org.fedoraproject.eclipse.packager.cvs.handlers;
 
 import java.util.Arrays;
 
+import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
@@ -28,6 +29,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.core.synchronize.SyncInfoSet;
 import org.eclipse.team.internal.ccvs.core.CVSException;
@@ -35,10 +37,12 @@ import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.wizards.CommitWizard;
 import org.eclipse.team.internal.core.subscribers.ActiveChangeSet;
 import org.eclipse.team.internal.core.subscribers.ActiveChangeSetManager;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.cvs.Messages;
-import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
  * Handler responsible for CVS commit actions.
@@ -46,12 +50,22 @@ import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
  * @author Red Hat Inc.
  */
 @SuppressWarnings("restriction")
-public class CommitHandler extends CommonHandler {
+public class CommitHandler extends AbstractHandler {
+	
+	protected Shell shell;
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
-				.getValidRoot(e);
+		final FedoraProjectRoot fedoraProjectRoot;
+		try {
+			fedoraProjectRoot = FedoraPackagerUtils
+					.getValidRoot(e);
+		} catch (InvalidProjectRootException e1) {
+			// FIXME: Handle appropriately
+			e1.printStackTrace();
+			return null;
+		}
+		shell = getShell(e);
 		Job job = new Job(Messages.commitHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -85,8 +99,9 @@ public class CommitHandler extends CommonHandler {
 						return FedoraHandlerUtils.handleError(e);
 					}
 					// add the most recent entry from the specfile's changelog to the
-					// commit message
-					cs.setComment(getClog(fedoraProjectRoot));
+					// commit message; getClog is broken in rpm-editor, so return ""
+					// for now.
+					cs.setComment("");
 				}
 
 				if (monitor.isCanceled()) {
@@ -120,6 +135,15 @@ public class CommitHandler extends CommonHandler {
 		job.setUser(true);
 		job.schedule();
 		return null;
+	}
+	
+	/**
+	 * @param event
+	 * @return the shell
+	 * @throws ExecutionException
+	 */
+	private Shell getShell(ExecutionEvent event) throws ExecutionException {
+		return HandlerUtil.getActiveShellChecked(event);
 	}
 	
 }

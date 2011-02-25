@@ -38,7 +38,7 @@ import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
  * Git specific project bits (branches management and such).
@@ -109,7 +109,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 		if (!isInitialized()) {
 			return null;
 		}
-		String username = FedoraHandlerUtils.getUsernameFromCert();
+		String username = FedoraPackagerUtils.getUsernameFromCert();
 		String packageName = this.project.getProject().getName();
 		if (username.equals("anonymous")) { //$NON-NLS-1$
 			return "git://pkgs.fedoraproject.org/" + packageName + ".git"; //$NON-NLS-1$ //$NON-NLS-2$

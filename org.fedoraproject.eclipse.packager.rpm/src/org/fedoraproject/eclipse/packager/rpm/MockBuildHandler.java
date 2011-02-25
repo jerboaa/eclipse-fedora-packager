@@ -29,7 +29,10 @@ import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
  * Handler for building locally using mock.
@@ -39,7 +42,14 @@ public class MockBuildHandler extends RPMHandler {
 	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils.getValidRoot(e);
+		final FedoraProjectRoot fedoraProjectRoot;
+		try {
+			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(e);
+		} catch (InvalidProjectRootException e1) {
+			// TODO Handle this appropriately
+			e1.printStackTrace();
+			return null;
+		}
 		specfile = fedoraProjectRoot.getSpecFile();
 		Job job = new Job(Messages.mockBuildHandler_jobName) {
 			@Override
@@ -91,10 +101,10 @@ public class MockBuildHandler extends RPMHandler {
 		try {
 			Specfile specfile = projectRoot.getSpecfileModel();
 			String[] cmd = { "mock", "-r", mockcfg, "--resultdir=" + dir //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					+ IPath.SEPARATOR + FedoraHandlerUtils.makeTagName(projectRoot), "rebuild", dir //$NON-NLS-1$
+					+ IPath.SEPARATOR + RPMUtils.makeTagName(projectRoot), "rebuild", dir //$NON-NLS-1$
 					+ IPath.SEPARATOR + specfile.getName() + "-" //$NON-NLS-1$
 					+ specfile.getVersion() + "-" //$NON-NLS-1$
-					+ FedoraHandlerUtils.rpmQuery(projectRoot, "RELEASE") + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
+					+ RPMUtils.rpmQuery(projectRoot, "RELEASE") + ".src.rpm" }; //$NON-NLS-1$ //$NON-NLS-2$
 			InputStream is = Utils.runCommandToInputStream(cmd);
 			status = runShellCommand(is, monitor);
 			
@@ -112,7 +122,7 @@ public class MockBuildHandler extends RPMHandler {
 	}
 
 	private String getMockcfg(FedoraProjectRoot projectRoot, String buildarch) {
-		IFpProjectBits projectBits =  FedoraHandlerUtils.getVcsHandler(projectRoot);
+		IFpProjectBits projectBits =  FedoraPackagerUtils.getVcsHandler(projectRoot);
 		String distvar = projectBits.getDistVariable(); 
 		String distval = projectBits.getDistVal(); 
 		String mockcfg = null;

@@ -23,11 +23,12 @@ Import-Package: org.apache.ws.commons.util,
  org.eclipse.swt.graphics,
  org.eclipse.swt.widgets,
  org.eclipse.ui,
- org.eclipse.ui.console,
  org.eclipse.ui.browser,
+ org.eclipse.ui.console,
  org.eclipse.ui.forms.widgets,
  org.fedoraproject.eclipse.packager,
- org.fedoraproject.eclipse.packager.handlers
+ org.fedoraproject.eclipse.packager.api.errors,
+ org.fedoraproject.eclipse.packager.utils
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

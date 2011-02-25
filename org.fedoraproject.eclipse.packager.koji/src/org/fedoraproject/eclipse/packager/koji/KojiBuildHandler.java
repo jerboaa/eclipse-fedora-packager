@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.CoreException;
@@ -34,22 +35,26 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.handlers.CommonHandler;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.RPMUtils;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.koji.stubs.KojiHubClientStub;
 
 /**
  * Handler to perform a Koji build.
  * 
  */
-public class KojiBuildHandler extends CommonHandler {
+public class KojiBuildHandler extends AbstractHandler {
 	@SuppressWarnings("unused")
 	private String dist;
 	private IKojiHubClient koji;
 	private Job job;
 	private MessageDialog kojiMsgDialog;
+	private Shell shell;
 	
 	///////////////////////////////////////////////////////////////
 	// FIXME: This is used for testing only and is super-ugly, but mocking
@@ -64,10 +69,17 @@ public class KojiBuildHandler extends CommonHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
-				.getValidRoot(e);
+		final FedoraProjectRoot fedoraProjectRoot;
+		try {
+			fedoraProjectRoot = FedoraPackagerUtils
+					.getValidRoot(e);
+		} catch (InvalidProjectRootException e1) {
+			// TODO handle appropriately
+			e1.printStackTrace();
+			return null;
+		}
 		
-		final IFpProjectBits projectBits = FedoraHandlerUtils
+		final IFpProjectBits projectBits = FedoraPackagerUtils
 				.getVcsHandler(fedoraProjectRoot);
 		// Fixes Trac ticket #35; Need to have shell variable on heap not
 		// on a thread's stack.
@@ -175,10 +187,6 @@ public class KojiBuildHandler extends CommonHandler {
 	}
 
 	private boolean promptForTag() {
-		if (debug) {
-			// don't worry about tagging for debug mode
-			return false;
-		}
 		YesNoRunnable op = new YesNoRunnable(
 				Messages.kojiBuildHandler_tagBeforeSendingBuild);
 		Display.getDefault().syncExec(op);
@@ -188,7 +196,7 @@ public class KojiBuildHandler extends CommonHandler {
 	protected IStatus newBuild(FedoraProjectRoot fedoraProjectRoot,
 			IProgressMonitor monitor) {
 		IStatus status;
-		IFpProjectBits projectBits = FedoraHandlerUtils
+		IFpProjectBits projectBits = FedoraPackagerUtils
 				.getVcsHandler(fedoraProjectRoot);
 		try {
 			// for testing use the stub instead
@@ -240,7 +248,7 @@ public class KojiBuildHandler extends CommonHandler {
 			monitor.subTask(Messages.kojiBuildHandler_sendBuildCmd);
 			String nvr= null;
 			try {
-				nvr = FedoraHandlerUtils.getNVR(fedoraProjectRoot);
+				nvr = RPMUtils.getNVR(fedoraProjectRoot);
 			} catch (CoreException e1) {
 				e1.printStackTrace();
 			}
@@ -354,5 +362,24 @@ public class KojiBuildHandler extends CommonHandler {
 	 */
 	private Shell getShell(ExecutionEvent event) throws ExecutionException {
 		return HandlerUtil.getActiveShellChecked(event);
+	}
+	
+	public final class YesNoRunnable implements Runnable {
+		private final String question;
+		private boolean okPressed;
+
+		public YesNoRunnable(String question) {
+			this.question = question;
+		}
+
+		@Override
+		public void run() {
+			okPressed = MessageDialog.openQuestion(shell, FedoraPackagerText.get().commonHandler_fedoraPackagerName, //$NON-NLS-1$
+					question);
+		}
+
+		public boolean isOkPressed() {
+			return okPressed;
+		}
 	}
 }

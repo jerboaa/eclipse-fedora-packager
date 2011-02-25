@@ -25,9 +25,10 @@ import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
-import org.fedoraproject.eclipse.packager.handlers.DownloadHandler;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
  * Handler for the fedpkg prep command.
@@ -37,8 +38,15 @@ public class PrepHandler extends RPMHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
-				.getValidRoot(e);
+		final FedoraProjectRoot fedoraProjectRoot;
+		try {
+			fedoraProjectRoot = FedoraPackagerUtils
+					.getValidRoot(e);
+		} catch (InvalidProjectRootException e2) {
+			// TODO Handle this appropriately
+			e2.printStackTrace();
+			return null;
+		}
 		final FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
 		specfile = fedoraProjectRoot.getSpecFile();
 		Job job = new Job(Messages.prepHandler_jobName) {

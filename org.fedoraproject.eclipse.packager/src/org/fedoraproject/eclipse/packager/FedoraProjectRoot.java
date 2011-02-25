@@ -24,11 +24,11 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
 import org.fedoraproject.eclipse.packager.LookasideCache.CacheType;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils.ProjectType;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
 
 /**
- * This class is representing a root directory for fedora package in given
+ * This class is representing a root directory for a Fedora package in a given
  * branch. It can be a folder in the cvs case or a project in the git case.
  * 
  */
@@ -44,14 +44,12 @@ public class FedoraProjectRoot {
 	 * 
 	 * @param container
 	 *            The root container either IFolder(cvs) or IProject(git).
-	 * @param cmdId
-	 * 			  The command ID for which a FedoraProjectRoot is requested.
 	 */
-	public FedoraProjectRoot(IContainer container, String cmdId /* unused */) {
+	public FedoraProjectRoot(IContainer container) {
 		this.rootContainer = container;
 		this.sourcesFile = new SourcesFile(rootContainer.getFile(new Path(
 				"sources"))); //$NON-NLS-1$
-		this.type = FedoraHandlerUtils.getProjectType(container);
+		this.type = FedoraPackagerUtils.getProjectType(container);
 		this.lookAsideCache = new LookasideCache(CacheType.FEDORA);
 	}
 

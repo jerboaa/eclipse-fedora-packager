@@ -32,20 +32,28 @@ import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
- * Class responsible for downloading source files
- * 
- * @author Red Hat inc.
+ * Handler for downloading sources as listed in sources files.
  * 
  */
 public class DownloadHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final FedoraProjectRoot fedoraProjectRoot = FedoraHandlerUtils
-				.getValidRoot(e);
+		final FedoraProjectRoot fedoraProjectRoot;
+		try {
+			fedoraProjectRoot = FedoraPackagerUtils
+					.getValidRoot(e);
+		} catch (InvalidProjectRootException e1) {
+			// TODO Show proper message
+			e1.printStackTrace();
+			return null;
+		}
 		final FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
 		final Shell shell = getShell(e);
 		@SuppressWarnings("static-access")
