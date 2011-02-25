@@ -52,6 +52,7 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
+import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
@@ -77,7 +78,7 @@ import org.fedoraproject.eclipse.packager.utils.httpclient.IProgressListener;
  * @author Red Hat inc.
  *
  */
-public class UploadHandler extends WGetHandler {
+public class UploadHandler extends AbstractHandler {
 
 	@Override
 	/**

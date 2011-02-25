@@ -104,5 +104,19 @@ public class UploadSourceCommandTest {
 			fail("File should have been missing!");
 		}
 	}
-
+	
+	@Test
+	public void canUpdateSourcesFile() throws Exception {
+		// TODO: Implement. Use a listener.
+	}
+	
+	@Test
+	public void canDetermineValidUploadFiles() throws Exception {
+		// TODO: implement		
+	}
+	
+	@Test
+	public void canUpdateIgnoreFile() throws Exception {
+		// TODO: Implement. Use listener.
+	}
 }
