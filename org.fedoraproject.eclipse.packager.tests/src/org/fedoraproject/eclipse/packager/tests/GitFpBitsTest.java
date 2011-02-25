@@ -1,14 +1,14 @@
-package org.fedoraproject.eclipse.packager.tests.git;
+package org.fedoraproject.eclipse.packager.tests;
 
 import org.fedoraproject.eclipse.packager.git.FpGitProjectBits;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestCase;
-import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestCase;
+import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 
 public class GitFpBitsTest extends GitTestCase {
 
 	public void testGetCurrentBranchName() throws Exception {
-		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraHandlerUtils.getVcsHandler(getFedoraprojectRoot());
+		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraPackagerUtils.getVcsHandler(getFedoraprojectRoot());
 		assertNotNull(projectBits);
 		// make sure we meet pre-condition (we should be on master)
 		assertEquals("devel", projectBits.getCurrentBranchName());
@@ -26,19 +26,19 @@ public class GitFpBitsTest extends GitTestCase {
 	
 	public void testGetBranchName() {
 		// this should do initialization
-		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraHandlerUtils.getVcsHandler(getFedoraprojectRoot());
+		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraPackagerUtils.getVcsHandler(getFedoraprojectRoot());
 		assertNotNull(projectBits);
 		assertNotNull(projectBits.getBranchName("F-7")); // should be there
 		assertNotNull(projectBits.getBranchName("devel")); // master mapped to devel
 	}
 	
 	public void testGetDistVal() throws Exception {
-		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraHandlerUtils.getVcsHandler(getFedoraprojectRoot());
+		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraPackagerUtils.getVcsHandler(getFedoraprojectRoot());
 		assertNotNull(projectBits);
 		// make sure we meet pre-condition (we should be on master)
 		assertEquals("devel", projectBits.getCurrentBranchName());
 		// ATM this will change with the next Fedora release, so expect this to fail
-		assertEquals(projectBits.getDistVal(), "15");
+		assertEquals(projectBits.getDistVal(), "16");
 		GitTestProject testProject = getProject();
 		// switch to remote branch f13
 		testProject.checkoutBranch("f13");

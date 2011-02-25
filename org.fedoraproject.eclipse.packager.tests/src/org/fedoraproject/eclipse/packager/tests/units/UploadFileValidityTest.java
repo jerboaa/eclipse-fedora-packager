@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 import junit.framework.TestCase;
 
@@ -65,10 +65,10 @@ public class UploadFileValidityTest extends TestCase {
 	 * Test FedoraHandlerUtils.isValidUploadFile().
 	 */
 	public void testIsValidUploadFile() {
-		assertFalse(FedoraHandlerUtils.isValidUploadFile(emptyFileRegular));
-		assertFalse(FedoraHandlerUtils.isValidUploadFile(emptyFileInvalid));
-		assertTrue(FedoraHandlerUtils.isValidUploadFile(regularFileNonEmpty));
-		assertFalse(FedoraHandlerUtils.isValidUploadFile(regularFileNonEmptyInvalid));
+		assertFalse(FedoraPackagerUtils.isValidUploadFile(emptyFileRegular));
+		assertFalse(FedoraPackagerUtils.isValidUploadFile(emptyFileInvalid));
+		assertTrue(FedoraPackagerUtils.isValidUploadFile(regularFileNonEmpty));
+		assertFalse(FedoraPackagerUtils.isValidUploadFile(regularFileNonEmptyInvalid));
 	}
 
 }

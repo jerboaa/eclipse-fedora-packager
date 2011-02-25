@@ -8,16 +8,16 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.tests.git;
+package org.fedoraproject.eclipse.packager.tests;
 
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestCase;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestCase;
 
 public class GitProjectTypeTest extends GitTestCase {
 	
 	public void testAdaptToFpProject() throws Exception {
 		// Should return FpProject instance with GIT type
-		assertTrue(FedoraHandlerUtils.getProjectType(getiProject()) == FedoraHandlerUtils.ProjectType.GIT);
+		assertTrue(FedoraPackagerUtils.getProjectType(getiProject()) == FedoraPackagerUtils.ProjectType.GIT);
 	}
 
 }

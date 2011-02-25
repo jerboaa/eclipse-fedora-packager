@@ -8,12 +8,12 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.tests.cvs;
+package org.fedoraproject.eclipse.packager.tests;
 
 import junit.framework.TestCase;
 import org.eclipse.core.resources.IProject;
-import org.fedoraproject.eclipse.packager.handlers.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.tests.cvs.utils.CVSTestProject;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.tests.utils.cvs.CVSTestProject;
 
 public class CVSProjectTypeTest extends TestCase {
 	private CVSTestProject project;
@@ -32,7 +32,7 @@ public class CVSProjectTypeTest extends TestCase {
 	
 	public void testAdaptToFpProject() throws Exception {
 		// Should return FpProject instance with CVS type
-		assertTrue(FedoraHandlerUtils.getProjectType(this.iProject) == FedoraHandlerUtils.ProjectType.CVS);
+		assertTrue(FedoraPackagerUtils.getProjectType(this.iProject) == FedoraPackagerUtils.ProjectType.CVS);
 	}
 
 }

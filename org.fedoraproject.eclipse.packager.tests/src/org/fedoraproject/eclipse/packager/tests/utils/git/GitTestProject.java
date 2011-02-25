@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.tests.git.utils;
+package org.fedoraproject.eclipse.packager.tests.utils.git;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +42,9 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.fedoraproject.eclipse.packager.git.CloneOperation2;
 
+/**
+ * Fixture for Git based projects.
+ */
 public class GitTestProject {	
 	private IProject project;
 	private Git gitRepo;

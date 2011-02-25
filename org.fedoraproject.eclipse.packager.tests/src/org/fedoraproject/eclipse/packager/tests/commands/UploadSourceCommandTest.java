@@ -1,4 +1,4 @@
-package org.fedoraproject.eclipse.packager.tests;
+package org.fedoraproject.eclipse.packager.tests.commands;
 
 
 import static org.junit.Assert.fail;
@@ -13,7 +13,8 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.UploadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
-import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
+import org.fedoraproject.eclipse.packager.tests.TestsPlugin;
+import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class UploadSourceCommandTest {
 	@Before
 	public void setUp() throws Exception {
 		this.testProject = new GitTestProject("eclipse-fedorapackager");
-		FedoraProjectRoot fpRoot = new FedoraProjectRoot(this.testProject.getProject(), "ignore");
+		FedoraProjectRoot fpRoot = new FedoraProjectRoot(this.testProject.getProject());
 		this.packager = new FedoraPackager(fpRoot);
 	}
 

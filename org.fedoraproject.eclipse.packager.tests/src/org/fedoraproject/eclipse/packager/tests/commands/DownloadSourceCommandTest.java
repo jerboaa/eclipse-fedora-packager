@@ -1,25 +1,20 @@
-package org.fedoraproject.eclipse.packager.tests;
+package org.fedoraproject.eclipse.packager.tests.commands;
 
 
 import static org.junit.Assert.fail;
 
-import java.io.File;
 import java.net.MalformedURLException;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.api.ChecksumValidListener;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
-import org.fedoraproject.eclipse.packager.api.UploadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
-import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
-import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
-import org.fedoraproject.eclipse.packager.tests.git.utils.GitTestProject;
+import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +39,7 @@ public class DownloadSourceCommandTest {
 	@Before
 	public void setUp() throws Exception {
 		this.testProject = new GitTestProject("eclipse");
-		this.fpRoot = new FedoraProjectRoot(this.testProject.getProject(), "ignore");
+		this.fpRoot = new FedoraProjectRoot(this.testProject.getProject());
 		this.packager = new FedoraPackager(fpRoot);
 	}
 
@@ -69,6 +64,8 @@ public class DownloadSourceCommandTest {
 		// The eclipse package usually has 2 source files. That's why we
 		// use the eclipse package for testing
 		DownloadSourceCommand downloadCmd = packager.downloadSources();
+		ChecksumValidListener md5sumListener = new ChecksumValidListener(fpRoot);
+		downloadCmd.addCommandListener(md5sumListener); // want md5sum checking
 		try {
 			downloadCmd.call(new NullProgressMonitor());
 		} catch (SourcesUpToDateException e) {
