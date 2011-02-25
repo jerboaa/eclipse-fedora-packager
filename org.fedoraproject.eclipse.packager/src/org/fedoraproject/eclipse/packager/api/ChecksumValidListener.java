@@ -44,7 +44,7 @@ public class ChecksumValidListener implements ICommandListener {
 	public void postExecution() throws CommandListenerException {
 		// do the MD5 check
 		Set<String> sourcesToGet = projectRoot.getSourcesFile()
-				.getSourcesToDownload();
+				.getMissingSources();
 	
 		// if all checks pass we should have an empty list
 		if (!sourcesToGet.isEmpty()) {

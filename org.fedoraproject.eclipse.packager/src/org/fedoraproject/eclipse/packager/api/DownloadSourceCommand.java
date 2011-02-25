@@ -92,7 +92,7 @@ public class DownloadSourceCommand extends
 		}
 		// Check if there are any sources to download (i.e. md5 does not match or
 		// files are not present in the current Fedora project root).
-		Set<String> sourcesToGet = sources.getSourcesToDownload();
+		Set<String> sourcesToGet = sources.getMissingSources();
 		if (sourcesToGet.isEmpty()) {
 			throw new SourcesUpToDateException(
 					FedoraPackagerText.get().downloadSourceCommand_nothingToDownload);
@@ -106,7 +106,7 @@ public class DownloadSourceCommand extends
 					+ "/" + //$NON-NLS-1$
 					source
 					+ "/" + //$NON-NLS-1$
-					sources.getSource(source)
+					sources.getCheckSum(source)
 					+ "/" + //$NON-NLS-1$
 					source;
 			
@@ -132,10 +132,10 @@ public class DownloadSourceCommand extends
 				// TODO: Externalize
 				throw new DownloadFailedException("Ooops something unexpected happened", e);
 			}
-			// Call post-exec listeners
-			callPostExecListeners();
-			result.setSuccessful(true);
 		}
+		// Call post-exec listeners
+		callPostExecListeners();
+		result.setSuccessful(true);
 		setCallable(false);
 		return result;
 	}

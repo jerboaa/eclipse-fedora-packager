@@ -14,6 +14,7 @@ import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
+import org.fedoraproject.eclipse.packager.tests.utils.CorruptDownload;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.junit.After;
 import org.junit.Before;
@@ -38,7 +39,7 @@ public class DownloadSourceCommandTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		this.testProject = new GitTestProject("eclipse");
+		this.testProject = new GitTestProject("eclipse-fedorapackager");
 		this.fpRoot = new FedoraProjectRoot(this.testProject.getProject());
 		this.packager = new FedoraPackager(fpRoot);
 	}
@@ -58,18 +59,29 @@ public class DownloadSourceCommandTest {
 			// pass
 		}
 	}
-	
+
+	/**
+	 * Positive results test. Should work fine. Since this is downloading
+	 * Eclipse sources it might take a while.
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void canDownloadSeveralFilesWithoutErrors() throws Exception {
+		// not using eclipse-fedorapackager for this test
+		this.testProject.dispose();
 		// The eclipse package usually has 2 source files. That's why we
 		// use the eclipse package for testing
+		this.testProject = new GitTestProject("eclipse");
+		this.fpRoot = new FedoraProjectRoot(this.testProject.getProject());
+		this.packager = new FedoraPackager(fpRoot);
 		DownloadSourceCommand downloadCmd = packager.downloadSources();
 		ChecksumValidListener md5sumListener = new ChecksumValidListener(fpRoot);
 		downloadCmd.addCommandListener(md5sumListener); // want md5sum checking
 		try {
 			downloadCmd.call(new NullProgressMonitor());
 		} catch (SourcesUpToDateException e) {
-			fail("sources for eclipse should not be present");
+			fail("sources for " + testProject.getProject().getName() + " should not be present");
 		} catch (CommandMisconfiguredException e) {
 			fail("Cmd should be properly configured");
 		} catch (CommandListenerException e) {
@@ -79,7 +91,33 @@ public class DownloadSourceCommandTest {
 		}
 		// pass
 	}
-
 	
+	/**
+	 * Test checksums of source files.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void canDetectChecksumErrors() throws Exception {
+		DownloadSourceCommand downloadCmd = packager.downloadSources();
+		CorruptDownload checksumDestroyer = new CorruptDownload(fpRoot);
+		ChecksumValidListener md5sumListener = new ChecksumValidListener(fpRoot);
+		// Add checksum destroyer first, checksum checker after.
+		downloadCmd.addCommandListener(checksumDestroyer); // should corrupt MD5
+		downloadCmd.addCommandListener(md5sumListener); // want md5sum checking
+		try {
+			downloadCmd.call(new NullProgressMonitor());
+		} catch (SourcesUpToDateException e) {
+			fail("sources for " + testProject.getProject().getName() + " should not be present");
+		} catch (CommandMisconfiguredException e) {
+			fail("Cmd should be properly configured");
+		} catch (CommandListenerException e) {
+			if (e.getCause() instanceof InvalidCheckSumException) {
+				// pass
+				return;
+			}
+		}
+		fail("Checksum should be invalid for all source files!");
+	}
 
 }

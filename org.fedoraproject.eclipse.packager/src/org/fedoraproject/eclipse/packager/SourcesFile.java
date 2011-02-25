@@ -63,6 +63,10 @@ public class SourcesFile {
 		return sourcesFile.getName();
 	}
 
+	/**
+	 * Parse source files from file {@code sources} and store
+	 * filenames/checksums in a Map.
+	 */
 	private void parseSources() {
 		BufferedReader br = null;
 		try {
@@ -97,27 +101,32 @@ public class SourcesFile {
 
 	/**
 	 * Returns the parsed sources in a map with the file name used as a key.
-	 * @return The parsed sources.
+	 * 
+	 * @return The parsed sources as a map in "filename => checksum" pairs.
 	 */
 	public Map<String, String> getSources() {
 		return sources;
 	}
 
 	/**
-	 * Returns the md5 for the given file in the sources file.
-	 * @param key The file name.
-	 * @return The md5 of the uploaded file.
+	 * Returns the MD5 checksum for the given file in the sources file.
+	 * 
+	 * @param source
+	 *            The file name for which to get the checksum for.
+	 * @return The MD5 checksum of the uploaded file as noted in the sources
+	 *         file.
 	 */
-	public String getSource(String key) {
-		return sources.get(key);
+	public String getCheckSum(String source) {
+		return sources.get(source);
 	}
 
 	/**
-	 * Returns the missing sources.
+	 * Returns the missing sources or sources which don't have the matching MD5
+	 * sum as specified in the {@code sources} file.
 	 * 
 	 * @return Files that are missing locally or has different md5.
 	 */
-	public Set<String> getSourcesToDownload() {
+	public Set<String> getMissingSources() {
 		HashSet<String> missingSources = new HashSet<String>();
 		for (String source : sources.keySet()) {
 			IResource r = sourcesFile.getParent().findMember(source);
@@ -131,9 +140,24 @@ public class SourcesFile {
 	}
 
 	/**
-	 * Delete actual file in project
+	 * Get all file names of sources which are listed in the sources file,
+	 * regardless of checksums matching or if they are not downloaded yet.
+	 * 
+	 * @return A {@link Set} of all file names listed in the sources file.
+	 */
+	public Set<String> getAllSources() {
+		HashSet<String> allSources = new HashSet<String>();
+		for (String source: sources.keySet()) {
+			allSources.add(source);
+		}
+		return allSources;
+	}
+
+	/**
+	 * Delete source file {@code file} in project.
 	 * 
 	 * @param file
+	 *            The source file to be deleted.
 	 * @throws CoreException
 	 */
 	public void deleteSource(String file) throws CoreException {
@@ -150,7 +174,7 @@ public class SourcesFile {
 	 * @param resource The file whose md5 should be compared.
 	 * @return True if the given md5 is the same as the calculated one, false otherwise.
 	 */
-	public static boolean checkMD5(String storedMd5, IResource resource) {
+	private boolean checkMD5(String storedMd5, IResource resource) {
 		// open file
 		File file = resource.getLocation().toFile();
 		String md5 = getMD5(file);
@@ -164,7 +188,7 @@ public class SourcesFile {
 	 * @param file The file to calculate checksum for.
 	 * @return The calculated checksum.
 	 */
-	public static String getMD5(File file) {
+	private String getMD5(File file) {
 		String result = null;
 		FileInputStream fis = null;
 		try {
@@ -208,7 +232,7 @@ public class SourcesFile {
 			}
 			pw.close();
 			out.close();
-			sourcesFile.refreshLocal(1, null);
+			sourcesFile.refreshLocal(IResource.DEPTH_ONE, null);
 			sourcesFile.setContents(in, true, true, null);
 		} catch (IOException e) {
 			e.printStackTrace();

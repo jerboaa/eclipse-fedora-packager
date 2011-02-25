@@ -118,7 +118,7 @@ public abstract class FedoraPackagerCommand<T> {
 	 */
 	protected void callPostExecListeners() throws CommandListenerException {
 		for (ICommandListener listener: cmdListeners) {
-			listener.preExecution();
+			listener.postExecution();
 		}
 	}
 	
