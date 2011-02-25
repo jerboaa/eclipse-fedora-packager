@@ -1,0 +1,7 @@
+What breaks when upgrading from 0.1.x to 0.2.x:
+
+1.) Filtering of context menu items (for Eclipse Fedora Packager) is done
+    based on the existence of a persistent property. I.e. it will not show up
+    for old clones. Deleting old clones and doing fresh clones are highly
+    recommended.
+2.) What else?
