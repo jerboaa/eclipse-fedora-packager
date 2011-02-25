@@ -60,6 +60,10 @@ public class DownloadHandler extends AbstractHandler {
 		Job job = new Job(FedoraPackagerText.get().downloadHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask(
+						FedoraPackagerText.get().downloadHandler_jobName,
+						fedoraProjectRoot.getSourcesFile().getMissingSources()
+								.size());
 				DownloadSourceCommand download = fp.downloadSources();
 				ChecksumValidListener md5sumListener = new ChecksumValidListener(fedoraProjectRoot);
 				download.addCommandListener(md5sumListener); // want md5sum checking

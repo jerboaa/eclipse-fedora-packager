@@ -15,9 +15,8 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.LookasideCache;
@@ -25,8 +24,6 @@ import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
-import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
-import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
 
 /**
@@ -65,6 +62,9 @@ public class DownloadSourceCommand extends
 	/**
 	 * Implementation of the {@code DownloadSourcesCommand}.
 	 * 
+	 * @param monitor
+	 *            The main progress monitor. Each file to download is executed
+	 *            as a subtask.
 	 * @throws SourcesUpToDateException
 	 *             If the source files are already downloaded and up-to-date.
 	 * @throws CommandMisconfiguredException
@@ -74,6 +74,7 @@ public class DownloadSourceCommand extends
 	 *             If the download of some source failed.
 	 * @throws CommandListenerException
 	 *             If some listener detected a problem.
+	 * @return The result of this command.
 	 */
 	@Override
 	public DownloadSourceResult call(IProgressMonitor monitor)
@@ -100,6 +101,7 @@ public class DownloadSourceCommand extends
 		// Need to download the rest of the files in the set from the lookaside
 		// cache
 		DownloadSourceResult result = new DownloadSourceResult();
+		int fileNumber = 1;
 		for (final String source : sourcesToGet) {
 			final String url = lookasideCache.getDownloadUrl().toString()
 					+ "/" + projectRoot.getProject().getName() //$NON-NLS-1$
@@ -115,23 +117,32 @@ public class DownloadSourceCommand extends
 			try {
 				sourceUrl = new URL(url);
 			} catch (MalformedURLException e) {
-				// TODO: Externalize
-				throw new DownloadFailedException("Invalid URL", e);
+				throw new DownloadFailedException(
+						MessageFormat.format(
+								FedoraPackagerText.get().downloadSourceCommand_invalidURL,
+						url), e);
 			}
-			
+			// indicate some progress
+			monitor.subTask(MessageFormat.format(
+								FedoraPackagerText.get().downloadSourceCommand_downloadingFileXofY,
+						fileNumber, sourcesToGet.size()));
+			SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
 			try {
-				download(monitor, file, sourceUrl);
+				download(subMonitor, file, sourceUrl);
 			} catch (IOException e) {
 				// clean-up and bail.
 				try {
 					sources.deleteSource(source);
 				} catch (CoreException coreEx) { /* ignore */ }
-				// TODO: Externalize
-				throw new DownloadFailedException("Failed to download file: x", e);
+				throw new DownloadFailedException(
+						MessageFormat.format(
+								FedoraPackagerText.get().downloadSourceCommand_downloadFile,
+						file.getName()), e);
 			} catch (CoreException e) {
-				// TODO: Externalize
-				throw new DownloadFailedException("Ooops something unexpected happened", e);
+				throw new DownloadFailedException(
+						FedoraPackagerText.get().downloadSourceCommand_downloadFile, e);
 			}
+			fileNumber++;
 		}
 		// Call post-exec listeners
 		callPostExecListeners();
@@ -144,24 +155,26 @@ public class DownloadSourceCommand extends
 	protected void checkConfiguration() throws CommandMisconfiguredException {
 		// We are good to go with the defaults. No-Op.
 	}
-	
+
 	/**
 	 * Carry out the download for a given IFile.
 	 * 
-	 * @param monitor
+	 * @param subMonitor
+	 *            A sub progress monitor to indicate progress for this file
+	 *            only.
 	 * @param fileToDownload
 	 * @param fileConnection
-	 * @throws IOException If download failed.
-	 * @throws CoreException Something else failed, unrecoverable error.
+	 * @throws IOException
+	 *             If download failed.
+	 * @throws CoreException
+	 *             Something else failed, unrecoverable error.
 	 */
-	@SuppressWarnings("static-access")
-	private void download(IProgressMonitor monitor, IFile fileToDownload,
+	private void download(IProgressMonitor subMonitor, IFile fileToDownload,
 			URL fileURL) throws IOException, CoreException {
 		URLConnection fileConnection = fileURL.openConnection();
 		fileConnection = fileURL.openConnection();
-		// FIXME: beginTask() may only be called once. This is not the case here.
-		monitor.beginTask(
-				MessageFormat.format(FedoraPackagerText.get().downloadJob_name,
+		subMonitor.beginTask(
+				MessageFormat.format(FedoraPackagerText.get().downloadSourceCommand_downloadFile,
 						fileToDownload.getName()), fileConnection.getContentLength());
 		File tempFile = File.createTempFile(fileToDownload.getName(), ""); //$NON-NLS-1$
 		FileOutputStream fos = new FileOutputStream(tempFile);
@@ -170,12 +183,12 @@ public class DownloadSourceCommand extends
 		boolean canceled = false;
 		byte buf[] = new byte[5 * 1024]; // 5k buffer
 		while ((bytesRead = is.read(buf)) != -1) {
-			if (monitor.isCanceled()) {
+			if (subMonitor.isCanceled()) {
 				canceled = true;
 				break;
 			}
 			fos.write(buf, 0, bytesRead);
-			monitor.worked(bytesRead);
+			subMonitor.worked(bytesRead);
 		}
 		is.close();
 		fos.close();
@@ -183,12 +196,13 @@ public class DownloadSourceCommand extends
 			if (fileToDownload.exists()) {
 				// replace file
 				fileToDownload.setContents(new FileInputStream(tempFile), true,
-						false, monitor);
+						false, subMonitor);
 			} else {
 				// create new file
-				fileToDownload.create(new FileInputStream(tempFile), true, monitor);
+				fileToDownload.create(new FileInputStream(tempFile), true, subMonitor);
 			}
 		}
 		tempFile.delete();
+		subMonitor.done();
 	}
 }

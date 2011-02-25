@@ -54,4 +54,10 @@ public class FedoraPackagerText extends TranslationBundle {
 	/****/ public static String uploadSourceCommand_uploadFileUnspecified;
 	// DownloadSourceCommand
 	/****/ public String downloadSourceCommand_nothingToDownload;
+	/****/ public String downloadSourceCommand_downloadFile;
+	/****/ public String downloadSourceCommand_downloadFileError;
+	/****/ public String downloadSourceCommand_invalidURL;
+	/****/ public String downloadSourceCommand_downloadingFileXofY;
+	// Generics
+	/****/ public String somethingUnexpectedHappenedError;
 }
