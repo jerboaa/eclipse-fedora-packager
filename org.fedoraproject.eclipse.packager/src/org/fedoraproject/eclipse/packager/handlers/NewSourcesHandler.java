@@ -27,6 +27,7 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
@@ -41,7 +42,15 @@ public class NewSourcesHandler extends AbstractHandler {
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 
-		final FedoraProjectRoot fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(e);
+		final FedoraProjectRoot fedoraProjectRoot;
+		try {
+			IResource eventResource = FedoraHandlerUtils.getResource(e);
+			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(eventResource);
+		} catch (InvalidProjectRootException e1) {
+			// TODO Handle appropriately
+			e1.printStackTrace();
+			return null;
+		}
 		final IResource resource = FedoraHandlerUtils.getResource(e);
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
@@ -63,8 +72,8 @@ public class NewSourcesHandler extends AbstractHandler {
 
 				// Do the file uploading
 				String filename = resource.getName();
-				IStatus result = performUpload(toAdd, filename, monitor,
-						fedoraProjectRoot);
+				// TODO do the upload.
+				IStatus result = null;
 				if (result.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
@@ -75,14 +84,14 @@ public class NewSourcesHandler extends AbstractHandler {
 
 				// Update sources file (replace existing sources, add true as
 				// last parameter)
-				result = updateSources(sourceFile, toAdd, true);
+				// TODO: replace sources file
 				if (!result.isOK()) {
 					// fail updating sources file
 					return FedoraHandlerUtils.handleError(FedoraPackagerText.get().newSourcesHandler_failUpdateSourceFile);
 				}
 
 				// Handle VCS specific stuff; Update .cvsignore/.gitignore
-				result = updateIgnoreFile(fedoraProjectRoot.getIgnoreFile(), toAdd);
+				// TODO: update ignore file!
 				if (!result.isOK()) {
 					// fail updating sources file
 					return FedoraHandlerUtils.handleError(FedoraPackagerText.get().newSourcesHandler_failVCSUpdate);
