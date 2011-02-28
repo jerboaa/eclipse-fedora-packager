@@ -52,12 +52,15 @@ public class FedoraPackagerText extends TranslationBundle {
 	/****/ public static String wGetHandler_couldNotRefresh;
 	// UploadCommand
 	/****/ public static String uploadSourceCommand_uploadFileUnspecified;
+	/****/ public static String uploadSourceCommand_uploadFileInvalid;
 	// DownloadSourceCommand
 	/****/ public String downloadSourceCommand_nothingToDownload;
 	/****/ public String downloadSourceCommand_downloadFile;
 	/****/ public String downloadSourceCommand_downloadFileError;
 	/****/ public String downloadSourceCommand_invalidURL;
 	/****/ public String downloadSourceCommand_downloadingFileXofY;
+	// SourcesFile
+	/****/ public String sourcesFile_saveFailedMsg;
 	// Generics
 	/****/ public String somethingUnexpectedHappenedError;
 }

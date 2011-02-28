@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,6 +40,12 @@ import org.eclipse.core.runtime.Status;
  * 
  */
 public class SourcesFile {
+	
+	/**
+	 * The name of the file containing checksums and file names of sources of a
+	 * Fedora package.
+	 */
+	public static final String SOURCES_FILENAME = "sources"; //$NON-NLS-1$ 
 
 	private IFile sourcesFile;
 	Map<String, String> sources = new LinkedHashMap<String, String>();
@@ -106,6 +113,13 @@ public class SourcesFile {
 	 */
 	public Map<String, String> getSources() {
 		return sources;
+	}
+
+	/**
+	 * @param sources the sources to set
+	 */
+	public void setSources(Map<String, String> sources) {
+		this.sources = sources;
 	}
 
 	/**
@@ -177,18 +191,20 @@ public class SourcesFile {
 	private boolean checkMD5(String storedMd5, IResource resource) {
 		// open file
 		File file = resource.getLocation().toFile();
-		String md5 = getMD5(file);
+		String md5 = calculateChecksum(file);
 
 		// perform check
 		return md5 == null ? false : md5.equalsIgnoreCase(storedMd5);
 	}
 
 	/**
-	 * Calculates md5 checksum for given file.
-	 * @param file The file to calculate checksum for.
+	 * Calculates an MD5 checksum for given file.
+	 * 
+	 * @param file
+	 *            The file to calculate checksum for.
 	 * @return The calculated checksum.
 	 */
-	private String getMD5(File file) {
+	public static String calculateChecksum(File file) {
 		String result = null;
 		FileInputStream fis = null;
 		try {
@@ -237,8 +253,10 @@ public class SourcesFile {
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new CoreException(new Status(IStatus.ERROR,
-					PackagerPlugin.PLUGIN_ID, "Error saving "
-							+ sourcesFile.getName()));
+					PackagerPlugin.PLUGIN_ID, 
+					MessageFormat.format(
+							FedoraPackagerText.get().sourcesFile_saveFailedMsg,
+							sourcesFile.getName())));
 		} finally {
 			if (out != null) {
 				try {

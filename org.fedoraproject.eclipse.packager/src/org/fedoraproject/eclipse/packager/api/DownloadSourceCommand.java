@@ -81,7 +81,6 @@ public class DownloadSourceCommand extends
 			throws SourcesUpToDateException, DownloadFailedException,
 			CommandMisconfiguredException,
 			CommandListenerException {
-		// Make sure listeners are properly called
 		try {
 			callPreExecListeners();
 		} catch (CommandListenerException e) {
