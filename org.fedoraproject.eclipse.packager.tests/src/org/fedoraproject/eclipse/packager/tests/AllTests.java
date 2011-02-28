@@ -15,7 +15,9 @@ import org.junit.runners.Suite.SuiteClasses;
 	// Auxiliary plug-in tests
 	CVSProjectTypeTest.class,
 	GitFpBitsTest.class,
-	GitProjectTypeTest.class	
+	GitProjectTypeTest.class,
+	SourcesFileUpdaterTest.class,
+	VCSIgnoreFileUpdaterTest.class
 })
 
 public class AllTests {
