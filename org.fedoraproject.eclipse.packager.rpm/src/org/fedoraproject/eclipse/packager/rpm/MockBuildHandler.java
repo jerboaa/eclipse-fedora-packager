@@ -44,7 +44,8 @@ public class MockBuildHandler extends RPMHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
-			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(e);
+			IResource eventResource = FedoraHandlerUtils.getResource(e);
+			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(eventResource);
 		} catch (InvalidProjectRootException e1) {
 			// TODO Handle this appropriately
 			e1.printStackTrace();

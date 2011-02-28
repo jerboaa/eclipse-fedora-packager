@@ -17,6 +17,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -71,8 +72,9 @@ public class KojiBuildHandler extends AbstractHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
+			IResource eventResource = FedoraHandlerUtils.getResource(e);
 			fedoraProjectRoot = FedoraPackagerUtils
-					.getValidRoot(e);
+					.getValidRoot(eventResource);
 		} catch (InvalidProjectRootException e1) {
 			// TODO handle appropriately
 			e1.printStackTrace();

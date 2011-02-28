@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager.cvs.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
@@ -20,6 +21,7 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.cvs.Messages;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
@@ -32,7 +34,8 @@ public class TagHandler extends AbstractHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
-			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(e);
+			IResource eventResource = FedoraHandlerUtils.getResource(e);
+			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(eventResource);
 		} catch (InvalidProjectRootException e1) {
 			// TODO Handle appropriately
 			e1.printStackTrace();

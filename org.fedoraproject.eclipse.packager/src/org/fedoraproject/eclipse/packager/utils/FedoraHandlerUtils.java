@@ -30,8 +30,7 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 /**
- * Utility class used to determine fedora specific properties from the
- * information in the ExecutionEvent.
+ * Handler bound utility class.
  */
 public class FedoraHandlerUtils {
 	

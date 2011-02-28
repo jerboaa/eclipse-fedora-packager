@@ -80,20 +80,18 @@ public class FedoraPackagerUtils {
 	}
 
 	/**
-	 * Returns a FedoraProjectRoot from the given resource. It finds the
-	 * underlying resource from the given ExecutionEvent and then uses the
-	 * closes container containing the sources file
+	 * Returns a FedoraProjectRoot from the given resource.
 	 * 
-	 * @param event
-	 *            The execution event.
+	 * @param resource
+	 *            The underlying resource of the Fedora project root or
+	 *            a resource within it.
 	 * @throws InvalidProjectRootException
 	 *             If the project root does not contain a .spec with the proper
 	 *             name or doesn't contain a sources file.
 	 * 
 	 * @return The retrieved FedoraProjectRoot.
 	 */
-	public static FedoraProjectRoot getValidRoot(ExecutionEvent event) throws InvalidProjectRootException {
-		IResource resource = FedoraHandlerUtils.getResource(event);
+	public static FedoraProjectRoot getValidRoot(IResource resource) throws InvalidProjectRootException {
 		IContainer canditate = null;
 		if (resource instanceof IFolder || resource instanceof IProject) {
 			canditate = (IContainer) resource;

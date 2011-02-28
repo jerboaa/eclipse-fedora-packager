@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -40,8 +41,9 @@ public class PrepHandler extends RPMHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
+			IResource eventResource = FedoraHandlerUtils.getResource(e);
 			fedoraProjectRoot = FedoraPackagerUtils
-					.getValidRoot(e);
+					.getValidRoot(eventResource);
 		} catch (InvalidProjectRootException e2) {
 			// TODO Handle this appropriately
 			e2.printStackTrace();

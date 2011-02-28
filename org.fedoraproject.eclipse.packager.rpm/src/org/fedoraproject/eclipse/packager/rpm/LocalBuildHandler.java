@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,7 +44,8 @@ public class LocalBuildHandler extends RPMHandler {
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
-			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(e);
+			IResource eventResource = FedoraHandlerUtils.getResource(e);
+			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(eventResource);
 		} catch (InvalidProjectRootException e2) {
 			// TODO Handle this appropriately
 			e2.printStackTrace();
