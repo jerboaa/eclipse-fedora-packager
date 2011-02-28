@@ -91,7 +91,7 @@ public class UploadSourceCommand extends
 	 * Implementation of the {@code UploadSources} command.
 	 * 
 	 * @throws FileAvailableInLookasideCacheException If the to-be-uploaded file
-	 * is still missing from the lookaside cache.
+	 * is already available in the lookaside cache.
 	 * @throws CommandMisconfiguredException If the command was not properly configured.
 	 * @throws CommandListenerException If a listener caused an error.
 	 */
