@@ -73,7 +73,7 @@ import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.httpclient.CoutingRequestEntity;
-import org.fedoraproject.eclipse.packager.utils.httpclient.IProgressListener;
+import org.fedoraproject.eclipse.packager.utils.httpclient.IRequestProgressListener;
 
 /**
  * Class responsible for uploading source files (VCS independent bits).

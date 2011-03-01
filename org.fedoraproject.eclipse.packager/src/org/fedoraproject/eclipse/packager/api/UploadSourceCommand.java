@@ -1,39 +1,81 @@
 package org.fedoraproject.eclipse.packager.api;
 
+import java.io.BufferedReader;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.text.MessageFormat;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.LookasideCache;
+import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
-import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidUploadFileException;
+import org.fedoraproject.eclipse.packager.api.errors.UploadFailedException;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.utils.httpclient.CoutingRequestEntity;
+import org.fedoraproject.eclipse.packager.utils.httpclient.IRequestProgressListener;
 
 /**
  * A class used to execute a {@code upload sources} command. It has setters for
- * all supported options and arguments of this command and a {@link #call()}
+ * all supported options and arguments of this command and a {@link #call(IProgressMonitor)}
  * method to finally execute the command. Each instance of this class should
  * only be used for one invocation of the command (means: one call to
- * {@link #call()})
+ * {@link #call(IProgressMonitor)})
  * 
  */
 public class UploadSourceCommand extends
 		FedoraPackagerCommand<UploadSourceResult> {
+	
+	/**
+	 * Response body text if a resource is available in the lookaside cache.
+	 */
+	public static final String RESOURCE_AVAILABLE = "available"; //$NON-NLS-1$
+	/**
+	 * Response body text if a resource is missing from the lookaside cache.
+	 * I.e. would need to be uploaded.
+	 */
+	public static final String RESOURCE_MISSING = "missing"; //$NON-NLS-1$
+	
+	// Parameter name constants
+	private static final String FILENAME_PARAM_NAME = "filename"; //$NON-NLS-1$
+	private static final String CHECKSUM_PARAM_NAME = "md5sum"; //$NON-NLS-1$
+	private static final String PACKAGENAME_PARAM_NAME = "name"; //$NON-NLS-1$
+	private static final String FILE_PARAM_NAME = "file"; //$NON-NLS-1$
+	
+	// Use 30 sec connection timeout
+	private static final int CONNECTION_TIMEOUT = 30000;
 
-	private final LookasideCache lookasideCache;
-	private final SourcesFile sources;
+	// The file to upload
 	private File fileToUpload;
-	private HttpResponse response;
-	private boolean replaceSource = false;
 	
 	/**
 	 * @param projectRoot The project root.
@@ -41,17 +83,15 @@ public class UploadSourceCommand extends
 	 */
 	public UploadSourceCommand(FedoraProjectRoot projectRoot) {
 		super(projectRoot);
-		this.sources = projectRoot.getSourcesFile();
-		this.lookasideCache = projectRoot.getLookAsideCache();
 	}
-	
+
 	/**
 	 * @param uploadURL the uploadURL to set. Optional.
 	 * @return this instance.
 	 * @throws MalformedURLException If the provided URL was not well formed.
 	 */
 	public UploadSourceCommand setUploadURL(String uploadURL) throws MalformedURLException {
-		this.lookasideCache.setUploadUrl(uploadURL);
+		this.projectRoot.getLookAsideCache().setUploadUrl(uploadURL);
 		return this;
 	}
 
@@ -75,16 +115,6 @@ public class UploadSourceCommand extends
 		this.fileToUpload = fileToUpload;
 		return this;
 	}
-
-	/**
-	 * @param replaceSource Set to true if sources should be replaced in
-	 * sources file.
-	 * @return this instance.
-	 */
-	public UploadSourceCommand setReplaceSource(boolean replaceSource) {
-		this.replaceSource = replaceSource;
-		return this;
-	}
 	
 
 	/**
@@ -96,8 +126,9 @@ public class UploadSourceCommand extends
 	 * @throws CommandListenerException If a listener caused an error.
 	 */
 	@Override
-	public UploadSourceResult call(IProgressMonitor monitor)
-		throws FileAvailableInLookasideCacheException, CommandMisconfiguredException, CommandListenerException {
+	public UploadSourceResult call(IProgressMonitor subMonitor)
+		throws FileAvailableInLookasideCacheException, CommandMisconfiguredException, CommandListenerException,
+		UploadFailedException {
 		try {
 			callPreExecListeners();
 		} catch (CommandListenerException e) {
@@ -107,12 +138,11 @@ public class UploadSourceCommand extends
 			}
 			throw e;
 		}
-		// implementation
-		UploadSourceResult result = new UploadSourceResult();
-		
-		
+		// Check if source is available, first.
+		checkSourceAvailable();
+		// Ok, file is missing. Perform the actual upload.
+		UploadSourceResult result = upload(subMonitor);
 		callPostExecListeners();
-		result.setSuccessful(true);
 		return result;
 	}
 	
@@ -123,6 +153,242 @@ public class UploadSourceCommand extends
 			throw new IllegalStateException(
 					FedoraPackagerText.get().uploadSourceCommand_uploadFileUnspecified);
 		}
+	}
+
+	/**
+	 * Check if upload file has already been uploaded. Do nothing, if file is
+	 * missing.
+	 * 
+	 * @throws UploadFailedException
+	 *             If something went wrong sending/receiving the request to/from
+	 *             the lookaside cache.
+	 * @throws FileAvailableInLookasideCacheException
+	 *             If the upload candidate file is already present in the
+	 *             lookaside cache.
+	 */
+	private void checkSourceAvailable()
+			throws FileAvailableInLookasideCacheException,
+			UploadFailedException {
+		HttpClient client = getClient();
+		try {
+			URI uploadURI = null;
+			try {
+				uploadURI = this.projectRoot.getLookAsideCache().getUploadUrl()
+						.toURI();
+			} catch (URISyntaxException e) {
+				// Ignore. Lookaside cache took care of this already.
+			}
+			assert uploadURI != null;
+			HttpPost post = new HttpPost(uploadURI);
+
+			// Construct the multipart POST request body.
+			MultipartEntity reqEntity = new MultipartEntity();
+			reqEntity.addPart(FILENAME_PARAM_NAME,
+					new StringBody(fileToUpload.getName()));
+			reqEntity.addPart(PACKAGENAME_PARAM_NAME, new StringBody(
+					projectRoot.getSpecfileModel().getName()));
+			reqEntity
+					.addPart(
+							CHECKSUM_PARAM_NAME,
+							new StringBody(SourcesFile
+									.calculateChecksum(fileToUpload)));
+
+			post.setEntity(reqEntity);
+
+			HttpResponse response = client.execute(post);
+			HttpEntity resEntity = response.getEntity();
+			int returnCode = response.getStatusLine().getStatusCode();
+
+			if (returnCode != HttpURLConnection.HTTP_OK) {
+				throw new UploadFailedException(response.getStatusLine()
+						.getReasonPhrase(), response);
+			} else {
+				String resString = ""; //$NON-NLS-1$
+				if (resEntity != null) {
+					try {
+						resString = parseResponse(resEntity);
+					} catch (IOException e) {
+						// ignore
+					}
+					EntityUtils.consume(resEntity); // clean up resources
+				}
+				// If this file has already been uploaded bail out
+				if (resString.toLowerCase().equals(RESOURCE_AVAILABLE)) {
+					throw new FileAvailableInLookasideCacheException(fileToUpload.getName());
+				} else if (resString.toLowerCase().equals(RESOURCE_MISSING)) {
+					// check passed
+					return;
+				} else {
+					// something is fishy
+					throw new UploadFailedException(
+							FedoraPackagerText.get().somethingUnexpectedHappenedError);
+				}
+			}
+		} catch (IOException e) {
+			throw new UploadFailedException(e.getMessage(), e);
+		} finally {
+			// When HttpClient instance is no longer needed,
+			// shut down the connection manager to ensure
+			// immediate deallocation of all system resources
+			client.getConnectionManager().shutdown();
+		}
+	}
+
+	/**
+	 * Upload a missing file to the lookaside cache.
+	 * 
+	 * Pre: upload file is missing as determined by
+	 * {@link UploadSourceCommand#checkSourceAvailable()}.
+	 * 
+	 * @param subMonitor
+	 * @return The result of the upload.
+	 */
+	@SuppressWarnings("static-access")
+	private UploadSourceResult upload(final IProgressMonitor subMonitor)
+			throws UploadFailedException {
+		HttpClient client = getClient();
+		try {
+			String uploadUrl = projectRoot.getLookAsideCache().getUploadUrl()
+					.toString();
+			
+			// We need an SSL enabled client
+			client = sslEnable(client);
+			
+			HttpPost post = new HttpPost(uploadUrl);
+			FileBody uploadFileBody = new FileBody(fileToUpload);
+            MultipartEntity reqEntity = new MultipartEntity();
+            reqEntity.addPart(FILE_PARAM_NAME, uploadFileBody);
+            reqEntity.addPart(FILENAME_PARAM_NAME,
+					new StringBody(fileToUpload.getName()));
+            reqEntity.addPart(PACKAGENAME_PARAM_NAME, new StringBody(
+            		projectRoot.getSpecfileModel().getName()));
+            reqEntity.addPart(CHECKSUM_PARAM_NAME, new StringBody(
+            		SourcesFile.calculateChecksum(fileToUpload)));
+			
+			// Not sure why it's ~ content-length * 2, but that's what it is...
+            final long totalsize = reqEntity.getContentLength() * 2;
+            subMonitor.beginTask(
+            		NLS.bind(FedoraPackagerText.get().uploadSourceCommand_uploadingFileSubTaskName,
+            				fileToUpload.getName()), 100 /* use percentage */);
+            subMonitor.worked(0);
+            
+            // Custom listener for progress reporting of the file upload
+			IRequestProgressListener progL = new IRequestProgressListener() {
+				
+				private int count = 0;
+				private int worked = 0;
+				private int updatedWorked = 0;
+				
+				@Override
+				public void transferred(final long bytesWritten) {
+					count++;
+					worked = updatedWorked;
+					if (subMonitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+					// Since this listener may be called *a lot*, don't
+					// do the calculation to often.
+					if ((count % 1024) == 0) {
+						updatedWorked = 
+							// multiply by 85 (instead of 100) since upload
+						    // progress cannot be 100% accurate.
+							(int)( (double)bytesWritten/totalsize * 85 );
+						if (updatedWorked > worked) {
+							worked = updatedWorked;
+							subMonitor.worked(updatedWorked);
+						}
+					}
+				}
+			};
+			// We need to wrap the entity which we want to upload in our
+			// custom entity, which allows for progress listening.
+			CoutingRequestEntity countingEntity = 
+				new CoutingRequestEntity(reqEntity, progL);
+            post.setEntity(countingEntity);
+            
+            HttpResponse response = client.execute(post);
+            
+            subMonitor.done();
+			return new UploadSourceResult(response);
+		} catch (IOException e) {
+			throw new UploadFailedException(e.getMessage(), e);
+		} catch (GeneralSecurityException e) {
+			throw new UploadFailedException(e.getMessage(), e);
+		} finally {
+			// When HttpClient instance is no longer needed,
+            // shut down the connection manager to ensure
+            // immediate deallocation of all system resources
+			client.getConnectionManager().shutdown();
+		}
+	}
+	
+	/**
+	 * @return A properly configured HTTP client instance
+	 */
+	private HttpClient getClient() {
+		// Set up client with proper timeout
+		HttpParams params = new BasicHttpParams();
+		params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, CONNECTION_TIMEOUT);
+		return new DefaultHttpClient(params);
+	}
+
+	/**
+	 * Wrap a basic HttpClient object in a SSL enabled HttpClient (including
+	 * Fedora SSL authentication cert) object.
+	 * 
+	 * @param base The HttpClient to wrap.
+	 * @return The SSL wrapped HttpClient.
+	 * @throws GeneralSecurityException
+	 * @throws IOException
+	 */
+	private HttpClient sslEnable(HttpClient base) throws GeneralSecurityException, IOException {
+		
+		// Get a SSL related instance for setting up SSL connections.
+		FedoraSSL fedoraSSL = new FedoraSSL(
+				new File(FedoraSSL.DEFAULT_CERT_FILE),
+				new File(FedoraSSL.DEFAULT_UPLOAD_CA_CERT),
+				new File(FedoraSSL.DEFAULT_SERVER_CA_CERT));
+        SSLSocketFactory sf = new SSLSocketFactory(fedoraSSL.getInitializedSSLContext(),
+        		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+		ClientConnectionManager ccm = base.getConnectionManager();
+		SchemeRegistry sr = ccm.getSchemeRegistry();
+		Scheme https = new Scheme("https", 443, sf); //$NON-NLS-1$
+		sr.register(https);
+		return new DefaultHttpClient(ccm, base.getParams());
+	}
+
+	/**
+	 * Helper to read response from response entity.
+	 * 
+	 * @param responseEntity
+	 * @return
+	 * @throws IOException
+	 */
+	private String parseResponse(HttpEntity responseEntity)
+			throws IOException {
+
+		String responseText = ""; //$NON-NLS-1$
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new InputStreamReader(
+					responseEntity.getContent()));
+			String line;
+			line = br.readLine();
+			while (line != null) {
+				responseText += line + "\n"; //$NON-NLS-1$
+				line = br.readLine();
+			}
+		} finally {
+			// cleanup
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
+		return responseText.trim();
 	}
 
 }

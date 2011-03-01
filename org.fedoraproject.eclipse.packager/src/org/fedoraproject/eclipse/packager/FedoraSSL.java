@@ -13,15 +13,10 @@ package org.fedoraproject.eclipse.packager;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.cert.X509Certificate;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.ssl.KeyMaterial;
 import org.apache.commons.ssl.TrustChain;
@@ -29,7 +24,7 @@ import org.apache.commons.ssl.TrustMaterial;
 
 /**
  * Helper class for Fedora related SSL things.
- * 
+ * Uses org.apache.commons.ssl (from not-yet-commons).
  */
 public class FedoraSSL {
 	
@@ -67,13 +62,13 @@ public class FedoraSSL {
 	}
 	
 	/**
-	 * Prepare a proper SSL connection to infrastructure accepting using certificates
-	 * as specified in the default constructor.
+	 * Set up an SSLContext, and initialize it properly.
 	 * 
 	 * @throws GeneralSecurityException
 	 * @throws IOException
+	 * @return The initialized SSLConext instance.
 	 */
-	public void initSSLConnection() throws GeneralSecurityException,
+	public SSLContext getInitializedSSLContext() throws GeneralSecurityException,
 			IOException {
 		TrustChain tc = getTrustChain();
 
@@ -81,18 +76,9 @@ public class FedoraSSL {
 
 		SSLContext sc = SSLContext.getInstance("SSL"); //$NON-NLS-1$
 
-		// Create empty HostnameVerifier
-		HostnameVerifier hv = new HostnameVerifier() {
-			@Override
-			public boolean verify(String arg0, SSLSession arg1) {
-				return true;
-			}
-		};
-
 		sc.init((KeyManager[]) kmat.getKeyManagers(), (TrustManager[]) tc
 				.getTrustManagers(), new java.security.SecureRandom());
-		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		HttpsURLConnection.setDefaultHostnameVerifier(hv);
+		return sc;
 	}
 
 	/**
@@ -108,34 +94,6 @@ public class FedoraSSL {
 		KeyMaterial kmat = new KeyMaterial(fedoraCert, fedoraCert,
 				new char[0]);
 		return kmat;
-	}
-
-	/**
-	 * Get a trust manager which always trusts the connection end-point.
-	 * 
-	 * @return An array of 1 element containing the trust manager.
-	 */
-	public static TrustManager[] getTrustEverythingTrustManager() {
-		// Create a trust manager that does not validate certificate chains
-		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-			@Override
-			public X509Certificate[] getAcceptedIssuers() {
-				return null;
-			}
-
-			@Override
-			public void checkClientTrusted(X509Certificate[] certs,
-					String authType) {
-				// Trust always
-			}
-
-			@Override
-			public void checkServerTrusted(X509Certificate[] certs,
-					String authType) {
-				// Trust always
-			}
-		} };
-		return trustAllCerts;
 	}
 
 	/**

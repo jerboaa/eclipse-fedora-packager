@@ -13,7 +13,7 @@ package org.fedoraproject.eclipse.packager.utils.httpclient;
 /**
  * Listener interface for hc-httpclient upload progress reporting. *
  */
-public interface IProgressListener {
+public interface IRequestProgressListener {
 
 	/**
 	 * Called each time x bytes of the total entity have been

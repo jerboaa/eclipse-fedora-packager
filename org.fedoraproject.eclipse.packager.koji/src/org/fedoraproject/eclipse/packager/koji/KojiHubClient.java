@@ -18,6 +18,8 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.net.ssl.SSLContext;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
@@ -141,7 +143,7 @@ public class KojiHubClient extends AbstractKojiHubClient {
 			File fedoraServerCert) throws KojiHubClientInitException {
 		FedoraSSL connection = new FedoraSSL(fedoraCert, fedoraUploadCert, fedoraServerCert);
 		try {
-			connection.initSSLConnection();
+			SSLContext ctxt = connection.getInitializedSSLContext();
 		} catch (GeneralSecurityException e) {
 			throw new KojiHubClientInitException(e);
 		} catch (IOException e) {

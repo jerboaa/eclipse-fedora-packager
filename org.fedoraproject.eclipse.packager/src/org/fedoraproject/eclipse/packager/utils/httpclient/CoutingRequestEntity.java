@@ -36,53 +36,62 @@ import org.apache.http.HttpEntity;
 public class CoutingRequestEntity implements HttpEntity {
 
 	private final HttpEntity entity;
-	private final IProgressListener listener;
+	private final IRequestProgressListener listener;
 
 	/**
 	 * @param entity The HttpEntity which gets wrapped.
 	 * @param listener The listener to notify.
 	 */
 	public CoutingRequestEntity(final HttpEntity entity,
-			final IProgressListener listener) {
+			final IRequestProgressListener listener) {
 		super();
 		this.entity = entity;
 		this.listener = listener;
 	}
 
 
+	@Override
 	@SuppressWarnings("deprecation")
 	public void consumeContent() throws IOException {
 		this.entity.consumeContent();
 	}
 
+	@Override
 	public long getContentLength() {
 		return this.entity.getContentLength();
 	}
 
+	@Override
 	public boolean isRepeatable() {
 		return this.entity.isRepeatable();
 	}
 
+	@Override
 	public void writeTo(final OutputStream out) throws IOException {
 		this.entity.writeTo(new CountingOutputStream(out, this.listener));
 	}
 
+	@Override
 	public InputStream getContent() throws IOException, IllegalStateException {
 		return this.entity.getContent();
 	}
 
+	@Override
 	public Header getContentEncoding() {
 		return this.entity.getContentEncoding();
 	}
 
+	@Override
 	public Header getContentType() {
 		return this.entity.getContentType();
 	}
 
+	@Override
 	public boolean isChunked() {
 		return this.entity.isChunked();
 	}
 
+	@Override
 	public boolean isStreaming() {
 		return this.entity.isStreaming();
 	}
@@ -93,7 +102,7 @@ public class CoutingRequestEntity implements HttpEntity {
 	 */
 	public static class CountingOutputStream extends FilterOutputStream {
 
-		private final IProgressListener listener;
+		private final IRequestProgressListener listener;
 		private long transferred;
 
 		/**
@@ -101,7 +110,7 @@ public class CoutingRequestEntity implements HttpEntity {
 		 * @param listener
 		 */
 		public CountingOutputStream(final OutputStream out,
-				final IProgressListener listener) {
+				final IRequestProgressListener listener) {
 			super(out);
 			this.listener = listener;
 			this.transferred = 0;

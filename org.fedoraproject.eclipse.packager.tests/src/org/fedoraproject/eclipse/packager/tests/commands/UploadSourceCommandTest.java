@@ -2,14 +2,12 @@ package org.fedoraproject.eclipse.packager.tests.commands;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IProject;
@@ -21,6 +19,7 @@ import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.SourcesFileUpdater;
 import org.fedoraproject.eclipse.packager.api.UploadSourceCommand;
+import org.fedoraproject.eclipse.packager.api.UploadSourceResult;
 import org.fedoraproject.eclipse.packager.api.VCSIgnoreFileUpdater;
 import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidUploadFileException;
@@ -47,7 +46,7 @@ public class UploadSourceCommandTest {
 		"resources/callgraph-factorial.zip"; // $NON-NLS-1$
 	private static final String INVALID_UPLOAD_FILE =
 		"resources/invalid_upload_file.exe"; // $NON-NLS-1$
-	private static final String LOOKASIDE_CACHE_URL_FOR_TESTING =
+	private static final String UPLOAD_URL_FOR_TESTING =
 		"http://upload-cgi/cgi-bin/upload.cgi"; //$NON-NLS-1$
 	private static final String EXAMPLE_FEDORA_PROJECT_ROOT = 
 		"resources/example-fedora-project"; // $NON-NLS-1$
@@ -105,11 +104,15 @@ public class UploadSourceCommandTest {
 						new Path(EXAMPLE_UPLOAD_FILE), null)).getFile();
 		File file = new File(fileName);
 		UploadSourceCommand uploadCmd = packager.uploadSources();
-		uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING)
-			.setFileToUpload(file).call(new NullProgressMonitor());
+		try {
+			uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING)
+				.setFileToUpload(file).call(new NullProgressMonitor());
+		} catch (FileAvailableInLookasideCacheException e) {
+			// don't care
+		}
 		uploadCmd = packager.uploadSources();
 		try {
-			uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING)
+			uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING)
 				.setFileToUpload(file).call(new NullProgressMonitor());
 			// File already available
 			fail("File should be present in lookaside cache.");
@@ -125,13 +128,17 @@ public class UploadSourceCommandTest {
 				FileLocator.find(TestsPlugin.getDefault().getBundle(),
 						new Path(EXAMPLE_UPLOAD_FILE), null)).getFile();
 		File file = new File(fileName);
+		UploadSourceResult result = null;
 		try {
-			uploadCmd.setUploadURL(LOOKASIDE_CACHE_URL_FOR_TESTING).setFileToUpload(file)
+			// TODO: generate a random file which is always missing
+			result = uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING).setFileToUpload(file)
 				.call(new NullProgressMonitor());
 		} catch (FileAvailableInLookasideCacheException e) {
 			// File should not be available
 			fail("File should have been missing!");
 		}
+		assertNotNull(result);
+		assertTrue(result.wasSuccessful());
 	}
 	
 	/**
@@ -171,9 +178,13 @@ public class UploadSourceCommandTest {
 		sourcesUpdater.setShouldReplace(true);
 		UploadSourceCommand uploadCmd = packager.uploadSources();
 		uploadCmd.setFileToUpload(fileToAdd);
+		uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING);
 		uploadCmd.addCommandListener(sourcesUpdater);
-		uploadCmd.call(new NullProgressMonitor());
-		
+		try {
+			uploadCmd.call(new NullProgressMonitor());
+		} catch (FileAvailableInLookasideCacheException e) {
+			// don't care
+		}
 		// assert sources file has been updated as expected
 		String sourcesFileContentPost = TestsUtils.readContents(sourcesFile);
 		assertEquals( SourcesFile.calculateChecksum(fileToAdd) + "  " + fileToAdd.getName(),
@@ -233,9 +244,14 @@ public class UploadSourceCommandTest {
 		
 		UploadSourceCommand uploadCmd = packager.uploadSources();
 		uploadCmd.setFileToUpload(fileToAdd);
+		uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING);
 		VCSIgnoreFileUpdater vcsUpdater = new VCSIgnoreFileUpdater(fileToAdd, vcsIgnoreFile);
 		uploadCmd.addCommandListener(vcsUpdater);
-		uploadCmd.call(new NullProgressMonitor());
+		try {
+			uploadCmd.call(new NullProgressMonitor());
+		} catch (FileAvailableInLookasideCacheException e) {
+			// don't care
+		}
 		
 		assertTrue(vcsIgnoreFile.exists()); // should have been created
 		String ignoreFileContentPost = TestsUtils.readContents(vcsIgnoreFile);

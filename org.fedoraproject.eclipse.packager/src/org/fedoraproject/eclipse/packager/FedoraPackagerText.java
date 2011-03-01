@@ -53,6 +53,7 @@ public class FedoraPackagerText extends TranslationBundle {
 	// UploadCommand
 	/****/ public static String uploadSourceCommand_uploadFileUnspecified;
 	/****/ public static String uploadSourceCommand_uploadFileInvalid;
+	/****/ public static String uploadSourceCommand_uploadingFileSubTaskName;
 	// FileAvailableInLookasideCacheException
 	/****/ public static String fileAvailableInLookasideCacheException_message;
 	// DownloadSourceCommand
