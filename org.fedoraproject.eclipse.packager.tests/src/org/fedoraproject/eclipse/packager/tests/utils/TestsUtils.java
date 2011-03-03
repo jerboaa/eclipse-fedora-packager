@@ -7,17 +7,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 
 /**
  * Utility class for Fedora Packager tests.
@@ -28,10 +24,17 @@ public class TestsUtils {
 	/**
 	 * Prefix for temporary directories created by EFP tests.
 	 */
-	public static final String TMP_DIRECTORY_PREFIX =
+	private static final String TMP_DIRECTORY_PREFIX =
 										"eclipse-fedorapackager-tests-temp";
-	public static final String TMP_FILE_PREFIX =
-		"eclipse-fedorapackager-tests-tempfile";
+	private static final String TMP_PROJECT_PREFIX =
+		"eclipse-fedorapackager-tests-";
+	
+	/**
+	 * @return A unique name.
+	 */
+	public static String getRandomUniqueName() {
+		return TMP_PROJECT_PREFIX + Long.toString(System.nanoTime());
+	}
 	
 	/**
 	 * Create a temporary directory (attempts to delete existing directories
@@ -97,46 +100,37 @@ public class TestsUtils {
 	}
 
 	/**
-	 * Convert a directory represented as an abstract {@link java.io.File} to an
-	 * Eclipse external project. Accounts for 1 level of files only.
+	 * Create a project in the current workspace with contents (i.e. files) the
+	 * same as in the template folder.
 	 * 
-	 * @param folder The directory to convert.
+	 * @param folder
+	 *            The directory to convert.
 	 * @return A handle to the external project.
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
-	public static IProject adaptFolderToProject(File folder) throws CoreException {
+	public static IProject createProjectFromTemplate(File folder) throws CoreException, IOException {
 		// Create external project
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IProject externalProject = root.getProject(folder.getName());
-		IProjectDescription description = ResourcesPlugin.getWorkspace()
-				.newProjectDescription(folder.getName());
-		URI fileProjectURL = null;
-		try {
-			fileProjectURL = new URI("file://" + folder.getAbsolutePath());
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		description.setLocationURI(fileProjectURL);
-		externalProject.create(null);
-		externalProject.open(null);
+		IProject newProject = root.getProject(getRandomUniqueName());
+		newProject.create(null);
+		newProject.open(null);
 		
 		// Add content
 		for (File file: folder.listFiles()) {
-			IFile newFile = externalProject.getFile(file.getName());
+			IFile newFile = newProject.getFile(file.getName());
 			if (!newFile.exists()) {
-				// Important: link resources only. Otherwise changes to files
-				// won't show up when accessing files via plain Java (i.e. no
-				// Eclipse layer). This is due to files not being in the
-				// workspace.
-				newFile.createLink(new Path(file.getAbsolutePath()),
-						IResource.REPLACE /* doesn't matter */, null);
+				FileInputStream in = new FileInputStream(file);
+				newFile.create(in, false, null);
+				try {
+					in.close();
+				} catch (IOException e) {
+					// ignore
+				}
 			}
 		}
+		newProject.refreshLocal(IResource.DEPTH_ONE, null);
 		
-		externalProject.refreshLocal(IResource.DEPTH_ONE, null);
-		
-		return externalProject;
+		return newProject;
 	}
 	
 	/**

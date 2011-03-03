@@ -54,7 +54,8 @@ public class DownloadSourceCommand extends
 	 * @return this instance.
 	 * @throws MalformedURLException If an invalid URL has been provided.
 	 */
-	public DownloadSourceCommand setDownloadURL(String downloadURL) throws MalformedURLException {
+	public DownloadSourceCommand setDownloadURL(String downloadURL)
+			throws MalformedURLException {
 		this.lookasideCache.setDownloadUrl(downloadURL);
 		return this;
 	}

@@ -46,10 +46,10 @@ import org.fedoraproject.eclipse.packager.utils.httpclient.IRequestProgressListe
 
 /**
  * A class used to execute a {@code upload sources} command. It has setters for
- * all supported options and arguments of this command and a {@link #call(IProgressMonitor)}
- * method to finally execute the command. Each instance of this class should
- * only be used for one invocation of the command (means: one call to
- * {@link #call(IProgressMonitor)})
+ * all supported options and arguments of this command and a
+ * {@link #call(IProgressMonitor)} method to finally execute the command. Each
+ * instance of this class should only be used for one invocation of the command
+ * (means: one call to {@link #call(IProgressMonitor)})
  * 
  */
 public class UploadSourceCommand extends
@@ -90,7 +90,8 @@ public class UploadSourceCommand extends
 	 * @return this instance.
 	 * @throws MalformedURLException If the provided URL was not well formed.
 	 */
-	public UploadSourceCommand setUploadURL(String uploadURL) throws MalformedURLException {
+	public UploadSourceCommand setUploadURL(String uploadURL)
+			throws MalformedURLException {
 		this.projectRoot.getLookAsideCache().setUploadUrl(uploadURL);
 		return this;
 	}
@@ -115,20 +116,25 @@ public class UploadSourceCommand extends
 		this.fileToUpload = fileToUpload;
 		return this;
 	}
-	
 
 	/**
 	 * Implementation of the {@code UploadSources} command.
 	 * 
-	 * @throws FileAvailableInLookasideCacheException If the to-be-uploaded file
-	 * is already available in the lookaside cache.
-	 * @throws CommandMisconfiguredException If the command was not properly configured.
-	 * @throws CommandListenerException If a listener caused an error.
+	 * @throws FileAvailableInLookasideCacheException
+	 *             If the to-be-uploaded file is already available in the
+	 *             lookaside cache.
+	 * @throws CommandMisconfiguredException
+	 *             If the command was not properly configured.
+	 * @throws CommandListenerException
+	 *             If a listener caused an error.
+	 * @throws UploadFailedException
+	 *             If the upload failed for some reason.
 	 */
 	@Override
 	public UploadSourceResult call(IProgressMonitor subMonitor)
-		throws FileAvailableInLookasideCacheException, CommandMisconfiguredException, CommandListenerException,
-		UploadFailedException {
+			throws FileAvailableInLookasideCacheException,
+			CommandMisconfiguredException, CommandListenerException,
+			UploadFailedException {
 		try {
 			callPreExecListeners();
 		} catch (CommandListenerException e) {
@@ -146,6 +152,10 @@ public class UploadSourceCommand extends
 		return result;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand#checkConfiguration()
+	 */
 	@SuppressWarnings("static-access")
 	@Override
 	protected void checkConfiguration() throws IllegalStateException {
@@ -306,6 +316,9 @@ public class UploadSourceCommand extends
 				new CoutingRequestEntity(reqEntity, progL);
             post.setEntity(countingEntity);
             
+            // TODO: This may throw some certificate exception. We should
+            // handle this case and throw a specific exception in order to
+            // report this to the user. I.e. advise to use use $ fedora-cert -n
             HttpResponse response = client.execute(post);
             
             subMonitor.done();
@@ -328,7 +341,8 @@ public class UploadSourceCommand extends
 	private HttpClient getClient() {
 		// Set up client with proper timeout
 		HttpParams params = new BasicHttpParams();
-		params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, CONNECTION_TIMEOUT);
+		params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT,
+				CONNECTION_TIMEOUT);
 		return new DefaultHttpClient(params);
 	}
 
@@ -341,15 +355,17 @@ public class UploadSourceCommand extends
 	 * @throws GeneralSecurityException
 	 * @throws IOException
 	 */
-	private HttpClient sslEnable(HttpClient base) throws GeneralSecurityException, IOException {
+	private HttpClient sslEnable(HttpClient base)
+			throws GeneralSecurityException, IOException {
 		
 		// Get a SSL related instance for setting up SSL connections.
 		FedoraSSL fedoraSSL = new FedoraSSL(
 				new File(FedoraSSL.DEFAULT_CERT_FILE),
 				new File(FedoraSSL.DEFAULT_UPLOAD_CA_CERT),
 				new File(FedoraSSL.DEFAULT_SERVER_CA_CERT));
-        SSLSocketFactory sf = new SSLSocketFactory(fedoraSSL.getInitializedSSLContext(),
-        		SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+		SSLSocketFactory sf = new SSLSocketFactory(
+				fedoraSSL.getInitializedSSLContext(),
+				SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 		ClientConnectionManager ccm = base.getConnectionManager();
 		SchemeRegistry sr = ccm.getSchemeRegistry();
 		Scheme https = new Scheme("https", 443, sf); //$NON-NLS-1$

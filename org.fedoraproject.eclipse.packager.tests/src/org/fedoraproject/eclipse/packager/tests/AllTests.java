@@ -16,6 +16,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	CVSProjectTypeTest.class,
 	GitFpBitsTest.class,
 	GitProjectTypeTest.class,
+	SourcesFileTest.class,
 	SourcesFileUpdaterTest.class,
 	VCSIgnoreFileUpdaterTest.class
 })

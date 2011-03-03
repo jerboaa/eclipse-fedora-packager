@@ -3,14 +3,18 @@ package org.fedoraproject.eclipse.packager.tests.commands;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Stack;
 
-import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -21,6 +25,7 @@ import org.fedoraproject.eclipse.packager.api.SourcesFileUpdater;
 import org.fedoraproject.eclipse.packager.api.UploadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.UploadSourceResult;
 import org.fedoraproject.eclipse.packager.api.VCSIgnoreFileUpdater;
+import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidUploadFileException;
 import org.fedoraproject.eclipse.packager.tests.SourcesFileUpdaterTest;
@@ -48,11 +53,9 @@ public class UploadSourceCommandTest {
 		"resources/invalid_upload_file.exe"; // $NON-NLS-1$
 	private static final String UPLOAD_URL_FOR_TESTING =
 		"http://upload-cgi/cgi-bin/upload.cgi"; //$NON-NLS-1$
-	private static final String EXAMPLE_FEDORA_PROJECT_ROOT = 
-		"resources/example-fedora-project"; // $NON-NLS-1$
 	
 	// List of temporary resources which should get deleted after test runs
-	private Stack<File> tempDirectories = new Stack<File>();
+	private Stack<File> tempFilesAndDirectories = new Stack<File>();
 	
 	/**
 	 * Set up a Fedora project and run the command.
@@ -62,19 +65,22 @@ public class UploadSourceCommandTest {
 	@Before
 	public void setUp() throws Exception {
 		this.testProject = new GitTestProject("eclipse-fedorapackager");
-		FedoraProjectRoot fpRoot = new FedoraProjectRoot(this.testProject.getProject());
+		FedoraProjectRoot fpRoot = new FedoraProjectRoot(
+				this.testProject.getProject());
 		this.packager = new FedoraPackager(fpRoot);
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		this.testProject.dispose();
-		while (!tempDirectories.isEmpty()) {
-			File dir = tempDirectories.pop();
-			for (File file: dir.listFiles()) {
-				file.delete();
+		while (!tempFilesAndDirectories.isEmpty()) {
+			File file = tempFilesAndDirectories.pop();
+			if (file.isDirectory()) {
+				for (File f: file.listFiles()) {
+					f.delete();
+				}
 			}
-			dir.delete();
+			file.delete();
 		}
 	}
 	
@@ -83,7 +89,8 @@ public class UploadSourceCommandTest {
 		UploadSourceCommand uploadCmd = packager.uploadSources();
 		try {
 			uploadCmd.setUploadURL("very bad url");
-			fail("UploadSourceCommand.setUploadURL should not accept invalid URLs!");
+			fail("UploadSourceCommand.setUploadURL()"
+					+ " should not accept invalid URLs!");
 		} catch (MalformedURLException e) {
 			// pass
 		}
@@ -120,19 +127,28 @@ public class UploadSourceCommandTest {
 			//pass
 		}
 	}
-	
+
+	/**
+	 * Generate a file which will have a different checksum than any other
+	 * already uploaded file for package {@code eclipse-fedorapackager}. Then
+	 * attempt to upload this file.
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void canUploadSources() throws Exception {
 		UploadSourceCommand uploadCmd = packager.uploadSources();
-		String fileName = FileLocator.toFileURL(
-				FileLocator.find(TestsPlugin.getDefault().getBundle(),
-						new Path(EXAMPLE_UPLOAD_FILE), null)).getFile();
-		File file = new File(fileName);
+		// create a a temp file with checksum, which hasn't been uploaded so far
+		File newUploadFile = File.createTempFile(
+				"eclipse-fedorapackager-uploadsources-test-", "-REMOVE_ME.tar");
+		// add file to stack for removal after test run
+		tempFilesAndDirectories.push(newUploadFile);
+		writeRandomContentToFile(newUploadFile);
 		UploadSourceResult result = null;
 		try {
-			// TODO: generate a random file which is always missing
-			result = uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING).setFileToUpload(file)
-				.call(new NullProgressMonitor());
+			result = uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING)
+					.setFileToUpload(newUploadFile)
+					.call(new NullProgressMonitor());
 		} catch (FileAvailableInLookasideCacheException e) {
 			// File should not be available
 			fail("File should have been missing!");
@@ -151,44 +167,49 @@ public class UploadSourceCommandTest {
 	 */
 	@Test
 	public void canUpdateSourcesFile() throws Exception {
-		String dirName = FileLocator.toFileURL(
-				FileLocator.find(TestsPlugin.getDefault().getBundle(),
-						new Path(EXAMPLE_FEDORA_PROJECT_ROOT), null)).getFile();
-		File copySource = new File(dirName);
-		File destTmpDir = TestsUtils.copyFolderContentsToTemp(copySource, null);
-		tempDirectories.push(destTmpDir); // add to stack for later removal
+		// Create a a temp file with checksum, which hasn't been uploaded so
+		// far. We need to upload a new non-existing file into the lookaside
+		// cache. Otherwise a file exists exception is thrown and nothing will
+		// be updated.
+		File newUploadFile = File.createTempFile(
+				"eclipse-fedorapackager-uploadsources-test-", "-REMOVE_ME.tar");
+		// add file to stack for removal after test run
+		tempFilesAndDirectories.push(newUploadFile);
+		writeRandomContentToFile(newUploadFile);
+		
 		// sources file pre-update
-		File sourcesFile = new File(destTmpDir.getAbsolutePath()
+		File sourcesFile = new File(testProject.getProject().getLocation().toFile().getAbsolutePath()
 				+ File.separatorChar + SourcesFile.SOURCES_FILENAME);
 		String sourcesFileContentPre = TestsUtils.readContents(sourcesFile);
-		// sanity check
-		assertEquals("4fd81a8fe53239a664f933707569d671  project_sources.zip",
-				sourcesFileContentPre);
-		// convert it to an external eclipse project
-		IProject dummyProject = TestsUtils.adaptFolderToProject(destTmpDir);
-		FedoraProjectRoot root = new FedoraProjectRoot(dummyProject);
-		String fileName = FileLocator.toFileURL(
-				FileLocator.find(TestsPlugin.getDefault().getBundle(),
-						new Path(EXAMPLE_UPLOAD_FILE), null)).getFile();
-		File fileToAdd = new File(fileName);
+		FedoraProjectRoot root = new FedoraProjectRoot(testProject.getProject());
 		
 		// create listener
-		SourcesFileUpdater sourcesUpdater = new SourcesFileUpdater(root, fileToAdd);
-		// want to replace sources
-		sourcesUpdater.setShouldReplace(true);
+		SourcesFileUpdater sourcesUpdater = new SourcesFileUpdater(root,
+				newUploadFile);
 		UploadSourceCommand uploadCmd = packager.uploadSources();
-		uploadCmd.setFileToUpload(fileToAdd);
+		uploadCmd.setFileToUpload(newUploadFile);
 		uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING);
 		uploadCmd.addCommandListener(sourcesUpdater);
+		UploadSourceResult result = null;
 		try {
-			uploadCmd.call(new NullProgressMonitor());
+			result = uploadCmd.call(new NullProgressMonitor());
 		} catch (FileAvailableInLookasideCacheException e) {
-			// don't care
+			fail("Need a new file to be uploaded "
+					+ "otherwise listener will not get executed!");
+		} catch (CommandListenerException e) {
+			fail("should not be thrown");
 		}
+		assertNotNull(result);
+		assertTrue(result.wasSuccessful());
+		final String sourceContentPost = TestsUtils.readContents(sourcesFile);
 		// assert sources file has been updated as expected
-		String sourcesFileContentPost = TestsUtils.readContents(sourcesFile);
-		assertEquals( SourcesFile.calculateChecksum(fileToAdd) + "  " + fileToAdd.getName(),
-				sourcesFileContentPost);
+		assertNotSame(sourcesFileContentPre, sourceContentPost);
+		assertTrue(sourceContentPost.contains(sourcesFileContentPre));
+		assertTrue(sourceContentPost.contains(newUploadFile.getName()));
+		int lastLineCharPos = sourceContentPost.lastIndexOf('\n');
+		String lastLine = sourceContentPost.substring(++lastLineCharPos);
+		assertEquals(SourcesFile.calculateChecksum(newUploadFile) + "  "
+				+ newUploadFile.getName(), lastLine);
 	}
 	
 	/**
@@ -222,39 +243,80 @@ public class UploadSourceCommandTest {
 	 */
 	@Test
 	public void canUpdateIgnoreFile() throws Exception {
-		String dirName = FileLocator.toFileURL(
-				FileLocator.find(TestsPlugin.getDefault().getBundle(),
-						new Path(EXAMPLE_FEDORA_PROJECT_ROOT), null)).getFile();
-		File copySource = new File(dirName);
-		File destTmpDir = TestsUtils.copyFolderContentsToTemp(copySource, null);
-		tempDirectories.push(destTmpDir);
+		// Create a a temp file with checksum, which hasn't been uploaded so
+		// far. We need to upload a new non-existing file into the lookaside
+		// cache. Otherwise a file exists exception is thrown and nothing will
+		// be updated.
+		File newUploadFile = File.createTempFile(
+				"eclipse-fedorapackager-uploadsources-test-", "-REMOVE_ME.tar");
+		// add file to stack for removal after test run
+		tempFilesAndDirectories.push(newUploadFile);
+		writeRandomContentToFile(newUploadFile);
+		
 		// VCS ignore file pre-update
-		File vcsIgnoreFile = new File(destTmpDir.getAbsolutePath()
-				+ File.separatorChar + ".gitignore");
+		IFile vcsIgnoreFile = testProject.getProject().getFile(new Path(".gitignore"));
 		String vcsIgnoreFileContentPre = "";
 		if (vcsIgnoreFile.exists()) {
-			vcsIgnoreFileContentPre = TestsUtils.readContents(vcsIgnoreFile);
+			vcsIgnoreFileContentPre = TestsUtils.readContents(vcsIgnoreFile
+					.getLocation().toFile());
 		}
-		assertEquals("", vcsIgnoreFileContentPre);
-		
-		String fileName = FileLocator.toFileURL(
-				FileLocator.find(TestsPlugin.getDefault().getBundle(),
-						new Path(EXAMPLE_UPLOAD_FILE), null)).getFile();
-		File fileToAdd = new File(fileName);
 		
 		UploadSourceCommand uploadCmd = packager.uploadSources();
-		uploadCmd.setFileToUpload(fileToAdd);
+		uploadCmd.setFileToUpload(newUploadFile);
 		uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING);
-		VCSIgnoreFileUpdater vcsUpdater = new VCSIgnoreFileUpdater(fileToAdd, vcsIgnoreFile);
+		VCSIgnoreFileUpdater vcsUpdater = new VCSIgnoreFileUpdater(newUploadFile,
+				vcsIgnoreFile);
 		uploadCmd.addCommandListener(vcsUpdater);
+		UploadSourceResult result = null;
 		try {
-			uploadCmd.call(new NullProgressMonitor());
+			result = uploadCmd.call(new NullProgressMonitor());
 		} catch (FileAvailableInLookasideCacheException e) {
-			// don't care
+			fail("Need a new file to be uploaded "
+					+ "otherwise listener will not get executed!");
+		} catch (CommandListenerException e) {
+			fail("should not be thrown");
 		}
 		
-		assertTrue(vcsIgnoreFile.exists()); // should have been created
-		String ignoreFileContentPost = TestsUtils.readContents(vcsIgnoreFile);
-		assertEquals(fileToAdd.getName(), ignoreFileContentPost);
+		assertNotNull(result);
+		assertTrue(result.wasSuccessful());
+		String ignoreFileContentPost = TestsUtils.readContents(vcsIgnoreFile
+				.getLocation().toFile());
+		assertNotSame(vcsIgnoreFileContentPre, ignoreFileContentPost);
+		assertTrue(ignoreFileContentPost.contains(vcsIgnoreFileContentPre));
+		assertTrue(ignoreFileContentPost.contains(newUploadFile.getName()));
+	}
+
+	/**
+	 * Make sure to write some randomly generated content to this temporary file
+	 * @param newFile
+	 */
+	private void writeRandomContentToFile(File newFile) {
+		FileOutputStream out = null;
+		try {
+			StringBuilder randomContent = new StringBuilder();
+			randomContent.append(Math.random());
+			randomContent.append("GARBAGE");
+			randomContent.append(System.nanoTime());
+			randomContent.append("more random content");
+			randomContent.append(System.nanoTime());
+			ByteArrayInputStream in = new ByteArrayInputStream(randomContent
+					.toString().getBytes());
+			out = new FileOutputStream(newFile);
+			byte[] buf = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = in.read(buf)) != -1) {
+				out.write(buf, 0, bytesRead);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
 	}
 }

@@ -1,26 +1,36 @@
 package org.fedoraproject.eclipse.packager.api;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 
 /**
  * Post exec hook for {@link UploadSourceCommand}, responsible for updating VCS
- * ignore file (such as .gitignore). TODO: This should probably use VCS project
- * bits in future.
+ * ignore file (such as {@code .gitignore}). TODO: This should probably use VCS
+ * project bits in future.
  * 
  */
 public class VCSIgnoreFileUpdater implements ICommandListener {
 	
-	private File ignoredFile;
+	private File newIgnoredFileCandidate;
 	private boolean shouldReplace = false;
-	private File vcsIgnoreFile;
+	private IFile vcsIgnoreFile; // may not exist
 
 	/**
 	 * Create a VCSIgnoreFileUpdater for this project root.
@@ -32,8 +42,8 @@ public class VCSIgnoreFileUpdater implements ICommandListener {
 	 *            some source file.
 	 */
 	public VCSIgnoreFileUpdater(File ignoredFile,
-			File vcsIgnoreFile) {
-		this.ignoredFile = ignoredFile;
+			IFile vcsIgnoreFile) {
+		this.newIgnoredFileCandidate = ignoredFile;
 		this.vcsIgnoreFile = vcsIgnoreFile;
 	}
 
@@ -53,8 +63,7 @@ public class VCSIgnoreFileUpdater implements ICommandListener {
 	}
 
 	/**
-	 * Updates the VCS ignore file for the Fedora project root of this instance
-	 * as required.
+	 * Updates the VCS ignore file for the Fedora project root of this instance.
 	 * 
 	 * @throws CommandListenerException
 	 *             If an error occurred during the update. Use
@@ -63,42 +72,89 @@ public class VCSIgnoreFileUpdater implements ICommandListener {
 	 */
 	@Override
 	public void postExecution() throws CommandListenerException {
-		String filename = ignoredFile.getName();
-		ArrayList<String> ignoreFiles = new ArrayList<String>();
-		BufferedReader br = null;
-		PrintWriter pw = null;
 		try {
+			createVCSFileIfNotExistent();
+		} catch (CoreException e) {
+			throw new CommandListenerException(e);
+		}
+		String filename = newIgnoredFileCandidate.getName();
+		ArrayList<String> ignoreFiles = new ArrayList<String>();
+		final PipedInputStream in = new PipedInputStream();
+		PipedOutputStream out = null;
+		PrintWriter pw = null;
+		final IFile file = vcsIgnoreFile;
+		try {
+			out = new PipedOutputStream(in);
+			pw = new PrintWriter(out);
 			if (shouldReplace) {
-				pw = new PrintWriter(new FileWriter(vcsIgnoreFile, false));
 				pw.println(filename);
 			} else {
-				// only append to file if not already present
-				br = new BufferedReader(new FileReader(vcsIgnoreFile));
-
+				BufferedReader br = new BufferedReader(new InputStreamReader(vcsIgnoreFile.getContents()));
 				String line = br.readLine();
 				while (line != null) {
 					ignoreFiles.add(line);
+					pw.println(line);
 					line = br.readLine();
 				}
-
+				// only append to file if not already present
 				if (!ignoreFiles.contains(filename)) {
-					pw = new PrintWriter(new FileWriter(vcsIgnoreFile, true));
 					pw.println(filename);
 				}
 			}
+			// Close output end of pipe
+			pw.close();
+			out.close();
+			
+			Job job = new Job(FedoraPackagerText.get().sourcesFile_saveJob) {
+
+				@Override
+				public IStatus run(IProgressMonitor monitor) {
+					try {
+						// Potentially long running so do as job.
+						file.setContents(in, false, true, monitor);
+						file.getParent().refreshLocal(IResource.DEPTH_ONE, null);
+					} catch (CoreException e) {
+						e.printStackTrace();
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			job.schedule();
+			try {
+				job.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
+			throw new CommandListenerException(e);
+		} catch (CoreException e) {
+			throw new CommandListenerException(e);
+		}
+		finally {
 			if (pw != null) {
 				pw.close();
 			}
-			if (br != null) {
+			if (out != null) {
 				try {
-					br.close();
+					out.close();
 				} catch (IOException e) {
 					// ignore
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Creates the VCS ignore file if it does not exist.
+	 * 
+	 * @throws CoreException If creation of VCS ignore file fails.
+	 */
+	private void createVCSFileIfNotExistent() throws CoreException {
+		if (vcsIgnoreFile.exists()) {
+			return; // done
+		}
+		// Start out empty
+		ByteArrayInputStream in = new ByteArrayInputStream("".getBytes()); //$NON-NLS-1$
+		vcsIgnoreFile.create(in, false, null);
 	}
 }

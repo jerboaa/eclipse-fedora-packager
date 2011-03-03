@@ -10,70 +10,46 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.handlers;
 
-import java.io.BufferedReader;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Map;
 
-import javax.net.ssl.SSLContext;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.commons.ssl.HttpSecureProtocol;
-import org.apache.commons.ssl.TrustMaterial;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.SourcesFileUpdater;
+import org.fedoraproject.eclipse.packager.api.UploadSourceCommand;
+import org.fedoraproject.eclipse.packager.api.UploadSourceResult;
+import org.fedoraproject.eclipse.packager.api.VCSIgnoreFileUpdater;
+import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
+import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
+import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.api.errors.InvalidUploadFileException;
+import org.fedoraproject.eclipse.packager.api.errors.UploadFailedException;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
-import org.fedoraproject.eclipse.packager.utils.httpclient.CoutingRequestEntity;
-import org.fedoraproject.eclipse.packager.utils.httpclient.IRequestProgressListener;
 
 /**
  * Class responsible for uploading source files (VCS independent bits).
@@ -83,6 +59,7 @@ import org.fedoraproject.eclipse.packager.utils.httpclient.IRequestProgressListe
  */
 public class UploadHandler extends AbstractHandler {
 
+	@SuppressWarnings("static-access")
 	@Override
 	/**
 	 *  Performs upload of sources (independent of VCS used), updates "sources"
@@ -101,6 +78,7 @@ public class UploadHandler extends AbstractHandler {
 			e1.printStackTrace();
 			return null;
 		}
+		final FedoraPackager packager = new FedoraPackager(fedoraProjectRoot);
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
 		// do tasks as job
@@ -109,51 +87,71 @@ public class UploadHandler extends AbstractHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				monitor.beginTask(FedoraPackagerText.get().uploadHandler_taskName, IProgressMonitor.UNKNOWN);
+				monitor.beginTask(FedoraPackagerText.get().uploadHandler_taskName, 1);
 
-				// ensure file has changed if already listed in sources
-				Map<String, String> sources = sourceFile.getSources();
-				String filename = resource.getName();
-				if (false /* TODO: check if file needs to be uploaded */) {
-					// file already in sources
-					return FedoraHandlerUtils.handleOK(MessageFormat.format(FedoraPackagerText.get().uploadHandler_versionExists, filename)
+				if (sourceFile.getMissingSources().contains(resource.getName())) {
+					// file already in sources and up-to-date
+					return FedoraHandlerUtils
+							.handleOK(
+									MessageFormat.format(
+											FedoraPackagerText.get().uploadHandler_versionExists,
+											resource.getName())
 							, true);
 				}
 
-				// Do file sanity checks (non-empty, file extensions etc.)
-				final File toAdd = resource.getLocation().toFile();
-				if (false /* TODO check for upload file validity */) {
-					return FedoraHandlerUtils.handleOK(MessageFormat.format(FedoraPackagerText.get().uploadHandler_invalidFile,
-							toAdd.getName()), true);
+				File newUploadFile = resource.getLocation().toFile();
+				SourcesFileUpdater sourcesUpdater = new SourcesFileUpdater(fedoraProjectRoot,
+						newUploadFile);
+				IFile gitIgnore = (IFile) fedoraProjectRoot.getContainer().findMember(new Path(".gitignore")); //$NON-NLS-1$
+				if (gitIgnore == null) {
+					gitIgnore = fedoraProjectRoot.getContainer().getFile(new Path(".gitignore")); //$NON-NLS-1$
+				}
+				VCSIgnoreFileUpdater vcsIgnoreFileUpdater = new VCSIgnoreFileUpdater(newUploadFile, gitIgnore);
+				UploadSourceCommand uploadCmd = packager.uploadSources();
+				
+				try {
+					uploadCmd.setUploadURL("http://upload-cgi/cgi-bin/upload.cgi");
+				} catch (MalformedURLException e2) {
+					// TODO Handle appropriately
+					e2.printStackTrace();
+				}
+				try {
+					uploadCmd.setFileToUpload(newUploadFile);
+				} catch (InvalidUploadFileException e1) {
+					// TODO: handle appropriately
+					e1.printStackTrace();
+				}
+				uploadCmd.addCommandListener(sourcesUpdater);
+				uploadCmd.addCommandListener(vcsIgnoreFileUpdater);
+				UploadSourceResult result = null;
+				try {
+					result = uploadCmd.call(new SubProgressMonitor(monitor, 1));
+				} catch (FileAvailableInLookasideCacheException e) {
+					// TODO: handle appropriately
+					e.printStackTrace();
+				} catch (CommandListenerException e) {
+					// TODO: handle appropriately
+					e.printStackTrace();
+				} catch (CommandMisconfiguredException e) {
+					// TODO handle appropriately
+					e.printStackTrace();
+				} catch (UploadFailedException e) {
+					// TODO handle appropriately
+					e.printStackTrace();
 				}
 
-				// Do the file uploading
-				// TODO execute upload command
-				IStatus result = null;
-
-				if (result.isOK()) {
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
 				}
-
-				// Update sources file
-				// TODO: update sources
-				if (!result.isOK()) {
-					// fail updating sources file
-					return FedoraHandlerUtils.handleError(FedoraPackagerText.get().uploadHandler_failUpdatSourceFile);
-				}
-
-				// Handle VCS specific stuff; Update .gitignore/.cvsignore
-				// TODO: update vcs ignore file
-				if (!result.isOK()) {
-					// fail updating sources file
-					return FedoraHandlerUtils.handleError(FedoraPackagerText.get().uploadHandler_failVCSUpdate);
+				
+				IStatus res = Status.OK_STATUS;
+				if (!result.wasSuccessful()) {
+					res = new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, result.getErrorString());
 				}
 
 				// Do VCS update
-				result = projectBits.updateVCS(fedoraProjectRoot, monitor);
-				if (result.isOK()) {
+				res = projectBits.updateVCS(fedoraProjectRoot, monitor);
+				if (res.isOK()) {
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
@@ -168,7 +166,8 @@ public class UploadHandler extends AbstractHandler {
 						return FedoraHandlerUtils.handleError(e);
 					}
 				}
-				return result;
+				
+				return res;
 			}
 
 		};

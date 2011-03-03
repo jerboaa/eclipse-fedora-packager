@@ -18,7 +18,10 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -141,14 +144,25 @@ public class KojiHubClient extends AbstractKojiHubClient {
 	 */
 	private void initSSLConnection(File fedoraCert, File fedoraUploadCert,
 			File fedoraServerCert) throws KojiHubClientInitException {
-		FedoraSSL connection = new FedoraSSL(fedoraCert, fedoraUploadCert, fedoraServerCert);
+		// Create empty HostnameVerifier
+		HostnameVerifier hv = new HostnameVerifier() {
+			@Override
+			public boolean verify(String arg0, SSLSession arg1) {
+				return true;
+			}
+		};
+		FedoraSSL fedoraSSL = new FedoraSSL(fedoraCert, fedoraUploadCert, fedoraServerCert);
+		SSLContext ctxt = null;
 		try {
-			SSLContext ctxt = connection.getInitializedSSLContext();
+			ctxt = fedoraSSL.getInitializedSSLContext();
 		} catch (GeneralSecurityException e) {
 			throw new KojiHubClientInitException(e);
 		} catch (IOException e) {
 			throw new KojiHubClientInitException(e);
 		}
+		// set up the proper socket
+		HttpsURLConnection.setDefaultSSLSocketFactory(ctxt.getSocketFactory());
+		HttpsURLConnection.setDefaultHostnameVerifier(hv);
 	}
 	
 	/**

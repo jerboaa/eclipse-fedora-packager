@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
@@ -25,13 +26,12 @@ public class SourcesFileUpdaterTest {
 	
 	private FedoraProjectRoot fpRoot;
 	private File uploadedFile;
+	private IProject testProject;
 	
 	private static final String EXAMPLE_FEDORA_PROJECT_ROOT = 
 		"resources/example-fedora-project"; // $NON-NLS-1$
 	private static final String EXAMPLE_UPLOAD_FILE =
 		"resources/callgraph-factorial.zip"; // $NON-NLS-1$
-	
-	private File tempDir;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -39,11 +39,9 @@ public class SourcesFileUpdaterTest {
 				FileLocator.find(TestsPlugin.getDefault().getBundle(),
 						new Path(EXAMPLE_FEDORA_PROJECT_ROOT), null)).getFile();
 		File copySource = new File(dirName);
-		tempDir = TestsUtils.copyFolderContentsToTemp(copySource, null);
 		
-		// convert it to an external eclipse project
-		IProject dummyProject = TestsUtils.adaptFolderToProject(tempDir);
-		fpRoot = FedoraPackagerUtils.getValidRoot(dummyProject);
+		testProject = TestsUtils.createProjectFromTemplate(copySource);
+		fpRoot = FedoraPackagerUtils.getValidRoot(testProject);
 		assertNotNull(fpRoot);
 		
 		String fileName = FileLocator.toFileURL(
@@ -55,16 +53,15 @@ public class SourcesFileUpdaterTest {
 
 	@After
 	public void tearDown() throws Exception {
-		for (File f : tempDir.listFiles()) {
-			f.delete();
-		}
-		tempDir.delete();
+		try {
+			this.testProject.delete(true, null);
+		} catch (CoreException e) { /* ignore */ }
 	}
 
 	@Test
 	public void canReplaceSourcesFile() throws Exception {
 		// sources file pre-update
-		File sourcesFile = new File(tempDir.getAbsolutePath()
+		File sourcesFile = new File(testProject.getLocation().toFile().getAbsolutePath()
 				+ File.separatorChar + SourcesFile.SOURCES_FILENAME);
 		final String sourcesFileContentPre = TestsUtils.readContents(sourcesFile);
 		// sanity check
@@ -89,7 +86,7 @@ public class SourcesFileUpdaterTest {
 	@Test
 	public void canUpdateSourcesFile() throws Exception {
 		// sources file pre-update
-		File sourcesFile = new File(tempDir.getAbsolutePath()
+		File sourcesFile = new File(testProject.getLocation().toFile().getAbsolutePath()
 				+ File.separatorChar + SourcesFile.SOURCES_FILENAME);
 		final String sourcesFileContentPre = TestsUtils.readContents(sourcesFile);
 		// sanity check

@@ -13,6 +13,7 @@ import java.util.Stack;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.SourcesFile;
@@ -25,8 +26,7 @@ public class SourcesFileTest {
 
 	private SourcesFile sourcesFile;
 	private Stack<File> tempDirsAndFiles = new Stack<File>();
-	private File tempDir;
-	private IProject testProject;
+	private IProject tempProject;
 	private static final String NEW_SOURCE_ARCHIVE =
 		"resources/callgraph-factorial.zip"; //$NON-NLS-1$
 	private static final String EXAMPLE_FEDORA_PROJECT_ROOT =
@@ -42,12 +42,10 @@ public class SourcesFileTest {
 				FileLocator.find(TestsPlugin.getDefault().getBundle(),
 						new Path(EXAMPLE_FEDORA_PROJECT_ROOT), null)).getFile();
 		File copySource = new File(dirName);
-		tempDir = TestsUtils.copyFolderContentsToTemp(copySource, null);
-		tempDirsAndFiles.push(tempDir);
 		
 		// convert it to an external eclipse project
-		testProject = TestsUtils.adaptFolderToProject(tempDir);
-		IFile s = (IFile) testProject.findMember(new Path(
+		tempProject = TestsUtils.createProjectFromTemplate(copySource);
+		IFile s = (IFile) tempProject.findMember(new Path(
 				SourcesFile.SOURCES_FILENAME));
 		assertNotNull(s);
 		sourcesFile = new SourcesFile(s);
@@ -64,6 +62,9 @@ public class SourcesFileTest {
 			}
 			file.delete();
 		}
+		try {
+			tempProject.delete(true, null);
+		} catch (CoreException e) { /* ignore */ }
 	}
 
 	@Test
@@ -112,10 +113,10 @@ public class SourcesFileTest {
 	public void testGetMissingSources() throws Exception {
 		assertTrue(sourcesFile.getMissingSources().isEmpty());
 		// remove source file in order to get non-empty missing sources set
-		IFile sourceToDelete = (IFile) testProject.findMember(new Path(
+		IFile sourceToDelete = (IFile) tempProject.findMember(new Path(
 				ORIG_SOURCE));
 		sourceToDelete.delete(true, null);
-		testProject.refreshLocal(IResource.DEPTH_ONE, null);
+		tempProject.refreshLocal(IResource.DEPTH_ONE, null);
 		assertEquals(1, sourcesFile.getMissingSources().size());
 		assertTrue(sourcesFile.getMissingSources().contains(ORIG_SOURCE));
 	}
@@ -136,7 +137,7 @@ public class SourcesFileTest {
 
 	@Test
 	public void testCalculateChecksum() throws Exception {
-		IFile projectSources = (IFile) testProject.findMember(new Path(ORIG_SOURCE));
+		IFile projectSources = (IFile) tempProject.findMember(new Path(ORIG_SOURCE));
 		assertNotNull(projectSources);
 		assertEquals(ORIG_CHECKSUM,
 				SourcesFile.calculateChecksum(projectSources.getLocation()
@@ -175,7 +176,7 @@ public class SourcesFileTest {
 	@Test
 	public void testSave() throws Exception {
 		// sources file pre-update
-		File s = new File(tempDir.getAbsolutePath()
+		File s = new File(tempProject.getLocation().toFile().getAbsolutePath()
 				+ File.separatorChar + SourcesFile.SOURCES_FILENAME);
 		final String sourcesFileContentPre = TestsUtils.readContents(s);
 		String newFileLoc = FileLocator.toFileURL(
