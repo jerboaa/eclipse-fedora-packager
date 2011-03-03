@@ -2,7 +2,17 @@ package org.fedoraproject.eclipse.packager.tests;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.SourcesFileUpdater;
+import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
+import org.fedoraproject.eclipse.packager.tests.utils.TestsUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,23 +22,93 @@ import org.junit.Test;
  *
  */
 public class SourcesFileUpdaterTest {
-
+	
+	private FedoraProjectRoot fpRoot;
+	private File uploadedFile;
+	
+	private static final String EXAMPLE_FEDORA_PROJECT_ROOT = 
+		"resources/example-fedora-project"; // $NON-NLS-1$
+	private static final String EXAMPLE_UPLOAD_FILE =
+		"resources/callgraph-factorial.zip"; // $NON-NLS-1$
+	
+	private File tempDir;
+	
 	@Before
 	public void setUp() throws Exception {
+		String dirName = FileLocator.toFileURL(
+				FileLocator.find(TestsPlugin.getDefault().getBundle(),
+						new Path(EXAMPLE_FEDORA_PROJECT_ROOT), null)).getFile();
+		File copySource = new File(dirName);
+		tempDir = TestsUtils.copyFolderContentsToTemp(copySource, null);
+		
+		// convert it to an external eclipse project
+		IProject dummyProject = TestsUtils.adaptFolderToProject(tempDir);
+		fpRoot = FedoraPackagerUtils.getValidRoot(dummyProject);
+		assertNotNull(fpRoot);
+		
+		String fileName = FileLocator.toFileURL(
+				FileLocator.find(TestsPlugin.getDefault().getBundle(),
+						new Path(EXAMPLE_UPLOAD_FILE), null)).getFile();
+		uploadedFile = new File(fileName);
+		assertNotNull(uploadedFile);
 	}
 
 	@After
 	public void tearDown() throws Exception {
+		for (File f : tempDir.listFiles()) {
+			f.delete();
+		}
+		tempDir.delete();
 	}
 
 	@Test
-	public void canReplaceSourcesFile() {
-		fail("Not yet implemented");
+	public void canReplaceSourcesFile() throws Exception {
+		// sources file pre-update
+		File sourcesFile = new File(tempDir.getAbsolutePath()
+				+ File.separatorChar + SourcesFile.SOURCES_FILENAME);
+		final String sourcesFileContentPre = TestsUtils.readContents(sourcesFile);
+		// sanity check
+		assertEquals("20a16942e761f9281591891834997fe5  project_sources.zip",
+				sourcesFileContentPre);
+		SourcesFileUpdater sourcesUpdater = new SourcesFileUpdater(fpRoot,
+				uploadedFile);
+		// want to replace :)
+		sourcesUpdater.setShouldReplace(true);
+		try {
+			// this should update the sources file
+			sourcesUpdater.postExecution();
+		} catch (CommandListenerException e) {
+			fail("Should not throw any exception!");
+		}
+		final String sourcesFileContentPost = TestsUtils.readContents(sourcesFile);
+		assertNotSame(sourcesFileContentPre, sourcesFileContentPost);
+		assertEquals(SourcesFile.calculateChecksum(uploadedFile) + "  "
+				+ uploadedFile.getName(), sourcesFileContentPost);
 	}
 
 	@Test
-	public void canUpdateSourcesFile() {
-		fail("Not yet implemented");
+	public void canUpdateSourcesFile() throws Exception {
+		// sources file pre-update
+		File sourcesFile = new File(tempDir.getAbsolutePath()
+				+ File.separatorChar + SourcesFile.SOURCES_FILENAME);
+		final String sourcesFileContentPre = TestsUtils.readContents(sourcesFile);
+		// sanity check
+		assertEquals("20a16942e761f9281591891834997fe5  project_sources.zip",
+				sourcesFileContentPre);
+		SourcesFileUpdater sourcesUpdater = new SourcesFileUpdater(fpRoot,
+				uploadedFile);
+		try {
+			// this should update the sources file
+			sourcesUpdater.postExecution();
+		} catch (CommandListenerException e) {
+			fail("Should not throw any exception!");
+		}
+		final String sourcesFileContentPost = TestsUtils.readContents(sourcesFile);
+		assertNotSame(sourcesFileContentPre, sourcesFileContentPost);
+		final String expectedSourcesFileContentPost = sourcesFileContentPre + "\n" +
+			SourcesFile.calculateChecksum(uploadedFile) + "  "
+			+ uploadedFile.getName();
+		assertEquals(expectedSourcesFileContentPost, sourcesFileContentPost);
 	}
 
 }
