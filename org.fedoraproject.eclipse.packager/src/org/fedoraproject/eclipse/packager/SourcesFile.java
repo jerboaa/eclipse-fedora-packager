@@ -30,8 +30,10 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 /**
  * Sources file (named sources) are files containing MD5 hash and file name.
@@ -45,7 +47,7 @@ public class SourcesFile {
 	 * The name of the file containing checksums and file names of sources of a
 	 * Fedora package.
 	 */
-	public static final String SOURCES_FILENAME = "sources"; //$NON-NLS-1$ 
+	public static final String SOURCES_FILENAME = "sources"; //$NON-NLS-1$
 
 	private IFile sourcesFile;
 	Map<String, String> sources = new LinkedHashMap<String, String>();
@@ -236,8 +238,8 @@ public class SourcesFile {
 	 * @throws CoreException
 	 */
 	public void save() throws CoreException {
-		PipedInputStream in = new PipedInputStream();
-
+		
+		final PipedInputStream in = new PipedInputStream();
 		// create an OutputStream with the InputStream from above as input
 		PipedOutputStream out = null;
 		try {
@@ -248,13 +250,33 @@ public class SourcesFile {
 			}
 			pw.close();
 			out.close();
-			sourcesFile.refreshLocal(IResource.DEPTH_ONE, null);
-			sourcesFile.setContents(in, true, true, null);
+			final IFile file = sourcesFile;
+
+			Job job = new Job(FedoraPackagerText.get().sourcesFile_saveJob) {
+
+				@Override
+				public IStatus run(IProgressMonitor monitor) {
+					try {
+						// Potentially long running so do as job.
+						file.setContents(in, false, true, monitor);
+						file.getParent().refreshLocal(IResource.DEPTH_ONE, null);
+					} catch (CoreException e) {
+						e.printStackTrace();
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			job.schedule();
+			try {
+				job.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		} catch (IOException e) {
-			e.printStackTrace();
 			throw new CoreException(new Status(IStatus.ERROR,
-					PackagerPlugin.PLUGIN_ID, 
-					MessageFormat.format(
+					PackagerPlugin.PLUGIN_ID, MessageFormat.format(
 							FedoraPackagerText.get().sourcesFile_saveFailedMsg,
 							sourcesFile.getName())));
 		} finally {
@@ -266,7 +288,6 @@ public class SourcesFile {
 				}
 			}
 		}
-
 	}
 
 }

@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -18,6 +17,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 
 /**
  * Utility class for Fedora Packager tests.
@@ -30,6 +30,8 @@ public class TestsUtils {
 	 */
 	public static final String TMP_DIRECTORY_PREFIX =
 										"eclipse-fedorapackager-tests-temp";
+	public static final String TMP_FILE_PREFIX =
+		"eclipse-fedorapackager-tests-tempfile";
 	
 	/**
 	 * Create a temporary directory (attempts to delete existing directories
@@ -54,6 +56,18 @@ public class TestsUtils {
 		}
 		return tempDir;
 	}
+	
+	/**
+	 * Copy a file into temporary storage.
+	 * 
+	 * @param fromFile The source file.
+	 * @return A temporary file with contents as in {@code fromFile}.
+	 * @throws IOException
+	 */
+	public static File copyContentsToTempFile(File fromFile) throws IOException {
+		File destination = createTempDirectory();
+		return copyFileContents(fromFile, destination, true);
+	}
 
 	/**
 	 * Copy contents of folder {@code from} into a temporary directory. This
@@ -70,8 +84,6 @@ public class TestsUtils {
 	public static File copyFolderContentsToTemp(File fromDir,
 			FileFilter fileFilter) throws IOException {
 		File destination = createTempDirectory();
-		FileInputStream from = null;
-		FileOutputStream to = null;
 		File[] files = null;
 		if (fileFilter == null) {
 			files = fromDir.listFiles();
@@ -79,32 +91,7 @@ public class TestsUtils {
 			files = fromDir.listFiles(fileFilter);
 		}
 		for (File file: files) {
-			try {
-				from = new FileInputStream(file);
-				File toFile = new File(destination.getAbsolutePath()
-						+ File.separatorChar + file.getName());
-				to = new FileOutputStream(toFile);
-				byte[] buffer = new byte[4096];
-				int bytesRead;
-				while ((bytesRead = from.read(buffer)) != -1) {
-					to.write(buffer, 0, bytesRead); // write
-				}
-			} finally {
-				if (from != null) {
-					try {
-						from.close();
-					} catch (IOException e) {
-						// ignore
-					}
-				}
-				if (to != null) {
-					try {
-						to.close();
-					} catch (IOException e) {
-						// ignore
-					}
-				}
-			}
+			copyFileContents(file, destination, false);
 		}
 		return destination;
 	}
@@ -138,11 +125,11 @@ public class TestsUtils {
 		for (File file: folder.listFiles()) {
 			IFile newFile = externalProject.getFile(file.getName());
 			if (!newFile.exists()) {
-				try {
-					newFile.create(new FileInputStream(file), true, null);
-				} catch (FileNotFoundException e) {
-					// ignore
-				}
+				// Important: link resources only. Otherwise changes to files
+				// won't show up when accessing files via plain Java (i.e. no
+				// Eclipse layer).
+				newFile.createLink(new Path(file.getAbsolutePath()),
+						IResource.REPLACE, null);
 			}
 		}
 		
@@ -161,10 +148,9 @@ public class TestsUtils {
 	 */
 	public static String readContents(File source) throws IOException {
 		StringBuffer result = new StringBuffer();
-		File file = source;
 		BufferedReader br = null;
 		try {
-			br = new BufferedReader(new FileReader(file));
+			br = new BufferedReader(new FileReader(source));
 			String line;
 			do {
 				line = br.readLine();
@@ -178,5 +164,54 @@ public class TestsUtils {
 			}
 		}
 		return result.toString().trim();
+	}
+
+	/**
+	 * Copy a file into destination {@code destination}. If {@code useTempFile}
+	 * is set to true, the a random temporary file in destination will get
+	 * created. Otherwise the filename of {@code fromFile} will be used.
+	 * 
+	 * @param fromFile
+	 * @param destination
+	 * @param useTempFilenames
+	 * @return
+	 * @throws IOException
+	 */
+	private static File copyFileContents(File fromFile, File destination,
+			boolean useTempFilenames) throws IOException {
+		FileInputStream from = null;
+		FileOutputStream to = null;
+		File toFile = null;
+		if (useTempFilenames) {
+			toFile = File.createTempFile(TMP_DIRECTORY_PREFIX, "", destination);
+		} else {
+			toFile = new File(destination.getAbsolutePath()
+					+ File.separatorChar + fromFile.getName());
+		}
+		try {
+			from = new FileInputStream(fromFile);
+			to = new FileOutputStream(toFile);
+			byte[] buffer = new byte[4096];
+			int bytesRead;
+			while ((bytesRead = from.read(buffer)) != -1) {
+				to.write(buffer, 0, bytesRead); // write
+			}
+		} finally {
+			if (from != null) {
+				try {
+					from.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+			if (to != null) {
+				try {
+					to.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
+		return toFile;
 	}
 }
