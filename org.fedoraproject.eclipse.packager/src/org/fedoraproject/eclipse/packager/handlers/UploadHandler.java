@@ -11,11 +11,9 @@
 package org.fedoraproject.eclipse.packager.handlers;
 
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.text.MessageFormat;
-import java.util.Map;
 
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -52,10 +50,11 @@ import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
- * Class responsible for uploading source files (VCS independent bits).
+ * Class responsible for uploading source files.
  * 
- * @author Red Hat inc.
- *
+ * @see UploadSourceCommand
+ * @see VCSIgnoreFileUpdater
+ * @see SourcesFileUpdater
  */
 public class UploadHandler extends AbstractHandler {
 
@@ -102,6 +101,7 @@ public class UploadHandler extends AbstractHandler {
 				File newUploadFile = resource.getLocation().toFile();
 				SourcesFileUpdater sourcesUpdater = new SourcesFileUpdater(fedoraProjectRoot,
 						newUploadFile);
+				sourcesUpdater.setShouldReplace(shouldReplaceSources());
 				IFile gitIgnore = (IFile) fedoraProjectRoot.getContainer().findMember(new Path(".gitignore")); //$NON-NLS-1$
 				if (gitIgnore == null) {
 					gitIgnore = fedoraProjectRoot.getContainer().getFile(new Path(".gitignore")); //$NON-NLS-1$
@@ -174,5 +174,16 @@ public class UploadHandler extends AbstractHandler {
 		job.setUser(true);
 		job.schedule();
 		return null;
+	}
+
+	/**
+	 * Determines if {@code sources} file should be replaced or not.
+	 * 
+	 * @return {@code true} if and only if {@code sources} file should be
+	 *         replaced with new content.
+	 * @see NewSourcesHandler
+	 */
+	protected boolean shouldReplaceSources() {
+		return false;
 	}
 }
