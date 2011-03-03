@@ -127,9 +127,10 @@ public class TestsUtils {
 			if (!newFile.exists()) {
 				// Important: link resources only. Otherwise changes to files
 				// won't show up when accessing files via plain Java (i.e. no
-				// Eclipse layer).
+				// Eclipse layer). This is due to files not being in the
+				// workspace.
 				newFile.createLink(new Path(file.getAbsolutePath()),
-						IResource.REPLACE, null);
+						IResource.REPLACE /* doesn't matter */, null);
 			}
 		}
 		
