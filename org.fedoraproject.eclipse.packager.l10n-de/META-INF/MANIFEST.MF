@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: German L10n Fragment for Eclipse Fedora Packager
+Bundle-SymbolicName: org.fedoraproject.eclipse.packager.l10n-de
+Bundle-Version: 0.2.0.qualifier
+Bundle-Vendor: Fedoraproject.org
+Fragment-Host: org.fedoraproject.eclipse.packager;bundle-version="0.2.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
