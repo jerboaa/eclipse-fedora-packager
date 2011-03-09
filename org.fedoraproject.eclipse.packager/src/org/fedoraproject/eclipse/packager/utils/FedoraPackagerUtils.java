@@ -13,29 +13,19 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.ssl.Certificates;
 import org.apache.commons.ssl.KeyMaterial;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.eclipse.ui.part.EditorPart;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
@@ -63,46 +53,49 @@ public class FedoraPackagerUtils {
 	}
 
 	/**
-	 * Do some sanity checks to make sure we have a properly structured Fedora
-	 * project root. At the moment this only checks if a sources file is
-	 * present.
+	 * A valid project root contains a {@code .spec} file and a {@code sources}
+	 * file. The RPM spec-file must be of the form {@code package-name.spec}.
 	 * 
 	 * @param resource
 	 * @return True if the project root looks right.
 	 */
-	private static boolean validateFedorapackageRoot(IContainer resource) {
-		IFile file = resource.getFile(new Path("sources")); //$NON-NLS-1$
-		if (file.exists()) {
+	private static boolean isValidFedoraProjectRoot(IContainer resource) {
+		IFile sourceFile = resource.getFile(new Path("sources")); //$NON-NLS-1$
+		// FIXME: Determine rpm package name from a persistent property. In
+		// future the project name might not be equal to the RPM package name.
+		IFile specFile = resource.getFile(new Path(resource.getProject()
+				.getName() + ".spec")); //$NON-NLS-1$
+		if (sourceFile.exists() && specFile.exists()) {
 			return true;
 		}
-		// TODO: Add check if .spec file is present
 		return false;
 	}
 
 	/**
-	 * Returns a FedoraProjectRoot from the given resource.
+	 * Returns a FedoraProjectRoot from the given resource after performing some
+	 * validations.
 	 * 
 	 * @param resource
-	 *            The underlying resource of the Fedora project root or
-	 *            a resource within it.
+	 *            The container for this Fedora project root or a resource
+	 *            within it.
 	 * @throws InvalidProjectRootException
 	 *             If the project root does not contain a .spec with the proper
 	 *             name or doesn't contain a sources file.
 	 * 
 	 * @return The retrieved FedoraProjectRoot.
 	 */
-	public static FedoraProjectRoot getValidRoot(IResource resource) throws InvalidProjectRootException {
+	public static FedoraProjectRoot getProjectRoot(IResource resource)
+			throws InvalidProjectRootException {
 		IContainer canditate = null;
 		if (resource instanceof IFolder || resource instanceof IProject) {
 			canditate = (IContainer) resource;
 		} else if (resource instanceof IFile) {
 			canditate = resource.getParent();
 		}
-		if (canditate != null && validateFedorapackageRoot(canditate)) {
+		if (canditate != null && isValidFedoraProjectRoot(canditate)) {
 			return new FedoraProjectRoot(canditate);
 		} else {
-			// TODO: Externalize
-			throw new InvalidProjectRootException("Invalid Fedora project root");
+			throw new InvalidProjectRootException(FedoraPackagerText.FedoraPackagerUtils_invalidProjectRootError);
 		}
 	}
 	

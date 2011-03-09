@@ -41,7 +41,7 @@ public class SourcesFileUpdaterTest {
 		File copySource = new File(dirName);
 		
 		testProject = TestsUtils.createProjectFromTemplate(copySource);
-		fpRoot = FedoraPackagerUtils.getValidRoot(testProject);
+		fpRoot = FedoraPackagerUtils.getProjectRoot(testProject);
 		assertNotNull(fpRoot);
 		
 		String fileName = FileLocator.toFileURL(

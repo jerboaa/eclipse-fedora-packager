@@ -27,7 +27,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
-import org.fedoraproject.eclipse.packager.koji.preferences.PreferencesConstants;
+import org.fedoraproject.eclipse.packager.preferences.PreferencesConstants;
 
 /**
  * Koji hub client which uses certificate based

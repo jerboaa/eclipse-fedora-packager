@@ -35,7 +35,7 @@ public class TagHandler extends AbstractHandler {
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(e);
-			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(eventResource);
+			fedoraProjectRoot = FedoraPackagerUtils.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e1) {
 			// TODO Handle appropriately
 			e1.printStackTrace();

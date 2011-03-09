@@ -26,7 +26,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.EditorPart;
-import org.fedoraproject.eclipse.packager.FedoraPackagerText;
+import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 /**
@@ -105,19 +105,19 @@ public class FedoraHandlerUtils {
 					@Override
 					public void run() {
 						if (isError) {
-							MessageDialog.openError(null, FedoraPackagerText.get().commonHandler_fedoraPackagerName,
+							MessageDialog.openError(null, NonTranslatableStrings.getProductName(),
 									message);
 						} else {
 							MessageDialog.openInformation(null,
-									FedoraPackagerText.get().commonHandler_fedoraPackagerName, message);
+									NonTranslatableStrings.getProductName(), message);
 						}
 					}
 				});
 			} else {
 				if (isError) {
-					MessageDialog.openError(null, FedoraPackagerText.get().commonHandler_fedoraPackagerName, message);
+					MessageDialog.openError(null, NonTranslatableStrings.getProductName(), message);
 				} else {
-					MessageDialog.openInformation(null, FedoraPackagerText.get().commonHandler_fedoraPackagerName,
+					MessageDialog.openInformation(null, NonTranslatableStrings.getProductName(),
 							message);
 				}
 			}

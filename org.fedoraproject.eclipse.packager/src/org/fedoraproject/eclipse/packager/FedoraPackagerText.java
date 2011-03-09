@@ -1,70 +1,73 @@
 package org.fedoraproject.eclipse.packager;
 
-import org.fedoraproject.eclipse.packager.nls.NLS;
-import org.fedoraproject.eclipse.packager.nls.TranslationBundle;
+import org.eclipse.osgi.util.NLS;
+
 
 /**
  * Translation bundle for FedoraPackager core.
  */
-public class FedoraPackagerText extends TranslationBundle {
+public class FedoraPackagerText extends NLS {
 
 	/**
-	 * @return an instance of this translation bundle
+	 * Do not in-line this into the static initializer as the
+	 * "Find Broken Externalized Strings" tool will not be
+	 * able to find the corresponding bundle file.
+	 * 
+	 * This is the path to the file containing externalized strings.
 	 */
-	public static FedoraPackagerText get() {
-		return NLS.getBundleFor(FedoraPackagerText.class);
-	}
+	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.fedorapackagertext"; //$NON-NLS-1$
 
-	/****/ public String commandWasCalledInTheWrongState;
 	// ConsoleWriterThread
-	/****/ public static String consoleWriterThread_ioFail;
-	// DownloadJob
-	/****/ public static String downloadJob_name;
-	/****/ public static String downloadJob_fileDoesNotExist;
-	/****/ public static String downloadJob_badHostname;
-	// CommonHandler Strings
-	/****/ public static String commonHandler_fedoraPackagerName;
-	/****/ public static String commonHandler_branchAlreadyTaggedMessage;
+	/****/ public static String ConsoleWriterThread_ioFail;
 	// DownloadHandler Strings
-	/****/ public static String downloadHandler_jobName;
-	/****/ public static String downloadHandler_downloadSourceTask;
-	// NewSourcesHandler Strings
-	/****/ public static String newSourcesHandler_jobName;
-	/****/ public static String newSourcesHandler_taskName;
-	/****/ public static String newSourcesHandler_invalidFile;
-	/****/ public static String newSourcesHandler_failUpdateSourceFile;
-	/****/ public static String newSourcesHandler_failVCSUpdate;
+	/****/ public static String DownloadHandler_downloadSourceTask;
 	// UploadHandler Strings
-	/****/ public static String uploadHandler_taskName;
-	/****/ public static String uploadHandler_versionExists;
-	/****/ public static String uploadHandler_invalidFile;
-	/****/ public static String uploadHandler_failUpdatSourceFile;
-	/****/ public static String uploadHandler_failVCSUpdate;
-	/****/ public static String uploadHandler_checkingRemoteStatus;
-	/****/ public static String uploadHandler_uploadFail;
-	/****/ public static String uploadHandler_fileAlreadyUploaded;
-	/****/ public static String uploadHandler_progressMsg;
-	/****/ public static String uploadHandler_invalidUrlError;
-	// WGetHandler Strings
-	/****/ public static String wGetHandler_nothingToDownload;
-	/****/ public static String wGetHandler_badMd5sum;
-	/****/ public static String wGetHandler_couldNotCreate;
-	/****/ public static String wGetHandler_couldNotRefresh;
+	/****/ public static String UploadHandler_taskName;
+	/****/ public static String UploadHandler_versionExists;
+	/****/ public static String UploadHandler_invalidFile;
+	/****/ public static String UploadHandler_failUpdatSourceFile;
+	/****/ public static String UploadHandler_failVCSUpdate;
+	/****/ public static String UploadHandler_checkingRemoteStatus;
+	/****/ public static String UploadHandler_uploadFail;
+	/****/ public static String UploadHandler_fileAlreadyUploaded;
+	/****/ public static String UploadHandler_progressMsg;
+	/****/ public static String UploadHandler_invalidUrlError;
 	// UploadCommand
-	/****/ public static String uploadSourceCommand_uploadFileUnspecified;
-	/****/ public static String uploadSourceCommand_uploadFileInvalid;
-	/****/ public static String uploadSourceCommand_uploadingFileSubTaskName;
+	/****/ public static String UploadSourceCommand_uploadFileUnspecified;
+	/****/ public static String UploadSourceCommand_uploadFileInvalid;
+	/****/ public static String UploadSourceCommand_uploadingFileSubTaskName;
 	// FileAvailableInLookasideCacheException
-	/****/ public static String fileAvailableInLookasideCacheException_message;
+	/****/ public static String FileAvailableInLookasideCacheException_message;
 	// DownloadSourceCommand
-	/****/ public String downloadSourceCommand_nothingToDownload;
-	/****/ public String downloadSourceCommand_downloadFile;
-	/****/ public String downloadSourceCommand_downloadFileError;
-	/****/ public String downloadSourceCommand_invalidURL;
-	/****/ public String downloadSourceCommand_downloadingFileXofY;
+	/****/ public static String DownloadSourceCommand_nothingToDownload;
+	/****/ public static String DownloadSourceCommand_downloadFile;
+	/****/ public static String DownloadSourceCommand_downloadFileError;
+	/****/ public static String DownloadSourceCommand_invalidURL;
+	/****/ public static String DownloadSourceCommand_downloadingFileXofY;
 	// SourcesFile
-	/****/ public String sourcesFile_saveFailedMsg;
-	/****/ public String sourcesFile_saveJob;
-	// Generics
-	/****/ public String somethingUnexpectedHappenedError;
+	/****/ public static String SourcesFile_saveFailedMsg;
+	/****/ public static String SourcesFile_saveJob;
+	// FedoraPackagerUtils
+	/****/ public static String FedoraPackagerUtils_invalidProjectRootError;
+	// ChecksumValidListener
+	/****/ public static String ChecksumValidListener_badChecksum;
+	// FedoraPackagerPreferencesPage
+	/****/ public static String FedoraPackagerPreferencePage_lookasideUploadURLLabel;
+	/****/ public static String FedoraPackagerPreferencePage_lookasideDownloadURLLabel;
+	/****/ public static String FedoraPackagerPreferencePage_description;
+	/****/ public static String FedoraPackagerPreferencePage_invalidDownloadURLMsg;
+	/****/ public static String FedoraPackagerPreferencePage_invalidUploadURLMsg;
+	/****/ public static String FedoraPackagerPreferencePage_kojiWebURLLabel;
+	/****/ public static String FedoraPackagerPreferencePage_kojiHubURLLabel;
+	/****/ public static String FedoraPackagerPreferencePage_kojiWebURLInvalidMsg;
+	/****/ public static String FedoraPackagerPreferencePage_kojiHubURLInvalidMsg;
+	/****/ public static String FedoraPackagerPreferencePage_buildSystemGroupName;
+	/****/ public static String FedoraPackagerPreferencePage_lookasideGroupName;
+	// Generic strings
+	/****/ public static String somethingUnexpectedHappenedError;
+	/****/ public static String commandWasCalledInTheWrongState;
+	
+	static {
+		initializeMessages(BUNDLE_NAME,	FedoraPackagerText.class);
+	}
 }

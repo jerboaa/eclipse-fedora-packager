@@ -50,7 +50,7 @@ public class VCSIgnoreFileUpdaterTest {
 				
 		// convert it to an external eclipse project
 		tempProject = TestsUtils.createProjectFromTemplate(copySource);
-		fpRoot = FedoraPackagerUtils.getValidRoot(tempProject);
+		fpRoot = FedoraPackagerUtils.getProjectRoot(tempProject);
 		assertNotNull(fpRoot);
 		
 		// Get an IFile handle it shouldn't matter if it exists or not.

@@ -34,6 +34,7 @@ import org.fedoraproject.eclipse.packager.tests.VCSIgnoreFileUpdaterTest;
 import org.fedoraproject.eclipse.packager.tests.units.UploadFileValidityTest;
 import org.fedoraproject.eclipse.packager.tests.utils.TestsUtils;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +66,7 @@ public class UploadSourceCommandTest {
 	@Before
 	public void setUp() throws Exception {
 		this.testProject = new GitTestProject("eclipse-fedorapackager");
-		FedoraProjectRoot fpRoot = new FedoraProjectRoot(
+		FedoraProjectRoot fpRoot = FedoraPackagerUtils.getProjectRoot(
 				this.testProject.getProject());
 		this.packager = new FedoraPackager(fpRoot);
 	}
@@ -181,7 +182,8 @@ public class UploadSourceCommandTest {
 		File sourcesFile = new File(testProject.getProject().getLocation().toFile().getAbsolutePath()
 				+ File.separatorChar + SourcesFile.SOURCES_FILENAME);
 		String sourcesFileContentPre = TestsUtils.readContents(sourcesFile);
-		FedoraProjectRoot root = new FedoraProjectRoot(testProject.getProject());
+		FedoraProjectRoot root = FedoraPackagerUtils.getProjectRoot(testProject
+				.getProject());
 		
 		// create listener
 		SourcesFileUpdater sourcesUpdater = new SourcesFileUpdater(root,

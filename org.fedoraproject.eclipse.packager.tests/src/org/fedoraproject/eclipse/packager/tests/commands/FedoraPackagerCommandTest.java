@@ -14,6 +14,7 @@ import org.fedoraproject.eclipse.packager.tests.utils.DummyPreExecCmdListener;
 import org.fedoraproject.eclipse.packager.tests.utils.DummyResult;
 import org.fedoraproject.eclipse.packager.tests.utils.FedoraPackagerCommandDummyImpl;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,7 +40,7 @@ public class FedoraPackagerCommandTest {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		testProject = new GitTestProject("eclipse-fedorapackager");
-		fpRoot = new FedoraProjectRoot(testProject.getProject());
+		fpRoot = FedoraPackagerUtils.getProjectRoot(testProject.getProject());
 	}
 
 	/**

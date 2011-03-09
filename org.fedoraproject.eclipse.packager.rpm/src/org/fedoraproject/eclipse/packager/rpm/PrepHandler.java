@@ -43,7 +43,7 @@ public class PrepHandler extends RPMHandler {
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(e);
 			fedoraProjectRoot = FedoraPackagerUtils
-					.getValidRoot(eventResource);
+					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e2) {
 			// TODO Handle this appropriately
 			e2.printStackTrace();

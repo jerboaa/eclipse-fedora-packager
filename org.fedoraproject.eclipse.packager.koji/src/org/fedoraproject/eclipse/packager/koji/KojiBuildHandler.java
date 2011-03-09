@@ -39,6 +39,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
@@ -74,7 +75,7 @@ public class KojiBuildHandler extends AbstractHandler {
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(e);
 			fedoraProjectRoot = FedoraPackagerUtils
-					.getValidRoot(eventResource);
+					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e1) {
 			// TODO handle appropriately
 			e1.printStackTrace();
@@ -376,7 +377,8 @@ public class KojiBuildHandler extends AbstractHandler {
 
 		@Override
 		public void run() {
-			okPressed = MessageDialog.openQuestion(shell, FedoraPackagerText.get().commonHandler_fedoraPackagerName, //$NON-NLS-1$
+			okPressed = MessageDialog.openQuestion(shell,
+					NonTranslatableStrings.getProductName(),
 					question);
 		}
 

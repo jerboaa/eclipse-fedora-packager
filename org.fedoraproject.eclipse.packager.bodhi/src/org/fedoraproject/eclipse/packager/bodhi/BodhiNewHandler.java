@@ -79,7 +79,7 @@ public class BodhiNewHandler extends AbstractHandler {
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(e);
 			fedoraProjectRoot = FedoraPackagerUtils
-					.getValidRoot(eventResource);
+					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e1) {
 			// TODO Handle appropriately
 			e1.printStackTrace();

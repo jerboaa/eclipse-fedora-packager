@@ -28,6 +28,5 @@ Import-Package: org.fedoraproject.eclipse.packager.tests.utils.git,
  org.fedoraproject.eclipse.packager.cvs,
  org.fedoraproject.eclipse.packager.git,
  org.fedoraproject.eclipse.packager.koji,
- org.fedoraproject.eclipse.packager.koji.preferences,
  org.fedoraproject.eclipse.packager.rpm,
  org.fedoraproject.eclipse.packager.utils

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Red Hat Inc. and others.
+ * Copyright (c) 2010-2011 Red Hat Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,38 +10,37 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.preferences;
 
+import org.fedoraproject.eclipse.packager.LookasideCache;
+
 /**
- * Constant definitions for plug-in preferences
+ * Constants for preferences.
  */
 public final class PreferencesConstants {
 
-	/***************************************************
-	 * Prefences keys
-	 **************************************************/
-
-	/**
-	 * Preference key for the look-aside download URL
+	/*
+	 * -------------------------------------------------
+	 *                Prefences keys
+	 * -------------------------------------------------
 	 */
-	public static final String PREF_LOOKASIDE_DOWNLOAD_URL = "lookasideDownloadURL"; //$NON-NLS-1$
+	/***/ public static final String PREF_LOOKASIDE_DOWNLOAD_URL =
+			"lookasideDownloadURL"; //$NON-NLS-1$
+	/***/ public static final String PREF_LOOKASIDE_UPLOAD_URL =
+			"lookasideUploadURL"; //$NON-NLS-1$
+	/***/ public static final String PREF_KOJI_WEB_URL = "kojiWebURL"; //$NON-NLS-1$
+	/***/ public static final String PREF_KOJI_HUB_URL = "kojiHubURL"; //$NON-NLS-1$
 	
-	/**
-	 * URL of the Hub/XMLRPC interface of the build system
+	/*
+	 * -------------------------------------------------
+	 *          Default values for preferences
+	 * -------------------------------------------------
 	 */
-	public static final String PREF_LOOKASIDE_UPLOAD_URL = "lookasideUploadURL"; //$NON-NLS-1$
 	
-	/***************************************************
-	 * Preferences default values
-	 **************************************************/
-	
-	/**
-	 * Default URL of the build system's Web interface
-	 */
-	public static final String DEFAULT_LOOKASIDE_DOWNLOAD_URL = 
-		"http://pkgs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
-	
-	/**
-	 * Default URL of the build system's Hub/XMLRPC interface
-	 */
-	public static final String DEFAULT_LOOKASIDE_UPLOAD_URL = 
-		"https://pkgs.fedoraproject.org/repo/pkgs/upload.cgi"; //$NON-NLS-1$
+	/***/ public static final String DEFAULT_LOOKASIDE_DOWNLOAD_URL = 
+			LookasideCache.DEFAULT_FEDORA_DOWNLOAD_URL;
+	/***/ public static final String DEFAULT_LOOKASIDE_UPLOAD_URL = 
+			LookasideCache.DEFAULT_FEDORA_UPLOAD_URL;
+	/***/ public static final String DEFAULT_KOJI_WEB_URL = 
+		"http://koji.fedoraproject.org/koji"; //$NON-NLS-1$
+	/***/ public static final String DEFAULT_KOJI_HUB_URL = 
+		"https://koji.fedoraproject.org/kojihub"; //$NON-NLS-1$
 }

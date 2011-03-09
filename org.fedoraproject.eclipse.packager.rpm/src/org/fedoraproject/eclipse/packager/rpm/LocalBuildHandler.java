@@ -45,7 +45,7 @@ public class LocalBuildHandler extends RPMHandler {
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(e);
-			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(eventResource);
+			fedoraProjectRoot = FedoraPackagerUtils.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e2) {
 			// TODO Handle this appropriately
 			e2.printStackTrace();

@@ -13,7 +13,6 @@ package org.fedoraproject.eclipse.packager.handlers;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.text.MessageFormat;
 
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -30,6 +29,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
@@ -58,7 +58,6 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  */
 public class UploadHandler extends AbstractHandler {
 
-	@SuppressWarnings("static-access")
 	@Override
 	/**
 	 *  Performs upload of sources (independent of VCS used), updates "sources"
@@ -71,7 +70,7 @@ public class UploadHandler extends AbstractHandler {
 		final IResource resource = FedoraHandlerUtils.getResource(e);
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
-			fedoraProjectRoot = FedoraPackagerUtils.getValidRoot(resource);
+			fedoraProjectRoot = FedoraPackagerUtils.getProjectRoot(resource);
 		} catch (InvalidProjectRootException e1) {
 			// TODO handle appropriately
 			e1.printStackTrace();
@@ -81,19 +80,19 @@ public class UploadHandler extends AbstractHandler {
 		final SourcesFile sourceFile = fedoraProjectRoot.getSourcesFile();
 		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
 		// do tasks as job
-		Job job = new Job(FedoraPackagerText.get().uploadHandler_taskName) {
+		Job job = new Job(FedoraPackagerText.UploadHandler_taskName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				monitor.beginTask(FedoraPackagerText.get().uploadHandler_taskName, 1);
+				monitor.beginTask(FedoraPackagerText.UploadHandler_taskName, 1);
 
 				if (sourceFile.getMissingSources().contains(resource.getName())) {
 					// file already in sources and up-to-date
 					return FedoraHandlerUtils
 							.handleOK(
-									MessageFormat.format(
-											FedoraPackagerText.get().uploadHandler_versionExists,
+									NLS.bind(
+											FedoraPackagerText.UploadHandler_versionExists,
 											resource.getName())
 							, true);
 				}

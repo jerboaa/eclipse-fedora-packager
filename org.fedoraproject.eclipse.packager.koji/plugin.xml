@@ -60,14 +60,6 @@
       </menuContribution>
    </extension>
    <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            category="org.fedoraproject.eclipse.packager.preferences"
-            class="org.fedoraproject.eclipse.packager.koji.preferences.KojiPreferencePage"
-            id="org.fedoraproject.eclipse.packager.preferences.kojipreference"
-            name="%kojipreferencepage.name"/>
-   </extension>
-   <extension
          point="org.eclipse.ui.commands">
       <command
             defaultHandler="org.fedoraproject.eclipse.packager.koji.KojiBuildHandler"
@@ -79,12 +71,6 @@
             id="org.fedoraproject.eclipse.packager.koji.ScratchBuildCommand"
             name="%command.name.1">
       </command>
-   </extension>
-   <extension
-         point="org.eclipse.equinox.preferences.preferences">
-      <initializer
-            class="org.fedoraproject.eclipse.packager.koji.preferences.KojiPluginPreferenceInitializer">
-      </initializer>
    </extension>
 
 </plugin>

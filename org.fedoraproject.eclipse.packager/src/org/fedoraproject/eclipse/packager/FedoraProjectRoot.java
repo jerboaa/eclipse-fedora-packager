@@ -11,7 +11,6 @@
 package org.fedoraproject.eclipse.packager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -40,10 +39,14 @@ public class FedoraProjectRoot {
 	private LookasideCache lookAsideCache; // The lookaside cache abstraction
 
 	/**
-	 * Creates the FedoraProjectRoot using the given container.
+	 * Creates the FedoraProjectRoot using the given container. It is
+	 * discouraged to use this constructor directly.
+	 * {@link FedoraPackagerUtils#getProjectRoot(IResource)} should be used
+	 * instead.
 	 * 
 	 * @param container
 	 *            The root container either IFolder(cvs) or IProject(git).
+	 * @see FedoraPackagerUtils#getProjectRoot(IResource)
 	 */
 	public FedoraProjectRoot(IContainer container) {
 		this.rootContainer = container;
@@ -128,19 +131,6 @@ public class FedoraProjectRoot {
 	}
 
 	/**
-	 * Creates a tag name from the given specfile.
-	 * 
-	 * @return The created tag name.
-	 */
-	public String makeTagName() {
-		Specfile specfile = getSpecfileModel();
-		String name = specfile.getName().replaceAll("^[0-9]+", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		String version = specfile.getVersion();
-		String release = specfile.getRelease();
-		return (name + "-" + version + "-" + release).replaceAll("\\.", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-	}
-
-	/**
 	 * Returns the project type.
 	 * 
 	 * @return The project type based on the VCS used.
@@ -150,32 +140,30 @@ public class FedoraProjectRoot {
 	}
 
 	/**
-	 * Returns the ignore file based on the project type.
+	 * Get the ignore file based on the project type.
+	 * 
 	 * @return The ignore file (.cvsignore or .gitignore).
 	 */
-	//TODO remove this method once we are sure we can use git or cvs methods to manipulate their ignore files.
-	public File getIgnoreFile() {
-		File ignoreFile = null;
+	public IFile getIgnoreFile() {
+		String ignoreFileName = null;
 		switch (type) {
 		case GIT:
-			ignoreFile = getFileMember(".gitignore"); //$NON-NLS-1$
+			ignoreFileName = ".gitignore"; //$NON-NLS-1$
 			break;
 		case CVS:
-			ignoreFile = getFileMember(".cvsignore"); //$NON-NLS-1$
+			ignoreFileName = ".cvsignore"; //$NON-NLS-1$
 			break;
-
 		default:
 			break;
 		}
-		return ignoreFile;
-	}
-
-	private File getFileMember(String ignoreFileName) {
-		IResource resource = rootContainer.findMember(ignoreFileName);
-		if (resource instanceof IFile) {
-			return ((IFile) resource).getLocation().toFile();
+		assert ignoreFileName != null;
+		IFile ignoreFile = getFileMember(ignoreFileName);
+		// If not existent, return a IFile handle from the container
+		if (ignoreFile == null) {
+			return this.rootContainer.getFile(new Path(ignoreFileName));
 		}
-		return null;
+		assert ignoreFile != null;
+		return ignoreFile;
 	}
 
 	/**
@@ -183,5 +171,20 @@ public class FedoraProjectRoot {
 	 */
 	public LookasideCache getLookAsideCache() {
 		return lookAsideCache;
+	}
+
+	/**
+	 * Find the ignore file in the root container if any.
+	 * 
+	 * @param ignoreFileName The name of the VCS ignore file.
+	 * 
+	 * @return The file handle if found. {@code null} otherwise.
+	 */
+	private IFile getFileMember(String ignoreFileName) {
+		IResource resource = rootContainer.findMember(ignoreFileName);
+		if (resource instanceof IFile) {
+			return ((IFile) resource);
+		}
+		return null;
 	}
 }

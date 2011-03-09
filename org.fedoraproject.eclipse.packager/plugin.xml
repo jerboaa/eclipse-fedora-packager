@@ -53,7 +53,7 @@
          <menu
                icon="icons/fedora16x16.png"
                id="org.eclipse.fedoraproject.packager.main"
-               label="%menu.label.0">
+               label="%MenuProductName">
             <separator
                   name="org.fedoraproject.eclipse.packager.kojisep"
                   visible="false">
@@ -73,8 +73,8 @@
       <menuContribution
                locationURI="popup:org.eclipse.fedoraproject.packager.main?before=org.fedoraproject.eclipse.packager.cvssep">
              <menu
-                  label="%menu.label.1"
-                  mnemonic="%menu.mnemonic.0">
+                  label="%LabelSubmenuUploadSources"
+                  mnemonic="%MnemonicSubmenuUploadSources">
                <visibleWhen
                      checkEnabled="false">
                   <or>
@@ -94,21 +94,21 @@
                </visibleWhen>
                <command
                      commandId="org.fedoraproject.eclipse.packager.UploadCommand"
-                     label="%command.label.2"
-                     mnemonic="%command.mnemonic.2"
+                     label="%LabelUploadSources"
+                     mnemonic="%MnemonicUploadSources"
                      style="push">
          	   </command>
                <command
                      commandId="org.fedoraproject.eclipse.packager.NewSourcesCommand"
-                     label="%command.label.3"
-                     mnemonic="%command.mnemonic.3"
+                     label="%LabelReplaceSources"
+                     mnemonic="%MnemonicReplaceSources"
                      style="push">
                </command>
             </menu>
          <command
                   commandId="org.fedoraproject.eclipse.packager.DownloadCommand"
-                  label="%command.label.4"
-                  mnemonic="%command.mnemonic.4"
+                  label="%LabelDownloadSources"
+                  mnemonic="%MnemonicDownloadSources"
                   
                   style="push">
                <visibleWhen
@@ -137,32 +137,31 @@
       <command
             defaultHandler="org.fedoraproject.eclipse.packager.handlers.DownloadHandler"
             id="org.fedoraproject.eclipse.packager.DownloadCommand"
-            name="%command.name.9">
+            name="Download">
       </command>
       <command
             defaultHandler="org.fedoraproject.eclipse.packager.handlers.UploadHandler"
             id="org.fedoraproject.eclipse.packager.UploadCommand"
-            name="%command.name.6">
+            name="Upload">
       </command>
       <command
             defaultHandler="org.fedoraproject.eclipse.packager.handlers.NewSourcesHandler"
             id="org.fedoraproject.eclipse.packager.NewSourcesCommand"
-            name="%command.name.7">
+            name="Replace">
       </command>
     </extension>
     
     <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="org.fedoraproject.eclipse.packager.preferences.LookasidePreferencePage"
+            class="org.fedoraproject.eclipse.packager.preferences.FedoraPackagerPreferencePage"
             id="org.fedoraproject.eclipse.packager.preferences"
-            name="%preferencepage.name"/>
+            name="%PreferencePageName"/>
    </extension>
     <extension
           point="org.eclipse.equinox.preferences.preferences">
        <initializer
-             class="org.fedoraproject.eclipse.packager.preferences.PackagerPluginPreferenceInitializer">
+             class="org.fedoraproject.eclipse.packager.preferences.FedoraPackagerPreferenceInitializer">
        </initializer>
     </extension>
-
 </plugin>

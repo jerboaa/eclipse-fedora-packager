@@ -10,7 +10,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
-import java.text.MessageFormat;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -105,12 +104,11 @@ public class UploadSourceCommand extends
 	 * @throws InvalidUploadFileException
 	 *             If the upload file candidate is an invalid file.
 	 */
-	@SuppressWarnings("static-access")
 	public UploadSourceCommand setFileToUpload(File fileToUpload)
 			throws InvalidUploadFileException {
 		if (!FedoraPackagerUtils.isValidUploadFile(fileToUpload)) {
-			throw new InvalidUploadFileException(MessageFormat.format(
-					FedoraPackagerText.get().uploadSourceCommand_uploadFileInvalid,
+			throw new InvalidUploadFileException(NLS.bind(
+					FedoraPackagerText.UploadSourceCommand_uploadFileInvalid,
 					fileToUpload.getName()));
 		}
 		this.fileToUpload = fileToUpload;
@@ -156,12 +154,11 @@ public class UploadSourceCommand extends
 	 * (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand#checkConfiguration()
 	 */
-	@SuppressWarnings("static-access")
 	@Override
 	protected void checkConfiguration() throws IllegalStateException {
 		if (this.fileToUpload == null) {
 			throw new IllegalStateException(
-					FedoraPackagerText.get().uploadSourceCommand_uploadFileUnspecified);
+					FedoraPackagerText.UploadSourceCommand_uploadFileUnspecified);
 		}
 	}
 
@@ -231,7 +228,7 @@ public class UploadSourceCommand extends
 				} else {
 					// something is fishy
 					throw new UploadFailedException(
-							FedoraPackagerText.get().somethingUnexpectedHappenedError);
+							FedoraPackagerText.somethingUnexpectedHappenedError);
 				}
 			}
 		} catch (IOException e) {
@@ -253,7 +250,6 @@ public class UploadSourceCommand extends
 	 * @param subMonitor
 	 * @return The result of the upload.
 	 */
-	@SuppressWarnings("static-access")
 	private UploadSourceResult upload(final IProgressMonitor subMonitor)
 			throws UploadFailedException {
 		HttpClient client = getClient();
@@ -278,7 +274,7 @@ public class UploadSourceCommand extends
 			// Not sure why it's ~ content-length * 2, but that's what it is...
             final long totalsize = reqEntity.getContentLength() * 2;
             subMonitor.beginTask(
-            		NLS.bind(FedoraPackagerText.get().uploadSourceCommand_uploadingFileSubTaskName,
+            		NLS.bind(FedoraPackagerText.UploadSourceCommand_uploadingFileSubTaskName,
             				fileToUpload.getName()), 100 /* use percentage */);
             subMonitor.worked(0);
             

@@ -252,7 +252,7 @@ public class SourcesFile {
 			out.close();
 			final IFile file = sourcesFile;
 
-			Job job = new Job(FedoraPackagerText.get().sourcesFile_saveJob) {
+			Job job = new Job(FedoraPackagerText.SourcesFile_saveJob) {
 
 				@Override
 				public IStatus run(IProgressMonitor monitor) {
@@ -277,7 +277,7 @@ public class SourcesFile {
 		} catch (IOException e) {
 			throw new CoreException(new Status(IStatus.ERROR,
 					PackagerPlugin.PLUGIN_ID, MessageFormat.format(
-							FedoraPackagerText.get().sourcesFile_saveFailedMsg,
+							FedoraPackagerText.SourcesFile_saveFailedMsg,
 							sourcesFile.getName())));
 		} finally {
 			if (out != null) {

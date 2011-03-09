@@ -16,6 +16,7 @@ import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
 import org.fedoraproject.eclipse.packager.tests.utils.CorruptDownload;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,8 @@ public class DownloadSourceCommandTest {
 	@Before
 	public void setUp() throws Exception {
 		this.testProject = new GitTestProject("eclipse-fedorapackager");
-		this.fpRoot = new FedoraProjectRoot(this.testProject.getProject());
+		this.fpRoot = FedoraPackagerUtils.getProjectRoot((this.testProject
+				.getProject()));
 		this.packager = new FedoraPackager(fpRoot);
 	}
 
@@ -73,7 +75,8 @@ public class DownloadSourceCommandTest {
 		// The eclipse package usually has 2 source files. That's why we
 		// use the eclipse package for testing
 		this.testProject = new GitTestProject("eclipse");
-		this.fpRoot = new FedoraProjectRoot(this.testProject.getProject());
+		this.fpRoot = FedoraPackagerUtils.getProjectRoot(this.testProject
+				.getProject());
 		this.packager = new FedoraPackager(fpRoot);
 		DownloadSourceCommand downloadCmd = packager.downloadSources();
 		ChecksumValidListener md5sumListener = new ChecksumValidListener(fpRoot);

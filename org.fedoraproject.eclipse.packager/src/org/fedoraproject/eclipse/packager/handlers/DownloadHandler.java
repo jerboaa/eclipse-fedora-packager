@@ -24,10 +24,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.api.ChecksumValidListener;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
-import org.fedoraproject.eclipse.packager.api.DownloadSourceResult;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -50,7 +49,7 @@ public class DownloadHandler extends AbstractHandler {
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(e);
 			fedoraProjectRoot = FedoraPackagerUtils
-					.getValidRoot(eventResource);
+					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e1) {
 			// TODO Show proper message
 			e1.printStackTrace();
@@ -58,29 +57,28 @@ public class DownloadHandler extends AbstractHandler {
 		}
 		final FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
 		final Shell shell = getShell(e);
-		@SuppressWarnings("static-access")
-		Job job = new Job(FedoraPackagerText.get().downloadHandler_jobName) {
+		Job job = new Job(NonTranslatableStrings.getProductName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(
-						FedoraPackagerText.get().downloadHandler_jobName,
+						FedoraPackagerText.DownloadHandler_downloadSourceTask,
 						fedoraProjectRoot.getSourcesFile().getMissingSources()
 								.size());
 				DownloadSourceCommand download = fp.downloadSources();
 				ChecksumValidListener md5sumListener = new ChecksumValidListener(fedoraProjectRoot);
 				download.addCommandListener(md5sumListener); // want md5sum checking
-				DownloadSourceResult result = null;
 				try {
-					// TODO set download URL from preferences.
-					result = download.call(monitor);
+					// FIXME set download URL from preferences.
+					download.call(monitor);
 				} catch (final SourcesUpToDateException e) {
 					PlatformUI.getWorkbench().getDisplay()
 							.asyncExec(new Runnable() {
 								@Override
 								public void run() {
 									MessageDialog.openInformation(shell,
-											// TODO externalize
-											"Download result", e.getMessage());
+											NonTranslatableStrings
+													.getProductName(), e
+													.getMessage());
 								}
 							});
 					return Status.OK_STATUS;
@@ -97,11 +95,7 @@ public class DownloadHandler extends AbstractHandler {
 				} finally {
 					monitor.done();
 				}
-				if (result != null && result.wasSuccessful()) {
-					return Status.OK_STATUS;
-				}
-				// TODO: externalize
-				return new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, "download failed!");
+				return Status.OK_STATUS;
 			}
 		};
 		job.setUser(true);

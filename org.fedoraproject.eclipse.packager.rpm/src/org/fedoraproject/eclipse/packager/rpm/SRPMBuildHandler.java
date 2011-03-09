@@ -33,7 +33,7 @@ public class SRPMBuildHandler extends RPMHandler {
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(e);
 			fedoraProjectRoot = FedoraPackagerUtils
-					.getValidRoot(eventResource);
+					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e1) {
 			// TODO Handle this appropriately
 			e1.printStackTrace();

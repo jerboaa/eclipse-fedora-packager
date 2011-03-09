@@ -60,7 +60,7 @@ public class CommitHandler extends AbstractHandler {
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(e);
 			fedoraProjectRoot = FedoraPackagerUtils
-					.getValidRoot(eventResource);
+					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e1) {
 			// FIXME: Handle appropriately
 			e1.printStackTrace();

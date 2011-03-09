@@ -1,8 +1,8 @@
 package org.fedoraproject.eclipse.packager.api;
 
-import java.text.MessageFormat;
 import java.util.Set;
 
+import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
@@ -57,8 +57,11 @@ public class ChecksumValidListener implements ICommandListener {
 			if ( (end = failedSources.lastIndexOf(", ")) > 0) { //$NON-NLS-1$ 
 				badFiles = failedSources.substring(0, end);
 			}
-			// FIXME: String externalization
-			throw new CommandListenerException(new InvalidCheckSumException(MessageFormat.format(FedoraPackagerText.get().wGetHandler_badMd5sum, badFiles)));
+			throw new CommandListenerException(
+					new InvalidCheckSumException(
+							NLS.bind(
+									FedoraPackagerText.ChecksumValidListener_badChecksum,
+									badFiles)));
 		}
 	}
 

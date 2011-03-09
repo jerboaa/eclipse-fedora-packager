@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.MessageFormat;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -17,6 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.LookasideCache;
@@ -96,7 +96,7 @@ public class DownloadSourceCommand extends
 		Set<String> sourcesToGet = sources.getMissingSources();
 		if (sourcesToGet.isEmpty()) {
 			throw new SourcesUpToDateException(
-					FedoraPackagerText.get().downloadSourceCommand_nothingToDownload);
+					FedoraPackagerText.DownloadSourceCommand_nothingToDownload);
 		}
 		// Need to download the rest of the files in the set from the lookaside
 		// cache
@@ -118,13 +118,13 @@ public class DownloadSourceCommand extends
 				sourceUrl = new URL(url);
 			} catch (MalformedURLException e) {
 				throw new DownloadFailedException(
-						MessageFormat.format(
-								FedoraPackagerText.get().downloadSourceCommand_invalidURL,
+						NLS.bind(
+								FedoraPackagerText.DownloadSourceCommand_invalidURL,
 						url), e);
 			}
 			// indicate some progress
-			monitor.subTask(MessageFormat.format(
-								FedoraPackagerText.get().downloadSourceCommand_downloadingFileXofY,
+			monitor.subTask(NLS.bind(
+								FedoraPackagerText.DownloadSourceCommand_downloadingFileXofY,
 						fileNumber, sourcesToGet.size()));
 			SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
 			try {
@@ -135,12 +135,12 @@ public class DownloadSourceCommand extends
 					sources.deleteSource(source);
 				} catch (CoreException coreEx) { /* ignore */ }
 				throw new DownloadFailedException(
-						MessageFormat.format(
-								FedoraPackagerText.get().downloadSourceCommand_downloadFile,
+						NLS.bind(
+								FedoraPackagerText.DownloadSourceCommand_downloadFile,
 						file.getName()), e);
 			} catch (CoreException e) {
 				throw new DownloadFailedException(
-						FedoraPackagerText.get().downloadSourceCommand_downloadFile, e);
+						FedoraPackagerText.DownloadSourceCommand_downloadFile, e);
 			}
 			fileNumber++;
 		}
@@ -174,7 +174,7 @@ public class DownloadSourceCommand extends
 		URLConnection fileConnection = fileURL.openConnection();
 		fileConnection = fileURL.openConnection();
 		subMonitor.beginTask(
-				MessageFormat.format(FedoraPackagerText.get().downloadSourceCommand_downloadFile,
+				NLS.bind(FedoraPackagerText.DownloadSourceCommand_downloadFile,
 						fileToDownload.getName()), fileConnection.getContentLength());
 		File tempFile = File.createTempFile(fileToDownload.getName(), ""); //$NON-NLS-1$
 		FileOutputStream fos = new FileOutputStream(tempFile);

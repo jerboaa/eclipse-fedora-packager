@@ -278,7 +278,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 			IProgressMonitor monitor) {
 		IStatus status = Status.OK_STATUS;
 		IFile specfile = projectRoot.getSpecFile();
-		File ignoreFile = projectRoot.getIgnoreFile();
+		File ignoreFile = projectRoot.getIgnoreFile().getLocation().toFile();
 		SourcesFile sources = projectRoot.getSourcesFile();
 		// get CVSProvider
 		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider

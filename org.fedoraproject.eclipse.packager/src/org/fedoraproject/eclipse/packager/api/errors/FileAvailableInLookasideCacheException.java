@@ -1,7 +1,7 @@
 package org.fedoraproject.eclipse.packager.api.errors;
 
-import java.text.MessageFormat;
 
+import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 
 /**
@@ -16,11 +16,9 @@ public class FileAvailableInLookasideCacheException extends
 	/**
 	 * @param fileName The available filename.
 	 */
-	@SuppressWarnings("static-access")
 	public FileAvailableInLookasideCacheException(String fileName) {
 		super(
-				MessageFormat
-						.format(FedoraPackagerText.get().fileAvailableInLookasideCacheException_message,
+				NLS.bind(FedoraPackagerText.FileAvailableInLookasideCacheException_message,
 								fileName));
 	}
 }

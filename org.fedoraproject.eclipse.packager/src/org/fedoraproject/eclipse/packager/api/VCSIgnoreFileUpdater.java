@@ -105,7 +105,7 @@ public class VCSIgnoreFileUpdater implements ICommandListener {
 			pw.close();
 			out.close();
 			
-			Job job = new Job(FedoraPackagerText.get().sourcesFile_saveJob) {
+			Job job = new Job(FedoraPackagerText.SourcesFile_saveJob) {
 
 				@Override
 				public IStatus run(IProgressMonitor monitor) {

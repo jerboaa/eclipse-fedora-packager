@@ -2,7 +2,6 @@ package org.fedoraproject.eclipse.packager.api;
 
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
-import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 
 /**
  * A simple listener which makes sure that each command is properly configured

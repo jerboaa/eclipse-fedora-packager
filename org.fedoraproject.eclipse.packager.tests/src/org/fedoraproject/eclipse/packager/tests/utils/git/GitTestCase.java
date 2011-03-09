@@ -2,6 +2,7 @@ package org.fedoraproject.eclipse.packager.tests.utils.git;
 
 import org.eclipse.core.resources.IProject;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 import junit.framework.TestCase;
 
@@ -16,7 +17,7 @@ public class GitTestCase extends TestCase {
 		project = new GitTestProject("eclipse-rpm-editor");
 		iProject = project.getProject();
 		// create a fedoraprojectRoot for this project
-		fedoraprojectRoot = new FedoraProjectRoot(iProject);		
+		fedoraprojectRoot = FedoraPackagerUtils.getProjectRoot((iProject));		
 	}
 
 	/**

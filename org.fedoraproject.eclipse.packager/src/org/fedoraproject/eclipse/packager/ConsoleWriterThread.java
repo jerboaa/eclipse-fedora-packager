@@ -63,7 +63,7 @@ public class ConsoleWriterThread extends Thread {
 			//Log error, but do nothing about it
 			PackagerPlugin.getDefault().getLog().log(new Status(IStatus.WARNING,
 				      PackagerPlugin.PLUGIN_ID, 0,
-				      FedoraPackagerText.get().consoleWriterThread_ioFail, e));
+				      FedoraPackagerText.ConsoleWriterThread_ioFail, e));
 		}
 	}
 
