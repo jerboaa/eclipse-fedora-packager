@@ -33,6 +33,7 @@ import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
+import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -355,10 +356,7 @@ public class UploadSourceCommand extends
 			throws GeneralSecurityException, IOException {
 		
 		// Get a SSL related instance for setting up SSL connections.
-		FedoraSSL fedoraSSL = new FedoraSSL(
-				new File(FedoraSSL.DEFAULT_CERT_FILE),
-				new File(FedoraSSL.DEFAULT_UPLOAD_CA_CERT),
-				new File(FedoraSSL.DEFAULT_SERVER_CA_CERT));
+		FedoraSSL fedoraSSL = FedoraSSLFactory.getInstance();
 		SSLSocketFactory sf = new SSLSocketFactory(
 				fedoraSSL.getInitializedSSLContext(),
 				SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);

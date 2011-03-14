@@ -26,6 +26,7 @@ import javax.net.ssl.SSLSession;
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
+import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.preferences.PreferencesConstants;
 
@@ -80,10 +81,7 @@ public class KojiHubClient extends AbstractKojiHubClient {
 		}
 		// Initialize SSL connection
 		try {
-			initSSLConnection(
-				new File(FedoraSSL.DEFAULT_CERT_FILE), 
-				new File(FedoraSSL.DEFAULT_UPLOAD_CA_CERT),
-				new File(FedoraSSL.DEFAULT_SERVER_CA_CERT));
+			initSSLConnection();
 		} catch (KojiHubClientInitException e) {
 			throw new KojiHubClientLoginException(e);
 		}
@@ -142,8 +140,7 @@ public class KojiHubClient extends AbstractKojiHubClient {
 	/**
 	 * Initialize SSL connection
 	 */
-	private void initSSLConnection(File fedoraCert, File fedoraUploadCert,
-			File fedoraServerCert) throws KojiHubClientInitException {
+	private void initSSLConnection() throws KojiHubClientInitException {
 		// Create empty HostnameVerifier
 		HostnameVerifier hv = new HostnameVerifier() {
 			@Override
@@ -151,7 +148,7 @@ public class KojiHubClient extends AbstractKojiHubClient {
 				return true;
 			}
 		};
-		FedoraSSL fedoraSSL = new FedoraSSL(fedoraCert, fedoraUploadCert, fedoraServerCert);
+		FedoraSSL fedoraSSL = FedoraSSLFactory.getInstance();
 		SSLContext ctxt = null;
 		try {
 			ctxt = fedoraSSL.getInitializedSSLContext();

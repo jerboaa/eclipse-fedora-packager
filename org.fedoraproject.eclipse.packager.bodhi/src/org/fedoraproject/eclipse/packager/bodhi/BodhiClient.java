@@ -26,6 +26,7 @@ import org.apache.commons.ssl.HttpSecureProtocol;
 import org.apache.commons.ssl.TrustMaterial;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
+import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,10 +48,8 @@ public class BodhiClient implements IBodhiClient {
 	 */
 	public BodhiClient() throws GeneralSecurityException, IOException {
 		HttpSecureProtocol protocol = new HttpSecureProtocol();
-		protocol.setKeyMaterial(new FedoraSSL(
-				new File(FedoraSSL.DEFAULT_CERT_FILE),
-				new File(FedoraSSL.DEFAULT_UPLOAD_CA_CERT),
-				new File(FedoraSSL.DEFAULT_SERVER_CA_CERT)).getFedoraCertKeyMaterial());
+		protocol.setKeyMaterial(FedoraSSLFactory.getInstance()
+				.getFedoraCertKeyMaterial());
 		protocol.setTrustMaterial(TrustMaterial.TRUST_ALL);
 		Protocol.registerProtocol("https", new Protocol("https", //$NON-NLS-1$ //$NON-NLS-2$
 				(ProtocolSocketFactory) protocol, 443));

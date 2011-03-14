@@ -13,11 +13,16 @@ package org.fedoraproject.eclipse.packager;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
+import org.apache.commons.ssl.Certificates;
 import org.apache.commons.ssl.KeyMaterial;
 import org.apache.commons.ssl.TrustChain;
 import org.apache.commons.ssl.TrustMaterial;
@@ -27,6 +32,12 @@ import org.apache.commons.ssl.TrustMaterial;
  * Uses org.apache.commons.ssl (from not-yet-commons).
  */
 public class FedoraSSL {
+	
+	/**
+	 * Constant returned when unable to determine the username from the Fedora
+	 * SSL certificate.
+	 */
+	public static final String UNKNOWN_USER = "anonymous"; //$NON-NLS-1$
 	
 	/**
 	 * Default certificate path.
@@ -49,13 +60,15 @@ public class FedoraSSL {
 	private File fedoraServerCert;
 	
 	/**
-	 * Create a SSLConnection object.
+	 * Create a Fedora SSL object from given cert files. The use of this
+	 * constructor is discouraged. Use
+	 * {@link FedoraSSLFactory#getInstance()} instead.
 	 * 
 	 * @param fedoraCert
 	 * @param fedoraUploadCert
 	 * @param fedoraServerCert
 	 */
-	public FedoraSSL(File fedoraCert, File fedoraUploadCert, File fedoraServerCert) {
+	FedoraSSL(File fedoraCert, File fedoraUploadCert, File fedoraServerCert) {
 		this.fedoraCert = fedoraCert;
 		this.fedoraServerCert = fedoraServerCert;
 		this.fedoraUploadCert = fedoraUploadCert;
@@ -69,7 +82,7 @@ public class FedoraSSL {
 	 * @return The initialized SSLConext instance.
 	 */
 	public SSLContext getInitializedSSLContext() throws GeneralSecurityException,
-			IOException {
+			IOException  {
 		TrustChain tc = getTrustChain();
 
 		KeyMaterial kmat = getFedoraCertKeyMaterial();
@@ -94,6 +107,37 @@ public class FedoraSSL {
 		KeyMaterial kmat = new KeyMaterial(fedoraCert, fedoraCert,
 				new char[0]);
 		return kmat;
+	}
+	
+	/**
+	 * Determine FAS username from fedora cert file.
+	 * 
+	 * @return Username if retrieval is successful. {@code "anonymous"}otherwise.
+	 */
+	public String getUsernameFromCert() {
+		if (fedoraCert.exists()) {
+			KeyMaterial kmat;
+			try {
+				kmat = new KeyMaterial(fedoraCert, fedoraCert, new char[0]);
+				List<?> chains = kmat.getAssociatedCertificateChains();
+				Iterator<?> it = chains.iterator();
+				ArrayList<String> cns = new ArrayList<String>();
+				while (it.hasNext()) {
+					X509Certificate[] certs = (X509Certificate[]) it.next();
+					if (certs != null) {
+						for (int i = 0; i < certs.length; i++) {
+							cns.add(Certificates.getCN(certs[i]));
+						}
+					}
+				}
+				return cns.get(0);
+			} catch (GeneralSecurityException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return UNKNOWN_USER;
 	}
 
 	/**

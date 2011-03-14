@@ -1,18 +1,10 @@
 package org.fedoraproject.eclipse.packager.utils;
 
 import java.io.File;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.ssl.Certificates;
-import org.apache.commons.ssl.KeyMaterial;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -21,7 +13,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
@@ -183,40 +174,5 @@ public class FedoraPackagerUtils {
 			}
 		}
 		return false;
-	}
-	
-	/**
-	 * Determine FAS username from <code>.fedora.cert</code>.
-	 * 
-	 * @return Username if retrieval is successful. <code>"anonymous"</code> otherwise.
-	 */
-	//TODO: Move this into Handler independent utility class?
-	public static String getUsernameFromCert() {
-		String file = System.getProperty("user.home") + IPath.SEPARATOR //$NON-NLS-1$
-				+ ".fedora.cert"; //$NON-NLS-1$
-		File cert = new File(file);
-		if (cert.exists()) {
-			KeyMaterial kmat;
-			try {
-				kmat = new KeyMaterial(cert, cert, new char[0]);
-				List<?> chains = kmat.getAssociatedCertificateChains();
-				Iterator<?> it = chains.iterator();
-				ArrayList<String> cns = new ArrayList<String>();
-				while (it.hasNext()) {
-					X509Certificate[] certs = (X509Certificate[]) it.next();
-					if (certs != null) {
-						for (int i = 0; i < certs.length; i++) {
-							cns.add(Certificates.getCN(certs[i]));
-						}
-					}
-				}
-				return cns.get(0);
-			} catch (GeneralSecurityException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return "anonymous"; //$NON-NLS-1$
 	}
 }

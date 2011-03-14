@@ -53,6 +53,8 @@ import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
+import org.fedoraproject.eclipse.packager.FedoraSSL;
+import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
@@ -92,9 +94,9 @@ public class FedoraCheckoutWizard extends Wizard implements IImportWizard {
 	}
 
 	private String getGitURL() {
-		String username = FedoraPackagerUtils.getUsernameFromCert();
+		String username = FedoraSSLFactory.getInstance().getUsernameFromCert();
 		String packageName = page.getPackageName();
-		if (username.equals("anonymous")) { //$NON-NLS-1$
+		if (username.equals(FedoraSSL.UNKNOWN_USER)) {
 			return "git://pkgs.fedoraproject.org/" + packageName + ".git"; //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			return "ssh://" + username + "@pkgs.fedoraproject.org/" //$NON-NLS-1$ //$NON-NLS-2$
