@@ -34,7 +34,7 @@ public class CVSTestProject {
 	public static final String SCM_URL = ":pserver;username=anonymous;hostname=cvs.fedoraproject.org:/cvs/pkgs";
 	protected IProject project;
 	
-	public CVSTestProject(String name, String tag) throws CoreException, InvocationTargetException, InterruptedException {
+	public CVSTestProject(String name) throws CoreException, InvocationTargetException, InterruptedException {
 		ICVSRepositoryLocation repo = CVSRepositoryLocation.fromString(SCM_URL);
 		ICVSRemoteFolder remoteFolder = repo.getRemoteFolder("rpms", null);
 		RemoteModule remoteModule = new RemoteModule(name, (RemoteFolder) remoteFolder, repo, name,new LocalOption[]{}, new CVSTag(), true);

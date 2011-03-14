@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.VCSIgnoreFileUpdater;
 import org.fedoraproject.eclipse.packager.tests.utils.TestsUtils;
-import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,11 +35,11 @@ public class VCSIgnoreFileUpdaterTest {
 	private FedoraProjectRoot fpRoot;
 	private IFile vcsIgnoreFile; // The .gitignore abstraction
 	private IProject tempProject;
-	private static final String GITIGNORE_FILE_NAME = ".gitignore";
 	private Stack<File> tempDirsAndFiles = new Stack<File>();
 	
 	private static final String EXAMPLE_FEDORA_PROJECT_ROOT = 
 		"resources/example-fedora-project"; // $NON-NLS-1$
+	private static final String GITIGNORE_FILE_NAME = ".gitignore"; //$NON-NLS-1$
 	
 	@Before
 	public void setUp() throws Exception {
@@ -48,14 +48,13 @@ public class VCSIgnoreFileUpdaterTest {
 						new Path(EXAMPLE_FEDORA_PROJECT_ROOT), null)).getFile();
 		File copySource = new File(dirName);
 				
-		// convert it to an external eclipse project
 		tempProject = TestsUtils.createProjectFromTemplate(copySource);
-		fpRoot = FedoraPackagerUtils.getProjectRoot(tempProject);
+		fpRoot = new FedoraProjectRoot(tempProject, ProjectType.GIT);
 		assertNotNull(fpRoot);
 		
 		// Get an IFile handle it shouldn't matter if it exists or not.
 		// VCSIgnoreFileUpdater should do the right thing.
-		vcsIgnoreFile = tempProject.getFile(new Path(GITIGNORE_FILE_NAME));
+		vcsIgnoreFile = fpRoot.getIgnoreFile();
 	}
 
 	@After
@@ -78,8 +77,7 @@ public class VCSIgnoreFileUpdaterTest {
 	public void canCreateNewVCSIgnoreFileIfNotExistent() throws Exception {
 		// should not exist as of yet
 		assertTrue(!vcsIgnoreFile.exists());
-		File underlyingFileInFs = new File(tempProject.getLocation().toFile().getAbsolutePath()
-				+ File.separatorChar + GITIGNORE_FILE_NAME);
+		File underlyingFileInFs = vcsIgnoreFile.getLocation().toFile();
 		assertTrue(!underlyingFileInFs.exists());
 		final String preContent = "";
 		final File newIgnoredFile = File.createTempFile("IGNORE_ME-", ".txt");

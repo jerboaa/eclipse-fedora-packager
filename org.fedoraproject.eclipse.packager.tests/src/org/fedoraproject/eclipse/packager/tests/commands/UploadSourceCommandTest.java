@@ -35,12 +35,16 @@ import org.fedoraproject.eclipse.packager.tests.units.UploadFileValidityTest;
 import org.fedoraproject.eclipse.packager.tests.utils.TestsUtils;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Eclipse plug-in test for UploadSourceCommand.
+ * Eclipse plug-in test for UploadSourceCommand. Note: in order to run this test
+ * successfully, one has to deploy the upload.cgi Python script as provided in
+ * the resources folder on the test machine. Make sure the script is reachable
+ * by the URL as specified in the UPLOAD_URL_FOR_TESTING constant.
  */
 public class UploadSourceCommandTest {
 
@@ -66,8 +70,8 @@ public class UploadSourceCommandTest {
 	@Before
 	public void setUp() throws Exception {
 		this.testProject = new GitTestProject("eclipse-fedorapackager");
-		FedoraProjectRoot fpRoot = FedoraPackagerUtils.getProjectRoot(
-				this.testProject.getProject());
+		FedoraProjectRoot fpRoot = new FedoraProjectRoot(
+				this.testProject.getProject(), ProjectType.GIT);
 		this.packager = new FedoraPackager(fpRoot);
 	}
 
@@ -256,7 +260,7 @@ public class UploadSourceCommandTest {
 		writeRandomContentToFile(newUploadFile);
 		
 		// VCS ignore file pre-update
-		IFile vcsIgnoreFile = testProject.getProject().getFile(new Path(".gitignore"));
+		IFile vcsIgnoreFile = packager.getFedoraProjectRoot().getIgnoreFile();
 		String vcsIgnoreFileContentPre = "";
 		if (vcsIgnoreFile.exists()) {
 			vcsIgnoreFileContentPre = TestsUtils.readContents(vcsIgnoreFile

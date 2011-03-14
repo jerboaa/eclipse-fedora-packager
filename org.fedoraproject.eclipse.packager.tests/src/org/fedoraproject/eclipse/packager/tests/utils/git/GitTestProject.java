@@ -22,7 +22,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.RepositoryUtil;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
@@ -49,38 +51,87 @@ public class GitTestProject {
 	private IProject project;
 	private Git gitRepo;
 	
-	public GitTestProject(String packageName) throws CoreException, URISyntaxException, InvocationTargetException, InterruptedException {
-		final URIish uri = new URIish(getGitURL(packageName));
-		final CloneOperation2 clone = new CloneOperation2(uri, true,
-				new ArrayList<Ref>(), new File(ResourcesPlugin
-						.getWorkspace().getRoot().getLocation().toFile(),
-						packageName), Constants.R_HEADS + Constants.MASTER,
-				"origin", 0);
-		clone.run(null); // clone project
-		// Add cloned repository to the list of Git repositories so that it
-		// shows up in the Git repositories view.
-		final RepositoryUtil config = org.eclipse.egit.core.Activator.getDefault().getRepositoryUtil();
-		config.addConfiguredRepository(clone.getGitDir());
-		this.project = ResourcesPlugin.getWorkspace().getRoot()
+	public GitTestProject(final String packageName) throws InterruptedException {
+		Job cloneProjectJob = new Job(packageName) {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				URIish uri = null;
+				try {
+					uri = new URIish(getGitURL(packageName));
+				} catch (URISyntaxException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				final CloneOperation2 clone = new CloneOperation2(uri, true,
+						new ArrayList<Ref>(), new File(ResourcesPlugin
+								.getWorkspace().getRoot().getLocation().toFile(),
+								packageName), Constants.R_HEADS + Constants.MASTER,
+								"origin", 0);
+				try {
+					clone.run(null);
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} // clone project
+				// Add cloned repository to the list of Git repositories so that it
+				// shows up in the Git repositories view.
+				final RepositoryUtil config = org.eclipse.egit.core.Activator.getDefault().getRepositoryUtil();
+				config.addConfiguredRepository(clone.getGitDir());
+				project = ResourcesPlugin.getWorkspace().getRoot()
 				.getProject(packageName);
-		this.project.create(null);
-		this.project.open(null);
-		ConnectProviderOperation connect = new ConnectProviderOperation(
-				this.project);
-		connect.execute(null);
-		this.project.refreshLocal(IResource.DEPTH_INFINITE, null);
-		// find repo we've just created and set gitRepo
-		RepositoryCache repoCache = org.eclipse.egit.core.Activator
+				try {
+					project.create(null);
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				try {
+					project.open(null);
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				ConnectProviderOperation connect = new ConnectProviderOperation(
+						project);
+				try {
+					connect.execute(null);
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				try {
+					project.refreshLocal(IResource.DEPTH_INFINITE, null);
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				// find repo we've just created and set gitRepo
+				RepositoryCache repoCache = org.eclipse.egit.core.Activator
 				.getDefault().getRepositoryCache();
-		try {
-			this.gitRepo = new Git(repoCache.lookupRepository(new File(this.project
-					.getProject().getLocation().toOSString()
-					+ "/.git")));
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-		// Do the local branches limbo
-		createLocalBranches(new NullProgressMonitor());
+				try {
+					gitRepo = new Git(repoCache.lookupRepository(new File(project
+							.getProject().getLocation().toOSString()
+							+ "/.git")));
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+				// Do the local branches limbo
+				try {
+					createLocalBranches(new NullProgressMonitor());
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return null;
+			}
+		};
+		cloneProjectJob.schedule();
+		// wait for it to finish
+		cloneProjectJob.join();
 	}
 	
 	public void dispose() throws Exception {

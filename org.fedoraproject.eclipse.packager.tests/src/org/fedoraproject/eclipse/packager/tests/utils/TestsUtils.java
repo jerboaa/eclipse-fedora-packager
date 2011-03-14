@@ -115,9 +115,14 @@ public class TestsUtils {
 		newProject.create(null);
 		newProject.open(null);
 		
-		// Add content
+		// Add content, handle spec file appropriately
 		for (File file: folder.listFiles()) {
-			IFile newFile = newProject.getFile(file.getName());
+			IFile newFile;
+			if (file.getName().endsWith(".spec")) {
+				newFile = newProject.getFile(newProject.getName() + ".spec");
+			} else {
+				newFile = newProject.getFile(file.getName());
+			}
 			if (!newFile.exists()) {
 				FileInputStream in = new FileInputStream(file);
 				newFile.create(in, false, null);

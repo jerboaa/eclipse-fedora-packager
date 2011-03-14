@@ -9,7 +9,7 @@ Require-Bundle: org.eclipse.ui,
  org.junit4;bundle-version="4.5.0",
  org.eclipse.core.runtime
 Eclipse-RegisterBuddy: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.fedoraproject.eclipse.packager.tests.utils.cvs;x-friends:=org.fedoraproject.eclipse.packager.ui.tests,
  org.fedoraproject.eclipse.packager.tests.utils.git;x-friends:=org.fedoraproject.eclipse.packager.ui.tests
@@ -44,5 +44,6 @@ Import-Package: org.apache.commons.httpclient,
  org.fedoraproject.eclipse.packager.koji,
  org.fedoraproject.eclipse.packager.rpm,
  org.fedoraproject.eclipse.packager.utils,
+ org.eclipse.linuxtools.rpm.ui.editor.parser,
  org.json
 Eclipse-BundleShape: dir

@@ -10,8 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Unit test for the Koji hub client class
- *
+ * Unit test for the Koji hub client class. Note that for a successful run of
+ * this test, one has to have valid Fedora certificates in ~/
+ * 
  */
 public class KojiHubClientTest {
 
@@ -20,7 +21,8 @@ public class KojiHubClientTest {
 	@Before
 	public void setUp() throws Exception {
 		// a bare SSL Koji client
-		kojiClient = new KojiHubClient();
+		kojiClient = new KojiHubClient("https://koji.fedoraproject.org/kojihub/ssllogin",
+				"http://koji.fedoraproject.org/");
 	}
 
 	@After

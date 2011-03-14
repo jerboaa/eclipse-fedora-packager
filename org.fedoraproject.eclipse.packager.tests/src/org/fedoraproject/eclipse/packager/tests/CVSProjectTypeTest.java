@@ -21,7 +21,7 @@ public class CVSProjectTypeTest extends TestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
-		project = new CVSTestProject("ed", "ed-1_1-1_fc10");
+		project = new CVSTestProject("ed");
 		iProject = project.getProject();
 	}
 

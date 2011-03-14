@@ -18,7 +18,10 @@ import org.junit.runners.Suite.SuiteClasses;
 	GitProjectTypeTest.class,
 	SourcesFileTest.class,
 	SourcesFileUpdaterTest.class,
-	VCSIgnoreFileUpdaterTest.class
+	VCSIgnoreFileUpdaterTest.class,
+	FedoraSSLTest.class,
+	FedoraProjectRootTest.class,
+	FedoraPackagerUtilsTest.class
 })
 
 public class AllTests {
