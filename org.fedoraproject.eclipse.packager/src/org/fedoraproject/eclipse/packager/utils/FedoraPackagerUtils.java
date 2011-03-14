@@ -83,8 +83,10 @@ public class FedoraPackagerUtils {
 		} else if (resource instanceof IFile) {
 			canditate = resource.getParent();
 		}
-		if (canditate != null && isValidFedoraProjectRoot(canditate)) {
-			return new FedoraProjectRoot(canditate);
+		ProjectType type = getProjectType(canditate);
+		if (canditate != null && isValidFedoraProjectRoot(canditate)
+				&& type != null) {
+			return new FedoraProjectRoot(canditate, type);
 		} else {
 			throw new InvalidProjectRootException(FedoraPackagerText.FedoraPackagerUtils_invalidProjectRootError);
 		}
