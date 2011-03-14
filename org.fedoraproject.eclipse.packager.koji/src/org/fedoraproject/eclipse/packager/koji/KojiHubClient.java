@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.koji;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,10 +37,9 @@ public class KojiHubClient extends AbstractKojiHubClient {
 	
 	
 	/**
-	 * Default 0-arg constructor.
+	 * Empty constructor
 	 */
 	public KojiHubClient() {
-		super();
 	}
 	
 	/**
