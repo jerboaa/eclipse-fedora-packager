@@ -46,13 +46,15 @@ public class FedoraProjectRoot {
 	 * 
 	 * @param container
 	 *            The root container either IFolder(cvs) or IProject(git).
+	 * @param type The project type (either Git or CVS).
 	 * @see FedoraPackagerUtils#getProjectRoot(IResource)
 	 */
-	public FedoraProjectRoot(IContainer container) {
+	public FedoraProjectRoot(IContainer container, ProjectType type) {
 		this.rootContainer = container;
 		this.sourcesFile = new SourcesFile(rootContainer.getFile(new Path(
 				"sources"))); //$NON-NLS-1$
-		this.type = FedoraPackagerUtils.getProjectType(container);
+		assert type != null;
+		this.type = type;
 		this.lookAsideCache = new LookasideCache(CacheType.FEDORA);
 	}
 
