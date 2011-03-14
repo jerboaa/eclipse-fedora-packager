@@ -7,7 +7,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
 	KojiHubClientTest.class,
-	UploadFileValidityTest.class
+	UploadFileValidityTest.class,
+	AssertionsEnabledTest.class
 })
 
 public class AllUnitTests {
