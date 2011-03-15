@@ -28,7 +28,6 @@ Import-Package: org.apache.ws.commons.util,
  org.eclipse.ui.forms.widgets,
  org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.api.errors,
- org.fedoraproject.eclipse.packager.preferences,
  org.fedoraproject.eclipse.packager.utils
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

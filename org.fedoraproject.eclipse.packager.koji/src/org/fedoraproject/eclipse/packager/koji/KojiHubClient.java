@@ -24,10 +24,10 @@ import javax.net.ssl.SSLSession;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
-import org.fedoraproject.eclipse.packager.preferences.PreferencesConstants;
 
 /**
  * Koji hub client which uses certificate based
@@ -93,17 +93,17 @@ public class KojiHubClient extends AbstractKojiHubClient {
 	public synchronized void setUrlsFromPreferences() throws KojiHubClientInitException {
 		// Sets Koji host according to preferences and statically sets kojiHubUrl and kojiWebUrl
 		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		String preference = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_HUB_URL);
+		String preference = kojiPrefStore.getString(FedoraPackagerPreferencesConstants.PREF_KOJI_HUB_URL);
 		// Eclipse does not seem to store default preference values in metadata.
 		if (preference.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
-			setHubUrl(PreferencesConstants.DEFAULT_KOJI_HUB_URL);
+			setHubUrl(FedoraPackagerPreferencesConstants.DEFAULT_KOJI_HUB_URL);
 		} else {
 			setHubUrl(preference);
 		}
-		preference = kojiPrefStore.getString(PreferencesConstants.PREF_KOJI_WEB_URL);
+		preference = kojiPrefStore.getString(FedoraPackagerPreferencesConstants.PREF_KOJI_WEB_URL);
 		// Eclipse does not seem to store default preference values in metadata.
 		if (preference.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
-			setWebUrl(PreferencesConstants.DEFAULT_KOJI_WEB_URL);
+			setWebUrl(FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
 		} else {
 			setWebUrl(preference);
 		}	
