@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.handlers;
+package org.fedoraproject.eclipse.packager.internal.handlers;
 
 
 import java.io.File;

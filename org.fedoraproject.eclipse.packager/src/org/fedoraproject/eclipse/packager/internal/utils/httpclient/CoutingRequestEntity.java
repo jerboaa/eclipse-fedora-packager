@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.utils.httpclient;
+package org.fedoraproject.eclipse.packager.internal.utils.httpclient;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;

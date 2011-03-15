@@ -40,9 +40,9 @@ import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredExcepti
 import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidUploadFileException;
 import org.fedoraproject.eclipse.packager.api.errors.UploadFailedException;
+import org.fedoraproject.eclipse.packager.internal.utils.httpclient.CoutingRequestEntity;
+import org.fedoraproject.eclipse.packager.internal.utils.httpclient.IRequestProgressListener;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
-import org.fedoraproject.eclipse.packager.utils.httpclient.CoutingRequestEntity;
-import org.fedoraproject.eclipse.packager.utils.httpclient.IRequestProgressListener;
 
 /**
  * A class used to execute a {@code upload sources} command. It has setters for

@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.utils.httpclient;
+package org.fedoraproject.eclipse.packager.internal.utils.httpclient;
 
 /**
  * Listener interface for hc-httpclient upload progress reporting. *

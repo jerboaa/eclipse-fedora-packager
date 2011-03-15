@@ -135,17 +135,17 @@
     <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.handlers.DownloadHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.internal.handlers.DownloadHandler"
             id="org.fedoraproject.eclipse.packager.DownloadCommand"
             name="Download">
       </command>
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.handlers.UploadHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.internal.handlers.UploadHandler"
             id="org.fedoraproject.eclipse.packager.UploadCommand"
             name="Upload">
       </command>
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.handlers.NewSourcesHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.internal.handlers.NewSourcesHandler"
             id="org.fedoraproject.eclipse.packager.NewSourcesCommand"
             name="Replace">
       </command>
@@ -154,14 +154,14 @@
     <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="org.fedoraproject.eclipse.packager.preferences.FedoraPackagerPreferencePage"
+            class="org.fedoraproject.eclipse.packager.internal.preferences.FedoraPackagerPreferencePage"
             id="org.fedoraproject.eclipse.packager.preferences"
             name="%PreferencePageName"/>
    </extension>
     <extension
           point="org.eclipse.equinox.preferences.preferences">
        <initializer
-             class="org.fedoraproject.eclipse.packager.preferences.FedoraPackagerPreferenceInitializer">
+             class="org.fedoraproject.eclipse.packager.internal.preferences.FedoraPackagerPreferenceInitializer">
        </initializer>
     </extension>
 </plugin>

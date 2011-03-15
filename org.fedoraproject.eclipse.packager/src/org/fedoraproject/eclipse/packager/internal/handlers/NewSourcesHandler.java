@@ -1,4 +1,4 @@
-package org.fedoraproject.eclipse.packager.handlers;
+package org.fedoraproject.eclipse.packager.internal.handlers;
 
 /**
  * Class responsible for uploading source files.

@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.preferences;
+package org.fedoraproject.eclipse.packager.internal.preferences;
 
 import org.fedoraproject.eclipse.packager.LookasideCache;
 
