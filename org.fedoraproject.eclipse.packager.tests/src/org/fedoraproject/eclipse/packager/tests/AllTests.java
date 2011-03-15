@@ -21,7 +21,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	VCSIgnoreFileUpdaterTest.class,
 	FedoraSSLTest.class,
 	FedoraProjectRootTest.class,
-	FedoraPackagerUtilsTest.class
+	FedoraPackagerUtilsTest.class,
+	FedoraPackagerLoggerTest.class
 })
 
 public class AllTests {
