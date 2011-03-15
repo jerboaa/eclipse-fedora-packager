@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
@@ -108,11 +109,11 @@ public class FedoraPackagerPreferencePage extends FieldEditorPreferencePage impl
 		.applyTo(lookasideGroup);
 		/* Preference for setting the lookaside urls */
 		lookasideUploadURLEditor = new StringFieldEditor(
-				PreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL,
+				FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL,
 				FedoraPackagerText.FedoraPackagerPreferencePage_lookasideUploadURLLabel,
 				lookasideGroup);
 		lookasideDownloadURLEditor = new StringFieldEditor(
-				PreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL,
+				FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL,
 				FedoraPackagerText.FedoraPackagerPreferencePage_lookasideDownloadURLLabel,
 				lookasideGroup);
 		// register change listener
@@ -131,10 +132,10 @@ public class FedoraPackagerPreferencePage extends FieldEditorPreferencePage impl
 		.applyTo(kojiGroup);
 		/* Preference for setting the koji host */
 		kojiWebURLEditor = new StringFieldEditor(
-				PreferencesConstants.PREF_KOJI_WEB_URL, FedoraPackagerText.FedoraPackagerPreferencePage_kojiWebURLLabel,
+				FedoraPackagerPreferencesConstants.PREF_KOJI_WEB_URL, FedoraPackagerText.FedoraPackagerPreferencePage_kojiWebURLLabel,
 				kojiGroup);
 		kojiHubURLEditor = new StringFieldEditor(
-				PreferencesConstants.PREF_KOJI_HUB_URL, FedoraPackagerText.FedoraPackagerPreferencePage_kojiHubURLLabel,
+				FedoraPackagerPreferencesConstants.PREF_KOJI_HUB_URL, FedoraPackagerText.FedoraPackagerPreferencePage_kojiHubURLLabel,
 				kojiGroup);
 		kojiWebURLEditor.setPropertyChangeListener(this);
 		kojiHubURLEditor.setPropertyChangeListener(this);

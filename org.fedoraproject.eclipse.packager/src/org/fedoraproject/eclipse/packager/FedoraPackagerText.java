@@ -63,6 +63,10 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String FedoraPackagerPreferencePage_kojiHubURLInvalidMsg;
 	/****/ public static String FedoraPackagerPreferencePage_buildSystemGroupName;
 	/****/ public static String FedoraPackagerPreferencePage_lookasideGroupName;
+	// FedoraPackagerGitPreferencesPage
+	/****/ public static String FedoraPackagerGitPreferencePage_description;
+	/****/ public static String FedoraPackagerGitPreferencePage_cloneBaseURLLabel;
+	/****/ public static String FedoraPackagerGitPreferencePage_gitGroupName;
 	// Generic strings
 	/****/ public static String somethingUnexpectedHappenedError;
 	/****/ public static String commandWasCalledInTheWrongState;

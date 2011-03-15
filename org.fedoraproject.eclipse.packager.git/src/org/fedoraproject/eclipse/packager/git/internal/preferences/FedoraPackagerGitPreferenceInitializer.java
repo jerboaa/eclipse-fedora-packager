@@ -8,18 +8,21 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.internal.preferences;
+package org.fedoraproject.eclipse.packager.git.internal.preferences;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.FedoraSSL;
+import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
+import org.fedoraproject.eclipse.packager.git.Activator;
+import org.fedoraproject.eclipse.packager.git.GitConstants;
+import org.fedoraproject.eclipse.packager.git.GitPreferencesConstants;
 
 /**
  * Class for initialization of Eclipse Fedora Packager preferences.
  */
-public class FedoraPackagerPreferenceInitializer extends AbstractPreferenceInitializer {
+public class FedoraPackagerGitPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	/*
 	 * (non-Javadoc)
@@ -28,15 +31,19 @@ public class FedoraPackagerPreferenceInitializer extends AbstractPreferenceIniti
 	@Override
 	public void initializeDefaultPreferences() {
 		// set default preferences for this plug-in
-		IEclipsePreferences node = new DefaultScope().getNode(PackagerPlugin.PLUGIN_ID);
-		// Lookaside prefs
-		node.put(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL,
-				FedoraPackagerPreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
-		node.put(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL,
-				FedoraPackagerPreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
-		// Koji prefs
-		node.put(FedoraPackagerPreferencesConstants.PREF_KOJI_WEB_URL, FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
-		node.put(FedoraPackagerPreferencesConstants.PREF_KOJI_HUB_URL, FedoraPackagerPreferencesConstants.DEFAULT_KOJI_HUB_URL);
+		IEclipsePreferences node = new DefaultScope().getNode(Activator.PLUGIN_ID);
+		// Figure out if we have an anonymous or a FAS user
+		String user = FedoraSSLFactory.getInstance().getUsernameFromCert();
+		String gitURL;
+		if (!user.equals(FedoraSSL.UNKNOWN_USER)) {
+			gitURL = GitConstants.AUTHENTICATED_PROTOCOL + user +
+			GitConstants.USERNAME_SEPARATOR;
+		} else {
+			gitURL = GitConstants.ANONYMOUS_PROTOCOL;
+		}
+		gitURL += GitPreferencesConstants.DEFAULT_CLONE_BASE_URL;
+		node.put(GitPreferencesConstants.PREF_CLONE_BASE_URL,
+				gitURL);
 	}
 
 }

@@ -32,4 +32,19 @@
          name="Git">
    </vcs>
 </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.fedoraproject.eclipse.packager.preferences"
+            class="org.fedoraproject.eclipse.packager.git.internal.preferences.FedoraPackagerGitPreferencePage"
+            id="org.fedoraproject.eclipse.packager.preferences.git"
+            name="Git">
+      </page>
+   </extension>
+    <extension
+          point="org.eclipse.equinox.preferences.preferences">
+       <initializer
+             class="org.fedoraproject.eclipse.packager.git.internal.preferences.FedoraPackagerGitPreferenceInitializer">
+       </initializer>
+    </extension>
 </plugin>

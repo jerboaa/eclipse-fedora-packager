@@ -8,14 +8,13 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.internal.preferences;
+package org.fedoraproject.eclipse.packager;
 
-import org.fedoraproject.eclipse.packager.LookasideCache;
 
 /**
  * Constants for preferences.
  */
-public final class PreferencesConstants {
+public final class FedoraPackagerPreferencesConstants {
 
 	/*
 	 * -------------------------------------------------

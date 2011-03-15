@@ -20,10 +20,12 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.EditorPart;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
@@ -81,11 +83,28 @@ public class FedoraHandlerUtils {
 	/**
 	 * Create an IStatus error
 	 * 
+	 * @param plugInID
+	 *            The plug-in ID to be used.
 	 * @param message
+	 *            The error message for the status.
 	 * @return A newly created Status instance.
 	 */
-	public static IStatus error(String message) {
-		return new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, message);
+	public static IStatus error(String plugInID, String message) {
+		return new Status(IStatus.ERROR, plugInID, message);
+	}
+	
+	/**
+	 * Create an IStatus error
+	 * 
+	 * @param plugInID
+	 *            The plug-in ID to be used.
+	 * @param message
+	 *            The error message for the status.
+	 * @param e The exception occurred (if any).
+	 * @return A newly created Status instance.
+	 */
+	public static IStatus error(String plugInID, String message, Throwable e) {
+		return new Status(IStatus.ERROR, plugInID, message, e);
 	}
 
 	/**
@@ -145,6 +164,7 @@ public class FedoraHandlerUtils {
 	 * 		Show error inline?
 	 * @return The IStatus object.
 	 */
+	@Deprecated
 	public static IStatus handleError(String message, boolean showInDialog) {
 		return handleError(message, null, true, showInDialog);
 	}
@@ -157,6 +177,7 @@ public class FedoraHandlerUtils {
 	 * 		Show dialog inline?
 	 * @return The IStatus object.
 	 */
+	@Deprecated
 	public static IStatus handleOK(String message, boolean showInDialog) {
 		return handleError(message, null, false, showInDialog);
 	}
@@ -167,6 +188,7 @@ public class FedoraHandlerUtils {
 	 * 		The Exception which occurred.
 	 * @return The IStatus object.
 	 */
+	@Deprecated
 	public static IStatus handleError(Exception e) {
 		return handleError(e.getMessage(), e, true, false);
 	}
@@ -179,8 +201,68 @@ public class FedoraHandlerUtils {
 	 * 		Show error inline?
 	 * @return The IStatus object.
 	 */
+	@Deprecated
 	public static IStatus handleError(Exception e, boolean showInDialog) {
 		return handleError(e.getMessage(), e, true, showInDialog);
 	}
-
+	
+	/**
+	 * Show an information dialog.
+	 * 
+	 * @param shell A valid shell
+	 * @param title The information dialog title
+	 * @param message The message to be displayed.
+	 * @return An OK IStatus.
+	 */
+	public static IStatus showInformation(final Shell shell,
+			final String title, final String message) {
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openInformation(shell, title, message);
+			}
+		});
+		return Status.OK_STATUS;
+	}
+	
+	/**
+	 * Show an error dialog.
+	 * 
+	 * @param shell A valid shell
+	 * @param title The error dialog title
+	 * @param message The message to be displayed.
+	 * @param pluginID The plug-in ID.
+	 * @return An error IStatus, derived from the error message.
+	 */
+	public static IStatus showError(final Shell shell,
+			final String title, final String message, final String pluginID) {
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openError(shell, title, message);
+			}
+		});
+		return error(pluginID, message);
+	}
+	
+	/**
+	 * Show an error dialog.
+	 * 
+	 * @param shell A valid shell
+	 * @param title The error dialog title
+	 * @param message The message to be displayed.
+	 * @param pluginID The plug-in ID.
+	 * @param e The occurred exception.
+	 * @return An error IStatus, derived from message and exception.
+	 */
+	public static IStatus showError(final Shell shell,
+			final String title, final String message, final String pluginID, final Throwable e) {
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openError(shell, title, message);
+			}
+		});
+		return error(pluginID, message, e);
+	}
 }
