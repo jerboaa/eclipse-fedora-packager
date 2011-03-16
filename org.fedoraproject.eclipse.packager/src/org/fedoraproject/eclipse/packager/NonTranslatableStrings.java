@@ -17,7 +17,7 @@ public class NonTranslatableStrings {
 	}
 	
 	/**
-	 * @return The name of this product.
+	 * @return The name of this distribution.
 	 */
 	public static String getDistributionName() {
 		return "Fedora"; //$NON-NLS-1$

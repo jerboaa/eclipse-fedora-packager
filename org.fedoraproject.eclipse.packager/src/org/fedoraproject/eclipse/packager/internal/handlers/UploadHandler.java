@@ -77,10 +77,15 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
 			fedoraProjectRoot = FedoraPackagerUtils.getProjectRoot(resource);
-		} catch (InvalidProjectRootException e1) {
-			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e1);
-			FedoraHandlerUtils.showError(shell, NonTranslatableStrings.getProductName(),
-					FedoraPackagerText.invalidFedoraProjectRootError, PackagerPlugin.PLUGIN_ID, e1);
+		} catch (InvalidProjectRootException e) {
+			logger.logError(NLS.bind(
+					FedoraPackagerText.invalidFedoraProjectRootError,
+					NonTranslatableStrings.getDistributionName()), e);
+			FedoraHandlerUtils.showError(shell, NonTranslatableStrings
+					.getProductName(), NLS.bind(
+					FedoraPackagerText.invalidFedoraProjectRootError,
+					NonTranslatableStrings.getDistributionName()),
+					PackagerPlugin.PLUGIN_ID, e);
 			return null;
 		}
 		final FedoraPackager packager = new FedoraPackager(fedoraProjectRoot);

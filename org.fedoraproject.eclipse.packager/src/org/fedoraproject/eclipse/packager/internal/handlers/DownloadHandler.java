@@ -55,9 +55,14 @@ public class DownloadHandler extends FedoraPackagerAbstractHandler {
 			fedoraProjectRoot = FedoraPackagerUtils
 					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e) {
-			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
-			FedoraHandlerUtils.showError(shell, NonTranslatableStrings.getProductName(),
-					FedoraPackagerText.invalidFedoraProjectRootError, PackagerPlugin.PLUGIN_ID, e);
+			logger.logError(NLS.bind(
+					FedoraPackagerText.invalidFedoraProjectRootError,
+					NonTranslatableStrings.getDistributionName()), e);
+			FedoraHandlerUtils.showError(shell, NonTranslatableStrings
+					.getProductName(), NLS.bind(
+					FedoraPackagerText.invalidFedoraProjectRootError,
+					NonTranslatableStrings.getDistributionName()),
+					PackagerPlugin.PLUGIN_ID, e);
 			return null;
 		}
 		final FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
