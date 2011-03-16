@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
+import org.fedoraproject.eclipse.packager.api.errors.VCSIgnoreFileUpdateException;
 
 /**
  * Post exec hook for {@link UploadSourceCommand}, responsible for updating VCS
@@ -75,7 +76,10 @@ public class VCSIgnoreFileUpdater implements ICommandListener {
 		try {
 			createVCSFileIfNotExistent();
 		} catch (CoreException e) {
-			throw new CommandListenerException(e);
+			throw new CommandListenerException(
+					new VCSIgnoreFileUpdateException(
+							FedoraPackagerText.VCSIgnoreFileUpdater_couldNotCreateFile,
+							e));
 		}
 		String filename = newIgnoredFileCandidate.getName();
 		ArrayList<String> ignoreFiles = new ArrayList<String>();
@@ -126,9 +130,15 @@ public class VCSIgnoreFileUpdater implements ICommandListener {
 				e.printStackTrace();
 			}
 		} catch (IOException e) {
-			throw new CommandListenerException(e);
+			throw new CommandListenerException(
+					new VCSIgnoreFileUpdateException(
+							FedoraPackagerText.VCSIgnoreFileUpdater_errorWritingFile,
+							e));
 		} catch (CoreException e) {
-			throw new CommandListenerException(e);
+			throw new CommandListenerException(
+					new VCSIgnoreFileUpdateException(
+							FedoraPackagerText.VCSIgnoreFileUpdater_errorWritingFile,
+							e));
 		}
 		finally {
 			if (pw != null) {
