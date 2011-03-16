@@ -21,6 +21,8 @@ public final class FedoraPackagerPreferencesConstants {
 	 *                Prefences keys
 	 * -------------------------------------------------
 	 */
+	/***/ public static final String PREF_DEBUG_MODE =
+		"debug"; //$NON-NLS-1$
 	/***/ public static final String PREF_LOOKASIDE_DOWNLOAD_URL =
 			"lookasideDownloadURL"; //$NON-NLS-1$
 	/***/ public static final String PREF_LOOKASIDE_UPLOAD_URL =
@@ -34,6 +36,7 @@ public final class FedoraPackagerPreferencesConstants {
 	 * -------------------------------------------------
 	 */
 	
+	/***/ public static final boolean DEFAULT_DEBUG_MODE = false;
 	/***/ public static final String DEFAULT_LOOKASIDE_DOWNLOAD_URL = 
 			LookasideCache.DEFAULT_FEDORA_DOWNLOAD_URL;
 	/***/ public static final String DEFAULT_LOOKASIDE_UPLOAD_URL = 

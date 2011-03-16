@@ -23,16 +23,9 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String DownloadHandler_downloadSourceTask;
 	// UploadHandler Strings
 	/****/ public static String UploadHandler_taskName;
-	/****/ public static String UploadHandler_versionExists;
-	/****/ public static String UploadHandler_invalidFile;
-	/****/ public static String UploadHandler_failUpdatSourceFile;
-	/****/ public static String UploadHandler_failVCSUpdate;
-	/****/ public static String UploadHandler_checkingRemoteStatus;
-	/****/ public static String UploadHandler_uploadFail;
-	/****/ public static String UploadHandler_fileAlreadyUploaded;
-	/****/ public static String UploadHandler_progressMsg;
+	/****/ public static String UploadHandler_versionOfFileExistsAndUpToDate;
 	/****/ public static String UploadHandler_invalidUrlError;
-	// UploadCommand
+	// UploadSourceCommand
 	/****/ public static String UploadSourceCommand_uploadFileUnspecified;
 	/****/ public static String UploadSourceCommand_uploadFileInvalid;
 	/****/ public static String UploadSourceCommand_uploadingFileSubTaskName;
@@ -51,6 +44,11 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String FedoraPackagerUtils_invalidProjectRootError;
 	// ChecksumValidListener
 	/****/ public static String ChecksumValidListener_badChecksum;
+	// VCSIgnoreFileUpdater
+	/****/ public static String VCSIgnoreFileUpdater_couldNotCreateFile;
+	/****/ public static String VCSIgnoreFileUpdater_errorWritingFile;
+	// SourcesFileUpdater
+	/****/ public static String SourcesFileUpdater_errorSavingFile;
 	// FedoraPackagerPreferencesPage
 	/****/ public static String FedoraPackagerPreferencePage_lookasideUploadURLLabel;
 	/****/ public static String FedoraPackagerPreferencePage_lookasideDownloadURLLabel;
@@ -63,6 +61,8 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String FedoraPackagerPreferencePage_kojiHubURLInvalidMsg;
 	/****/ public static String FedoraPackagerPreferencePage_buildSystemGroupName;
 	/****/ public static String FedoraPackagerPreferencePage_lookasideGroupName;
+	/****/ public static String FedoraPackagerPreferencePage_generalGroupName;
+	/****/ public static String FedoraPackagerPreferencePage_debugSwitchLabel;
 	// FedoraPackagerGitPreferencesPage
 	/****/ public static String FedoraPackagerGitPreferencePage_description;
 	/****/ public static String FedoraPackagerGitPreferencePage_cloneBaseURLLabel;
@@ -70,6 +70,8 @@ public class FedoraPackagerText extends NLS {
 	// Generic strings
 	/****/ public static String somethingUnexpectedHappenedError;
 	/****/ public static String commandWasCalledInTheWrongState;
+	/****/ public static String invalidFedoraProjectRootError;
+	/****/ public static String callingCommand;
 	
 	static {
 		initializeMessages(BUNDLE_NAME,	FedoraPackagerText.class);

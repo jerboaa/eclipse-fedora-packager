@@ -52,7 +52,7 @@ public class FedoraProjectRoot {
 	public FedoraProjectRoot(IContainer container, ProjectType type) {
 		this.rootContainer = container;
 		this.sourcesFile = new SourcesFile(rootContainer.getFile(new Path(
-				"sources"))); //$NON-NLS-1$
+				SourcesFile.SOURCES_FILENAME)));
 		assert type != null;
 		this.type = type;
 		this.lookAsideCache = new LookasideCache(CacheType.FEDORA);

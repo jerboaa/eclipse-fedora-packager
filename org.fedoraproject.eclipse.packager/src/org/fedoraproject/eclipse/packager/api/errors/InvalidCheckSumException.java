@@ -8,6 +8,7 @@ package org.fedoraproject.eclipse.packager.api.errors;
 public class InvalidCheckSumException extends FedoraPackagerAPIException {
 	
 	private static final long serialVersionUID = -4530245999844216895L;
+	
 	/**
 	 * @param message
 	 * @param cause

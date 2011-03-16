@@ -136,11 +136,13 @@ public class DownloadSourceCommand extends
 				} catch (CoreException coreEx) { /* ignore */ }
 				throw new DownloadFailedException(
 						NLS.bind(
-								FedoraPackagerText.DownloadSourceCommand_downloadFile,
+								FedoraPackagerText.DownloadSourceCommand_downloadFileError,
 						file.getName()), e);
 			} catch (CoreException e) {
 				throw new DownloadFailedException(
-						FedoraPackagerText.DownloadSourceCommand_downloadFile, e);
+						NLS.bind(
+								FedoraPackagerText.DownloadSourceCommand_downloadFileError,
+						file.getName()), e);
 			}
 			fileNumber++;
 		}

@@ -29,6 +29,8 @@ public class FedoraPackagerPreferenceInitializer extends AbstractPreferenceIniti
 	public void initializeDefaultPreferences() {
 		// set default preferences for this plug-in
 		IEclipsePreferences node = new DefaultScope().getNode(PackagerPlugin.PLUGIN_ID);
+		// General
+		node.putBoolean(FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE, FedoraPackagerPreferencesConstants.DEFAULT_DEBUG_MODE);
 		// Lookaside prefs
 		node.put(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL,
 				FedoraPackagerPreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);

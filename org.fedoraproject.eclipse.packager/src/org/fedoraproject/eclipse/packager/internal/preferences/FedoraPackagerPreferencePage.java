@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager.internal.preferences;
 
 
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.StringFieldEditor;
@@ -36,7 +37,7 @@ public class FedoraPackagerPreferencePage extends FieldEditorPreferencePage impl
 	private static final int GROUP_SPAN = 2;
 	private static final String HTTP_PREFIX = "http"; //$NON-NLS-1$
 	private static final String HTTPS_PREFIX = "https://"; //$NON-NLS-1$
-	
+	 
 	// Lookaside cache
 	private StringFieldEditor lookasideUploadURLEditor;
 	private StringFieldEditor lookasideDownloadURLEditor;
@@ -61,7 +62,7 @@ public class FedoraPackagerPreferencePage extends FieldEditorPreferencePage impl
 		super.checkState();
 		// Upload URL has to be https
 		if (lookasideUploadURLEditor.getStringValue() != null
-				&& !lookasideUploadURLEditor.getStringValue().startsWith(HTTPS_PREFIX)) {
+				&& !lookasideUploadURLEditor.getStringValue().startsWith(HTTP_PREFIX)) {
 			setErrorMessage(FedoraPackagerText.FedoraPackagerPreferencePage_invalidUploadURLMsg);
 			setValid(false);
 		} else if (lookasideDownloadURLEditor.getStringValue() != null &&
@@ -103,6 +104,16 @@ public class FedoraPackagerPreferencePage extends FieldEditorPreferencePage impl
 	@Override
 	protected void createFieldEditors() {
 		Composite composite = getFieldEditorParent();
+		
+		// General prefs
+		Group generalGroup = new Group(composite, SWT.SHADOW_ETCHED_IN);
+		generalGroup.setText(FedoraPackagerText.FedoraPackagerPreferencePage_generalGroupName);
+		addField(new BooleanFieldEditor(
+				FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE,
+				FedoraPackagerText.FedoraPackagerPreferencePage_debugSwitchLabel,
+				generalGroup));
+		updateMargins(generalGroup);
+		
 		Group lookasideGroup = new Group(composite, SWT.SHADOW_ETCHED_IN);
 		lookasideGroup.setText(FedoraPackagerText.FedoraPackagerPreferencePage_lookasideGroupName);
 		GridDataFactory.fillDefaults().grab(true, false).span(GROUP_SPAN, 1)

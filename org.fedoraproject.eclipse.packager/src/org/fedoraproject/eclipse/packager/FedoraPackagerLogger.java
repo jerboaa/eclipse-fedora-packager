@@ -1,12 +1,15 @@
 package org.fedoraproject.eclipse.packager;
 
 import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
- * Log errors or informative messages to the Eclipse log
+ * Log errors or informative messages to the Eclipse log. In future we may want
+ * to register an {@link ILogListener} in order to create a custom log somewhere
+ * for debugging purposes (~/eclipse-fedorapackager.log maybe).
  * 
  */
 public class FedoraPackagerLogger {
@@ -38,8 +41,14 @@ public class FedoraPackagerLogger {
 	private FedoraPackagerLogger() {
 		log = PackagerPlugin.getDefault().getLog();
 		// default to error log level. i.e. show only errors.
-		// TODO: Make this a preference or use DebugOptionsListener
-		currentLogLevel = LogLevel.ERROR;
+		// Should we use DebugOptionsListener here?
+		IPreferenceStore prefStore = PackagerPlugin.getDefault().getPreferenceStore();
+		boolean debugEnabled = prefStore.getBoolean(FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE);
+		if (debugEnabled) {
+			currentLogLevel = LogLevel.DEBUG;
+		} else {
+			currentLogLevel = LogLevel.ERROR;
+		}
 	}
 
 	/**
@@ -90,7 +99,7 @@ public class FedoraPackagerLogger {
 	 * @param reason
 	 *            The exception indicating what really happened.
 	 */
-	public void logInfo(String message, FedoraPackagerAPIException reason) {
+	public void logInfo(String message, Throwable reason) {
 		if (currentLogLevel == LogLevel.DEBUG) {
 			log.log(new Status(IStatus.INFO, PackagerPlugin.PLUGIN_ID,
 					DEBUG_STATUS, message, reason));

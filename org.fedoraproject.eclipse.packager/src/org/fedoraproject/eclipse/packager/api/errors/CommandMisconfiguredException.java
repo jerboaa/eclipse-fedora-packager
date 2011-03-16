@@ -1,9 +1,10 @@
 package org.fedoraproject.eclipse.packager.api.errors;
 
+import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 
 /**
  * Thrown if a FedoraPackager command was not properly configured prior calling
- * {@code FedoraPackager#call()}.
+ * {@link FedoraPackagerCommand#call(org.eclipse.core.runtime.IProgressMonitor)}.
  */
 public class CommandMisconfiguredException extends FedoraPackagerAPIException {
 	
