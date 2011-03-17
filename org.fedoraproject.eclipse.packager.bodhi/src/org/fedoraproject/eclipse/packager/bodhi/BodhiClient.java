@@ -11,6 +11,7 @@
 package org.fedoraproject.eclipse.packager.bodhi;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.security.GeneralSecurityException;
@@ -44,12 +45,13 @@ public class BodhiClient implements IBodhiClient {
 	 * Create a Bodhi client instance. Establishes HTTP connection.
 	 * 
 	 * @throws GeneralSecurityException
+	 * @throws FileNotFoundException If fedora certificates are missing.
 	 * @throws IOException
 	 */
-	public BodhiClient() throws GeneralSecurityException, IOException {
+	public BodhiClient() throws GeneralSecurityException, FileNotFoundException, IOException {
 		HttpSecureProtocol protocol = new HttpSecureProtocol();
 		protocol.setKeyMaterial(FedoraSSLFactory.getInstance()
-				.getFedoraCertKeyMaterial());
+				.getFedoraCertKeyMaterial()); // may throw FileNotFound
 		protocol.setTrustMaterial(TrustMaterial.TRUST_ALL);
 		Protocol.registerProtocol("https", new Protocol("https", //$NON-NLS-1$ //$NON-NLS-2$
 				(ProtocolSocketFactory) protocol, 443));

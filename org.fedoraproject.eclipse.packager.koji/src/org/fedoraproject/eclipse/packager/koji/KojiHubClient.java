@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.koji;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -150,6 +151,9 @@ public class KojiHubClient extends AbstractKojiHubClient {
 		SSLContext ctxt = null;
 		try {
 			ctxt = fedoraSSL.getInitializedSSLContext();
+		} catch (FileNotFoundException e) {
+			// certs are missing
+			throw new KojiHubClientInitException(e);
 		} catch (GeneralSecurityException e) {
 			throw new KojiHubClientInitException(e);
 		} catch (IOException e) {

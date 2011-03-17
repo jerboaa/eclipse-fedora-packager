@@ -3,12 +3,11 @@ package org.fedoraproject.eclipse.packager.api;
 import java.io.BufferedReader;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 
 import org.apache.http.HttpEntity;
@@ -76,6 +75,8 @@ public class UploadSourceCommand extends
 
 	// The file to upload
 	private File fileToUpload;
+	// State info if SSL should be used or not
+	private boolean sslEnabled = false;
 	
 	/**
 	 * @param projectRoot The project root.
@@ -93,6 +94,17 @@ public class UploadSourceCommand extends
 	public UploadSourceCommand setUploadURL(String uploadURL)
 			throws MalformedURLException {
 		this.projectRoot.getLookAsideCache().setUploadUrl(uploadURL);
+		return this;
+	}
+	
+	/**
+	 * Set to true if upload host requires SSL authentication.
+	 * 
+	 * @param newValue
+	 * @return this instance.
+	 */
+	public UploadSourceCommand setSSLEnabled(boolean newValue) {
+		this.sslEnabled = newValue;
 		return this;
 	}
 
@@ -179,14 +191,20 @@ public class UploadSourceCommand extends
 			UploadFailedException {
 		HttpClient client = getClient();
 		try {
-			URI uploadURI = null;
-			try {
-				uploadURI = this.projectRoot.getLookAsideCache().getUploadUrl()
-						.toURI();
-			} catch (URISyntaxException e) {
-				// Ignore. Lookaside cache took care of this already.
-			}
+			String uploadURI = null;
+			uploadURI = this.projectRoot.getLookAsideCache().getUploadUrl()
+					.toString();
 			assert uploadURI != null;
+			
+			if (sslEnabled) {
+				// user requested SSL enabled client
+				try {
+					client = sslEnable(client);
+				} catch (GeneralSecurityException e) {
+					throw new UploadFailedException(e.getMessage(), e);
+				}
+			}
+			
 			HttpPost post = new HttpPost(uploadURI);
 
 			// Construct the multipart POST request body.
@@ -258,8 +276,10 @@ public class UploadSourceCommand extends
 			String uploadUrl = projectRoot.getLookAsideCache().getUploadUrl()
 					.toString();
 			
-			// We need an SSL enabled client
-			client = sslEnable(client);
+			if (sslEnabled) {
+				// user requested an SSL enabled client
+				client = sslEnable(client);
+			}
 			
 			HttpPost post = new HttpPost(uploadUrl);
 			FileBody uploadFileBody = new FileBody(fileToUpload);
@@ -353,12 +373,12 @@ public class UploadSourceCommand extends
 	 * @throws IOException
 	 */
 	private HttpClient sslEnable(HttpClient base)
-			throws GeneralSecurityException, IOException {
+			throws GeneralSecurityException, FileNotFoundException, IOException {
 		
 		// Get a SSL related instance for setting up SSL connections.
 		FedoraSSL fedoraSSL = FedoraSSLFactory.getInstance();
 		SSLSocketFactory sf = new SSLSocketFactory(
-				fedoraSSL.getInitializedSSLContext(),
+				fedoraSSL.getInitializedSSLContext(), // may throw FileNotFoundE
 				SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 		ClientConnectionManager ccm = base.getConnectionManager();
 		SchemeRegistry sr = ccm.getSchemeRegistry();

@@ -11,6 +11,7 @@
 package org.fedoraproject.eclipse.packager;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
@@ -26,6 +27,7 @@ import org.apache.commons.ssl.Certificates;
 import org.apache.commons.ssl.KeyMaterial;
 import org.apache.commons.ssl.TrustChain;
 import org.apache.commons.ssl.TrustMaterial;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Helper class for Fedora related SSL things.
@@ -58,6 +60,7 @@ public class FedoraSSL {
 	private File fedoraCert;
 	private File fedoraUploadCert;
 	private File fedoraServerCert;
+	private boolean allCertsExist = false;
 	
 	/**
 	 * Create a Fedora SSL object from given cert files. The use of this
@@ -72,6 +75,10 @@ public class FedoraSSL {
 		this.fedoraCert = fedoraCert;
 		this.fedoraServerCert = fedoraServerCert;
 		this.fedoraUploadCert = fedoraUploadCert;
+		if (fedoraCert.exists() && fedoraServerCert.exists()
+				&& fedoraUploadCert.exists()) {
+			this.allCertsExist = true;
+		}
 	}
 	
 	/**
@@ -80,9 +87,19 @@ public class FedoraSSL {
 	 * @throws GeneralSecurityException
 	 * @throws IOException
 	 * @return The initialized SSLConext instance.
+	 * @throws FileNotFoundException
+	 *             If one of the three certificates is missing.
 	 */
 	public SSLContext getInitializedSSLContext() throws GeneralSecurityException,
-			IOException  {
+		FileNotFoundException, IOException  {
+		if (!allCertsExist) {
+			Object[] bindings = { fedoraCert.getAbsolutePath(),
+					fedoraServerCert.getAbsolutePath(),
+					fedoraUploadCert.getAbsolutePath() };
+			throw new FileNotFoundException(NLS.bind(
+					FedoraPackagerText.FedoraSSL_certificatesMissingError,
+					bindings));
+		}
 		TrustChain tc = getTrustChain();
 
 		KeyMaterial kmat = getFedoraCertKeyMaterial();
@@ -95,15 +112,24 @@ public class FedoraSSL {
 	}
 
 	/**
-	 * Retrieve key material from fedoraCert as specified by
-	 * constructor.
+	 * Retrieve key material from fedoraCert as specified by constructor.
 	 * 
 	 * @return The key material.
 	 * @throws GeneralSecurityException
+	 * @throws FileNotFoundException
+	 *             If one of the three certificates is missing.
 	 * @throws IOException
 	 */
 	public KeyMaterial getFedoraCertKeyMaterial()
-			throws GeneralSecurityException, IOException {
+			throws GeneralSecurityException, FileNotFoundException, IOException {
+		if (!allCertsExist) {
+			Object[] bindings = { fedoraCert.getAbsolutePath(),
+					fedoraServerCert.getAbsolutePath(),
+					fedoraUploadCert.getAbsolutePath() };
+			throw new FileNotFoundException(NLS.bind(
+					FedoraPackagerText.FedoraSSL_certificatesMissingError,
+					bindings));
+		}
 		KeyMaterial kmat = new KeyMaterial(fedoraCert, fedoraCert,
 				new char[0]);
 		return kmat;
@@ -112,7 +138,8 @@ public class FedoraSSL {
 	/**
 	 * Determine FAS username from fedora cert file.
 	 * 
-	 * @return Username if retrieval is successful. {@code "anonymous"}otherwise.
+	 * @return Username if retrieval is successful.
+	 *         {@link FedoraSSL#UNKNOWN_USER} otherwise.
 	 */
 	public String getUsernameFromCert() {
 		if (fedoraCert.exists()) {

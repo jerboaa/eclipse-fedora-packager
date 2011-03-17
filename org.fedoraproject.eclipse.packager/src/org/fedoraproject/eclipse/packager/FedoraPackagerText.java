@@ -40,6 +40,8 @@ public class FedoraPackagerText extends NLS {
 	// SourcesFile
 	/****/ public static String SourcesFile_saveFailedMsg;
 	/****/ public static String SourcesFile_saveJob;
+	// FedoraSSL
+	/****/ public static String FedoraSSL_certificatesMissingError;
 	// FedoraPackagerUtils
 	/****/ public static String FedoraPackagerUtils_invalidProjectRootError;
 	// ChecksumValidListener

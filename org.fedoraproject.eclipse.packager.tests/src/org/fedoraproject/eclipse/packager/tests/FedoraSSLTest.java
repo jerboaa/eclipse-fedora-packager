@@ -6,8 +6,10 @@ package org.fedoraproject.eclipse.packager.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import javax.net.ssl.SSLContext;
 
@@ -61,6 +63,27 @@ public class FedoraSSLTest {
 	public void canGetInitializedSSLContext() throws Exception {
 		SSLContext ctxt = this.fedoraSSL.getInitializedSSLContext();
 		assertNotNull(ctxt);
+	}
+	
+	/**
+	 * FileNotFoundException should be thrown if a certificate is missing
+	 * and {@link FedoraSSL#getInitializedSSLContext()} or {@link FedoraSSL#getFedoraCertKeyMaterial()} is called.
+	 * 
+	 */
+	@Test
+	public void throwsFileNotFoundExceptionIfCertsMissing() throws Exception {
+		try {
+			anonymousFedoraSSL.getInitializedSSLContext();
+			fail("should have thrown FileNotFoundException");
+		} catch (FileNotFoundException e) {
+			// pass
+		}
+		try {
+			anonymousFedoraSSL.getFedoraCertKeyMaterial();
+			fail("should have thrown FileNotFoundException");
+		} catch (FileNotFoundException e) {
+			// pass
+		}
 	}
 	
 	/**
