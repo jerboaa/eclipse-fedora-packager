@@ -1,4 +1,4 @@
-package org.fedoraproject.eclipse.packager.api.koji;
+package org.fedoraproject.eclipse.packager.koji.api;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;

@@ -48,7 +48,7 @@ import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
-import org.fedoraproject.eclipse.packager.api.koji.KojiBuildCommand;
+import org.fedoraproject.eclipse.packager.koji.api.KojiBuildCommand;
 import org.fedoraproject.eclipse.packager.koji.stubs.KojiHubClientStub;
 
 /**
