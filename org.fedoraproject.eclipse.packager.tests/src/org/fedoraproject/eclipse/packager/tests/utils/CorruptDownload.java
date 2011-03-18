@@ -25,6 +25,7 @@ public class CorruptDownload implements ICommandListener {
 		this.fedoraProjectRoot = fpRoot;
 	}
 
+	@Override
 	public void preExecution() throws CommandListenerException {
 		// nothing
 	}
@@ -32,6 +33,7 @@ public class CorruptDownload implements ICommandListener {
 	/**
 	 * Intentionally destroy MD5sums of sources files.
 	 */
+	@Override
 	public void postExecution() throws CommandListenerException {
 		String extraContents = "0xbeef";
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(extraContents.getBytes());

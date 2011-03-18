@@ -14,6 +14,7 @@ public class DummyResult implements ICommandResult {
 		this.overallStatus = status;
 	}
 	
+	@Override
 	public boolean wasSuccessful() {
 		return overallStatus;
 	}

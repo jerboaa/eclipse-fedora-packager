@@ -13,11 +13,13 @@ public class DummyPreExecCmdListener implements ICommandListener {
 
 	public static final String EXCEPTION_MSG = "preExecTest";
 	
+	@Override
 	public void preExecution() throws CommandListenerException {
 		// throw some arbitrary exception (wrapped in CmdListEx)
 		throw new CommandListenerException(new IllegalStateException(EXCEPTION_MSG));
 	}
 
+	@Override
 	public void postExecution() throws CommandListenerException {
 		// nothing
 	}
