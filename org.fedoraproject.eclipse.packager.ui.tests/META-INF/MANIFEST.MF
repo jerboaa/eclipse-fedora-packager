@@ -17,9 +17,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit4;bundle-version="4.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: org.fedoraproject.eclipse.packager.tests.utils.git,
- org.fedoraproject.eclipse.packager.tests.utils.cvs,
- org.eclipse.jgit.lib,
+Import-Package: org.eclipse.jgit.lib,
  org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.api,
  org.fedoraproject.eclipse.packager.api.errors,
@@ -29,4 +27,6 @@ Import-Package: org.fedoraproject.eclipse.packager.tests.utils.git,
  org.fedoraproject.eclipse.packager.git,
  org.fedoraproject.eclipse.packager.koji,
  org.fedoraproject.eclipse.packager.rpm,
+ org.fedoraproject.eclipse.packager.tests.utils.cvs,
+ org.fedoraproject.eclipse.packager.tests.utils.git,
  org.fedoraproject.eclipse.packager.utils
