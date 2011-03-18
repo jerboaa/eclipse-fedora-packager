@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.git;
+package org.fedoraproject.eclipse.packager.git.internal.ui;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,12 +29,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.dialogs.WorkingSetConfigurationBlock;
+import org.fedoraproject.eclipse.packager.git.Activator;
+import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitText;
 
 /**
  * Page for selecting the module to clone.
  *
  */
-//TODO add controls for listing and selecting a module without writing it's name.
 public class SelectModulePage extends WizardPage {
 
 	private Text projectText;
@@ -44,9 +45,9 @@ public class SelectModulePage extends WizardPage {
 	private static final IWorkingSet[] EMPTY_WORKING_SET_ARRAY = new IWorkingSet[0];
 
 	protected SelectModulePage() {
-		super(Messages.selectModulePage_packageSelection);
-		setTitle(Messages.selectModulePage_packageSelection);
-		setDescription(Messages.selectModulePage_choosePackage); 
+		super(FedoraPackagerGitText.SelectModulePage_packageSelection);
+		setTitle(FedoraPackagerGitText.SelectModulePage_packageSelection);
+		setDescription(FedoraPackagerGitText.SelectModulePage_choosePackage); 
 		this.setImageDescriptor(ImageDescriptor.createFromFile(getClass(),
 				"/icons/wizban/newconnect_wizban.png")); //$NON-NLS-1$
 
@@ -72,7 +73,7 @@ public class SelectModulePage extends WizardPage {
 
 		// Package name controls
 		Label label = new Label(composite, SWT.NONE);
-		label.setText(Messages.selectModulePage_packageName); 
+		label.setText(FedoraPackagerGitText.SelectModulePage_packageName); 
 		projectText = new Text(composite, SWT.BORDER | SWT.SINGLE);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		projectText.setLayoutData(gd);
@@ -85,7 +86,7 @@ public class SelectModulePage extends WizardPage {
 	}
 
 	/**
-	 * @return location the user wants to store this repository.
+	 * @return The name of the package to clone.
 	 */
 	public String getPackageName() {
 		return projectText.getText();
@@ -124,6 +125,7 @@ public class SelectModulePage extends WizardPage {
 		if (treeSelection.isEmpty())
 			return EMPTY_WORKING_SET_ARRAY;
 
+		@SuppressWarnings("unchecked")
 		List<Object> elements= treeSelection.toList();
 		if (elements.size() == 1) {
 			Object element = elements.get(0);
@@ -166,13 +168,14 @@ public class SelectModulePage extends WizardPage {
 
 		public WorkingSetGroup() {
 			String[] workingSetIds = new String[] { "org.eclipse.ui.resourceWorkingSetPage" }; //$NON-NLS-1$
-			workingSetBlock = new WorkingSetConfigurationBlock(workingSetIds, Activator.getDefault().getDialogSettings());
+			workingSetBlock = new WorkingSetConfigurationBlock(workingSetIds,
+					Activator.getDefault().getDialogSettings());
 		}
 
 		public Control createControl(Composite composite) {
 			Group workingSetGroup = new Group(composite, SWT.NONE);
 			workingSetGroup.setFont(composite.getFont());
-			workingSetGroup.setText(Messages.selectModulePage_workingSets);
+			workingSetGroup.setText(FedoraPackagerGitText.SelectModulePage_workingSets);
 			workingSetGroup.setLayout(new GridLayout(1, false));
 
 			workingSetBlock.createContent(workingSetGroup);

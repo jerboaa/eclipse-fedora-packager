@@ -16,8 +16,8 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.git.Activator;
-import org.fedoraproject.eclipse.packager.git.GitConstants;
 import org.fedoraproject.eclipse.packager.git.GitPreferencesConstants;
+import org.fedoraproject.eclipse.packager.git.GitUtils;
 
 /**
  * Class for initialization of Eclipse Fedora Packager preferences.
@@ -36,12 +36,10 @@ public class FedoraPackagerGitPreferenceInitializer extends AbstractPreferenceIn
 		String user = FedoraSSLFactory.getInstance().getUsernameFromCert();
 		String gitURL;
 		if (!user.equals(FedoraSSL.UNKNOWN_USER)) {
-			gitURL = GitConstants.AUTHENTICATED_PROTOCOL + user +
-			GitConstants.USERNAME_SEPARATOR;
+			gitURL = GitUtils.getAuthenticatedGitBaseUrl(user);
 		} else {
-			gitURL = GitConstants.ANONYMOUS_PROTOCOL;
+			gitURL = GitUtils.getAnonymousGitBaseUrl();
 		}
-		gitURL += GitPreferencesConstants.DEFAULT_CLONE_BASE_URL;
 		node.put(GitPreferencesConstants.PREF_CLONE_BASE_URL,
 				gitURL);
 	}

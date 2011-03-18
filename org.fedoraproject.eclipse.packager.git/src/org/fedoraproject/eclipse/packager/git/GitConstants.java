@@ -18,5 +18,8 @@ public final class GitConstants {
 	 * Token which separates username from Git URL
 	 */
 	public static final String USERNAME_SEPARATOR = "@"; //$NON-NLS-1$
-	
+	/**
+	 * Commonly used suffix for Git repositories
+	 */
+	public static final String GIT_REPO_SUFFIX = ".git"; //$NON-NLS-1$
 }

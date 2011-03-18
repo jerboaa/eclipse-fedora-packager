@@ -10,7 +10,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.git;
+package org.fedoraproject.eclipse.packager.git.internal;
 
 import java.io.File;
 import java.io.IOException;

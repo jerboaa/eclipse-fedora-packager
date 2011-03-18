@@ -12,6 +12,7 @@ package org.fedoraproject.eclipse.packager.git;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.BundleContext;
@@ -78,6 +79,19 @@ public class Activator extends AbstractUIPlugin {
 		if (show)
 			style |= StatusManager.SHOW;
 		StatusManager.getManager().handle(status, style);
+	}
+	
+	/**
+	 * @param prefKey
+	 * @return The set preference for the given key or {@code null} if not set.
+	 */
+	public static String getStringPreference(String prefKey) {
+		IPreferenceStore store = getDefault().getPreferenceStore();
+		String candidate = store.getString(prefKey);
+		if (candidate.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
+			return null;
+		}
+		return candidate;
 	}
 
 

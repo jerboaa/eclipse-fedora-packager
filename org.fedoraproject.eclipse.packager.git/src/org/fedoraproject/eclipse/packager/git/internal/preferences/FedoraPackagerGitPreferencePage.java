@@ -1,16 +1,18 @@
 package org.fedoraproject.eclipse.packager.git.internal.preferences;
 
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.git.Activator;
+import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitText;
 import org.fedoraproject.eclipse.packager.git.GitPreferencesConstants;
 
 /**
@@ -29,25 +31,44 @@ public class FedoraPackagerGitPreferencePage extends
 	public FedoraPackagerGitPreferencePage() {
 		super(GRID);
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
-		setDescription(FedoraPackagerText.FedoraPackagerGitPreferencePage_description);
+		setDescription(FedoraPackagerGitText.FedoraPackagerGitPreferencePage_description);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 */
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getProperty().equals(FieldEditor.VALUE)) {
+			checkState();
+		}
 	}
 	
 	@Override
 	public void checkState() {
 		super.checkState();
+		// base URL should end with "/"
+		if (!gitCloneURLEditor.getStringValue().endsWith("/")) { //$NON-NLS-1$
+			setErrorMessage(FedoraPackagerGitText.FedoraPackagerGitPreferencePage_invalidBaseURLMsg);
+			setValid(false);
+		} else {
+			setErrorMessage(null);
+			setValid(true);
+		}
 	}
 	
 	@Override
 	public void createFieldEditors() {
 		Composite composite = getFieldEditorParent();
 		Group gitGroup = new Group(composite, SWT.SHADOW_ETCHED_IN);
-		gitGroup.setText(FedoraPackagerText.FedoraPackagerGitPreferencePage_gitGroupName);
+		gitGroup.setText(FedoraPackagerGitText.FedoraPackagerGitPreferencePage_gitGroupName);
 		GridDataFactory.fillDefaults().grab(true, false).span(GROUP_SPAN, 1)
 		.applyTo(gitGroup);
 		/* Preference for git clone base url */
 		gitCloneURLEditor = new StringFieldEditor(
 				GitPreferencesConstants.PREF_CLONE_BASE_URL,
-				FedoraPackagerText.FedoraPackagerGitPreferencePage_cloneBaseURLLabel,
+				FedoraPackagerGitText.FedoraPackagerGitPreferencePage_cloneBaseURLLabel,
 				gitGroup);
 		addField(gitCloneURLEditor);
 		updateMargins(gitGroup);
