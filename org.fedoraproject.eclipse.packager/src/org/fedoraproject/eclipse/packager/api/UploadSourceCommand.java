@@ -36,6 +36,7 @@ import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidUploadFileException;
 import org.fedoraproject.eclipse.packager.api.errors.UploadFailedException;
@@ -48,7 +49,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  * all supported options and arguments of this command and a
  * {@link #call(IProgressMonitor)} method to finally execute the command. Each
  * instance of this class should only be used for one invocation of the command
- * (means: one call to {@link #call(IProgressMonitor)})
+ * (meaning: one call to {@link #call(IProgressMonitor)})
  * 
  */
 public class UploadSourceCommand extends
@@ -63,6 +64,11 @@ public class UploadSourceCommand extends
 	 * I.e. would need to be uploaded.
 	 */
 	public static final String RESOURCE_MISSING = "missing"; //$NON-NLS-1$
+	/**
+	 * The unique ID of this command.
+	 */
+	public static final String ID = "UploadSourceCommand"; //$NON-NLS-1$
+	
 	
 	// Parameter name constants
 	private static final String FILENAME_PARAM_NAME = "filename"; //$NON-NLS-1$
@@ -78,12 +84,14 @@ public class UploadSourceCommand extends
 	// State info if SSL should be used or not
 	private boolean sslEnabled = false;
 	
-	/**
-	 * @param projectRoot The project root.
-	 * 
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand#initialize(org.fedoraproject.eclipse.packager.FedoraProjectRoot)
 	 */
-	public UploadSourceCommand(FedoraProjectRoot projectRoot) {
-		super(projectRoot);
+	@Override
+	public void initialize(FedoraProjectRoot projectRoot)
+			throws FedoraPackagerCommandInitializationException {
+		super.initialize(projectRoot);
 	}
 
 	/**

@@ -53,7 +53,8 @@ public class DownloadSourceCommandTest {
 	
 	@Test
 	public void shouldThrowMalformedURLException() throws Exception {
-		DownloadSourceCommand downloadCmd = packager.downloadSources();
+		DownloadSourceCommand downloadCmd = (DownloadSourceCommand) packager
+				.getCommandInstance(DownloadSourceCommand.ID);
 		try {
 			downloadCmd.setDownloadURL("very bad url");
 			fail("DownloadSourceCommand.setUploadURL should not accept invalid URLs!");
@@ -78,7 +79,8 @@ public class DownloadSourceCommandTest {
 		this.fpRoot = FedoraPackagerUtils.getProjectRoot(this.testProject
 				.getProject());
 		this.packager = new FedoraPackager(fpRoot);
-		DownloadSourceCommand downloadCmd = packager.downloadSources();
+		DownloadSourceCommand downloadCmd = (DownloadSourceCommand) packager
+				.getCommandInstance(DownloadSourceCommand.ID);
 		ChecksumValidListener md5sumListener = new ChecksumValidListener(fpRoot);
 		downloadCmd.addCommandListener(md5sumListener); // want md5sum checking
 		try {
@@ -102,7 +104,8 @@ public class DownloadSourceCommandTest {
 	 */
 	@Test
 	public void canDetectChecksumErrors() throws Exception {
-		DownloadSourceCommand downloadCmd = packager.downloadSources();
+		DownloadSourceCommand downloadCmd = (DownloadSourceCommand) packager
+				.getCommandInstance(DownloadSourceCommand.ID);
 		CorruptDownload checksumDestroyer = new CorruptDownload(fpRoot);
 		ChecksumValidListener md5sumListener = new ChecksumValidListener(fpRoot);
 		// Add checksum destroyer first, checksum checker after.

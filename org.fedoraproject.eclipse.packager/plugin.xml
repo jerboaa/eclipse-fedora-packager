@@ -12,6 +12,7 @@
 
 <plugin>
    <extension-point id="vcsContribution" name="VCS interaction" schema="schema/vcsContribution.exsd"/>
+   <extension-point id="packagerCommandContribution" name="Eclipse Fedora Packager Command Contribution" schema="schema/packagerCommandContribution.exsd"/>
    
    <extension point="org.eclipse.core.expressions.definitions">
       <definition
@@ -163,5 +164,15 @@
        <initializer
              class="org.fedoraproject.eclipse.packager.internal.preferences.FedoraPackagerPreferenceInitializer">
        </initializer>
+    </extension>
+    <!-- Core plug-in contributes upload/download source commands  -->
+    <extension
+          point="org.fedoraproject.eclipse.packager.packagerCommandContribution">
+       <command id="UploadSourceCommand"
+                class="org.fedoraproject.eclipse.packager.api.UploadSourceCommand">
+       </command>
+       <command id="DownloadSourceCommand"
+                class="org.fedoraproject.eclipse.packager.api.DownloadSourceCommand">
+       </command>
     </extension>
 </plugin>

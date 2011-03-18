@@ -45,6 +45,8 @@ import org.fedoraproject.eclipse.packager.api.UploadSourceResult;
 import org.fedoraproject.eclipse.packager.api.VCSIgnoreFileUpdater;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.FileAvailableInLookasideCacheException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidUploadFileException;
@@ -88,9 +90,27 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 					PackagerPlugin.PLUGIN_ID, e);
 			return null;
 		}
-		final FedoraPackager packager = new FedoraPackager(fedoraProjectRoot);
+		FedoraPackager packager = new FedoraPackager(fedoraProjectRoot);
+		final UploadSourceCommand uploadCmd;
+		try {
+			// Get DownloadSourceCommand from Fedora packager registry
+			uploadCmd = (UploadSourceCommand) packager
+					.getCommandInstance(UploadSourceCommand.ID);
+		} catch (FedoraPackagerCommandNotFoundException e) {
+			logger.logError(e.getMessage(), e);
+			FedoraHandlerUtils.showError(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage(),
+					PackagerPlugin.PLUGIN_ID, e);
+			return null;
+		} catch (FedoraPackagerCommandInitializationException e) {
+			logger.logError(e.getMessage(), e);
+			FedoraHandlerUtils.showError(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage(),
+					PackagerPlugin.PLUGIN_ID, e);
+			return null;
+		}
 		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
-		// do tasks as job
+		// Do the uploading
 		Job job = new Job(FedoraPackagerText.UploadHandler_taskName) {
 
 			@Override
@@ -121,7 +141,6 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 				// Note that ignore file may not exist, yet
 				IFile gitIgnore = fedoraProjectRoot.getIgnoreFile();
 				VCSIgnoreFileUpdater vcsIgnoreFileUpdater = new VCSIgnoreFileUpdater(newUploadFile, gitIgnore);
-				UploadSourceCommand uploadCmd = packager.uploadSources();
 				
 				UploadSourceResult result = null;
 				try {

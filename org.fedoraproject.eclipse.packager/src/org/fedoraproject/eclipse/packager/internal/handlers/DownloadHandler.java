@@ -34,6 +34,8 @@ import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
@@ -65,7 +67,25 @@ public class DownloadHandler extends FedoraPackagerAbstractHandler {
 					PackagerPlugin.PLUGIN_ID, e);
 			return null;
 		}
-		final FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
+		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
+		final DownloadSourceCommand download;
+		try {
+			// Get DownloadSourceCommand from Fedora packager registry
+			download = (DownloadSourceCommand) fp
+					.getCommandInstance(DownloadSourceCommand.ID);
+		} catch (FedoraPackagerCommandNotFoundException e) {
+			logger.logError(e.getMessage(), e);
+			FedoraHandlerUtils.showError(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage(),
+					PackagerPlugin.PLUGIN_ID, e);
+			return null;
+		} catch (FedoraPackagerCommandInitializationException e) {
+			logger.logError(e.getMessage(), e);
+			FedoraHandlerUtils.showError(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage(),
+					PackagerPlugin.PLUGIN_ID, e);
+			return null;
+		}
 		Job job = new Job(NonTranslatableStrings.getProductName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -73,7 +93,6 @@ public class DownloadHandler extends FedoraPackagerAbstractHandler {
 						FedoraPackagerText.DownloadHandler_downloadSourceTask,
 						fedoraProjectRoot.getSourcesFile().getMissingSources()
 								.size());
-				DownloadSourceCommand download = fp.downloadSources();
 				ChecksumValidListener md5sumListener = new ChecksumValidListener(fedoraProjectRoot);
 				download.addCommandListener(md5sumListener); // want md5sum checking
 				try {

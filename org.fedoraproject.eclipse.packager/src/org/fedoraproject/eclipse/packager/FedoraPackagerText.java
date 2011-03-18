@@ -69,6 +69,10 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String FedoraPackagerGitPreferencePage_description;
 	/****/ public static String FedoraPackagerGitPreferencePage_cloneBaseURLLabel;
 	/****/ public static String FedoraPackagerGitPreferencePage_gitGroupName;
+	// FedoraPackagerCommand
+	/****/ public static String FedoraPackagerCommand_projectRootSetTwiceError;
+	// FedoraPackager
+	/****/ public static String FedoraPackager_commandNotFoundError;
 	// Generic strings
 	/****/ public static String somethingUnexpectedHappenedError;
 	/****/ public static String commandWasCalledInTheWrongState;

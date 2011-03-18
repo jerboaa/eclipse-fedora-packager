@@ -5,6 +5,7 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 
 /**
  * Fixture for {@link FedoraPackagerCommandTest}. It is a very basic
@@ -15,11 +16,16 @@ public class FedoraPackagerCommandDummyImpl extends FedoraPackagerCommand<DummyR
 	
 	// some dummy state.
 	private boolean configured = false;
-	
-	public FedoraPackagerCommandDummyImpl(FedoraProjectRoot root) {
-		super(root);
-	}
 
+	@Override
+	public void initialize(FedoraProjectRoot root) {
+		try {
+			super.initialize(root);
+		} catch (FedoraPackagerCommandInitializationException e) {
+			// ignore
+		}
+	}
+	
 	@Override
 	protected void checkConfiguration() throws CommandMisconfiguredException {
 		// pretend to require configured set to true

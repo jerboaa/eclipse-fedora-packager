@@ -43,9 +43,12 @@ import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
@@ -56,7 +59,7 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
  * Handler containing common functionality for implementations using rpm calls. 
  *
  */
-public abstract class RPMHandler extends AbstractHandler {
+public abstract class RPMHandler extends FedoraPackagerAbstractHandler {
 	protected static final QualifiedName KEY = new QualifiedName(
 			RPMPlugin.PLUGIN_ID, "source"); //$NON-NLS-1$
 
@@ -214,7 +217,18 @@ public abstract class RPMHandler extends AbstractHandler {
 	protected IStatus makeSRPM(FedoraProjectRoot fedoraProjectRoot, IProgressMonitor monitor) {
 		final FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
 		// First download sources
-		DownloadSourceCommand downloadCmd = fp.downloadSources();
+		DownloadSourceCommand downloadCmd;
+		try {
+			downloadCmd = (DownloadSourceCommand)fp.getCommandInstance(DownloadSourceCommand.ID);
+		} catch (FedoraPackagerCommandInitializationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} catch (FedoraPackagerCommandNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 		
 		try {
 			downloadCmd.call(monitor);

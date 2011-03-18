@@ -17,9 +17,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 
 /**
  * Common superclass of all commands in the package
@@ -52,32 +54,61 @@ public abstract class FedoraPackagerCommand<T> {
 	/**
 	 * The project root to work with.
 	 */
-	final protected FedoraProjectRoot projectRoot;
+	protected FedoraProjectRoot projectRoot;
 	
 	/**
-	 * 
+	 * A list of command listeners to call
 	 */
-	final protected ArrayList<ICommandListener> cmdListeners;
+	private final ArrayList<ICommandListener> cmdListeners = new ArrayList<ICommandListener>();
 	
 	/**
 	 * a state which tells whether it is allowed to call {@link #call()} on this
 	 * instance.
 	 */
 	private boolean callable = true;
+
+	/**
+	 * Default 0-arg constructor.
+	 */
+	protected FedoraPackagerCommand() {
+		// nothing
+	}
 	
 	/**
-	 * Creates a new command which interacts with a single repository
-	 *
-	 * @param repo
-	 *            the {@link Repository} this command should interact with
+	 * Initialize a FedoraPackagerCommand instance with the
+	 * {@link FedoraProjectRoot} to work with. Called on object creation.
+	 * 
+	 * @param projectRoot
+	 * @throws FedoraPackagerCommandInitializationException
+	 *             If the project root was already set. I.e. this method has
+	 *             been called more than once.
 	 */
-	protected FedoraPackagerCommand(FedoraProjectRoot projectRoot) {
-		this.projectRoot = projectRoot;
-		this.cmdListeners = new ArrayList<ICommandListener>();
+	public void initialize(FedoraProjectRoot projectRoot) throws FedoraPackagerCommandInitializationException {
+		try {
+			setProjectRoot(projectRoot);
+		} catch (IllegalStateException e) {
+			throw new FedoraPackagerCommandInitializationException(e.getMessage(), e);
+		}
 		// per default add config and state checker
 		this.cmdListeners.add(new CheckConfigListener(this));
 	}
-	
+
+	/**
+	 * 
+	 * @param projectRoot
+	 *            the projectRoot to set
+	 */
+	private void setProjectRoot(FedoraProjectRoot projectRoot)
+			throws IllegalStateException {
+		if (this.projectRoot != null) {
+			throw new IllegalStateException(
+					NLS.bind(
+							FedoraPackagerText.FedoraPackagerCommand_projectRootSetTwiceError,
+							NonTranslatableStrings.getDistributionName()));
+		}
+		this.projectRoot = projectRoot;
+	}
+
 	/**
 	 * Checks that the property {@link #callable} is {@code true}. If not then
 	 * an {@link IllegalStateException} is thrown

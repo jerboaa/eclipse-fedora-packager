@@ -55,7 +55,8 @@ public class FedoraPackagerCommandTest {
 	
 	@Test
 	public void shouldThrowConfigurationException() throws Exception {
-		FedoraPackagerCommandDummyImpl fpCmd = new FedoraPackagerCommandDummyImpl(fpRoot);
+		FedoraPackagerCommandDummyImpl fpCmd = new FedoraPackagerCommandDummyImpl();
+		fpCmd.initialize(fpRoot);
 		// FedoraPackagerCommandDummyImpl requires setConfiguration(true) to be
 		// called, i.e. this should throw an exception.
 		try {
@@ -69,7 +70,8 @@ public class FedoraPackagerCommandTest {
 	
 	@Test
 	public void cannotCallACommandInstanceTwice() throws Exception {
-		FedoraPackagerCommandDummyImpl fpCmd = new FedoraPackagerCommandDummyImpl(fpRoot);
+		FedoraPackagerCommandDummyImpl fpCmd = new FedoraPackagerCommandDummyImpl();
+		fpCmd.initialize(fpRoot);
 		fpCmd.setConfiguration(true); // configure
 		fpCmd.call(new NullProgressMonitor()); // should work
 		try {
@@ -82,7 +84,8 @@ public class FedoraPackagerCommandTest {
 	
 	@Test
 	public void canRegisterCommandListeners() throws Exception {
-		FedoraPackagerCommandDummyImpl fpCmd = new FedoraPackagerCommandDummyImpl(fpRoot);
+		FedoraPackagerCommandDummyImpl fpCmd = new FedoraPackagerCommandDummyImpl();
+		fpCmd.initialize(fpRoot);
 		DummyPreExecCmdListener preExecListener = new DummyPreExecCmdListener();
 		fpCmd.setConfiguration(true);
 		fpCmd.addCommandListener(preExecListener);
@@ -98,7 +101,7 @@ public class FedoraPackagerCommandTest {
 			}
 		}
 		// get a fresh instance
-		fpCmd = new FedoraPackagerCommandDummyImpl(fpRoot);
+		fpCmd = new FedoraPackagerCommandDummyImpl();
 		DummyPostExecCmdListener postExecListener = new DummyPostExecCmdListener();
 		fpCmd.setConfiguration(true);
 		fpCmd.addCommandListener(postExecListener);
@@ -122,7 +125,8 @@ public class FedoraPackagerCommandTest {
 	 */
 	@Test
 	public void canGetCommandResult() throws Exception {
-		FedoraPackagerCommandDummyImpl fpCmd = new FedoraPackagerCommandDummyImpl(fpRoot);
+		FedoraPackagerCommandDummyImpl fpCmd = new FedoraPackagerCommandDummyImpl();
+		fpCmd.initialize(fpRoot);
 		fpCmd.setConfiguration(true);
 		DummyResult result = fpCmd.call(new NullProgressMonitor());
 		assertTrue(result.wasSuccessful());

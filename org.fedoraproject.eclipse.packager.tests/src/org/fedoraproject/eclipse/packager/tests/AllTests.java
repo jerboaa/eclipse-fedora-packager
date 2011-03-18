@@ -22,7 +22,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	FedoraSSLTest.class,
 	FedoraProjectRootTest.class,
 	FedoraPackagerUtilsTest.class,
-	FedoraPackagerLoggerTest.class
+	FedoraPackagerLoggerTest.class,
+	FedoraPackagerTest.class
 })
 
 public class AllTests {

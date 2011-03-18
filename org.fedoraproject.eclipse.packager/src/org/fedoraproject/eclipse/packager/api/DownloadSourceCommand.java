@@ -24,6 +24,7 @@ import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
 
 /**
@@ -41,10 +42,17 @@ public class DownloadSourceCommand extends
 	private LookasideCache lookasideCache;
 	
 	/**
-	 * @param projectRoot The project root abstraction.
+	 * The unique ID of this command.
 	 */
-	public DownloadSourceCommand(FedoraProjectRoot projectRoot) {
-		super(projectRoot);
+	public static final String ID = "DownloadSourceCommand"; //$NON-NLS-1$
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand#initialize(org.fedoraproject.eclipse.packager.FedoraProjectRoot)
+	 */
+	@Override
+	public void initialize(FedoraProjectRoot projectRoot) throws FedoraPackagerCommandInitializationException {
+		super.initialize(projectRoot);
 		this.sources = projectRoot.getSourcesFile();
 		this.lookasideCache = projectRoot.getLookAsideCache();
 	}

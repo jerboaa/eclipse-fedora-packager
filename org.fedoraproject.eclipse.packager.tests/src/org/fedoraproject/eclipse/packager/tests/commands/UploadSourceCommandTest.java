@@ -91,7 +91,8 @@ public class UploadSourceCommandTest {
 	
 	@Test
 	public void shouldThrowMalformedURLException() throws Exception {
-		UploadSourceCommand uploadCmd = packager.uploadSources();
+		UploadSourceCommand uploadCmd = (UploadSourceCommand) packager
+				.getCommandInstance(UploadSourceCommand.ID);
 		try {
 			uploadCmd.setUploadURL("very bad url");
 			fail("UploadSourceCommand.setUploadURL()"
@@ -115,14 +116,16 @@ public class UploadSourceCommandTest {
 				FileLocator.find(TestsPlugin.getDefault().getBundle(),
 						new Path(EXAMPLE_UPLOAD_FILE), null)).getFile();
 		File file = new File(fileName);
-		UploadSourceCommand uploadCmd = packager.uploadSources();
+		UploadSourceCommand uploadCmd = (UploadSourceCommand) packager
+				.getCommandInstance(UploadSourceCommand.ID);
 		try {
 			uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING)
 				.setFileToUpload(file).call(new NullProgressMonitor());
 		} catch (FileAvailableInLookasideCacheException e) {
 			// don't care
 		}
-		uploadCmd = packager.uploadSources();
+		uploadCmd = (UploadSourceCommand) packager
+				.getCommandInstance(UploadSourceCommand.ID);
 		try {
 			uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING)
 				.setFileToUpload(file).call(new NullProgressMonitor());
@@ -142,7 +145,8 @@ public class UploadSourceCommandTest {
 	 */
 	@Test
 	public void canUploadSources() throws Exception {
-		UploadSourceCommand uploadCmd = packager.uploadSources();
+		UploadSourceCommand uploadCmd = (UploadSourceCommand) packager
+				.getCommandInstance(UploadSourceCommand.ID);
 		// create a a temp file with checksum, which hasn't been uploaded so far
 		File newUploadFile = File.createTempFile(
 				"eclipse-fedorapackager-uploadsources-test-", "-REMOVE_ME.tar");
@@ -192,7 +196,8 @@ public class UploadSourceCommandTest {
 		// create listener
 		SourcesFileUpdater sourcesUpdater = new SourcesFileUpdater(root,
 				newUploadFile);
-		UploadSourceCommand uploadCmd = packager.uploadSources();
+		UploadSourceCommand uploadCmd = (UploadSourceCommand) packager
+				.getCommandInstance(UploadSourceCommand.ID);
 		uploadCmd.setFileToUpload(newUploadFile);
 		uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING);
 		uploadCmd.addCommandListener(sourcesUpdater);
@@ -227,7 +232,8 @@ public class UploadSourceCommandTest {
 	 */
 	@Test
 	public void canDetermineValidUploadFiles() throws Exception {
-		UploadSourceCommand uploadCmd = packager.uploadSources();
+		UploadSourceCommand uploadCmd = (UploadSourceCommand) packager
+				.getCommandInstance(UploadSourceCommand.ID);
 		String invalidUploadFileName = FileLocator.toFileURL(
 				FileLocator.find(TestsPlugin.getDefault().getBundle(),
 						new Path(INVALID_UPLOAD_FILE), null)).getFile();
@@ -267,7 +273,8 @@ public class UploadSourceCommandTest {
 					.getLocation().toFile());
 		}
 		
-		UploadSourceCommand uploadCmd = packager.uploadSources();
+		UploadSourceCommand uploadCmd = (UploadSourceCommand) packager
+				.getCommandInstance(UploadSourceCommand.ID);
 		uploadCmd.setFileToUpload(newUploadFile);
 		uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING);
 		VCSIgnoreFileUpdater vcsUpdater = new VCSIgnoreFileUpdater(newUploadFile,
