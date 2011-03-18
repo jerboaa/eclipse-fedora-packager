@@ -65,10 +65,6 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String FedoraPackagerPreferencePage_lookasideGroupName;
 	/****/ public static String FedoraPackagerPreferencePage_generalGroupName;
 	/****/ public static String FedoraPackagerPreferencePage_debugSwitchLabel;
-	// FedoraPackagerGitPreferencesPage
-	/****/ public static String FedoraPackagerGitPreferencePage_description;
-	/****/ public static String FedoraPackagerGitPreferencePage_cloneBaseURLLabel;
-	/****/ public static String FedoraPackagerGitPreferencePage_gitGroupName;
 	// FedoraPackagerCommand
 	/****/ public static String FedoraPackagerCommand_projectRootSetTwiceError;
 	// FedoraPackager
