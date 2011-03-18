@@ -15,12 +15,12 @@
          point="org.eclipse.ui.importWizards">
       <wizard
             category="org.eclipse.egit.ui.internal.clone.gitclonecategory"
-            class="org.fedoraproject.eclipse.packager.git.FedoraCheckoutWizard"
+            class="org.fedoraproject.eclipse.packager.git.internal.ui.FedoraPackagerGitCloneWizard"
             icon="icons/import_obj.gif"
             id="org.fedoraproject.eclipse.packager.FedoraImportWizard"
-            name="%wizard.name.0">
+            name="%FedoraGitWizardName">
          <description>
-            %wizard.description.0
+            %FedoraGitWizardDescription
          </description>
       </wizard>
    </extension>

@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: %Bundle-Name.0
+Bundle-Name: %BundleName
 Bundle-SymbolicName: org.fedoraproject.eclipse.packager.git;singleton:=true
 Bundle-Version: 0.2.0.qualifier
 Bundle-Activator: org.fedoraproject.eclipse.packager.git.Activator
-Bundle-Vendor: %Bundle-Vendor.0
-Bundle-Localization: plugin
+Bundle-Vendor: %BundleVendor
+Bundle-Localization: OSGI-INF/l10n/plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.egit.core;bundle-version="0.9.0",
@@ -15,5 +15,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.fedoraproject.eclipse.packager,
+ org.fedoraproject.eclipse.packager.api,
+ org.fedoraproject.eclipse.packager.api.errors,
  org.fedoraproject.eclipse.packager.utils
 Export-Package: org.fedoraproject.eclipse.packager.git
