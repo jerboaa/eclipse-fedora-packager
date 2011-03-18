@@ -43,7 +43,12 @@ import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
+import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.api.koji.KojiBuildCommand;
 import org.fedoraproject.eclipse.packager.koji.stubs.KojiHubClientStub;
 
 /**
@@ -81,112 +86,130 @@ public class KojiBuildHandler extends AbstractHandler {
 			e1.printStackTrace();
 			return null;
 		}
-		
-		final IFpProjectBits projectBits = FedoraPackagerUtils
-				.getVcsHandler(fedoraProjectRoot);
-		// Fixes Trac ticket #35; Need to have shell variable on heap not
-		// on a thread's stack.
-		shell = getShell(e);
-
-		// Send the build
-		job = new Job(Messages.kojiBuildHandler_jobName) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.kojiBuildHandler_sendBuildToKoji,
-						IProgressMonitor.UNKNOWN);
-				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
-				
-				// Initialize koji client. Type of client instantiated is
-				// determined by command id.
-				setKojiClient(e.getCommand().getId());
-				try {
-					getKoji().setUrlsFromPreferences();
-				} catch (KojiHubClientInitException e) {
-					FedoraHandlerUtils.handleError(e);
-				}
-				
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
-				}
-				IStatus status = Status.OK_STATUS;
-				if (projectBits.needsTag()) {
-					// Do VCS tagging if so requested.
-					if (promptForTag()) {
-						status = projectBits.tagVcs(fedoraProjectRoot, monitor);
-					}
-				}
-				if (projectBits.hasLocalChanges(fedoraProjectRoot)) {
-					// if there are local commits we should not build because our hash will be wrong.
-					return new Status(IStatus.CANCEL, KojiPlugin.PLUGIN_ID, Messages.KojiBuildHandler_unpushedChanges);
-				}
-				
-				if (status.isOK()) {
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-					status = newBuild(fedoraProjectRoot, monitor);
-					if (status.isOK()) {
-						if (monitor.isCanceled()) {
-							throw new OperationCanceledException();
-						}
-					}
-				}
-				monitor.done();
-				return status;
-			}
-		};
-		// Create job listener (for event done)
-		IJobChangeListener listener = new JobChangeAdapter() {
-			@Override
-			public void done(IJobChangeEvent event) {
-				final IStatus jobStatus = event.getResult();
-				PlatformUI.getWorkbench().getDisplay().asyncExec(
-						new Runnable() {
-							@Override
-							public void run() {
-								// Only show something on success
-								if (jobStatus.isOK()) {
-									final String taskId = jobStatus
-											.getMessage(); // IStatus message is
-															// task ID
-									if (shell != null && !shell.isDisposed()) {
-										// create and open customized MessageDialog
-										setKojiMsgDialog(e.getCommand().getId(), taskId);
-										getKojiMsgDialog().open();
-									} else { // fall back to console print
-										getKoji()
-												.writeToConsole(NLS
-														.bind(
-																Messages.kojiBuildHandler_fallbackBuildMsg,
-																taskId));
-									}
-								} else if (shell != null && !shell.isDisposed()) {
-									// Try to show error
-									MessageDialog
-											.openError(
-													shell,
-													Messages.kojiBuildHandler_kojiBuild,
-													NLS
-															.bind(
-																	Messages.kojiBuildHandler_buildTaskIdError,
-																	jobStatus
-																			.getMessage()));
-								} else {
-									getKoji()
-											.writeToConsole(NLS
-													.bind(
-															Messages.kojiBuildHandler_buildTaskIdError,
-															jobStatus
-																	.getMessage()));
-								}
-							}
-						});
-			}
-		};
-		job.addJobChangeListener(listener);
-		job.setUser(true);
-		job.schedule();
+		FedoraPackager packager = new FedoraPackager(fedoraProjectRoot);
+		KojiBuildCommand buildCmd = null;
+		try {
+			buildCmd = (KojiBuildCommand) packager.getCommandInstance(KojiBuildCommand.ID);
+		} catch (FedoraPackagerCommandInitializationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (FedoraPackagerCommandNotFoundException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		try {
+			buildCmd.call(null);
+		} catch (FedoraPackagerAPIException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		return null;
+		
+//		final IFpProjectBits projectBits = FedoraPackagerUtils
+//				.getVcsHandler(fedoraProjectRoot);
+//		// Fixes Trac ticket #35; Need to have shell variable on heap not
+//		// on a thread's stack.
+//		shell = getShell(e);
+//
+//		// Send the build
+//		job = new Job(Messages.kojiBuildHandler_jobName) {
+//			@Override
+//			protected IStatus run(IProgressMonitor monitor) {
+//				monitor.beginTask(Messages.kojiBuildHandler_sendBuildToKoji,
+//						IProgressMonitor.UNKNOWN);
+//				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
+//				
+//				// Initialize koji client. Type of client instantiated is
+//				// determined by command id.
+//				setKojiClient(e.getCommand().getId());
+//				try {
+//					getKoji().setUrlsFromPreferences();
+//				} catch (KojiHubClientInitException e) {
+//					FedoraHandlerUtils.handleError(e);
+//				}
+//				
+//				if (monitor.isCanceled()) {
+//					throw new OperationCanceledException();
+//				}
+//				IStatus status = Status.OK_STATUS;
+//				if (projectBits.needsTag()) {
+//					// Do VCS tagging if so requested.
+//					if (promptForTag()) {
+//						status = projectBits.tagVcs(fedoraProjectRoot, monitor);
+//					}
+//				}
+//				if (projectBits.hasLocalChanges(fedoraProjectRoot)) {
+//					// if there are local commits we should not build because our hash will be wrong.
+//					return new Status(IStatus.CANCEL, KojiPlugin.PLUGIN_ID, Messages.KojiBuildHandler_unpushedChanges);
+//				}
+//				
+//				if (status.isOK()) {
+//					if (monitor.isCanceled()) {
+//						throw new OperationCanceledException();
+//					}
+//					status = newBuild(fedoraProjectRoot, monitor);
+//					if (status.isOK()) {
+//						if (monitor.isCanceled()) {
+//							throw new OperationCanceledException();
+//						}
+//					}
+//				}
+//				monitor.done();
+//				return status;
+//			}
+//		};
+//		// Create job listener (for event done)
+//		IJobChangeListener listener = new JobChangeAdapter() {
+//			@Override
+//			public void done(IJobChangeEvent event) {
+//				final IStatus jobStatus = event.getResult();
+//				PlatformUI.getWorkbench().getDisplay().asyncExec(
+//						new Runnable() {
+//							@Override
+//							public void run() {
+//								// Only show something on success
+//								if (jobStatus.isOK()) {
+//									final String taskId = jobStatus
+//											.getMessage(); // IStatus message is
+//															// task ID
+//									if (shell != null && !shell.isDisposed()) {
+//										// create and open customized MessageDialog
+//										setKojiMsgDialog(e.getCommand().getId(), taskId);
+//										getKojiMsgDialog().open();
+//									} else { // fall back to console print
+//										getKoji()
+//												.writeToConsole(NLS
+//														.bind(
+//																Messages.kojiBuildHandler_fallbackBuildMsg,
+//																taskId));
+//									}
+//								} else if (shell != null && !shell.isDisposed()) {
+//									// Try to show error
+//									MessageDialog
+//											.openError(
+//													shell,
+//													Messages.kojiBuildHandler_kojiBuild,
+//													NLS
+//															.bind(
+//																	Messages.kojiBuildHandler_buildTaskIdError,
+//																	jobStatus
+//																			.getMessage()));
+//								} else {
+//									getKoji()
+//											.writeToConsole(NLS
+//													.bind(
+//															Messages.kojiBuildHandler_buildTaskIdError,
+//															jobStatus
+//																	.getMessage()));
+//								}
+//							}
+//						});
+//			}
+//		};
+//		job.addJobChangeListener(listener);
+//		job.setUser(true);
+//		job.schedule();
+//		return null;
 	}
 
 	private boolean promptForTag() {
