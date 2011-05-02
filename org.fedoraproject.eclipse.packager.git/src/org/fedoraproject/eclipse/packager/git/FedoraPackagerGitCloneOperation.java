@@ -29,7 +29,8 @@ import org.fedoraproject.eclipse.packager.git.internal.CloneOperation2;
 
 /**
  * Convenience class for Fedora Git clones. All relevant Fedora specific things
- * should be done in here.
+ * should be done in here. This isn't really a command in the
+ * FedoraPackagerCommand sense. Hence, the "Operation" postfix.
  */
 public class FedoraPackagerGitCloneOperation {
 	
