@@ -6,9 +6,7 @@ Bundle-Version: 0.2.0.qualifier
 Bundle-Activator: org.fedoraproject.eclipse.packager.PackagerPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime;bundle-version="3.3.0",
- org.eclipse.linuxtools.rpm.core,
- org.apache.http.client,
- org.apache.http
+ org.eclipse.linuxtools.rpm.core
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.apache.commons.codec.digest,
@@ -18,6 +16,12 @@ Import-Package: org.apache.commons.codec.digest,
  org.apache.http.entity.mime.content,
  org.apache.http.impl.client,
  org.apache.http.params,
+ org.apache.http.client,
+ org.apache.http.client.methods,
+ org.apache.http.conn,
+ org.apache.http.conn.ssl,
+ org.apache.http.conn.scheme,
+ org.apache.http.util,
  org.eclipse.core.resources,
  org.eclipse.jface.text,
  org.eclipse.linuxtools.rpm.ui.editor.parser,
