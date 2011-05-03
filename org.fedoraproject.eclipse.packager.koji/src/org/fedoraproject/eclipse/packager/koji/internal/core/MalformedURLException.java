@@ -1,16 +1,16 @@
-package org.fedoraproject.eclipse.packager.koji;
+package org.fedoraproject.eclipse.packager.koji.internal.core;
 
 /**
  * 
  * Exception raised if some Koji hub-client initialization fails.
  *
  */
-public class KojiHubClientInitException extends Exception {
+public class MalformedURLException extends Exception {
 
 	/**
 	 * @param e
 	 */
-	public KojiHubClientInitException(final Exception e) {
+	public MalformedURLException(final Exception e) {
 		super(e);
 	}
 

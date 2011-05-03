@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.koji;
+package org.fedoraproject.eclipse.packager.koji.internal.handlers;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -48,8 +48,13 @@ import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.koji.KojiPlugin;
+import org.fedoraproject.eclipse.packager.koji.KojiText;
+import org.fedoraproject.eclipse.packager.koji.api.IKojiHubClient;
 import org.fedoraproject.eclipse.packager.koji.api.KojiBuildCommand;
-import org.fedoraproject.eclipse.packager.koji.stubs.KojiHubClientStub;
+import org.fedoraproject.eclipse.packager.koji.internal.core.KojiSSLHubClientOld;
+import org.fedoraproject.eclipse.packager.koji.internal.core.KojiHubClientLoginException;
+import org.fedoraproject.eclipse.packager.koji.internal.ui.KojiMessageDialog;
 
 /**
  * Handler to perform a Koji build.
@@ -63,16 +68,10 @@ public class KojiBuildHandler extends AbstractHandler {
 	private MessageDialog kojiMsgDialog;
 	private Shell shell;
 	
-	///////////////////////////////////////////////////////////////
-	// FIXME: This is used for testing only and is super-ugly, but mocking
-	//        things in conjunction with SWTBotTests doesn't work. We really
-	//        need to refactor this.
-	//        Better ideas very welcome!
 	/**
 	 * Indicates if stub or real client should be returned by getKoji()
 	 */
 	public static boolean inTestingMode = false;
-	private static IKojiHubClient kojiStub = new KojiHubClientStub();
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
@@ -104,117 +103,11 @@ public class KojiBuildHandler extends AbstractHandler {
 			e1.printStackTrace();
 		}
 		return null;
-		
-//		final IFpProjectBits projectBits = FedoraPackagerUtils
-//				.getVcsHandler(fedoraProjectRoot);
-//		// Fixes Trac ticket #35; Need to have shell variable on heap not
-//		// on a thread's stack.
-//		shell = getShell(e);
-//
-//		// Send the build
-//		job = new Job(Messages.kojiBuildHandler_jobName) {
-//			@Override
-//			protected IStatus run(IProgressMonitor monitor) {
-//				monitor.beginTask(Messages.kojiBuildHandler_sendBuildToKoji,
-//						IProgressMonitor.UNKNOWN);
-//				dist = fedoraProjectRoot.getSpecFile().getParent().getName();
-//				
-//				// Initialize koji client. Type of client instantiated is
-//				// determined by command id.
-//				setKojiClient(e.getCommand().getId());
-//				try {
-//					getKoji().setUrlsFromPreferences();
-//				} catch (KojiHubClientInitException e) {
-//					FedoraHandlerUtils.handleError(e);
-//				}
-//				
-//				if (monitor.isCanceled()) {
-//					throw new OperationCanceledException();
-//				}
-//				IStatus status = Status.OK_STATUS;
-//				if (projectBits.needsTag()) {
-//					// Do VCS tagging if so requested.
-//					if (promptForTag()) {
-//						status = projectBits.tagVcs(fedoraProjectRoot, monitor);
-//					}
-//				}
-//				if (projectBits.hasLocalChanges(fedoraProjectRoot)) {
-//					// if there are local commits we should not build because our hash will be wrong.
-//					return new Status(IStatus.CANCEL, KojiPlugin.PLUGIN_ID, Messages.KojiBuildHandler_unpushedChanges);
-//				}
-//				
-//				if (status.isOK()) {
-//					if (monitor.isCanceled()) {
-//						throw new OperationCanceledException();
-//					}
-//					status = newBuild(fedoraProjectRoot, monitor);
-//					if (status.isOK()) {
-//						if (monitor.isCanceled()) {
-//							throw new OperationCanceledException();
-//						}
-//					}
-//				}
-//				monitor.done();
-//				return status;
-//			}
-//		};
-//		// Create job listener (for event done)
-//		IJobChangeListener listener = new JobChangeAdapter() {
-//			@Override
-//			public void done(IJobChangeEvent event) {
-//				final IStatus jobStatus = event.getResult();
-//				PlatformUI.getWorkbench().getDisplay().asyncExec(
-//						new Runnable() {
-//							@Override
-//							public void run() {
-//								// Only show something on success
-//								if (jobStatus.isOK()) {
-//									final String taskId = jobStatus
-//											.getMessage(); // IStatus message is
-//															// task ID
-//									if (shell != null && !shell.isDisposed()) {
-//										// create and open customized MessageDialog
-//										setKojiMsgDialog(e.getCommand().getId(), taskId);
-//										getKojiMsgDialog().open();
-//									} else { // fall back to console print
-//										getKoji()
-//												.writeToConsole(NLS
-//														.bind(
-//																Messages.kojiBuildHandler_fallbackBuildMsg,
-//																taskId));
-//									}
-//								} else if (shell != null && !shell.isDisposed()) {
-//									// Try to show error
-//									MessageDialog
-//											.openError(
-//													shell,
-//													Messages.kojiBuildHandler_kojiBuild,
-//													NLS
-//															.bind(
-//																	Messages.kojiBuildHandler_buildTaskIdError,
-//																	jobStatus
-//																			.getMessage()));
-//								} else {
-//									getKoji()
-//											.writeToConsole(NLS
-//													.bind(
-//															Messages.kojiBuildHandler_buildTaskIdError,
-//															jobStatus
-//																	.getMessage()));
-//								}
-//							}
-//						});
-//			}
-//		};
-//		job.addJobChangeListener(listener);
-//		job.setUser(true);
-//		job.schedule();
-//		return null;
 	}
 
 	private boolean promptForTag() {
 		YesNoRunnable op = new YesNoRunnable(
-				Messages.kojiBuildHandler_tagBeforeSendingBuild);
+				KojiText.KojiBuildHandler_tagBeforeSendingBuild);
 		Display.getDefault().syncExec(op);
 		return op.isOkPressed();
 	}
@@ -229,14 +122,14 @@ public class KojiBuildHandler extends AbstractHandler {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			monitor.subTask(Messages.kojiBuildHandler_connectKojiMsg);
+			monitor.subTask(KojiText.KojiBuildHandler_connectKojiMsg);
 
 			String scmURL = projectBits.getScmUrlForKoji(fedoraProjectRoot);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 			// login via SSL
-			monitor.subTask(Messages.kojiBuildHandler_kojiLogin);
+			monitor.subTask(KojiText.KojiBuildHandler_kojiLogin);
 			HashMap<?, ?> sessionData = null;
 			try {
 				sessionData = getKoji().login();
@@ -257,12 +150,10 @@ public class KojiBuildHandler extends AbstractHandler {
 						sid = (String)sessionId;
 					} catch (NumberFormatException e) {
 						// something is wrong should have gotten an int or String
-						return FedoraHandlerUtils.handleError(Messages.KojiBuildHandler_unexpectedSessionId + sessionId.toString());
+						return FedoraHandlerUtils.handleError(KojiText.KojiBuildHandler_unexpectedSessionId + sessionId.toString());
 					}
 				}
-				getKoji().saveSessionInfo((String)sessionData.get("session-key"), sid); //$NON-NLS-1$
-			} catch (MalformedURLException e) {
-				return FedoraHandlerUtils.handleError(e);
+				//getKoji().saveSessionInfo((String)sessionData.get("session-key"), sid); //$NON-NLS-1$
 			} catch (ClassCastException e) {
 				return FedoraHandlerUtils.handleError(e);
 			}
@@ -271,14 +162,14 @@ public class KojiBuildHandler extends AbstractHandler {
 				throw new OperationCanceledException();
 			}
 			// push build
-			monitor.subTask(Messages.kojiBuildHandler_sendBuildCmd);
+			monitor.subTask(KojiText.KojiBuildHandler_sendBuildCmd);
 			String nvr= null;
 			try {
 				nvr = RPMUtils.getNVR(fedoraProjectRoot);
 			} catch (CoreException e1) {
 				e1.printStackTrace();
 			}
-			String result = getKoji().build(projectBits.getTarget(), scmURL, nvr, isScratch());
+			String result = null;// = getKoji().build(projectBits.getTarget(), scmURL, nvr, isScratch());
 			// if we get an int (that is our taskId)
 			int taskId = -1;
 			try {
@@ -296,7 +187,7 @@ public class KojiBuildHandler extends AbstractHandler {
 				throw new OperationCanceledException();
 			}
 			// logout
-			monitor.subTask(Messages.kojiBuildHandler_kojiLogout);
+			monitor.subTask(KojiText.KojiBuildHandler_kojiLogout);
 			getKoji().logout();
 		} catch (XmlRpcException e) {
 			e.printStackTrace();
@@ -317,8 +208,7 @@ public class KojiBuildHandler extends AbstractHandler {
 			// return actual client
 			return koji;
 		} else {
-			// return stub for testing
-			return kojiStub;
+			return null;
 		}
 	}
 
@@ -341,11 +231,11 @@ public class KojiBuildHandler extends AbstractHandler {
 		Image titleImage = descriptor.createImage();
 		KojiMessageDialog msgDialog = new KojiMessageDialog(
 				shell,
-				Messages.kojiBuildHandler_kojiBuild,
+				KojiText.KojiBuildHandler_kojiBuild,
 				titleImage,
 				MessageDialog.NONE,
 				new String[] { IDialogConstants.OK_LABEL },
-				0, getKoji(), taskId);
+				0, "http://www.example.com", taskId);
 		this.kojiMsgDialog = msgDialog;
 	}
 	
@@ -367,7 +257,7 @@ public class KojiBuildHandler extends AbstractHandler {
 	 *              authentication scheme supported.
 	 */
 	public void setKojiClient(String cmdId) {
-		this.koji = new KojiHubClient();
+		this.koji = new KojiSSLHubClientOld();
 	}
 	
 	/**

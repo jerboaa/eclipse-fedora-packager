@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.koji;
+package org.fedoraproject.eclipse.packager.koji.internal.core;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,23 +19,19 @@ import java.util.Map;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.koji.api.IKojiHubClient;
+import org.fedoraproject.eclipse.packager.koji.api.KojiClientException;
+import org.fedoraproject.eclipse.packager.koji.internal.utils.KojiTypeFactory;
 
 /**
  * Koji Base client.
  */
 public abstract class AbstractKojiHubClient implements IKojiHubClient {
 	
-	private final String CONSOLE_NAME = KojiPlugin.PLUGIN_ID + ".console"; //$NON-NLS-1$
 	/**
 	 * URL of the Koji Hub/XMLRPC interface
 	 */
@@ -50,7 +46,6 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 	/**
 	 * @return the kojiWebUrl
 	 */
-	@Override
 	public URL getWebUrl() {
 		return kojiWebUrl;
 	}
@@ -65,28 +60,19 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 
 	/**
 	 * @param kojiHubUrl the kojiHubUrl to set
-	 * @throws KojiHubClientInitException if the provided URL is invalid.
+	 * @throws MalformedURLException if the provided URL is invalid.
 	 */
 	@Override
-	public void setHubUrl(String kojiHubUrl) throws KojiHubClientInitException {
-		try {
-			this.kojiHubUrl = new URL(kojiHubUrl);
-		} catch (MalformedURLException e) {
-			throw new KojiHubClientInitException(e);
-		}
+	public void setHubUrl(String kojiHubUrl) throws MalformedURLException {
+		this.kojiHubUrl = new URL(kojiHubUrl);
 	}
 	
 	/**
 	 * @param kojiWebUrl the kojiHubUrl to set
-	 * @throws KojiHubClientInitException if the provided URL is invalid.
+	 * @throws MalformedURLException if the provided URL is invalid.
 	 */
-	@Override
-	public void setWebUrl(String kojiWebUrl) throws KojiHubClientInitException {
-		try {
-			this.kojiWebUrl = new URL(kojiWebUrl);
-		} catch (MalformedURLException e) {
-			throw new KojiHubClientInitException(e);
-		}
+	public void setWebUrl(String kojiWebUrl) throws MalformedURLException {
+		this.kojiWebUrl = new URL(kojiWebUrl);
 	}
 
 	/**
@@ -96,7 +82,6 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 	 * @param sessionID
 	 * @throws MalformedURLException
 	 */
-	@Override
 	public void saveSessionInfo(String sessionKey, String sessionID)
 			throws MalformedURLException {
 		xmlRpcConfig.setServerURL(new URL(this.kojiHubUrl.toString() + "?session-key=" + sessionKey //$NON-NLS-1$
@@ -129,11 +114,11 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 
 	/**
 	 * @see
-	 * org.fedoraproject.eclipse.packager.koji.IKojiHubClient#build(java.lang.String,
+	 * org.fedoraproject.eclipse.packager.koji.api.IKojiHubClient#build(java.lang.String,
 	 * java.lang.String, java.lang.String, boolean)
 	 */
 	@Override
-	public String build(String target, String scmURL, String nvr, boolean scratch) throws XmlRpcException {
+	public String build(String target, String scmURL, String nvr, boolean scratch) throws KojiClientException {
 		ArrayList<Object> params = new ArrayList<Object>();
 		params.add(scmURL);
 		params.add(target);
@@ -142,20 +127,32 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 			scratchParam.put("scratch", true); //$NON-NLS-1$
 			params.add(scratchParam);
 		} else if(nvr != null){
-			Map buildInfo = getBuild(nvr);
+			Map buildInfo;
+			try {
+				buildInfo = getBuild(nvr);
+			} catch (XmlRpcException e) {
+				throw new KojiClientException(e);
+			}
 			if (buildInfo != null && buildInfo.get("state").equals(Integer.valueOf(1))) { //$NON-NLS-1$
+				// TODO: externalize
 				return "Build already exists (id="+buildInfo.get("task_id")+", state=COMPLETE)";
 			}
 		}
-		Object result = xmlRpcClient.execute("build", params); //$NON-NLS-1$
+		Object result;
+		try {
+			result = xmlRpcClient.execute("build", params);  //$NON-NLS-1$
+		} catch (XmlRpcException e) {
+			throw new KojiClientException(e);
+		}
 		return result.toString();
 	}
 	
 	/**
-	 * @see
-	 * org.fedoraproject.eclipse.packager.koji.IKojiHubClient#getBuild(java.lang.String)
+	 * @param nvr 
+	 * @throws XmlRpcException 
+	 *
+	 * @return The nvr as a Map
 	 */
-	@Override
 	public Map getBuild(String nvr) throws XmlRpcException {
 		ArrayList<Object> params = new ArrayList<Object>();
 		params.add(nvr);
@@ -179,31 +176,6 @@ public abstract class AbstractKojiHubClient implements IKojiHubClient {
 	      conMan.addConsoles(new IConsole[]{myConsole});
 	      return myConsole;
 	 }
-	
-	/**
-	 * Utility method to write to Eclipse console if not present.
-	 * 
-	 * @param message
-	 */
-	@Override
-	public void writeToConsole(String message) {
-		MessageConsole console = findConsole(CONSOLE_NAME);
-		MessageConsoleStream out = console.newMessageStream();
-		out.setActivateOnWrite(true);
-		out.println(message);
-		
-		// Show console view
-		IWorkbenchPage page = PackagerPlugin.getDefault().getWorkbench()
-				.getActiveWorkbenchWindow().getActivePage();
-		String id = IConsoleConstants.ID_CONSOLE_VIEW;
-		IConsoleView view = null;
-		try {
-			view = (IConsoleView) page.showView(id);
-		} catch (PartInitException e) {
-			e.printStackTrace();
-		}
-		view.display(console);
-	}
 	
 	/**
 	 * Configure XMLRPC connection

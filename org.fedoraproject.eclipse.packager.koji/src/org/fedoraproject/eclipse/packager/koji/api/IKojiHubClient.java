@@ -8,17 +8,18 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.koji;
+package org.fedoraproject.eclipse.packager.koji.api;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.fedoraproject.eclipse.packager.koji.internal.core.KojiHubClientLoginException;
 
 /**
- * Interface for Koji hub client implementations.
+ * Interface for Koji hub client implementations. At the moment there is only
+ * a SSL login based implementation.
  *
  */
 public interface IKojiHubClient {
@@ -47,33 +48,18 @@ public interface IKojiHubClient {
 	 * @param nvr 
 	 * @param scratch
 	 * @return The remote server's response.
-	 * @throws XmlRpcException
+	 * @throws KojiClientException
 	 */
 	public String build(String target, String scmURL, String nvr, boolean scratch)
-			throws XmlRpcException;
-	
-	/**
-	 * Set the Web URL for the client.
-	 * 
-	 * @param url The new URL.
-	 * @throws KojiHubClientInitException If the given URL is invalid.
-	 */
-	public void setWebUrl(String url) throws KojiHubClientInitException;
+			throws KojiClientException;
 	
 	/**
 	 * Set the XMLRPC enabled hub URL for the client.
 	 * 
 	 * @param url The new URL.
-	 * @throws KojiHubClientInitException If the given URL is invalid.
+	 * @throws MalformedURLException If the given URL is invalid.
 	 */
-	public void setHubUrl(String url) throws KojiHubClientInitException;
-	
-	/**
-	 * Get the Web URL for the client.
-	 * 
-	 * @return The currently set Web URL.
-	 */
-	public URL getWebUrl();
+	public void setHubUrl(String url) throws MalformedURLException;
 	
 	/**
 	 * Get the XMLRPC enabled hub URL for the client.
@@ -81,31 +67,4 @@ public interface IKojiHubClient {
 	 * @return The currently set hub URL.
 	 */
 	public URL getHubUrl();
-	
-	/**
-	 * Write message to the Fedora Packager console.
-	 * 
-	 * @param message
-	 */
-	public void writeToConsole(String message);
-	
-	/**
-	 * Set Web URL and hub URL from preferences
-	 * 
-	 * @throws KojiHubClientInitException If URLs read from preferences
-	 *         are invalid. 
-	 */
-	public void setUrlsFromPreferences() throws KojiHubClientInitException;
-	
-	/**
-	 * Save session data in XMLRPC config URL.
-	 *
-	 * @param sessionKey
-	 * @param sessionID
-	 * @throws MalformedURLException
-	 */
-	public void saveSessionInfo(String sessionKey, String sessionID)
-		throws MalformedURLException;
-
-	public Map getBuild(String nvr) throws XmlRpcException;
 }

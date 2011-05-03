@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.koji;
+package org.fedoraproject.eclipse.packager.koji.internal.ui;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,6 +27,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.forms.widgets.FormText;
+import org.fedoraproject.eclipse.packager.koji.KojiPlugin;
+import org.fedoraproject.eclipse.packager.koji.KojiText;
 
 /**
  * Message dialog showing the link to the koji page showing build info
@@ -34,7 +36,7 @@ import org.eclipse.ui.forms.widgets.FormText;
  */
 public class KojiMessageDialog extends MessageDialog {
 	private String taskNo;
-	private IKojiHubClient kojiClient;
+	private String kojiWebUrl;
 
 	/**
 	 * Creates the message dialog with the given index.
@@ -45,16 +47,16 @@ public class KojiMessageDialog extends MessageDialog {
 	 * @param dialogImageType
 	 * @param dialogButtonLabels
 	 * @param defaultIndex
-	 * @param kojiClient 
+	 * @param kojiWebURL 
 	 * @param taskId 
 	 */
 	public KojiMessageDialog(Shell parentShell, String dialogTitle,
 			Image dialogTitleImage, int dialogImageType,
-			String[] dialogButtonLabels, int defaultIndex, IKojiHubClient kojiClient, String taskId) {
+			String[] dialogButtonLabels, int defaultIndex, String kojiWebURL, String taskId) {
 		super(parentShell, dialogTitle, dialogTitleImage,
-				NLS.bind(Messages.kojiMessageDialog_buildNumberMsg, taskId),
+				NLS.bind(KojiText.KojiMessageDialog_buildNumberMsg, taskId),
 				dialogImageType, dialogButtonLabels, defaultIndex);
-		this.kojiClient = kojiClient;
+		this.kojiWebUrl = kojiWebURL;
 		this.taskNo = taskId;
 	}
 
@@ -67,10 +69,10 @@ public class KojiMessageDialog extends MessageDialog {
 	@Override
 	protected Control createCustomArea(Composite parent) {
 		FormText taskLink = new FormText(parent, SWT.NONE);
-		final String url = kojiClient.getWebUrl().toString() + "/taskinfo?taskID=" //$NON-NLS-1$
+		final String url = kojiWebUrl + "/taskinfo?taskID=" //$NON-NLS-1$
 				+ taskNo;
 		taskLink.setText("<form><p>" +  //$NON-NLS-1$
-				Messages.kojiMessageDialog_buildResponseMsg + "</p><p>"+ url //$NON-NLS-1$ //$NON-NLS-2$
+				KojiText.KojiMessageDialog_buildResponseMsg + "</p><p>"+ url //$NON-NLS-1$
 						+ "</p></form>", true, true); //$NON-NLS-1$
 		taskLink.addListener(SWT.Selection, new Listener() {
 			@Override

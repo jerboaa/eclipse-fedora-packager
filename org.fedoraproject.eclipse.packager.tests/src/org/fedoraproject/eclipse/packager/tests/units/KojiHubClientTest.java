@@ -4,7 +4,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.HashMap;
 
-import org.fedoraproject.eclipse.packager.koji.KojiHubClient;
+import org.fedoraproject.eclipse.packager.koji.internal.core.KojiSSLHubClientOld;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,12 +16,12 @@ import org.junit.Test;
  */
 public class KojiHubClientTest {
 
-	private KojiHubClient kojiClient;
+	private KojiSSLHubClientOld kojiClient;
 	
 	@Before
 	public void setUp() throws Exception {
 		// a bare SSL Koji client
-		kojiClient = new KojiHubClient("https://koji.fedoraproject.org/kojihub/ssllogin",
+		kojiClient = new KojiSSLHubClientOld("https://koji.fedoraproject.org/kojihub/ssllogin",
 				"http://koji.fedoraproject.org/");
 	}
 

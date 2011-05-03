@@ -3,7 +3,7 @@ package org.fedoraproject.eclipse.packager.koji.api;
 import org.fedoraproject.eclipse.packager.api.ICommandResult;
 
 /**
- * Result of a Fedora packager clone operation.
+ * Result of a koji build as triggered by KojiBuildCommand.
  */
 public class BuildResult implements ICommandResult {
 

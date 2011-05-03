@@ -62,12 +62,12 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.koji.KojiBuildHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.koji.internal.handlers.KojiBuildHandler"
             id="org.fedoraproject.eclipse.packager.koji.BuildCommand"
             name="%command.name.0">
       </command>
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.koji.KojiScratchBuildHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.koji.internal.handlers.KojiScratchBuildHandler"
             id="org.fedoraproject.eclipse.packager.koji.ScratchBuildCommand"
             name="%command.name.1">
       </command>

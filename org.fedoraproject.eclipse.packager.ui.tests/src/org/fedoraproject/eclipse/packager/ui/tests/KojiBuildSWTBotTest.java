@@ -22,7 +22,6 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.fedoraproject.eclipse.packager.koji.KojiBuildHandler;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.ContextMenuHelper;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.PackageExplorer;
@@ -66,7 +65,7 @@ public class KojiBuildSWTBotTest {
 		IResource efpSpec = efpProject.getProject().findMember(new Path("eclipse-fedorapackager.spec"));
 		assertNotNull(efpSpec);
 		// Put KojiBuildHandler into testing mode
-		KojiBuildHandler.inTestingMode = true;
+//		KojiBuildHandler.inTestingMode = true;
 	}
  
 	/**
@@ -112,8 +111,8 @@ public class KojiBuildSWTBotTest {
 		Widget buildMessageWidget = buildDialogBot.widget(
 				WidgetMatcherFactory.allOf(
 				WidgetMatcherFactory.withText(
-						NLS.bind(org.fedoraproject.eclipse.packager.koji.Messages.
-								kojiMessageDialog_buildNumberMsg, "1337"))));
+						NLS.bind(org.fedoraproject.eclipse.packager.koji.KojiText.
+								KojiMessageDialog_buildNumberMsg, "1337"))));
 		assertNotNull(buildMessageWidget);
 		buildMsgWindow.close();
 	}

@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.koji;
+package org.fedoraproject.eclipse.packager.koji.internal.core;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,18 +29,20 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.koji.api.IKojiHubClient;
+import org.fedoraproject.eclipse.packager.koji.api.KojiClientException;
 
 /**
  * Koji hub client which uses certificate based
  * authentication (SSL).
  */
-public class KojiHubClient extends AbstractKojiHubClient {
+public class KojiSSLHubClientOld extends AbstractKojiHubClient {
 	
 	
 	/**
 	 * Empty constructor
 	 */
-	public KojiHubClient() {
+	public KojiSSLHubClientOld() {
 	}
 	
 	/**
@@ -49,10 +51,10 @@ public class KojiHubClient extends AbstractKojiHubClient {
 	 * @param hubUrl 
 	 * @param webUrl 
 	 * 
-	 * @throws KojiHubClientInitException if either one of the 
+	 * @throws MalformedURLException if either one of the 
 	 *         provided URLs is invalid.
 	 */
-	public KojiHubClient(String hubUrl, String webUrl) throws KojiHubClientInitException {
+	public KojiSSLHubClientOld(String hubUrl, String webUrl) throws MalformedURLException {
 		setHubUrl(hubUrl);
 		setWebUrl(webUrl);
 	}
@@ -81,7 +83,7 @@ public class KojiHubClient extends AbstractKojiHubClient {
 		// Initialize SSL connection
 		try {
 			initSSLConnection();
-		} catch (KojiHubClientInitException e) {
+		} catch (KojiClientException e) {
 			throw new KojiHubClientLoginException(e);
 		}
 		return doSslLogin();
@@ -90,8 +92,7 @@ public class KojiHubClient extends AbstractKojiHubClient {
 	/**
 	 * Set Koji Web- and hub URL according to preferences 
 	 */
-	@Override
-	public synchronized void setUrlsFromPreferences() throws KojiHubClientInitException {
+	public void setUrlsFromPreferences() throws MalformedURLException {
 		// Sets Koji host according to preferences and statically sets kojiHubUrl and kojiWebUrl
 		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
 		String preference = kojiPrefStore.getString(FedoraPackagerPreferencesConstants.PREF_KOJI_HUB_URL);
@@ -139,7 +140,7 @@ public class KojiHubClient extends AbstractKojiHubClient {
 	/**
 	 * Initialize SSL connection
 	 */
-	private void initSSLConnection() throws KojiHubClientInitException {
+	private void initSSLConnection() throws KojiClientException {
 		// Create empty HostnameVerifier
 		HostnameVerifier hv = new HostnameVerifier() {
 			@Override
@@ -153,11 +154,11 @@ public class KojiHubClient extends AbstractKojiHubClient {
 			ctxt = fedoraSSL.getInitializedSSLContext();
 		} catch (FileNotFoundException e) {
 			// certs are missing
-			throw new KojiHubClientInitException(e);
+			throw new KojiClientException(e);
 		} catch (GeneralSecurityException e) {
-			throw new KojiHubClientInitException(e);
+			throw new KojiClientException(e);
 		} catch (IOException e) {
-			throw new KojiHubClientInitException(e);
+			throw new KojiClientException(e);
 		}
 		// set up the proper socket
 		HttpsURLConnection.setDefaultSSLSocketFactory(ctxt.getSocketFactory());
