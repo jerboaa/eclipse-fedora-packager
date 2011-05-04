@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.koji.internal.ui;
+package org.fedoraproject.eclipse.packager.koji;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,8 +27,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.forms.widgets.FormText;
-import org.fedoraproject.eclipse.packager.koji.KojiPlugin;
-import org.fedoraproject.eclipse.packager.koji.KojiText;
 
 /**
  * Message dialog showing the link to the koji page showing build info

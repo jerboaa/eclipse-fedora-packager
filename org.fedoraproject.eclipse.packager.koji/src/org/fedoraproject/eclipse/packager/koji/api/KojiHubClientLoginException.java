@@ -1,4 +1,4 @@
-package org.fedoraproject.eclipse.packager.koji.internal.core;
+package org.fedoraproject.eclipse.packager.koji.api;
 
 /**
  * @author Redhat Inc.

@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.koji.internal.core;
+package org.fedoraproject.eclipse.packager.koji.api;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,61 +24,43 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 
 import org.apache.xmlrpc.XmlRpcException;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
-import org.fedoraproject.eclipse.packager.koji.api.IKojiHubClient;
-import org.fedoraproject.eclipse.packager.koji.api.KojiClientException;
 
 /**
  * Koji hub client which uses certificate based
  * authentication (SSL).
  */
-public class KojiSSLHubClientOld extends AbstractKojiHubClient {
-	
-	
-	/**
-	 * Empty constructor
-	 */
-	public KojiSSLHubClientOld() {
-	}
+public class KojiSSLHubClient extends AbstractKojiHubBaseClient {
 	
 	/**
-	 * Constructor taking a Koji hub and Web URL.
+	 * @param kojiHubUrl The koji hub URL to use.
 	 * 
-	 * @param hubUrl 
-	 * @param webUrl 
-	 * 
-	 * @throws MalformedURLException if either one of the 
-	 *         provided URLs is invalid.
+	 * @throws MalformedURLException
 	 */
-	public KojiSSLHubClientOld(String hubUrl, String webUrl) throws MalformedURLException {
-		setHubUrl(hubUrl);
-		setWebUrl(webUrl);
+	public KojiSSLHubClient(String kojiHubUrl) throws MalformedURLException {
+		super(kojiHubUrl);
 	}
 	
 	/**
 	 * SSL implementation of XMLRPC based login()
 	 * 
-	 * Login to remote URL specified by constructor or setter
-	 * using the SSL client certificate. It is the user's
-	 * responsibility to initialize the SSL connection as
-	 * appropriate.
+	 * Login to remote URL specified by constructor or setter using the SSL
+	 * client certificate.
 	 * 
 	 * @see IKojiHubClient#login()
 	 * 
 	 * @return session key and session id as a Map.
-	 * @throws IllegalStateException if hub URL has not been
-	 *         configured.
-	 * @throws KojiHubClientLoginException if login fails for some
-	 *         other reason.
+	 * @throws IllegalStateException
+	 *             if hub URL has not been configured.
+	 * @throws KojiHubClientLoginException
+	 *             if login fails for some other reason.
 	 */
 	@Override
 	public HashMap<?, ?> login() throws KojiHubClientLoginException {
-		if (getHubUrl() == null) {
-			throw new IllegalStateException("Hub URL must be set before trying to login");
+		if (this.kojiHubUrl == null) {
+			throw new IllegalStateException(
+					"Hub URL must be set before trying to login");
 		}
 		// Initialize SSL connection
 		try {
@@ -88,32 +70,12 @@ public class KojiSSLHubClientOld extends AbstractKojiHubClient {
 		}
 		return doSslLogin();
 	}
-	
-	/**
-	 * Set Koji Web- and hub URL according to preferences 
-	 */
-	public void setUrlsFromPreferences() throws MalformedURLException {
-		// Sets Koji host according to preferences and statically sets kojiHubUrl and kojiWebUrl
-		IPreferenceStore kojiPrefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		String preference = kojiPrefStore.getString(FedoraPackagerPreferencesConstants.PREF_KOJI_HUB_URL);
-		// Eclipse does not seem to store default preference values in metadata.
-		if (preference.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
-			setHubUrl(FedoraPackagerPreferencesConstants.DEFAULT_KOJI_HUB_URL);
-		} else {
-			setHubUrl(preference);
-		}
-		preference = kojiPrefStore.getString(FedoraPackagerPreferencesConstants.PREF_KOJI_WEB_URL);
-		// Eclipse does not seem to store default preference values in metadata.
-		if (preference.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
-			setWebUrl(FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
-		} else {
-			setWebUrl(preference);
-		}	
-	}
 
 	/**
 	 * Log on to URL using SSL.
-	 * @throws KojiHubClientLoginException if login returns something unexpected.
+	 * 
+	 * @throws KojiHubClientLoginException
+	 *             if login returns something unexpected.
 	 */
 	private HashMap<?, ?> doSslLogin() throws KojiHubClientLoginException {
 		// prepare XMLRPC
@@ -127,10 +89,11 @@ public class KojiSSLHubClientOld extends AbstractKojiHubClient {
 		HashMap<?, ?> hashMap = null;
 		try {
 			result = xmlRpcClient.execute("sslLogin", params); //$NON-NLS-1$
-			hashMap = (HashMap<?, ?>)result;
+			hashMap = (HashMap<?, ?>) result;
 		} catch (ClassCastException e) {
 			// TODO: Externalize
-			throw new KojiHubClientLoginException("Login returned unexpected result");
+			throw new KojiHubClientLoginException(
+					"Login returned unexpected result");
 		} catch (XmlRpcException e) {
 			throw new KojiHubClientLoginException(e);
 		}
@@ -172,14 +135,14 @@ public class KojiSSLHubClientOld extends AbstractKojiHubClient {
 	 * @throws KojiHubClientLoginException
 	 */
 	private void setupSSLLoginXMLRPCConfig() throws KojiHubClientLoginException {
-		if (this.xmlRpcConfig == null ) {
-			throw new KojiHubClientLoginException(
-					new IllegalStateException("xmlRpcConfig needs to be initialized!"));
+		if (this.xmlRpcConfig == null) {
 			// TODO: externalize!
+			throw new KojiHubClientLoginException(new IllegalStateException(
+					"xmlRpcConfig needs to be initialized!"));
 		}
 		URL sslLoginUrl = null;
 		try {
-			sslLoginUrl = new URL(getHubUrl().toString() + "/ssllogin"); //$NON-NLS-1$
+			sslLoginUrl = new URL(this.kojiHubUrl.toString() + "/ssllogin"); //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			// Ignore. If hub URL was invalid an exception should have been
 			// thrown earlier.

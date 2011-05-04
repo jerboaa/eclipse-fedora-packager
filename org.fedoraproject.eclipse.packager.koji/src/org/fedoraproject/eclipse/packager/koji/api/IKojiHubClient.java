@@ -10,12 +10,9 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.koji.api;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 
 import org.apache.xmlrpc.XmlRpcException;
-import org.fedoraproject.eclipse.packager.koji.internal.core.KojiHubClientLoginException;
 
 /**
  * Interface for Koji hub client implementations. At the moment there is only
@@ -25,9 +22,8 @@ import org.fedoraproject.eclipse.packager.koji.internal.core.KojiHubClientLoginE
 public interface IKojiHubClient {
 
 	/**
-	 * Log in on the remote host as specified by the
-	 * hub client url and stores session information
-	 * into XMLRPC config URL.
+	 * Log in on the remote host as specified by the hub client url and stores
+	 * session information into XMLRPC config URL.
 	 * 
 	 * @return Login session information.
 	 * @throws KojiHubClientLoginException
@@ -36,35 +32,41 @@ public interface IKojiHubClient {
 
 	/**
 	 * Logout from hub url and discard session.
-	 * @throws XmlRpcException 
+	 * 
+	 * @throws XmlRpcException
 	 */
 	public void logout() throws XmlRpcException;
 
 	/**
-	 * Initiate a build on the remote hub host.
+	 * Initiate a build on the remote hub host. Checks, if a build with the
+	 * given "Name-Release-Version" (NVR) has been built already.
 	 * 
 	 * @param target
+	 *            The dist-tag (see: $ koji list-targets).
 	 * @param scmURL
-	 * @param nvr 
+	 * @param nvr
+	 *            Name-Version-Release (see: RPM package naming).
 	 * @param scratch
-	 * @return The remote server's response.
+	 *            Set to {@code true} for a scratch build.
+	 * @return The task ID.
 	 * @throws KojiClientException
+	 *             If some error occurred.
 	 */
-	public String build(String target, String scmURL, String nvr, boolean scratch)
+	public int build(String target, String scmURL, String nvr, boolean scratch)
 			throws KojiClientException;
 	
 	/**
-	 * Set the XMLRPC enabled hub URL for the client.
+	 * Fetches information related to a name-version-release token.
 	 * 
-	 * @param url The new URL.
-	 * @throws MalformedURLException If the given URL is invalid.
-	 */
-	public void setHubUrl(String url) throws MalformedURLException;
-	
-	/**
-	 * Get the XMLRPC enabled hub URL for the client.
+	 * @param nvr
+	 *            The name-version-release of the build for which to fetch
+	 *            information.
 	 * 
-	 * @return The currently set hub URL.
+	 * @throws KojiClientException
+	 *             If some error occurred.
+	 * 
+	 * @return The build information for the given nvr or {@code null} if build
+	 *         does not exist
 	 */
-	public URL getHubUrl();
+	public KojiBuildInfo getBuild(String nvr) throws KojiClientException;
 }

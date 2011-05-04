@@ -43,7 +43,7 @@ Import-Package: org.apache.commons.httpclient,
  org.fedoraproject.eclipse.packager.cvs,
  org.fedoraproject.eclipse.packager.git,
  org.fedoraproject.eclipse.packager.koji,
- org.fedoraproject.eclipse.packager.koji.internal.core,
+ org.fedoraproject.eclipse.packager.koji.api,
  org.fedoraproject.eclipse.packager.rpm,
  org.fedoraproject.eclipse.packager.utils,
  org.json

@@ -48,13 +48,13 @@ import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.koji.KojiMessageDialog;
 import org.fedoraproject.eclipse.packager.koji.KojiPlugin;
 import org.fedoraproject.eclipse.packager.koji.KojiText;
 import org.fedoraproject.eclipse.packager.koji.api.IKojiHubClient;
 import org.fedoraproject.eclipse.packager.koji.api.KojiBuildCommand;
-import org.fedoraproject.eclipse.packager.koji.internal.core.KojiSSLHubClientOld;
-import org.fedoraproject.eclipse.packager.koji.internal.core.KojiHubClientLoginException;
-import org.fedoraproject.eclipse.packager.koji.internal.ui.KojiMessageDialog;
+import org.fedoraproject.eclipse.packager.koji.api.KojiHubClientLoginException;
+import org.fedoraproject.eclipse.packager.koji.api.KojiSSLHubClient;
 
 /**
  * Handler to perform a Koji build.
@@ -255,9 +255,10 @@ public class KojiBuildHandler extends AbstractHandler {
 	 *              schemes. E.g. username and password authentication client.
 	 *              We only need to override this method if there's more than one
 	 *              authentication scheme supported.
+	 * @throws MalformedURLException 
 	 */
-	public void setKojiClient(String cmdId) {
-		this.koji = new KojiSSLHubClientOld();
+	public void setKojiClient(String cmdId) throws MalformedURLException {
+		this.koji = new KojiSSLHubClient("bad-url ----> :)");
 	}
 	
 	/**
