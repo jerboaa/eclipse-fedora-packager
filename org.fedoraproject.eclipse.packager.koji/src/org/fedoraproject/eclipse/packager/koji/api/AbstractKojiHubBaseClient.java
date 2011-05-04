@@ -103,7 +103,7 @@ public abstract class AbstractKojiHubBaseClient implements IKojiHubClient {
 	 */
 	@Override
 	public int build(String target, String scmURL, String nvr, boolean scratch)
-			throws KojiClientException {
+			throws KojiHubClientException {
 		ArrayList<Object> params = new ArrayList<Object>();
 		params.add(scmURL);
 		params.add(target);
@@ -121,14 +121,14 @@ public abstract class AbstractKojiHubBaseClient implements IKojiHubClient {
 		try {
 			result = xmlRpcClient.execute("build", params); //$NON-NLS-1$
 		} catch (XmlRpcException e) {
-			throw new KojiClientException(e);
+			throw new KojiHubClientException(e);
 		}
 		int taskId;
 		try {
 			taskId = Integer.parseInt(result.toString());
 		} catch (NumberFormatException e) {
 			// no task ID returned, some other error must have happened.
-			throw new KojiClientException(result.toString());
+			throw new KojiHubClientException(result.toString());
 		}
 		return taskId;
 	}
@@ -142,7 +142,7 @@ public abstract class AbstractKojiHubBaseClient implements IKojiHubClient {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public KojiBuildInfo getBuild(String nvr) throws KojiClientException {
+	public KojiBuildInfo getBuild(String nvr) throws KojiHubClientException {
 		ArrayList<Object> params = new ArrayList<Object>();
 		params.add(nvr);
 		Map<String, Object> rawBuildInfo;
@@ -150,7 +150,7 @@ public abstract class AbstractKojiHubBaseClient implements IKojiHubClient {
 			rawBuildInfo = (Map<String, Object>) xmlRpcClient.execute(
 					"getBuild", params); //$NON-NLS-1$
 		} catch (XmlRpcException e) {
-			throw new KojiClientException(e);
+			throw new KojiHubClientException(e);
 		}
 		if (rawBuildInfo != null) {
 			return new KojiBuildInfo(rawBuildInfo);

@@ -17,6 +17,7 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -59,16 +60,22 @@ public class KojiSSLHubClient extends AbstractKojiHubBaseClient {
 	@Override
 	public HashMap<?, ?> login() throws KojiHubClientLoginException {
 		if (this.kojiHubUrl == null) {
+			// TODO: externalize!
 			throw new IllegalStateException(
 					"Hub URL must be set before trying to login");
 		}
 		// Initialize SSL connection
 		try {
 			initSSLConnection();
-		} catch (KojiClientException e) {
+		} catch (KojiHubClientException e) {
 			throw new KojiHubClientLoginException(e);
 		}
-		return doSslLogin();
+		HashMap<?, ?> loginSessionInfo = doSslLogin();
+		// save session info in xmlrpc config
+		saveSessionInfo(
+				(String) loginSessionInfo.get("session-key"), //$NON-NLS-1$
+				((Integer)loginSessionInfo.get("session-id")).toString()); //$NON-NLS-1$
+		return loginSessionInfo;
 	}
 
 	/**
@@ -103,7 +110,7 @@ public class KojiSSLHubClient extends AbstractKojiHubBaseClient {
 	/**
 	 * Initialize SSL connection
 	 */
-	private void initSSLConnection() throws KojiClientException {
+	private void initSSLConnection() throws KojiHubClientException {
 		// Create empty HostnameVerifier
 		HostnameVerifier hv = new HostnameVerifier() {
 			@Override
@@ -117,11 +124,11 @@ public class KojiSSLHubClient extends AbstractKojiHubBaseClient {
 			ctxt = fedoraSSL.getInitializedSSLContext();
 		} catch (FileNotFoundException e) {
 			// certs are missing
-			throw new KojiClientException(e);
+			throw new KojiHubClientException(e);
 		} catch (GeneralSecurityException e) {
-			throw new KojiClientException(e);
+			throw new KojiHubClientException(e);
 		} catch (IOException e) {
-			throw new KojiClientException(e);
+			throw new KojiHubClientException(e);
 		}
 		// set up the proper socket
 		HttpsURLConnection.setDefaultSSLSocketFactory(ctxt.getSocketFactory());

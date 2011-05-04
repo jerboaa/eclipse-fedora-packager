@@ -3,28 +3,28 @@ package org.fedoraproject.eclipse.packager.koji.api;
 /**
  * Exceptions thrown by koji clients.
  */
-public class KojiClientException extends Exception {
+public class KojiHubClientException extends Exception {
 
 	private static final long serialVersionUID = -3622365505538797782L;
 
 	/**
 	 * Default constructor
 	 */
-	public KojiClientException() {
+	public KojiHubClientException() {
 		// empty
 	}
 	
 	/**
 	 * @param cause
 	 */
-	public KojiClientException(Throwable cause) {
+	public KojiHubClientException(Throwable cause) {
 		super(cause);
 	}
 	
 	/**
 	 * @param msg
 	 */
-	public KojiClientException(String msg) {
+	public KojiHubClientException(String msg) {
 		super(msg);
 	}
 }

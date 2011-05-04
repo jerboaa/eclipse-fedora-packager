@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	KojiHubClientTest.class,
+	KojiSSLHubClientTest.class,
 	UploadFileValidityTest.class,
 	AssertionsEnabledTest.class
 })

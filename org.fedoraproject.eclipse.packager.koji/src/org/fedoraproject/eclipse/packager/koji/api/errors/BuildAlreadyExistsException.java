@@ -1,13 +1,13 @@
 package org.fedoraproject.eclipse.packager.koji.api.errors;
 
-import org.fedoraproject.eclipse.packager.koji.api.KojiClientException;
+import org.fedoraproject.eclipse.packager.koji.api.KojiHubClientException;
 
 /**
  * Thrown if some build already existed, when another one was attempted to be
  * pushed to koji.
  * 
  */
-public class BuildAlreadyExistsException extends KojiClientException {
+public class BuildAlreadyExistsException extends KojiHubClientException {
 
 	private static final long serialVersionUID = 5322603068319243734L;
 	

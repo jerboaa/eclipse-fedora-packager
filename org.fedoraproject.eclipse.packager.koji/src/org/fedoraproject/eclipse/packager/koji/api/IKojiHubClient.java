@@ -25,8 +25,9 @@ public interface IKojiHubClient {
 	 * Log in on the remote host as specified by the hub client url and stores
 	 * session information into XMLRPC config URL.
 	 * 
-	 * @return Login session information.
+	 * @return Login session information, which was stored.
 	 * @throws KojiHubClientLoginException
+	 *             If an error occurred.
 	 */
 	public HashMap<?, ?> login() throws KojiHubClientLoginException;
 
@@ -49,11 +50,11 @@ public interface IKojiHubClient {
 	 * @param scratch
 	 *            Set to {@code true} for a scratch build.
 	 * @return The task ID.
-	 * @throws KojiClientException
+	 * @throws KojiHubClientException
 	 *             If some error occurred.
 	 */
 	public int build(String target, String scmURL, String nvr, boolean scratch)
-			throws KojiClientException;
+			throws KojiHubClientException;
 	
 	/**
 	 * Fetches information related to a name-version-release token.
@@ -62,11 +63,11 @@ public interface IKojiHubClient {
 	 *            The name-version-release of the build for which to fetch
 	 *            information.
 	 * 
-	 * @throws KojiClientException
+	 * @throws KojiHubClientException
 	 *             If some error occurred.
 	 * 
 	 * @return The build information for the given nvr or {@code null} if build
 	 *         does not exist
 	 */
-	public KojiBuildInfo getBuild(String nvr) throws KojiClientException;
+	public KojiBuildInfo getBuild(String nvr) throws KojiHubClientException;
 }
