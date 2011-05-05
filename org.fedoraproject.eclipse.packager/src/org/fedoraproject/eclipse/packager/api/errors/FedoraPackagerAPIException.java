@@ -9,11 +9,14 @@ public class FedoraPackagerAPIException extends Exception {
 
 	private static final long serialVersionUID = -3988956265787343112L;
 
-	FedoraPackagerAPIException(String message, Throwable cause) {
+	protected FedoraPackagerAPIException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	FedoraPackagerAPIException(String message) {
+	protected FedoraPackagerAPIException(String message) {
 		super(message);
+	}
+
+	protected FedoraPackagerAPIException() {
 	}
 }

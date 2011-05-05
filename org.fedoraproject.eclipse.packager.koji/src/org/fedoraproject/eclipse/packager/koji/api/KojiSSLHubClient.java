@@ -17,7 +17,6 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -27,6 +26,8 @@ import javax.net.ssl.SSLSession;
 import org.apache.xmlrpc.XmlRpcException;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
+import org.fedoraproject.eclipse.packager.koji.KojiText;
+import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientLoginException;
 
 /**
  * Koji hub client which uses certificate based
@@ -59,15 +60,15 @@ public class KojiSSLHubClient extends AbstractKojiHubBaseClient {
 	 */
 	@Override
 	public HashMap<?, ?> login() throws KojiHubClientLoginException {
-		if (this.kojiHubUrl == null) {
-			// TODO: externalize!
-			throw new IllegalStateException(
-					"Hub URL must be set before trying to login");
-		}
 		// Initialize SSL connection
 		try {
 			initSSLConnection();
-		} catch (KojiHubClientException e) {
+		} catch (FileNotFoundException e) {
+			// certs are missing
+			throw new KojiHubClientLoginException(e, true);
+		} catch (GeneralSecurityException e) {
+			throw new KojiHubClientLoginException(e);
+		} catch (IOException e) {
 			throw new KojiHubClientLoginException(e);
 		}
 		HashMap<?, ?> loginSessionInfo = doSslLogin();
@@ -98,9 +99,8 @@ public class KojiSSLHubClient extends AbstractKojiHubBaseClient {
 			result = xmlRpcClient.execute("sslLogin", params); //$NON-NLS-1$
 			hashMap = (HashMap<?, ?>) result;
 		} catch (ClassCastException e) {
-			// TODO: Externalize
-			throw new KojiHubClientLoginException(
-					"Login returned unexpected result");
+			// Something is fishy, should have returned a map
+			throw new KojiHubClientLoginException(e);
 		} catch (XmlRpcException e) {
 			throw new KojiHubClientLoginException(e);
 		}
@@ -110,7 +110,7 @@ public class KojiSSLHubClient extends AbstractKojiHubBaseClient {
 	/**
 	 * Initialize SSL connection
 	 */
-	private void initSSLConnection() throws KojiHubClientException {
+	private void initSSLConnection() throws FileNotFoundException, GeneralSecurityException, IOException {
 		// Create empty HostnameVerifier
 		HostnameVerifier hv = new HostnameVerifier() {
 			@Override
@@ -120,16 +120,8 @@ public class KojiSSLHubClient extends AbstractKojiHubBaseClient {
 		};
 		FedoraSSL fedoraSSL = FedoraSSLFactory.getInstance();
 		SSLContext ctxt = null;
-		try {
-			ctxt = fedoraSSL.getInitializedSSLContext();
-		} catch (FileNotFoundException e) {
-			// certs are missing
-			throw new KojiHubClientException(e);
-		} catch (GeneralSecurityException e) {
-			throw new KojiHubClientException(e);
-		} catch (IOException e) {
-			throw new KojiHubClientException(e);
-		}
+		// may throw exceptions (dealt with in login())
+ 	    ctxt = fedoraSSL.getInitializedSSLContext();
 		// set up the proper socket
 		HttpsURLConnection.setDefaultSSLSocketFactory(ctxt.getSocketFactory());
 		HttpsURLConnection.setDefaultHostnameVerifier(hv);
@@ -143,9 +135,8 @@ public class KojiSSLHubClient extends AbstractKojiHubBaseClient {
 	 */
 	private void setupSSLLoginXMLRPCConfig() throws KojiHubClientLoginException {
 		if (this.xmlRpcConfig == null) {
-			// TODO: externalize!
 			throw new KojiHubClientLoginException(new IllegalStateException(
-					"xmlRpcConfig needs to be initialized!"));
+					KojiText.xmlRPCconfigNotInitialized));
 		}
 		URL sslLoginUrl = null;
 		try {

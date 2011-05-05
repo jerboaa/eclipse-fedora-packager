@@ -51,7 +51,6 @@ import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
-import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
@@ -405,11 +404,11 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	@Override
 	public IStatus tagVcs(FedoraProjectRoot projectRoot,
 			IProgressMonitor monitor) {
-		monitor.subTask("Generating Tag Name from Specfile");
+//		monitor.subTask("Generating Tag Name from Specfile");
 		final String tagName;
 		try {
 			tagName = RPMUtils.makeTagName(projectRoot);
-		} catch (CoreException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			return new Status(IStatus.ERROR, CVSPlugin.PLUGIN_ID, e.getMessage());
 		}
@@ -417,7 +416,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		monitor.subTask("Tagging as " + tagName);
+//		monitor.subTask("Tagging as " + tagName);
 		IStatus result = createCVSTag(tagName, false, monitor, projectRoot);
 		String errExists = "Tag " + tagName + " has been already created";
 		if (!result.isOK()) {
@@ -531,7 +530,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		String createdTag = null;
 		try {
 			createdTag = RPMUtils.makeTagName(fedoraProjectRoot);
-		} catch (CoreException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -553,7 +552,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	public String getScmUrlForKoji(FedoraProjectRoot projectRoot) {
 		try {
 			return getScmUrl() + "#" + RPMUtils.makeTagName(projectRoot);
-		} catch (CoreException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

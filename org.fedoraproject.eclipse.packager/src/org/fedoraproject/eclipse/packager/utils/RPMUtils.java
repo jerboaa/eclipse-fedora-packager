@@ -5,13 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 /**
  * Utility class for RPM related things.
@@ -47,10 +43,10 @@ public class RPMUtils {
 	 * @param projectRoot
 	 * @param format
 	 * @return The result of the query.
-	 * @throws CoreException
+	 * @throws IOException If rpm command failed.
 	 */
 	public static String rpmQuery(FedoraProjectRoot projectRoot, String format)
-			throws CoreException {
+			throws IOException {
 		IResource parent = projectRoot.getSpecFile().getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = getRPMDefines(dir);
@@ -67,12 +63,7 @@ public class RPMUtils {
 		defines.add("--specfile"); //$NON-NLS-1$
 		defines.add(projectRoot.getSpecFile().getLocation().toString());
 
-		try {
-			result = Utils.runCommandToString(defines.toArray(new String[0]));
-		} catch (IOException e) {
-			throw new CoreException(new Status(IStatus.ERROR,
-					PackagerPlugin.PLUGIN_ID, e.getMessage(), e));
-		}
+		result = Utils.runCommandToString(defines.toArray(new String[0]));
 
 		return result.substring(0, result.indexOf('\n'));
 	}
@@ -84,10 +75,10 @@ public class RPMUtils {
 	 * @param projectRoot
 	 *            Container used for retrieving needed data.
 	 * @return The tag name.
-	 * @throws CoreException
+	 * @throws IOException
 	 */
 	public static String makeTagName(FedoraProjectRoot projectRoot)
-			throws CoreException {
+			throws IOException {
 		return getNVR(projectRoot).replaceAll("\\.", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -96,11 +87,11 @@ public class RPMUtils {
 	 * 
 	 * @param projectRoot
 	 *            Container used to retrieve the needed data.
-	 * @return N-V-R(Name-Value-Release) retrieved.
-	 * @throws CoreException
+	 * @return N-V-R (Name-Version-Release) retrieved.
+	 * @throws IOException if RPM query failed.
 	 */
 	public static String getNVR(FedoraProjectRoot projectRoot)
-			throws CoreException {
+			throws IOException {
 		String name = rpmQuery(projectRoot, "NAME").replaceAll("^[0-9]+", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String version = rpmQuery(projectRoot, "VERSION"); //$NON-NLS-1$
 		String release = rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$

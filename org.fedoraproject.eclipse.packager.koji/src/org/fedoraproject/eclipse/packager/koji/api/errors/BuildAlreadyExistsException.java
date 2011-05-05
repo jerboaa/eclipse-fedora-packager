@@ -1,6 +1,7 @@
 package org.fedoraproject.eclipse.packager.koji.api.errors;
 
-import org.fedoraproject.eclipse.packager.koji.api.KojiHubClientException;
+import org.eclipse.osgi.util.NLS;
+import org.fedoraproject.eclipse.packager.koji.KojiText;
 
 /**
  * Thrown if some build already existed, when another one was attempted to be
@@ -23,8 +24,7 @@ public class BuildAlreadyExistsException extends KojiHubClientException {
 	
 	@Override
 	public String getMessage() {
-		// TODO externalize
-		return "Build already exists (id=" + this.taskId + ", state=COMPLETE)";
+		return NLS.bind(KojiText.BuildAlreadyExistsException_msg, this.taskId);
 	}
 	
 	/**

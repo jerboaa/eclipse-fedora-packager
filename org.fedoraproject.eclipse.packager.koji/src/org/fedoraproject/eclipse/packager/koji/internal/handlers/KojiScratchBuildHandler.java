@@ -10,11 +10,18 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.koji.internal.handlers;
 
-
+/**
+ * Handler to push a scratch build to Koji.
+ */
 public class KojiScratchBuildHandler extends KojiBuildHandler {
 
+	/**
+	 * Since, this is the handler for a scratch build always return true.
+	 * 
+	 * @return {@code true}
+	 */
 	@Override
-	protected boolean isScratch() {
+	protected boolean isScratchBuild() {
 		return true;
 	}
 }

@@ -10,18 +10,15 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.koji.internal.handlers;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashMap;
+import java.net.URL;
 
-import org.apache.xmlrpc.XmlRpcException;
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -32,272 +29,305 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
-import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
+import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
+import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
+import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.koji.KojiMessageDialog;
 import org.fedoraproject.eclipse.packager.koji.KojiPlugin;
 import org.fedoraproject.eclipse.packager.koji.KojiText;
+import org.fedoraproject.eclipse.packager.koji.KojiUrlUtils;
+import org.fedoraproject.eclipse.packager.koji.api.BuildResult;
 import org.fedoraproject.eclipse.packager.koji.api.IKojiHubClient;
 import org.fedoraproject.eclipse.packager.koji.api.KojiBuildCommand;
-import org.fedoraproject.eclipse.packager.koji.api.KojiHubClientLoginException;
 import org.fedoraproject.eclipse.packager.koji.api.KojiSSLHubClient;
+import org.fedoraproject.eclipse.packager.koji.api.TagSourcesListener;
+import org.fedoraproject.eclipse.packager.koji.api.UnpushedChangesListener;
+import org.fedoraproject.eclipse.packager.koji.api.errors.BuildAlreadyExistsException;
+import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientException;
+import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientLoginException;
+import org.fedoraproject.eclipse.packager.koji.api.errors.TagSourcesException;
+import org.fedoraproject.eclipse.packager.koji.api.errors.UnpushedChangesException;
 
 /**
- * Handler to perform a Koji build.
+ * Handler to kick off a remote Koji build.
  * 
  */
-public class KojiBuildHandler extends AbstractHandler {
-	@SuppressWarnings("unused")
-	private String dist;
-	private IKojiHubClient koji;
-	private Job job;
-	private MessageDialog kojiMsgDialog;
-	private Shell shell;
+public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 	
 	/**
-	 * Indicates if stub or real client should be returned by getKoji()
+	 * Shell for message dialogs, etc.
 	 */
-	public static boolean inTestingMode = false;
-
+	private Shell shell;
+	private BuildResult buildResult;
+	private URL kojiWebUrl;
+	
 	@Override
-	public Object execute(final ExecutionEvent e) throws ExecutionException {
+	public Object execute(final ExecutionEvent event) throws ExecutionException {
+		this.shell = getShell(event);
+		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
-			IResource eventResource = FedoraHandlerUtils.getResource(e);
+			IResource eventResource = FedoraHandlerUtils.getResource(event);
 			fedoraProjectRoot = FedoraPackagerUtils
 					.getProjectRoot(eventResource);
-		} catch (InvalidProjectRootException e1) {
-			// TODO handle appropriately
-			e1.printStackTrace();
+		} catch (InvalidProjectRootException e) {
+			logger.logError(NLS.bind(
+					FedoraPackagerText.invalidFedoraProjectRootError,
+					NonTranslatableStrings.getDistributionName()), e);
+			FedoraHandlerUtils.showError(shell, NonTranslatableStrings
+					.getProductName(), NLS.bind(
+					FedoraPackagerText.invalidFedoraProjectRootError,
+					NonTranslatableStrings.getDistributionName()),
+					KojiPlugin.PLUGIN_ID, e);
 			return null;
 		}
-		FedoraPackager packager = new FedoraPackager(fedoraProjectRoot);
-		KojiBuildCommand buildCmd = null;
+		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
+		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
+		final KojiBuildCommand kojiBuildCmd;
 		try {
-			buildCmd = (KojiBuildCommand) packager.getCommandInstance(KojiBuildCommand.ID);
-		} catch (FedoraPackagerCommandInitializationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (FedoraPackagerCommandNotFoundException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			// Get KojiBuildCommand from Fedora packager registry
+			kojiBuildCmd = (KojiBuildCommand) fp
+					.getCommandInstance(KojiBuildCommand.ID);
+		} catch (FedoraPackagerCommandNotFoundException e) {
+			logger.logError(e.getMessage(), e);
+			FedoraHandlerUtils.showError(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage(),
+					KojiPlugin.PLUGIN_ID, e);
+			return null;
+		} catch (FedoraPackagerCommandInitializationException e) {
+			logger.logError(e.getMessage(), e);
+			FedoraHandlerUtils.showError(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage(),
+					KojiPlugin.PLUGIN_ID, e);
+			return null;
 		}
-		try {
-			buildCmd.call(null);
-		} catch (FedoraPackagerAPIException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		return null;
-	}
+		// Push the build
+		Job job = new Job(NonTranslatableStrings.getProductName()) {
 
-	private boolean promptForTag() {
-		YesNoRunnable op = new YesNoRunnable(
-				KojiText.KojiBuildHandler_tagBeforeSendingBuild);
-		Display.getDefault().syncExec(op);
-		return op.isOkPressed();
-	}
-
-	protected IStatus newBuild(FedoraProjectRoot fedoraProjectRoot,
-			IProgressMonitor monitor) {
-		IStatus status;
-		IFpProjectBits projectBits = FedoraPackagerUtils
-				.getVcsHandler(fedoraProjectRoot);
-		try {
-			// for testing use the stub instead
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			monitor.subTask(KojiText.KojiBuildHandler_connectKojiMsg);
-
-			String scmURL = projectBits.getScmUrlForKoji(fedoraProjectRoot);
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			// login via SSL
-			monitor.subTask(KojiText.KojiBuildHandler_kojiLogin);
-			HashMap<?, ?> sessionData = null;
-			try {
-				sessionData = getKoji().login();
-			} catch (KojiHubClientLoginException e) {
-				e.printStackTrace();
-				return FedoraHandlerUtils.handleError(e);
-			}
-			// store session in URL
-			try {
-				Object sessionId = sessionData.get("session-id"); //$NON-NLS-1$
-				String sid = null;
-				if (sessionId instanceof Integer) {
-					sid = ((Integer)sessionId).toString();
-				} else if (sessionId instanceof String) {
-					// if we get a String it should be convertible to an int
-					try {
-						Integer.parseInt((String)sessionId);
-						sid = (String)sessionId;
-					} catch (NumberFormatException e) {
-						// something is wrong should have gotten an int or String
-						return FedoraHandlerUtils.handleError(KojiText.KojiBuildHandler_unexpectedSessionId + sessionId.toString());
-					}
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask(KojiText.KojiBuildHandler_pushBuildToKoji,
+						100);
+				UnpushedChangesListener unpushedChangesListener = new UnpushedChangesListener(
+						fedoraProjectRoot, monitor);
+				// check for unpushed changes prior calling command
+				kojiBuildCmd.addCommandListener(unpushedChangesListener);
+				// tag sources if user wishes; TagSourcesListener takes care of this
+				TagSourcesListener tagSources = new TagSourcesListener(fedoraProjectRoot, monitor, shell);
+				kojiBuildCmd.addCommandListener(tagSources);
+				IKojiHubClient kojiClient;
+				try {
+					kojiClient = getHubClient();
+				} catch (MalformedURLException e) {
+					logger.logError(KojiText.KojiBuildHandler_invalidHubUrl, e);
+					return FedoraHandlerUtils.showError(shell,
+							NonTranslatableStrings.getProductName(),
+							KojiText.KojiBuildHandler_invalidHubUrl,
+							KojiPlugin.PLUGIN_ID, e);
 				}
-				//getKoji().saveSessionInfo((String)sessionData.get("session-key"), sid); //$NON-NLS-1$
-			} catch (ClassCastException e) {
-				return FedoraHandlerUtils.handleError(e);
+				kojiBuildCmd.setKojiClient(kojiClient);
+				kojiBuildCmd.scmUrl(projectBits
+							.getScmUrlForKoji(fedoraProjectRoot));
+				String nvr;
+				try {
+					nvr = RPMUtils.getNVR(fedoraProjectRoot);
+				} catch (IOException e) {
+					logger.logError(KojiText.KojiBuildHandler_errorGettingNVR,
+							e);
+					return FedoraHandlerUtils.showError(shell,
+							NonTranslatableStrings.getProductName(),
+							KojiText.KojiBuildHandler_errorGettingNVR,
+							KojiPlugin.PLUGIN_ID, e);
+				}
+				kojiBuildCmd.distTag(projectBits.getTarget()).nvr(nvr)
+						.isScratchBuild(isScratchBuild());
+				// Call build command
+				try {
+					buildResult = kojiBuildCmd.call(monitor);
+				} catch (CommandMisconfiguredException e) {
+					// This shouldn't happen, but report error anyway
+					logger.logError(e.getMessage(), e);
+					return FedoraHandlerUtils.showError(shell,
+							NonTranslatableStrings.getProductName(),
+							e.getMessage(), KojiPlugin.PLUGIN_ID, e);
+				} catch (BuildAlreadyExistsException e) {
+					logger.logInfo(e.getMessage(), e);
+					return FedoraHandlerUtils.showInformation(shell,
+							NonTranslatableStrings.getProductName(),
+							e.getMessage());
+				} catch (UnpushedChangesException e) {
+					logger.logInfo(e.getMessage(), e);
+					return FedoraHandlerUtils.showInformation(shell,
+							NonTranslatableStrings.getProductName(),
+							e.getMessage());
+				} catch (TagSourcesException e) {
+					// something failed while tagging sources
+					logger.logError(e.getMessage(), e);
+					return FedoraHandlerUtils.showError(shell,
+							NonTranslatableStrings.getProductName(),
+							e.getMessage(), KojiPlugin.PLUGIN_ID, e);
+				} catch (CommandListenerException e) {
+					// This shouldn't happen, but report error anyway
+					logger.logError(e.getMessage(), e);
+					return FedoraHandlerUtils.showError(shell,
+							NonTranslatableStrings.getProductName(),
+							e.getMessage(), KojiPlugin.PLUGIN_ID, e);
+				} catch (KojiHubClientLoginException e) {
+					// Check if certs were missing
+					if (e.isCertificateMissing()) {
+						String msg = NLS
+								.bind(KojiText.KojiBuildHandler_missingCertificatesMsg,
+										NonTranslatableStrings
+												.getDistributionName());
+						logger.logError(msg, e);
+						return FedoraHandlerUtils.showError(shell,
+								NonTranslatableStrings.getProductName(),
+								msg, KojiPlugin.PLUGIN_ID, e);
+					}
+					if (e.isCertificateExpired()) {
+						String msg = NLS
+						.bind(KojiText.KojiBuildHandler_certificateExpriredMsg,
+								NonTranslatableStrings
+										.getDistributionName());
+						logger.logError(msg, e);
+						return FedoraHandlerUtils.showError(shell,
+								NonTranslatableStrings.getProductName(),
+								msg, KojiPlugin.PLUGIN_ID, e);
+					}
+					// return some generic error
+					logger.logError(e.getMessage(), e);
+					return FedoraHandlerUtils.showError(shell,
+							NonTranslatableStrings.getProductName(),
+							e.getMessage(), KojiPlugin.PLUGIN_ID, e);
+				} catch (KojiHubClientException e) {
+					// return some generic error
+					logger.logError(e.getMessage(), e);
+					return FedoraHandlerUtils.showError(shell,
+							NonTranslatableStrings.getProductName(),
+							e.getMessage(), KojiPlugin.PLUGIN_ID, e);
+				}
+				// success
+				return Status.OK_STATUS;
 			}
-
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			// push build
-			monitor.subTask(KojiText.KojiBuildHandler_sendBuildCmd);
-			String nvr= null;
-			try {
-				nvr = RPMUtils.getNVR(fedoraProjectRoot);
-			} catch (CoreException e1) {
-				e1.printStackTrace();
-			}
-			String result = null;// = getKoji().build(projectBits.getTarget(), scmURL, nvr, isScratch());
-			// if we get an int (that is our taskId)
-			int taskId = -1;
-			try {
-				taskId = Integer.parseInt(result);
-			} catch (NumberFormatException e) {
-				// ignore
-			}
-			if (taskId != -1) {
-				status = new Status(IStatus.OK, KojiPlugin.PLUGIN_ID,
-						new Integer(taskId).toString());
-			} else{ // Error
-				status = new Status(IStatus.INFO, KojiPlugin.PLUGIN_ID, result);
-			}
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			// logout
-			monitor.subTask(KojiText.KojiBuildHandler_kojiLogout);
-			getKoji().logout();
-		} catch (XmlRpcException e) {
-			e.printStackTrace();
-			status = FedoraHandlerUtils.handleError(e);
-		}
-		return status;
+			
+		};
+		// Add listener to show response dialog
+		job.addJobChangeListener(getJobChangeListener());
+		job.setUser(true);
+		job.schedule();
+		return null; // must be null
 	}
-
+	
 	/**
-	 * ATM this is the preferred way to get the koji client instance.
-	 * When in testing mode, this will return the stubbed client.
+	 * Create KojiMessageDialog based on taskId and kojiWebUrl.
 	 * 
-	 * @return The real or the stubbed koji client depending on the
-	 *         mode (inTestingMode)
+	 * @param taskId
+	 *            The task ID to use for the message.
+	 * @param kojiWebUrl
+	 *            The url to Koji Web without any parameters.
+	 * @return A new KojiMessageDialog for the given Web Url and task Id.
 	 */
-	public IKojiHubClient getKoji() {
-		if (!inTestingMode) {
-			// return actual client
-			return koji;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * @return the kojiMsgDialog
-	 */
-	public MessageDialog getKojiMsgDialog() {
-		return kojiMsgDialog;
-	}
-
-	/**
-	 * Set the MessageDialog for build status reporting.
-	 * 
-	 * @param CmdId The command ID which triggered this handler.
-	 * @param taskId The task ID to use for the message.
-	 */
-	public void setKojiMsgDialog(String CmdId, String taskId) {
+	public KojiMessageDialog getKojiMsgDialog(int taskId, URL kojiWebUrl) {
 		ImageDescriptor descriptor = KojiPlugin
-			.getImageDescriptor("icons/Artwork_DesignService_koji-icon-16.png"); //$NON-NLS-1$
+				.getImageDescriptor("icons/Artwork_DesignService_koji-icon-16.png"); //$NON-NLS-1$
 		Image titleImage = descriptor.createImage();
-		KojiMessageDialog msgDialog = new KojiMessageDialog(
-				shell,
-				KojiText.KojiBuildHandler_kojiBuild,
-				titleImage,
-				MessageDialog.NONE,
-				new String[] { IDialogConstants.OK_LABEL },
-				0, "http://www.example.com", taskId);
-		this.kojiMsgDialog = msgDialog;
+		Image msgContentImage = KojiPlugin.getImageDescriptor("icons/koji.png") //$NON-NLS-1$
+				.createImage();
+		KojiMessageDialog msgDialog = new KojiMessageDialog(shell,
+				KojiText.KojiBuildHandler_kojiBuild, titleImage,
+				MessageDialog.NONE, new String[] { IDialogConstants.OK_LABEL },
+				0, kojiWebUrl, taskId,
+				KojiText.KojiMessageDialog_buildResponseMsg, msgContentImage);
+		return msgDialog;
 	}
 	
 	/**
-	 * Protected setter for kojiMsgDialog.
-	 */
-	protected void setKojiMsgDialog(MessageDialog msgDialog) {
-		this.kojiMsgDialog = msgDialog;
-	}
-
-	/**
-	 * Set the koji client. Pass in hint in order to be able to use different
-	 * client depending on actual cmdId.
+	 * Since, this is the handler for a regular build always return false.
 	 * 
-	 * @param cmdId Command ID which triggered this handler. This is useful
-	 *              for Koji client implementations for different authentication
-	 *              schemes. E.g. username and password authentication client.
-	 *              We only need to override this method if there's more than one
-	 *              authentication scheme supported.
-	 * @throws MalformedURLException 
+	 * @return {@code false}
 	 */
-	public void setKojiClient(String cmdId) throws MalformedURLException {
-		this.koji = new KojiSSLHubClient("bad-url ----> :)");
-	}
-	
-	/**
-	 * Setter for Koji client instance variable
-	 */
-	protected void setKojiClient(IKojiHubClient client) {
-		this.koji = client;
-	}
-
-	protected boolean isScratch() {
+	protected boolean isScratchBuild() {
 		return false;
 	}
-
+	
 	/**
-	 * @param event
-	 * @return the shell
-	 * @throws ExecutionException
+	 * Create a hub client based on set preferences 
+	 * 
+	 * @throws MalformedURLException If the koji hub URL preference was invalid.
+	 * @return The koji client.
 	 */
-	private Shell getShell(ExecutionEvent event) throws ExecutionException {
-		return HandlerUtil.getActiveShellChecked(event);
+	protected IKojiHubClient getHubClient() throws MalformedURLException {
+		String kojiHubUrl = PackagerPlugin.getStringPreference(FedoraPackagerPreferencesConstants.PREF_KOJI_HUB_URL);
+		if (kojiHubUrl == null) {
+			// Set to default
+			kojiHubUrl = FedoraPackagerPreferencesConstants.DEFAULT_KOJI_HUB_URL;
+		}
+		return new KojiSSLHubClient(kojiHubUrl);
 	}
 	
-	public final class YesNoRunnable implements Runnable {
-		private final String question;
-		private boolean okPressed;
-
-		public YesNoRunnable(String question) {
-			this.question = question;
+	/**
+	 * Create a job listener for the event {@code done}.
+	 *  
+	 * @return The job change listener.
+	 */
+	protected IJobChangeListener getJobChangeListener() {
+		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+		String webUrl = PackagerPlugin.getStringPreference(FedoraPackagerPreferencesConstants.PREF_KOJI_WEB_URL);
+		if (webUrl == null) {
+			// use default
+			webUrl = FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL; 
 		}
-
-		@Override
-		public void run() {
-			okPressed = MessageDialog.openQuestion(shell,
-					NonTranslatableStrings.getProductName(),
-					question);
+		try {
+			kojiWebUrl = new URL(webUrl);
+		} catch (MalformedURLException e) {
+			// nothing critical, use default koji URL instead and log the bogus
+			// Web url set in preferences.
+			logger.logError(NLS.bind(KojiText.KojiBuildHandler_invalidKojiWebUrl, webUrl), e);
+			try {
+				kojiWebUrl = new URL(FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
+			} catch (MalformedURLException ignored) {};
 		}
-
-		public boolean isOkPressed() {
-			return okPressed;
-		}
+		IJobChangeListener listener = new JobChangeAdapter() {
+			
+			// We are only interested in the done event
+			@Override
+			public void done(IJobChangeEvent event) {
+				final IStatus jobStatus = event.getResult();
+				PlatformUI.getWorkbench().getDisplay().asyncExec(
+						new Runnable() {
+							@Override
+							public void run() {
+								// Only show something on success
+								if (jobStatus.isOK()) {
+									logger.logInfo(KojiText.KojiMessageDialog_buildResponseMsg
+											+ " " //$NON-NLS-1$
+											+ KojiUrlUtils.constructTaskUrl(
+													buildResult.getTaskId(),
+													kojiWebUrl));
+									// open dialog
+									getKojiMsgDialog(buildResult.getTaskId(),
+											kojiWebUrl).open();
+								}
+							}
+						});
+			}
+		};
+		return listener;
 	}
 }

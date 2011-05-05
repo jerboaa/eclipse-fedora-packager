@@ -12,7 +12,8 @@ package org.fedoraproject.eclipse.packager.koji.api;
 
 import java.util.HashMap;
 
-import org.apache.xmlrpc.XmlRpcException;
+import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientException;
+import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientLoginException;
 
 /**
  * Interface for Koji hub client implementations. At the moment there is only
@@ -34,9 +35,9 @@ public interface IKojiHubClient {
 	/**
 	 * Logout from hub url and discard session.
 	 * 
-	 * @throws XmlRpcException
+	 * @throws KojiHubClientException
 	 */
-	public void logout() throws XmlRpcException;
+	public void logout() throws KojiHubClientException;
 
 	/**
 	 * Initiate a build on the remote hub host. Checks, if a build with the

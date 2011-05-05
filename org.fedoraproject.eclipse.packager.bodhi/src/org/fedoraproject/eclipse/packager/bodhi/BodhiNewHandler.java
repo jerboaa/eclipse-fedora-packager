@@ -219,6 +219,10 @@ public class BodhiNewHandler extends AbstractHandler {
 				} catch (CoreException e) {
 					e.printStackTrace();
 					return FedoraHandlerUtils.handleError(e);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return null;
 				}
 			}
 		};
@@ -245,9 +249,9 @@ public class BodhiNewHandler extends AbstractHandler {
 	 * 
 	 * @param projectRoot
 	 * @return The build name as specified in the spec file.
-	 * @throws CoreException
+	 * @throws IOException
 	 */
-	public String getBuildName(FedoraProjectRoot projectRoot) throws CoreException {
+	public String getBuildName(FedoraProjectRoot projectRoot) throws IOException {
 		return RPMUtils.rpmQuery(projectRoot, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
 		+ RPMUtils.rpmQuery(projectRoot, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
 		+ RPMUtils.rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$

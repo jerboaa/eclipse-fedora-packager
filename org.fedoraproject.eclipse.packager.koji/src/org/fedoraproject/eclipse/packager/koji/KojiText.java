@@ -26,25 +26,51 @@ public class KojiText extends NLS {
 	 * This is the path to the file containing externalized strings.
 	 */
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.koji.kojitext"; //$NON-NLS-1$
+
+
+
 	
 	// KojiBuildHandler Strings
 	/****/ public static String KojiBuildHandler_unexpectedSessionId;
 	/****/ public static String KojiBuildHandler_unpushedChanges;
 	/****/ public static String KojiBuildHandler_tagBeforeSendingBuild;
-	/****/ public static String KojiBuildHandler_sendBuildToKoji;
+	/****/ public static String KojiBuildHandler_pushBuildToKoji;
 	/****/ public static String KojiBuildHandler_jobName;
 	/****/ public static String KojiBuildHandler_kojiBuild;
 	/****/ public static String KojiBuildHandler_connectKojiMsg;
-	/****/ public static String KojiBuildHandler_kojiLogin;
-	/****/ public static String KojiBuildHandler_sendBuildCmd;
-	/****/ public static String KojiBuildHandler_kojiLogout;
 	/****/ public static String KojiBuildHandler_fallbackBuildMsg;
 	/****/ public static String KojiBuildHandler_buildTaskIdError;
+	/****/ public static String KojiBuildHandler_invalidHubUrl;
+	/****/ public static String KojiBuildHandler_invalidScmUrl;
+	/****/ public static String KojiBuildHandler_errorGettingNVR;
+	/****/ public static String KojiBuildHandler_invalidKojiWebUrl;
+	/****/ public static String KojiBuildHandler_trackStatusMsg;
+	/****/ public static String KojiBuildHandler_missingCertificatesMsg;
+	/****/ public static String KojiBuildHandler_certificateExpriredMsg;
 	// KojiMessageDialog Strings
 	/****/ public static String KojiMessageDialog_buildNumberMsg;
 	/****/ public static String KojiMessageDialog_buildResponseMsg;
 	// KojiHubClient
 	/****/ public static String KojiHubClient_invalidHubUrl;
+	// UnpushedChangesListener
+	/****/ public static String UnpushedChangesListener_checkUnpushedChangesSubTaskName;
+	/****/ public static String UnpushedChangesListener_unpushedChangesError;
+	// TagSourcesListener
+	/****/ public static String TagSourcesListener_tagSourcesSubTaskName;
+	// KojiBuildCommand
+	/****/ public static String KojiBuildCommand_sendBuildCmd;
+	/****/ public static String KojiBuildCommand_kojiLogoutTask;
+	/****/ public static String KojiBuildCommand_configErrorNoClient;
+	/****/ public static String KojiBuildCommand_configErrorNoScmURL;
+	/****/ public static String KojiBuildCommand_configErrorNoDistribution;
+	/****/ public static String KojiBuildCommand_configErrorNoNVR;
+	/****/ public static String KojiBuildCommand_kojiLogInTask;
+	// BuildAlreadyExistsException
+	/****/ public static String BuildAlreadyExistsException_msg;
+	// KojiHubClientLoginException
+	/****/ public static String KojiHubClientLoginException_loginFailedMsg;
+	// Generic Strings
+	/****/ public static String xmlRPCconfigNotInitialized;
 	
 	static {
 		initializeMessages(BUNDLE_NAME,	KojiText.class);

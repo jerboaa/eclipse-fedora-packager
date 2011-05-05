@@ -29,48 +29,64 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.forms.widgets.FormText;
 
 /**
- * Message dialog showing the link to the koji page showing build info
+ * Message dialog showing the link to the Koji Web page showing build info.
  *
  */
 public class KojiMessageDialog extends MessageDialog {
-	private String taskNo;
-	private String kojiWebUrl;
+	private int taskId;
+	private URL kojiWebUrl;
+	private String messageText;
+	private Image dialogContentImage;
 
 	/**
 	 * Creates the message dialog with the given index.
 	 * 
-	 * @param parentShell
+	 * @param shell
+	 *            A valid shell (make sure shell is on heap not stack)
 	 * @param dialogTitle
+	 *            The dialog title.
 	 * @param dialogTitleImage
+	 *            The image for the dialog title bar
 	 * @param dialogImageType
+	 *            The image type
 	 * @param dialogButtonLabels
+	 *            Labels for the dialog buttons.
 	 * @param defaultIndex
-	 * @param kojiWebURL 
-	 * @param taskId 
+	 *            The default index (usually 1)
+	 * @param kojiWebURL
+	 *            The base URL to Koji Web.
+	 * @param taskId
+	 *            The id of the pushed task
+	 * @param messageText
+	 *            The textual content of the message dialog.
+	 * @param dialogContentImage
+	 *            The image for the message dialog content.
 	 */
-	public KojiMessageDialog(Shell parentShell, String dialogTitle,
+	public KojiMessageDialog(Shell shell, String dialogTitle,
 			Image dialogTitleImage, int dialogImageType,
-			String[] dialogButtonLabels, int defaultIndex, String kojiWebURL, String taskId) {
-		super(parentShell, dialogTitle, dialogTitleImage,
-				NLS.bind(KojiText.KojiMessageDialog_buildNumberMsg, taskId),
+			String[] dialogButtonLabels, int defaultIndex, URL kojiWebURL,
+			int taskId, String messageText, Image dialogContentImage) {
+		super(shell, dialogTitle, dialogTitleImage, NLS.bind(
+				KojiText.KojiMessageDialog_buildNumberMsg, taskId),
 				dialogImageType, dialogButtonLabels, defaultIndex);
 		this.kojiWebUrl = kojiWebURL;
-		this.taskNo = taskId;
+		this.taskId = taskId;
+		this.messageText = messageText;
 	}
 
 	@Override
 	public Image getImage() {
-		return KojiPlugin.getImageDescriptor("icons/koji.png") //$NON-NLS-1$
-				.createImage();
+//		return KojiPlugin.getImageDescriptor("icons/koji.png") //$NON-NLS-1$
+//				.createImage();
+		return this.dialogContentImage;
 	}
 
 	@Override
 	protected Control createCustomArea(Composite parent) {
 		FormText taskLink = new FormText(parent, SWT.NONE);
-		final String url = kojiWebUrl + "/taskinfo?taskID=" //$NON-NLS-1$
-				+ taskNo;
+		final String url = KojiUrlUtils.constructTaskUrl(taskId, kojiWebUrl);
 		taskLink.setText("<form><p>" +  //$NON-NLS-1$
-				KojiText.KojiMessageDialog_buildResponseMsg + "</p><p>"+ url //$NON-NLS-1$
+				this.messageText + "</p><p>"+ url //$NON-NLS-1$
 						+ "</p></form>", true, true); //$NON-NLS-1$
 		taskLink.addListener(SWT.Selection, new Listener() {
 			@Override

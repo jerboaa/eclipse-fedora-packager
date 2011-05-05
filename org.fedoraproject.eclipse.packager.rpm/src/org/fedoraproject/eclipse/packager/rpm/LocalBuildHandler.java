@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.rpm;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -111,7 +112,7 @@ public class LocalBuildHandler extends RPMHandler {
 					flags.add("-ba"); //$NON-NLS-1$
 					result = rpmBuild(fedoraProjectRoot, flags, monitor);
 
-				} catch (CoreException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 					result = FedoraHandlerUtils.handleError(e);
 				}

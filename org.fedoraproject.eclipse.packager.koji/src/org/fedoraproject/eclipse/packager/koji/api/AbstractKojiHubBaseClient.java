@@ -19,7 +19,10 @@ import java.util.Map;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import org.fedoraproject.eclipse.packager.koji.KojiText;
 import org.fedoraproject.eclipse.packager.koji.api.errors.BuildAlreadyExistsException;
+import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientException;
+import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientLoginException;
 import org.fedoraproject.eclipse.packager.koji.internal.utils.KojiTypeFactory;
 
 /**
@@ -87,9 +90,13 @@ public abstract class AbstractKojiHubBaseClient implements IKojiHubClient {
 	 * @see org.fedoraproject.eclipse.packager.IKojiHubClient#logout()
 	 */
 	@Override
-	public void logout() throws XmlRpcException {
+	public void logout() throws KojiHubClientException {
 		ArrayList<String> params = new ArrayList<String>();
-		xmlRpcClient.execute("logout", params); //$NON-NLS-1$
+		try {
+			xmlRpcClient.execute("logout", params); //$NON-NLS-1$
+		} catch (XmlRpcException e) {
+			throw new KojiHubClientException(e);
+		}
 		discardSession();
 	}
 
@@ -177,8 +184,7 @@ public abstract class AbstractKojiHubBaseClient implements IKojiHubClient {
 	 */
 	protected void setupXmlRpcClient() throws IllegalStateException {
 		if (xmlRpcConfig == null) {
-			// TODO: Externalize
-			throw new IllegalStateException("XMLRPC not configured.");
+			throw new IllegalStateException(KojiText.xmlRPCconfigNotInitialized);
 		}
 		xmlRpcClient = new XmlRpcClient();
 		xmlRpcClient.setTypeFactory(new KojiTypeFactory(this.xmlRpcClient));
