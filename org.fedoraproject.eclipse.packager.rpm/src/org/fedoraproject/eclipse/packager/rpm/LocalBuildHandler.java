@@ -67,15 +67,13 @@ public class LocalBuildHandler extends RPMHandler {
 					.getCommandInstance(DownloadSourceCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showError(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage(),
-					PackagerPlugin.PLUGIN_ID, e);
+			FedoraHandlerUtils.showErrorDialog(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showError(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage(),
-					PackagerPlugin.PLUGIN_ID, e);
+			FedoraHandlerUtils.showErrorDialog(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
 		specfile = fedoraProjectRoot.getSpecFile();

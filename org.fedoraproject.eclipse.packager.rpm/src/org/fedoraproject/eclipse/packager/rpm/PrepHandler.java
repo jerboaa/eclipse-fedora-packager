@@ -59,22 +59,20 @@ public class PrepHandler extends RPMHandler {
 		}
 		specfile = fedoraProjectRoot.getSpecFile();
 		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
-		final DownloadSourceCommand downloadCmd;
+		final DownloadSourceCommand download;
 		try {
 			// Get DownloadSourceCommand from Fedora packager registry
-			downloadCmd = (DownloadSourceCommand) fp
+			download = (DownloadSourceCommand) fp
 					.getCommandInstance(DownloadSourceCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showError(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage(),
-					PackagerPlugin.PLUGIN_ID, e);
+			FedoraHandlerUtils.showErrorDialog(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showError(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage(),
-					PackagerPlugin.PLUGIN_ID, e);
+			FedoraHandlerUtils.showErrorDialog(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
 		Job job = new Job(Messages.prepHandler_jobName) {
@@ -84,7 +82,7 @@ public class PrepHandler extends RPMHandler {
 						IProgressMonitor.UNKNOWN);
 				// First download sources
 				try {
-					downloadCmd.call(monitor);
+					download.call(monitor);
 				} catch (SourcesUpToDateException e1) {
 					// TODO handle appropriately
 				} catch (DownloadFailedException e1) {
