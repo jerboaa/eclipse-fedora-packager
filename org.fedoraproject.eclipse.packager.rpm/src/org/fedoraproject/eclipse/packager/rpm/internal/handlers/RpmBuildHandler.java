@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.rpm;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +51,8 @@ import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitia
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
+import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
+import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
@@ -59,14 +61,14 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
  * Handler containing common functionality for implementations using rpm calls. 
  *
  */
-public abstract class RPMHandler extends FedoraPackagerAbstractHandler {
+public abstract class RpmBuildHandler extends FedoraPackagerAbstractHandler {
 	protected static final QualifiedName KEY = new QualifiedName(
 			RPMPlugin.PLUGIN_ID, "source"); //$NON-NLS-1$
 
 	/**
 	 * Name of the console used for displaying rpm build output.
 	 */
-	public static final String CONSOLE_NAME = Messages.rpmHandler_consoleName;
+	public static final String CONSOLE_NAME = RpmText.RpmBuildHandler_consoleName;
 
 	protected IResource specfile;
 
@@ -89,7 +91,7 @@ public abstract class RPMHandler extends FedoraPackagerAbstractHandler {
 
 	protected IStatus rpmBuild(FedoraProjectRoot fedoraprojectRoot, List<String> flags, IProgressMonitor monitor) {
 		monitor.subTask(NLS.bind(
-				Messages.rpmHandler_callRpmBuildMsg, specfile.getName()));
+				RpmText.RpmBuildHandler_callRpmBuildMsg, specfile.getName()));
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = RPMUtils.getRPMDefines(dir);
@@ -131,7 +133,7 @@ public abstract class RPMHandler extends FedoraPackagerAbstractHandler {
 		if (mon == null) {
 			terminateMonitor = true;
 			mon = new NullProgressMonitor();
-			mon.beginTask(Messages.rpmHandler_runShellCmds, 1);
+			mon.beginTask(RpmText.RpmBuildHandler_runShellCmds, 1);
 		}
 		IStatus status;
 		final MessageConsole console = getConsole(CONSOLE_NAME);
@@ -177,12 +179,12 @@ public abstract class RPMHandler extends FedoraPackagerAbstractHandler {
 					public void run() {
 						MessageDialog.openError(
 								new Shell(),
-								Messages.rpmHandler_scriptCancelled,
-								Messages.rpmHandler_userWarningMsg);
+								RpmText.RpmBuildHandler_scriptCancelled,
+								RpmText.RpmBuildHandler_userWarningMsg);
 					}
 
 				});
-				FedoraHandlerUtils.handleError(Messages.rpmHandler_terminationMsg);
+				FedoraHandlerUtils.handleError(RpmText.RpmBuildHandler_terminationMsg);
 				return Status.CANCEL_STATUS;
 			}
 

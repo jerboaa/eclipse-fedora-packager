@@ -72,9 +72,9 @@ public class PrepSourcesSWTBotTest {
 		clickOnPrepareSources(packagerTree);
 		// Wait for upload process to start
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.
-				eclipse.packager.rpm.Messages.prepHandler_jobName));
+				eclipse.packager.rpm.RpmText.PrepHandler_jobName));
 		SWTBotShell efpJobWindow = bot.shell(org.fedoraproject.
-				eclipse.packager.rpm.Messages.prepHandler_jobName);
+				eclipse.packager.rpm.RpmText.PrepHandler_jobName);
 		assertNotNull(efpJobWindow);
 		// Wait for upload process to finish
 		bot.waitUntil(Conditions.shellCloses(efpJobWindow));

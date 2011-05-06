@@ -79,9 +79,9 @@ public class LocalBuildSWTBotTest {
 		clickOnBuildForLocalArchitecture(packagerTree);
 		// Wait for upload process to start
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.
-				eclipse.packager.rpm.Messages.localBuildHandler_jobName));
+				eclipse.packager.rpm.RpmText.LocalBuildHandler_jobName));
 		SWTBotShell efpJobWindow = bot.shell(org.fedoraproject.
-				eclipse.packager.rpm.Messages.localBuildHandler_jobName);
+				eclipse.packager.rpm.RpmText.LocalBuildHandler_jobName);
 		assertNotNull(efpJobWindow);
 		// Wait for upload process to finish, extend timeout
 		SWTBotPreferences.TIMEOUT = 5 * 5000;

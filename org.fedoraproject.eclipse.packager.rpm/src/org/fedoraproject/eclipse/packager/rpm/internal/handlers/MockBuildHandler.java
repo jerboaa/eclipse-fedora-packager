@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.rpm;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +30,7 @@ import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
@@ -38,7 +39,7 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
  * Handler for building locally using mock.
  *
  */
-public class MockBuildHandler extends RPMHandler {
+public class MockBuildHandler extends RpmBuildHandler {
 	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
@@ -52,10 +53,10 @@ public class MockBuildHandler extends RPMHandler {
 			return null;
 		}
 		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job(Messages.mockBuildHandler_jobName) {
+		Job job = new Job(RpmText.MockBuildHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.mockBuildHandler_testLocalBuildWithMock, IProgressMonitor.UNKNOWN);
+				monitor.beginTask(RpmText.MockBuildHandler_testLocalBuildWithMock, IProgressMonitor.UNKNOWN);
 				// build fresh SRPM
 				IStatus result = makeSRPM(fedoraProjectRoot, monitor);
 				if (result.isOK()) {
@@ -79,7 +80,7 @@ public class MockBuildHandler extends RPMHandler {
 			String buildarch = rpmEval("_arch"); //$NON-NLS-1$
 			final String mockcfg = getMockcfg(projectRoot, buildarch);
 
-			monitor.subTask(NLS.bind(Messages.mockBuildHandler_callMockMsg, projectRoot.getSpecFile().getName()));
+			monitor.subTask(NLS.bind(RpmText.MockBuildHandler_callMockMsg, projectRoot.getSpecFile().getName()));
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
@@ -97,7 +98,7 @@ public class MockBuildHandler extends RPMHandler {
 		
 		// make sure mock is installed, bail out otherwise
 		if (!isMockInstalled()) {
-			return FedoraHandlerUtils.handleError(Messages.mockBuildHandler_mockNotInstalled);
+			return FedoraHandlerUtils.handleError(RpmText.MockBuildHandler_mockNotInstalled);
 		}
 		try {
 			Specfile specfile = projectRoot.getSpecfileModel();

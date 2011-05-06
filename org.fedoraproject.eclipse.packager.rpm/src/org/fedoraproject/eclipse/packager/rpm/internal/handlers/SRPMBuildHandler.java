@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.rpm;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
@@ -25,7 +26,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  * Handler for the fedpkg srpm command.
  *
  */
-public class SRPMBuildHandler extends RPMHandler {
+public class SRPMBuildHandler extends RpmBuildHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
@@ -40,10 +41,10 @@ public class SRPMBuildHandler extends RPMHandler {
 			return null;
 		}
 		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job(Messages.srpmHandler_jobName) {
+		Job job = new Job(RpmText.CreateSRPMHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.srpmHandler_buildSrpm,
+				monitor.beginTask(RpmText.CreateSRPMHandler_buildSrpm,
 						IProgressMonitor.UNKNOWN);
 				return makeSRPM(fedoraProjectRoot, monitor);
 			}

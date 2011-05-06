@@ -72,9 +72,9 @@ public class CreateSRPMSWTBotTest {
 		clickOnCreateSRPM(packagerTree);
 		// Wait for upload process to start
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.
-				eclipse.packager.rpm.Messages.srpmHandler_jobName));
+				eclipse.packager.rpm.RpmText.CreateSRPMHandler_jobName));
 		SWTBotShell efpJobWindow = bot.shell(org.fedoraproject.
-				eclipse.packager.rpm.Messages.srpmHandler_jobName);
+				eclipse.packager.rpm.RpmText.CreateSRPMHandler_jobName);
 		assertNotNull(efpJobWindow);
 		// Wait for upload process to finish
 		bot.waitUntil(Conditions.shellCloses(efpJobWindow));

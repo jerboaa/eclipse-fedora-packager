@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.rpm;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 
 import java.util.ArrayList;
 
@@ -34,6 +34,7 @@ import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFou
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
+import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
@@ -41,7 +42,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  * Handler for the fedpkg prep command.
  * 
  */
-public class PrepHandler extends RPMHandler {
+public class PrepHandler extends RpmBuildHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -75,10 +76,10 @@ public class PrepHandler extends RPMHandler {
 					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
-		Job job = new Job(Messages.prepHandler_jobName) {
+		Job job = new Job(RpmText.PrepHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.prepHandler_attemptApplyPatchMsg,
+				monitor.beginTask(RpmText.PrepHandler_attemptApplyPatchMsg,
 						IProgressMonitor.UNKNOWN);
 				// First download sources
 				try {

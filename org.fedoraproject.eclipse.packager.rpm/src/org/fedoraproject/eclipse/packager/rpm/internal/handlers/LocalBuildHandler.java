@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.rpm;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,6 +35,7 @@ import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitia
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
+import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
@@ -43,7 +44,7 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
  * Handler for building locally.
  *
  */
-public class LocalBuildHandler extends RPMHandler {
+public class LocalBuildHandler extends RpmBuildHandler {
 
 	
 	@Override
@@ -77,10 +78,10 @@ public class LocalBuildHandler extends RPMHandler {
 			return null;
 		}
 		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job(Messages.localBuildHandler_jobName) {
+		Job job = new Job(RpmText.LocalBuildHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.localBuildHandler_buildForLocalArch,
+				monitor.beginTask(RpmText.LocalBuildHandler_buildForLocalArch,
 						IProgressMonitor.UNKNOWN);
 				// First download sources				
 				try {

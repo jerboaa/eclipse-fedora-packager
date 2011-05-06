@@ -93,9 +93,9 @@ public class MockSWTBotTest {
 		clickOnMockBuild(packagerTree);
 		// Wait for fedora packager job to start
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.
-				eclipse.packager.rpm.Messages.mockBuildHandler_jobName));
+				eclipse.packager.rpm.RpmText.MockBuildHandler_jobName));
 		SWTBotShell efpJobWindow = bot.shell(org.fedoraproject.
-				eclipse.packager.rpm.Messages.mockBuildHandler_jobName);
+				eclipse.packager.rpm.RpmText.MockBuildHandler_jobName);
 		assertNotNull(efpJobWindow);
 		// Wait for mock build to finish, this takes a while so increase timeout
 		SWTBotPreferences.TIMEOUT = 5 * 60 * 1000; // set this to 5 minutes for now
