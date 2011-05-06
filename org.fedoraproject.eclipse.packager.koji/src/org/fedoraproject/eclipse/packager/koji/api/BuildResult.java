@@ -42,6 +42,13 @@ public class BuildResult implements ICommandResult {
 		this.successful = false;
 	}
 	
+	/**
+	 * Invoke if build was successful.
+	 */
+	public void setSuccessful() {
+		this.successful = true;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.api.ICommandResult#wasSuccessful()

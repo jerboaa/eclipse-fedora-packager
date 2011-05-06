@@ -42,8 +42,17 @@ import org.apache.xmlrpc.serializer.NodeSerializer;
 import org.apache.xmlrpc.serializer.NullSerializer;
 import org.apache.xmlrpc.serializer.SerializableSerializer;
 
+/**
+ * 
+ * Type mapper for XMLRPC calls.
+ *
+ */
 public class KojiTypeFactory extends TypeFactoryImpl {
 
+	/**
+	 * 
+	 * @param pController
+	 */
 	public KojiTypeFactory(XmlRpcController pController) {
 		super(pController);
 	}

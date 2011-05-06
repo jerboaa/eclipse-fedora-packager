@@ -1,7 +1,7 @@
 package org.fedoraproject.eclipse.packager.koji.api;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -167,28 +167,30 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 			}
 			throw e;
 		}
-		monitor.worked(20); // tagging and push check done
+		// main monitor worked for 20
 		BuildResult result = new BuildResult();
 		monitor.subTask(KojiText.KojiBuildCommand_kojiLogInTask);
-		SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 10);
-		subMonitor.worked(5);
 		// login 
 		this.kojiClient.login();
-		subMonitor.done();
+		monitor.worked(30);
 		monitor.subTask(KojiText.KojiBuildCommand_sendBuildCmd);
-		subMonitor = new SubProgressMonitor(monitor, 50);
-		subMonitor.worked(10);
+		
+		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+		if (this.scratchBuild) {
+			logger.logInfo(KojiText.KojiBuildCommand_scratchBuildLogMsg);
+		} else {
+			logger.logInfo(KojiText.KojiBuildCommand_buildLogMsg);
+		}
 		// attempt to push build
 		int taskId = this.kojiClient.build(distribution, scmUrl.toString(), nvr, scratchBuild);
 		result.setTaskId(taskId);
-		subMonitor.done();
+		monitor.worked(80);
 		monitor.subTask(KojiText.KojiBuildCommand_kojiLogoutTask);
-		subMonitor = new SubProgressMonitor(monitor, 10);
-		subMonitor.worked(5);
 		this.kojiClient.logout();
-		subMonitor.done();
+		monitor.worked(90);
 		callPostExecListeners();
 		setCallable(false); // reuse of instance's call() not allowed
+		result.setSuccessful();
 		monitor.done();
 		return result;
 	}

@@ -1,7 +1,6 @@
 package org.fedoraproject.eclipse.packager.koji.api.errors;
 
-import java.security.GeneralSecurityException;
-
+import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 import org.fedoraproject.eclipse.packager.koji.KojiText;
 
@@ -11,8 +10,7 @@ import org.fedoraproject.eclipse.packager.koji.KojiText;
 public class KojiHubClientLoginException extends FedoraPackagerAPIException {
 	
 	private static final long serialVersionUID = 1540744448331042317L;
-
-	private Throwable cause;
+	
 	private boolean certificatesMissing = false;
 
 	/**
@@ -30,7 +28,6 @@ public class KojiHubClientLoginException extends FedoraPackagerAPIException {
 	 */
 	public KojiHubClientLoginException(Throwable cause) {
 		super(KojiText.KojiHubClientLoginException_loginFailedMsg, cause);
-		this.cause = cause;
 	}
 
 	/**
@@ -40,9 +37,8 @@ public class KojiHubClientLoginException extends FedoraPackagerAPIException {
 	 *         certificate expired.
 	 */
 	public boolean isCertificateExpired() {
-		// Can only possibly be when a GeneralSecurityException was thrown
-		if (cause instanceof GeneralSecurityException) {
-			// TODO: implement
+		if (!FedoraSSLFactory.getInstance().isFedoraCertValid()) {
+			return true;
 		}
 		return false;
 	}

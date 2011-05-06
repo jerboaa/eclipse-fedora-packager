@@ -1,7 +1,7 @@
 package org.fedoraproject.eclipse.packager.koji.api;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.api.ICommandListener;
@@ -40,14 +40,14 @@ public class UnpushedChangesListener implements ICommandListener {
 	@Override
 	public void preExecution() throws CommandListenerException {
 		// indicate some progress, by creating a subtask
-		mainMonitor.subTask(KojiText.UnpushedChangesListener_checkUnpushedChangesSubTaskName);
-		SubProgressMonitor subMonitor = new SubProgressMonitor(mainMonitor, 18);
-		subMonitor.worked(5);
+		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+		logger.logInfo(KojiText.UnpushedChangesListener_checkUnpushedChangesMsg);
+		mainMonitor.subTask(KojiText.UnpushedChangesListener_checkUnpushedChangesMsg);
 		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(projectRoot);
 		if (projectBits.hasLocalChanges(projectRoot)) {
 			throw new CommandListenerException(new UnpushedChangesException(KojiText.UnpushedChangesListener_unpushedChangesError));
 		}
-		subMonitor.done();
+		mainMonitor.worked(15);
 	}
 
 	/*

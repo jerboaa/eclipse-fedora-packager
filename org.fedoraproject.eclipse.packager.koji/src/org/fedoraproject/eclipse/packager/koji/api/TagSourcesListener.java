@@ -1,9 +1,9 @@
 package org.fedoraproject.eclipse.packager.koji.api;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.QuestionMessageDialog;
@@ -44,17 +44,17 @@ public class TagSourcesListener implements ICommandListener {
 	@Override
 	public void preExecution() throws CommandListenerException {
 		// indicate some progress, by creating a subtask
-		mainMonitor.subTask(KojiText.TagSourcesListener_tagSourcesSubTaskName);
-		SubProgressMonitor subMonitor = new SubProgressMonitor(mainMonitor, 2);
+		mainMonitor.subTask(KojiText.TagSourcesListener_tagSourcesMsg);
 		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(projectRoot);
-		subMonitor.worked(1);
 		if (projectBits.needsTag()) {
 			// Do VCS tagging if so requested.
 			if (askIfShouldTag()) {
-				projectBits.tagVcs(projectRoot, subMonitor);
+				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+				logger.logInfo(KojiText.TagSourcesListener_tagSourcesMsg);
+				projectBits.tagVcs(projectRoot, mainMonitor);
 			}
 		}
-		subMonitor.done();
+		mainMonitor.worked(20);
 	}
 
 	/*

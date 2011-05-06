@@ -90,11 +90,10 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 			logger.logError(NLS.bind(
 					FedoraPackagerText.invalidFedoraProjectRootError,
 					NonTranslatableStrings.getDistributionName()), e);
-			FedoraHandlerUtils.showError(shell, NonTranslatableStrings
+			FedoraHandlerUtils.showErrorDialog(shell, NonTranslatableStrings
 					.getProductName(), NLS.bind(
 					FedoraPackagerText.invalidFedoraProjectRootError,
-					NonTranslatableStrings.getDistributionName()),
-					KojiPlugin.PLUGIN_ID, e);
+					NonTranslatableStrings.getDistributionName()));
 			return null;
 		}
 		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
@@ -106,15 +105,13 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 					.getCommandInstance(KojiBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showError(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage(),
-					KojiPlugin.PLUGIN_ID, e);
+			FedoraHandlerUtils.showErrorDialog(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showError(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage(),
-					KojiPlugin.PLUGIN_ID, e);
+			FedoraHandlerUtils.showErrorDialog(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
 		// Push the build
@@ -124,6 +121,7 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(KojiText.KojiBuildHandler_pushBuildToKoji,
 						100);
+				monitor.worked(5);
 				UnpushedChangesListener unpushedChangesListener = new UnpushedChangesListener(
 						fedoraProjectRoot, monitor);
 				// check for unpushed changes prior calling command
@@ -136,10 +134,8 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 					kojiClient = getHubClient();
 				} catch (MalformedURLException e) {
 					logger.logError(KojiText.KojiBuildHandler_invalidHubUrl, e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(),
-							KojiText.KojiBuildHandler_invalidHubUrl,
-							KojiPlugin.PLUGIN_ID, e);
+					return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
+							KojiText.KojiBuildHandler_invalidHubUrl, e);
 				}
 				kojiBuildCmd.setKojiClient(kojiClient);
 				kojiBuildCmd.scmUrl(projectBits
@@ -150,45 +146,44 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 				} catch (IOException e) {
 					logger.logError(KojiText.KojiBuildHandler_errorGettingNVR,
 							e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(),
-							KojiText.KojiBuildHandler_errorGettingNVR,
-							KojiPlugin.PLUGIN_ID, e);
+					return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
+							KojiText.KojiBuildHandler_errorGettingNVR, e);
 				}
 				kojiBuildCmd.distTag(projectBits.getTarget()).nvr(nvr)
 						.isScratchBuild(isScratchBuild());
+				logger.logInfo(KojiText.KojiBuildHandler_callingBuildCmdInfoMsg);
 				// Call build command
 				try {
 					buildResult = kojiBuildCmd.call(monitor);
 				} catch (CommandMisconfiguredException e) {
 					// This shouldn't happen, but report error anyway
 					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage(), KojiPlugin.PLUGIN_ID, e);
+					return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
+							e.getMessage(), e);
 				} catch (BuildAlreadyExistsException e) {
 					logger.logInfo(e.getMessage(), e);
-					return FedoraHandlerUtils.showInformation(shell,
+					FedoraHandlerUtils.showInformationDialog(shell,
 							NonTranslatableStrings.getProductName(),
 							e.getMessage());
+					return Status.OK_STATUS;
 				} catch (UnpushedChangesException e) {
 					logger.logInfo(e.getMessage(), e);
-					return FedoraHandlerUtils.showInformation(shell,
+					FedoraHandlerUtils.showInformationDialog(shell,
 							NonTranslatableStrings.getProductName(),
 							e.getMessage());
+					return Status.OK_STATUS;
 				} catch (TagSourcesException e) {
 					// something failed while tagging sources
 					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage(), KojiPlugin.PLUGIN_ID, e);
+					return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
+							e.getMessage(), e);
 				} catch (CommandListenerException e) {
 					// This shouldn't happen, but report error anyway
 					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage(), KojiPlugin.PLUGIN_ID, e);
+					return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
+							e.getMessage(), e);
 				} catch (KojiHubClientLoginException e) {
+					e.printStackTrace();
 					// Check if certs were missing
 					if (e.isCertificateMissing()) {
 						String msg = NLS
@@ -196,9 +191,8 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 										NonTranslatableStrings
 												.getDistributionName());
 						logger.logError(msg, e);
-						return FedoraHandlerUtils.showError(shell,
-								NonTranslatableStrings.getProductName(),
-								msg, KojiPlugin.PLUGIN_ID, e);
+						return FedoraHandlerUtils.errorStatus(
+								KojiPlugin.PLUGIN_ID, msg, e);
 					}
 					if (e.isCertificateExpired()) {
 						String msg = NLS
@@ -206,21 +200,19 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 								NonTranslatableStrings
 										.getDistributionName());
 						logger.logError(msg, e);
-						return FedoraHandlerUtils.showError(shell,
-								NonTranslatableStrings.getProductName(),
-								msg, KojiPlugin.PLUGIN_ID, e);
+						return FedoraHandlerUtils.errorStatus(
+								KojiPlugin.PLUGIN_ID, msg, e);
 					}
 					// return some generic error
 					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage(), KojiPlugin.PLUGIN_ID, e);
+					return FedoraHandlerUtils.errorStatus(
+							KojiPlugin.PLUGIN_ID, e.getMessage(), e);
 				} catch (KojiHubClientException e) {
 					// return some generic error
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage(), KojiPlugin.PLUGIN_ID, e);
+					String msg = NLS.bind(KojiText.KojiBuildHandler_unknownBuildError, e.getMessage());
+					logger.logError(msg, e);
+					return FedoraHandlerUtils.errorStatus(
+							KojiPlugin.PLUGIN_ID, msg, e);
 				}
 				// success
 				return Status.OK_STATUS;
@@ -313,8 +305,10 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 						new Runnable() {
 							@Override
 							public void run() {
-								// Only show something on success
-								if (jobStatus.isOK()) {
+								// Only show response message dialog on success
+								if (jobStatus.isOK() && buildResult != null && buildResult.wasSuccessful()) {
+									FedoraPackagerLogger logger = FedoraPackagerLogger
+											.getInstance();
 									logger.logInfo(KojiText.KojiMessageDialog_buildResponseMsg
 											+ " " //$NON-NLS-1$
 											+ KojiUrlUtils.constructTaskUrl(
