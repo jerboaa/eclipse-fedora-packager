@@ -13,8 +13,6 @@ package org.fedoraproject.eclipse.packager.git.internal.preferences;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.fedoraproject.eclipse.packager.FedoraSSL;
-import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.git.Activator;
 import org.fedoraproject.eclipse.packager.git.GitPreferencesConstants;
 import org.fedoraproject.eclipse.packager.git.GitUtils;
@@ -32,16 +30,8 @@ public class FedoraPackagerGitPreferenceInitializer extends AbstractPreferenceIn
 	public void initializeDefaultPreferences() {
 		// set default preferences for this plug-in
 		IEclipsePreferences node = new DefaultScope().getNode(Activator.PLUGIN_ID);
-		// Figure out if we have an anonymous or a FAS user
-		String user = FedoraSSLFactory.getInstance().getUsernameFromCert();
-		String gitURL;
-		if (!user.equals(FedoraSSL.UNKNOWN_USER)) {
-			gitURL = GitUtils.getAuthenticatedGitBaseUrl(user);
-		} else {
-			gitURL = GitUtils.getAnonymousGitBaseUrl();
-		}
 		node.put(GitPreferencesConstants.PREF_CLONE_BASE_URL,
-				gitURL);
+				GitUtils.getDefaultGitBaseUrl());
 	}
 
 }

@@ -1,5 +1,8 @@
 package org.fedoraproject.eclipse.packager.git;
 
+import org.fedoraproject.eclipse.packager.FedoraSSL;
+import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
+
 
 /**
  * Utility class for Fedora Git related things.
@@ -31,5 +34,22 @@ public class GitUtils {
 		return GitConstants.AUTHENTICATED_PROTOCOL + username
 				+ GitConstants.USERNAME_SEPARATOR
 				+ GitPreferencesConstants.DEFAULT_CLONE_BASE_URL;
+	}
+	
+	/**
+	 * Determine the default Git base URL for cloning. Based on ~/.fedora.cert
+	 * 
+	 * @return The default Git base URL for cloning.
+	 */
+	public static String getDefaultGitBaseUrl() {
+		// Figure out if we have an anonymous or a FAS user
+		String user = FedoraSSLFactory.getInstance().getUsernameFromCert();
+		String gitURL;
+		if (!user.equals(FedoraSSL.UNKNOWN_USER)) {
+			gitURL = GitUtils.getAuthenticatedGitBaseUrl(user);
+		} else {
+			gitURL = GitUtils.getAnonymousGitBaseUrl();
+		}
+		return gitURL;
 	}
 }

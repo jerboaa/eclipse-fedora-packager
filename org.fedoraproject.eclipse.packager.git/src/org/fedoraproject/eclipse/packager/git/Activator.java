@@ -94,5 +94,13 @@ public class Activator extends AbstractUIPlugin {
 		return candidate;
 	}
 
+	/** 
+	 * Initializes a preference store with default preference values 
+	 * for this plug-in.
+	 */
+	@Override
+	protected void initializeDefaultPreferences(IPreferenceStore store) {
+		store.setDefault(GitPreferencesConstants.PREF_CLONE_BASE_URL, GitUtils.getDefaultGitBaseUrl());
+	}
 
 }
