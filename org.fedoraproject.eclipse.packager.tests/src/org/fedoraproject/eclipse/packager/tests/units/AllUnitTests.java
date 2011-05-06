@@ -8,7 +8,9 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	KojiSSLHubClientTest.class,
 	UploadFileValidityTest.class,
-	AssertionsEnabledTest.class
+	AssertionsEnabledTest.class,
+	KojiBuildInfoTest.class,
+	KojiHubClientLoginExceptionTest.class,
 })
 
 public class AllUnitTests {
