@@ -8,7 +8,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
 	FedoraPackagerCommandTest.class,
 	DownloadSourceCommandTest.class,
-	UploadSourceCommandTest.class
+	UploadSourceCommandTest.class,
+	KojiBuildCommandTest.class
 })
 
 public class AllCommandsTests {
