@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -179,5 +181,42 @@ public class FedoraSSL {
 		tc.addTrustMaterial(new TrustMaterial(fedoraUploadCert));
 		tc.addTrustMaterial(new TrustMaterial(fedoraServerCert));
 		return tc;
+	}
+
+	/**
+	 * Determine if FAS certificate (~/.fedora.cert) is valid.
+	 * 
+	 * @return {@code true} if certificate exist and is valid. {@code false}
+	 *         otherwise.
+	 */
+	public boolean isFedoraCertValid() {
+		if (fedoraCert.exists()) {
+			KeyMaterial kmat;
+			try {
+				kmat = new KeyMaterial(fedoraCert, fedoraCert, new char[0]);
+				List<?> chains = kmat.getAssociatedCertificateChains();
+				Iterator<?> it = chains.iterator();
+				while (it.hasNext()) {
+					X509Certificate[] certs = (X509Certificate[]) it.next();
+					if (certs != null) {
+						if (certs.length == 1) {
+							try {
+								certs[0].checkValidity();
+								return true;
+							} catch (CertificateExpiredException e) {
+								return false;
+							} catch (CertificateNotYetValidException e) {
+								return false;
+							}
+						}
+					}
+				}
+			} catch (GeneralSecurityException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
 	}
 }

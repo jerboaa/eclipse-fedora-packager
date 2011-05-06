@@ -60,11 +60,10 @@ public class DownloadHandler extends FedoraPackagerAbstractHandler {
 			logger.logError(NLS.bind(
 					FedoraPackagerText.invalidFedoraProjectRootError,
 					NonTranslatableStrings.getDistributionName()), e);
-			FedoraHandlerUtils.showError(shell, NonTranslatableStrings
+			FedoraHandlerUtils.showErrorDialog(shell, NonTranslatableStrings
 					.getProductName(), NLS.bind(
 					FedoraPackagerText.invalidFedoraProjectRootError,
-					NonTranslatableStrings.getDistributionName()),
-					PackagerPlugin.PLUGIN_ID, e);
+					NonTranslatableStrings.getDistributionName()));
 			return null;
 		}
 		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
@@ -75,15 +74,13 @@ public class DownloadHandler extends FedoraPackagerAbstractHandler {
 					.getCommandInstance(DownloadSourceCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showError(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage(),
-					PackagerPlugin.PLUGIN_ID, e);
+			FedoraHandlerUtils.showErrorDialog(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showError(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage(),
-					PackagerPlugin.PLUGIN_ID, e);
+			FedoraHandlerUtils.showErrorDialog(shell,
+					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
 		Job job = new Job(NonTranslatableStrings.getProductName()) {
@@ -108,41 +105,34 @@ public class DownloadHandler extends FedoraPackagerAbstractHandler {
 					download.call(monitor);
 				} catch (final SourcesUpToDateException e) {
 					logger.logInfo(e.getMessage(), e);
-					return FedoraHandlerUtils.showInformation(shell,
+					FedoraHandlerUtils.showInformationDialog(shell,
 							NonTranslatableStrings.getProductName(),
 							e.getMessage());
+					return Status.OK_STATUS;
 				} catch (DownloadFailedException e) {
 					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage(), PackagerPlugin.PLUGIN_ID, e);
+					return FedoraHandlerUtils.errorStatus(
+							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
 				} catch (CommandMisconfiguredException e) {
 					// This shouldn't happen, but report error anyway
 					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage(), PackagerPlugin.PLUGIN_ID, e);
+					return FedoraHandlerUtils.errorStatus(
+							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
 				} catch (CommandListenerException e) {
 					if (e.getCause() instanceof InvalidCheckSumException) {
 						String message = e.getCause().getMessage();
 						logger.logError(message, e.getCause());
-						return FedoraHandlerUtils
-								.showError(
-										shell,
-										NonTranslatableStrings.getProductName(),
-										message, PackagerPlugin.PLUGIN_ID,
-										e.getCause());
+						return FedoraHandlerUtils.errorStatus(
+								PackagerPlugin.PLUGIN_ID, message, e.getCause());
 					}
 					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage(), PackagerPlugin.PLUGIN_ID, e);
+					return FedoraHandlerUtils.errorStatus(
+							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
 				} catch (MalformedURLException e) {
 					// setDownloadUrl failed
 					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.showError(shell,
-							NonTranslatableStrings.getProductName(), e.getMessage(),
-							PackagerPlugin.PLUGIN_ID, e);
+					return FedoraHandlerUtils.errorStatus(
+							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
 				} finally {
 					monitor.done();
 				}

@@ -89,7 +89,7 @@ public class FedoraHandlerUtils {
 	 *            The error message for the status.
 	 * @return A newly created Status instance.
 	 */
-	public static IStatus error(String plugInID, String message) {
+	public static IStatus errorStatus(String plugInID, String message) {
 		return new Status(IStatus.ERROR, plugInID, message);
 	}
 	
@@ -103,7 +103,7 @@ public class FedoraHandlerUtils {
 	 * @param e The exception occurred (if any).
 	 * @return A newly created Status instance.
 	 */
-	public static IStatus error(String plugInID, String message, Throwable e) {
+	public static IStatus errorStatus(String plugInID, String message, Throwable e) {
 		return new Status(IStatus.ERROR, plugInID, message, e);
 	}
 
@@ -152,6 +152,7 @@ public class FedoraHandlerUtils {
 	 * 		The error which occurred.
 	 * @return The IStatus object.
 	 */
+	@Deprecated
 	public static IStatus handleError(String message) {
 		return handleError(message, null, true, false);
 	}
@@ -212,9 +213,9 @@ public class FedoraHandlerUtils {
 	 * @param shell A valid shell
 	 * @param title The information dialog title
 	 * @param message The message to be displayed.
-	 * @return An OK IStatus.
+	 * 
 	 */
-	public static IStatus showInformation(final Shell shell,
+	public static void showInformationDialog(final Shell shell,
 			final String title, final String message) {
 		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 			@Override
@@ -222,7 +223,6 @@ public class FedoraHandlerUtils {
 				MessageDialog.openInformation(shell, title, message);
 			}
 		});
-		return Status.OK_STATUS;
 	}
 	
 	/**
@@ -231,38 +231,14 @@ public class FedoraHandlerUtils {
 	 * @param shell A valid shell
 	 * @param title The error dialog title
 	 * @param message The message to be displayed.
-	 * @param pluginID The plug-in ID.
-	 * @return An error IStatus, derived from the error message.
 	 */
-	public static IStatus showError(final Shell shell,
-			final String title, final String message, final String pluginID) {
+	public static void showErrorDialog(final Shell shell,
+			final String title, final String message) {
 		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
 				MessageDialog.openError(shell, title, message);
 			}
 		});
-		return error(pluginID, message);
-	}
-	
-	/**
-	 * Show an error dialog.
-	 * 
-	 * @param shell A valid shell
-	 * @param title The error dialog title
-	 * @param message The message to be displayed.
-	 * @param pluginID The plug-in ID.
-	 * @param e The occurred exception.
-	 * @return An error IStatus, derived from message and exception.
-	 */
-	public static IStatus showError(final Shell shell,
-			final String title, final String message, final String pluginID, final Throwable e) {
-		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				MessageDialog.openError(shell, title, message);
-			}
-		});
-		return error(pluginID, message, e);
 	}
 }

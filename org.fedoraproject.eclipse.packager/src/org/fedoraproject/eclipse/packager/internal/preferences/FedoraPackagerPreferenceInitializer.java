@@ -17,7 +17,7 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 /**
- * Class for initialization of Eclipse Fedora Packager preferences.
+ * Class for setting the default preferences of Eclipse Fedora Packager preferences.
  */
 public class FedoraPackagerPreferenceInitializer extends AbstractPreferenceInitializer {
 
