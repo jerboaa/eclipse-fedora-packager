@@ -5,7 +5,9 @@ package org.fedoraproject.eclipse.packager.tests;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -26,7 +28,7 @@ import org.junit.Test;
  */
 public class FedoraSSLTest {
 
-	private FedoraSSL fedoraSSL;
+	private FedoraSSL expiredFedoraSSL;
 	private FedoraSSL anonymousFedoraSSL;
 	private static final String CERT_FILE = "resources/fedora-ssl/fedora-example-invalid.cert";
 	private static final String UPLOAD_CERT_FILE = "resources/fedora-ssl/fedora-upload-ca.cert";
@@ -50,7 +52,7 @@ public class FedoraSSLTest {
 		File fedoraCert = new File(fedCertName);
 		File fedoraUploadCert = new File(fedUploadCertName);
 		File fedoraServerCert = new File(fedServerCertName);
-		this.fedoraSSL = FedoraSSLFactory.getInstance(fedoraCert,
+		this.expiredFedoraSSL = FedoraSSLFactory.getInstance(fedoraCert,
 				fedoraUploadCert, fedoraServerCert);
 		this.anonymousFedoraSSL = FedoraSSLFactory.getInstance(new File("/tmp/i_do_not_exist.cert"),
 				fedoraUploadCert, fedoraServerCert);
@@ -61,7 +63,7 @@ public class FedoraSSLTest {
 	 */
 	@Test
 	public void canGetInitializedSSLContext() throws Exception {
-		SSLContext ctxt = this.fedoraSSL.getInitializedSSLContext();
+		SSLContext ctxt = this.expiredFedoraSSL.getInitializedSSLContext();
 		assertNotNull(ctxt);
 	}
 	
@@ -92,19 +94,33 @@ public class FedoraSSLTest {
 	@Test
 	public void canGetKeyMaterial() throws Exception {
 		// Get key material for fedora.cert
-		KeyMaterial keymat = this.fedoraSSL.getFedoraCertKeyMaterial();
+		KeyMaterial keymat = this.expiredFedoraSSL.getFedoraCertKeyMaterial();
 		assertNotNull(keymat);
 		assertNotNull(keymat.getKeyStore());
 	}
 	
 	@Test
 	public void canGetUsernameFromCertificate() throws Exception {
-		String username = this.fedoraSSL.getUsernameFromCert();
+		String username = this.expiredFedoraSSL.getUsernameFromCert();
 		assertNotNull(username);
 		assertEquals("jerboaa", username);
 		username = this.anonymousFedoraSSL.getUsernameFromCert();
 		assertNotNull(username);
 		assertEquals(FedoraSSL.UNKNOWN_USER, username);
+	}
+	
+	/**
+	 * Test for the validity checker. This test requires a valid ~/.fedora.cert
+	 *  
+	 * @throws Exception
+	 */
+	@Test
+	public void canDetermineCertificateValidity() throws Exception {
+		FedoraSSL validFedoraSSL = FedoraSSLFactory.getInstance();
+		// should be valid
+		assertTrue(validFedoraSSL.isFedoraCertValid());
+		// should not be valid
+		assertFalse(expiredFedoraSSL.isFedoraCertValid());
 	}
 
 }
