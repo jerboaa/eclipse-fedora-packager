@@ -1,6 +1,7 @@
 package org.fedoraproject.eclipse.packager.koji.api;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
@@ -167,14 +168,21 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 			}
 			throw e;
 		}
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		
 		// main monitor worked for 20
 		BuildResult result = new BuildResult();
 		monitor.subTask(KojiText.KojiBuildCommand_kojiLogInTask);
 		// login 
 		this.kojiClient.login();
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		
 		monitor.worked(30);
 		monitor.subTask(KojiText.KojiBuildCommand_sendBuildCmd);
-		
 		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		if (this.scratchBuild) {
 			logger.logInfo(KojiText.KojiBuildCommand_scratchBuildLogMsg);
@@ -183,6 +191,9 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 		}
 		// attempt to push build
 		int taskId = this.kojiClient.build(distribution, scmUrl.toString(), nvr, scratchBuild);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
 		result.setTaskId(taskId);
 		monitor.worked(80);
 		monitor.subTask(KojiText.KojiBuildCommand_kojiLogoutTask);
