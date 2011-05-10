@@ -11,7 +11,9 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Export-Package: org.fedoraproject.eclipse.packager.rpm
+Export-Package: org.fedoraproject.eclipse.packager.rpm,
+ org.fedoraproject.eclipse.packager.rpm.api,
+ org.fedoraproject.eclipse.packager.rpm.api.errors
 Import-Package: org.eclipse.core.resources,
  org.eclipse.linuxtools.rpm.ui.editor.parser,
  org.eclipse.ui.console,

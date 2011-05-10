@@ -49,7 +49,7 @@ public interface IFpProjectBits {
 	 * Get the dist for the given branch. See also
 	 * {@link "http://fedoraproject.org/wiki/Packaging:DistTag"}
 	 * 
-	 * @return The dist as used by koji.
+	 * @return The distribution.
 	 */
 	public String getDist();
 	

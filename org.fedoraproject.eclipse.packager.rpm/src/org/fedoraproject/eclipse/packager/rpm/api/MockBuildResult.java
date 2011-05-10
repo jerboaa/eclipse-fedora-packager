@@ -1,15 +1,19 @@
-/**
- * 
- */
 package org.fedoraproject.eclipse.packager.rpm.api;
-
-import org.fedoraproject.eclipse.packager.api.ICommandResult;
 
 /**
  * Result of a call to {@link MockBuildCommand}.
  */
-public class MockBuildResult implements ICommandResult {
+public class MockBuildResult extends Result {
 
+	
+	/**
+	 * 
+	 * @param cmdList
+	 */
+	public MockBuildResult(String[] cmdList) {
+		super(cmdList);
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.api.ICommandResult#wasSuccessful()
 	 */

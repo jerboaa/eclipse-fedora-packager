@@ -134,4 +134,16 @@
             name="%command.name.5">
       </command>
    </extension>
+   <extension
+          point="org.fedoraproject.eclipse.packager.packagerCommandContribution">
+       <command id="RpmEvalCommand"
+       	        class="org.fedoraproject.eclipse.packager.rpm.api.RpmEvalCommand">
+       </command>
+       <command id="RpmBuildCommand"
+       	        class="org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand">
+       </command>
+       <command id="MockBuildCommand"
+       	        class="org.fedoraproject.eclipse.packager.rpm.api.MockBuildCommand">
+       </command>
+   </extension>
 </plugin>

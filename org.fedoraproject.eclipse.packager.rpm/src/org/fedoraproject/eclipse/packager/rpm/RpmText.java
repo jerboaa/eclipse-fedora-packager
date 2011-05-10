@@ -27,7 +27,8 @@ public class RpmText extends NLS {
 	 * This is the path to the file containing externalized strings.
 	 */
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.rpm.rpmtext"; //$NON-NLS-1$
-	
+
+
 	// LocalBuildHandler Strings
 	/****/ public static String LocalBuildHandler_buildForLocalArch;
 	/****/ public static String LocalBuildHandler_jobName;
@@ -41,7 +42,6 @@ public class RpmText extends NLS {
 	/****/ public static String PrepHandler_jobName;
 	// RPMHandler Strings
 	/****/ public static String RpmBuildHandler_consoleName;
-	/****/ public static String RpmBuildHandler_callRpmBuildMsg;
 	/****/ public static String RpmBuildHandler_runShellCmds;
 	/****/ public static String RpmBuildHandler_scriptCancelled;
 	/****/ public static String RpmBuildHandler_userWarningMsg;
@@ -49,6 +49,16 @@ public class RpmText extends NLS {
 	// SRPMHandler Strings
 	/****/ public static String CreateSRPMHandler_jobName;
 	/****/ public static String CreateSRPMHandler_buildSrpm;
+	// RpmBuildCommand
+	/****/ public static String RpmBuildCommand_distDefinesNullError;
+	/****/ public static String RpmBuildCommand_flagsNullError;
+	/****/ public static String RpmBuildCommand_commandStringMsg;
+	/****/ public static String RpmBuildCommand_buildTypeRequired;
+	/****/ public static String RpmBuildCommand_callRpmBuildMsg;
+	// RpmEvalCommand
+	/****/ public static String RpmEvalCommand_variableMustBeSet;
+	// RpmEvalCommandException
+	/****/ public static String RpmEvalCommandException_msg;
 
 	static {
 		// initialize resource bundle

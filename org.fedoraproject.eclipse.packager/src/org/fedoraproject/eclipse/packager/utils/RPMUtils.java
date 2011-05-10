@@ -52,7 +52,7 @@ public class RPMUtils {
 		List<String> defines = getRPMDefines(dir);
 		IFpProjectBits projectBits = FedoraPackagerUtils
 				.getVcsHandler(projectRoot);
-		List<String> distDefines = getDistDefines(projectBits, parent.getName());
+		List<String> distDefines = getDistDefines(projectBits);
 
 		String result = null;
 		defines.add(0, "rpm"); //$NON-NLS-1$
@@ -102,11 +102,9 @@ public class RPMUtils {
 	 * Get distribution definitions required for RPM build.
 	 * 
 	 * @param projectBits
-	 * @param parentName
 	 * @return A list of required dist-defines.
 	 */
-	public static List<String> getDistDefines(IFpProjectBits projectBits,
-			String parentName) {
+	public static List<String> getDistDefines(IFpProjectBits projectBits) {
 		// substitution for rhel
 		ArrayList<String> distDefines = new ArrayList<String>();
 		String distvar = projectBits.getDistVariable().equals("epel") ? "rhel" //$NON-NLS-1$//$NON-NLS-2$ 

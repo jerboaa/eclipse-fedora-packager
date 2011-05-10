@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.fedoraproject.eclipse.packager.tests.commands;
 
 import static org.junit.Assert.*;
@@ -9,8 +6,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
-import org.fedoraproject.eclipse.packager.koji.api.KojiBuildCommand;
-import org.fedoraproject.eclipse.packager.tests.utils.KojiGenericHubClientStub;
+import org.fedoraproject.eclipse.packager.rpm.api.EvalResult;
+import org.fedoraproject.eclipse.packager.rpm.api.RpmEvalCommand;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.junit.After;
@@ -18,10 +15,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests for Koji build command.
- *
+ * Tests for the RPM eval command.
  */
-public class KojiBuildCommandTest {
+public class RpmEvalCommandTest {
 
 	// project under test
 	private GitTestProject testProject;
@@ -53,14 +49,14 @@ public class KojiBuildCommandTest {
 
 	/**
 	 * Test method for 
-	 * {@link org.fedoraproject.eclipse.packager.koji.api.KojiBuildCommand#checkConfiguration()}.
+	 * {@link org.fedoraproject.eclipse.packager.rpm.api.RpmEvalCommand#checkConfiguration()}.
 	 */
 	@Test
 	public void testCheckConfiguration() throws Exception {
-		KojiBuildCommand buildCommand = (KojiBuildCommand) packager
-				.getCommandInstance(KojiBuildCommand.ID);
+		RpmEvalCommand eval = (RpmEvalCommand) packager
+				.getCommandInstance(RpmEvalCommand.ID);
 		try {
-			buildCommand.call(new NullProgressMonitor());
+			eval.call(new NullProgressMonitor());
 			fail("Should have thrown an exception. Command is not properly configured.");
 		} catch (CommandMisconfiguredException e) {
 			// pass
@@ -68,21 +64,20 @@ public class KojiBuildCommandTest {
 	}
 
 	/**
-	 *  This illustrates proper usage of {@link KojiBuildCommand}. Since
-	 *  it's using a stubbed client it does not actually push a build to koji.
+	 *  This illustrates proper usage of {@link RpmEvalCommand}.
 	 */
 	@Test
-	public void canPushFakeScratchBuild() throws Exception {
-		KojiBuildCommand build = (KojiBuildCommand) packager
-				.getCommandInstance(KojiBuildCommand.ID);
-		build.setKojiClient(new KojiGenericHubClientStub());
-		build.distTag("dist-rawhide").nvr("eclipse-fedorapackager-0.1.12-1.fc15");
-		build.scmUrl("git://pkgs.stg.fedoraproject.org/eclipse-fedorapackager.git?#7526fb6c2c150dcc3480a9838540426a501d0553");
+	public void canEvalArchitecture() throws Exception {
+		RpmEvalCommand eval = (RpmEvalCommand) packager
+				.getCommandInstance(RpmEvalCommand.ID);
+		EvalResult result;
 		try {
-			build.isScratchBuild(true).call(new NullProgressMonitor());
+			result = eval.variable("%{_arch}").call(new NullProgressMonitor());
 		} catch (Exception e) {
 			fail("Shouldn't have thrown any exception.");
+			return;
 		}
+		assertTrue(result.wasSuccessful());
 	}
 
 }

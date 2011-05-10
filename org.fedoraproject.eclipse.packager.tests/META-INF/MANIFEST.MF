@@ -46,6 +46,8 @@ Import-Package: org.apache.commons.httpclient,
  org.fedoraproject.eclipse.packager.koji.api,
  org.fedoraproject.eclipse.packager.koji.api.errors,
  org.fedoraproject.eclipse.packager.rpm,
+ org.fedoraproject.eclipse.packager.rpm.api,
+ org.fedoraproject.eclipse.packager.rpm.api.errors,
  org.fedoraproject.eclipse.packager.utils,
  org.json
 Eclipse-BundleShape: dir

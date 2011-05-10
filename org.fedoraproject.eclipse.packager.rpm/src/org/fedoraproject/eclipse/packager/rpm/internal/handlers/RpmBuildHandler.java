@@ -37,7 +37,6 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
-import org.fedoraproject.eclipse.packager.ConsoleWriterThread;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
@@ -53,6 +52,8 @@ import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
 import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
+import org.fedoraproject.eclipse.packager.rpm.api.FedoraPackagerConsole;
+import org.fedoraproject.eclipse.packager.rpm.internal.core.ConsoleWriterThread;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
@@ -65,39 +66,15 @@ public abstract class RpmBuildHandler extends FedoraPackagerAbstractHandler {
 	protected static final QualifiedName KEY = new QualifiedName(
 			RPMPlugin.PLUGIN_ID, "source"); //$NON-NLS-1$
 
-	/**
-	 * Name of the console used for displaying rpm build output.
-	 */
-	public static final String CONSOLE_NAME = RpmText.RpmBuildHandler_consoleName;
-
 	protected IResource specfile;
 
-	protected MessageConsole getConsole(String name) {
-		MessageConsole ret = null;
-		for (IConsole cons : ConsolePlugin.getDefault().getConsoleManager()
-				.getConsoles()) {
-			if (cons.getName().equals(name)) {
-				ret = (MessageConsole) cons;
-			}
-		}
-		// no existing console, create new one
-		if (ret == null) {
-			ret = new MessageConsole(name,
-					PackagerPlugin.getImageDescriptor("icons/rpm.gif")); //$NON-NLS-1$
-		}
-		ret.clearConsole();
-		return ret;
-	}
-
 	protected IStatus rpmBuild(FedoraProjectRoot fedoraprojectRoot, List<String> flags, IProgressMonitor monitor) {
-		monitor.subTask(NLS.bind(
-				RpmText.RpmBuildHandler_callRpmBuildMsg, specfile.getName()));
 		IResource parent = specfile.getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = RPMUtils.getRPMDefines(dir);
 		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraprojectRoot);
 
-		List<String> distDefines = RPMUtils.getDistDefines(projectBits, parent.getName());
+		List<String> distDefines = RPMUtils.getDistDefines(projectBits);
 
 		defines.add(0, "rpmbuild"); //$NON-NLS-1$
 		defines.addAll(distDefines);
@@ -136,7 +113,7 @@ public abstract class RpmBuildHandler extends FedoraPackagerAbstractHandler {
 			mon.beginTask(RpmText.RpmBuildHandler_runShellCmds, 1);
 		}
 		IStatus status;
-		final MessageConsole console = getConsole(CONSOLE_NAME);
+		final MessageConsole console = FedoraPackagerConsole.getConsole();
 		IConsoleManager manager = ConsolePlugin.getDefault()
 				.getConsoleManager();
 		manager.addConsoles(new IConsole[] { console });

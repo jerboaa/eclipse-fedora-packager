@@ -9,7 +9,9 @@ import org.junit.runners.Suite.SuiteClasses;
 	FedoraPackagerCommandTest.class,
 	DownloadSourceCommandTest.class,
 	UploadSourceCommandTest.class,
-	KojiBuildCommandTest.class
+	KojiBuildCommandTest.class,
+	RpmBuildCommandTest.class,
+	RpmEvalCommandTest.class
 })
 
 public class AllCommandsTests {
