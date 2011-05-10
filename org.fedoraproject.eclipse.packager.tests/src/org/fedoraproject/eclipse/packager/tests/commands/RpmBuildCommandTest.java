@@ -1,5 +1,6 @@
 package org.fedoraproject.eclipse.packager.tests.commands;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -106,6 +107,8 @@ public class RpmBuildCommandTest {
 		assertNotNull(noArchFolder);
 		// there should be one RPM
 		assertTrue(((IContainer)noArchFolder).members().length == 1);
+		assertNotNull(result.getAbsoluteRpmFilePaths());
+		assertEquals(1, result.getAbsoluteRpmFilePaths().size());
 	}
 	
 	/**
@@ -160,5 +163,7 @@ public class RpmBuildCommandTest {
 			}
 		}
 		assertTrue(found);
+		String srpm = result.getAbsoluteSRPMFilePath();
+		assertTrue(srpm.endsWith("src.rpm"));
 	}
 }

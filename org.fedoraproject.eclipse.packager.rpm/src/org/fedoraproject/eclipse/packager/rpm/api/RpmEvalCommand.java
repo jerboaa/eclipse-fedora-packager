@@ -24,6 +24,10 @@ public class RpmEvalCommand extends FedoraPackagerCommand<EvalResult> {
 	 *  The unique ID of this command.
 	 */
 	public static final String ID = "RpmEvalCommand"; //$NON-NLS-1$
+	/**
+	 * Variable for architecture eval.
+	 */
+	public static final String ARCH = "%{_arch}"; //$NON-NLS-1$
 	
 	private static final String RPM_CMD = "rpm"; //$NON-NLS-1$
 	private static final String EVAL_OPTION = "--eval"; //$NON-NLS-1$

@@ -57,6 +57,10 @@ public class RpmText extends NLS {
 	/****/ public static String RpmBuildCommand_callRpmBuildMsg;
 	// RpmEvalCommand
 	/****/ public static String RpmEvalCommand_variableMustBeSet;
+	// MockBuildCommand
+	/****/ public static String MockBuildCommand_buildArchNullError;
+	/****/ public static String MockBuildCommand_archException;
+	/****/ public static String MockBuildCommand_invalidMockConfigError;
 	// RpmEvalCommandException
 	/****/ public static String RpmEvalCommandException_msg;
 

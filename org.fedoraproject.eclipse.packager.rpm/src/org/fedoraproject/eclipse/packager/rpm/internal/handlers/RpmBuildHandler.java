@@ -53,7 +53,7 @@ import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
 import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.rpm.api.FedoraPackagerConsole;
-import org.fedoraproject.eclipse.packager.rpm.internal.core.ConsoleWriterThread;
+import org.fedoraproject.eclipse.packager.rpm.internal.core.ConsoleWriter;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
@@ -131,52 +131,52 @@ public abstract class RpmBuildHandler extends FedoraPackagerAbstractHandler {
 
 		});
 
-		try {
-			// create thread for reading inputStream (process' stdout)
-			ConsoleWriterThread outThread = new ConsoleWriterThread(is,
-					outStream);
-			// start both threads
-			outThread.start();
-
-			while (!mon.isCanceled()) {
-				try {
-					// Don't waste system resources
-					Thread.sleep(300);
-					break;
-				} catch (IllegalThreadStateException e) {
-					// Do nothing
-				}
-			}
-
-			if (mon.isCanceled()) {
-				outThread.close();
-				Display.getDefault().asyncExec(new Runnable() {
-
-					@Override
-					public void run() {
-						MessageDialog.openError(
-								new Shell(),
-								RpmText.RpmBuildHandler_scriptCancelled,
-								RpmText.RpmBuildHandler_userWarningMsg);
-					}
-
-				});
-				FedoraHandlerUtils.handleError(RpmText.RpmBuildHandler_terminationMsg);
-				return Status.CANCEL_STATUS;
-			}
-
-			if (terminateMonitor)
-				mon.done();
-
-			// finish reading whatever's left in the buffers
-			outThread.join();
-
-			status = Status.OK_STATUS;
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			status = Status.OK_STATUS;
-		}
-		return status;
+//		try {
+//			// create thread for reading inputStream (process' stdout)
+//			ConsoleWriter outThread = new ConsoleWriter(is,
+//					outStream);
+//			// start both threads
+//			outThread.start();
+//
+//			while (!mon.isCanceled()) {
+//				try {
+//					// Don't waste system resources
+//					Thread.sleep(300);
+//					break;
+//				} catch (IllegalThreadStateException e) {
+//					// Do nothing
+//				}
+//			}
+//
+//			if (mon.isCanceled()) {
+//				outThread.close();
+//				Display.getDefault().asyncExec(new Runnable() {
+//
+//					@Override
+//					public void run() {
+//						MessageDialog.openError(
+//								new Shell(),
+//								RpmText.RpmBuildHandler_scriptCancelled,
+//								RpmText.RpmBuildHandler_userWarningMsg);
+//					}
+//
+//				});
+//				FedoraHandlerUtils.handleError(RpmText.RpmBuildHandler_terminationMsg);
+//				return Status.CANCEL_STATUS;
+//			}
+//
+//			if (terminateMonitor)
+//				mon.done();
+//
+//			// finish reading whatever's left in the buffers
+//			outThread.join();
+//
+//			status = Status.OK_STATUS;
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//			status = Status.OK_STATUS;
+//		}
+		return Status.OK_STATUS;
 	}
 
 	protected String rpmEval(String format) throws CoreException {

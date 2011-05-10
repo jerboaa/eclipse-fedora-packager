@@ -14,20 +14,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Observable;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 /**
- * Thread for writing output to the console.
+ * Observable event source for writing to the Eclipse Fedora Packager console.
+ * 
  */
-public class ConsoleWriterThread extends Thread {
+public class ConsoleWriter extends Observable implements Runnable {
+	
+	boolean terminated;
 	BufferedReader in;
 	MessageConsoleStream out;
-	private boolean terminated;
 
 	/**
 	 * Create a new console writer thread.
@@ -37,10 +38,10 @@ public class ConsoleWriterThread extends Thread {
 	 * @param out
 	 * 		The Eclipse MessageConsoleStream to write output to.
 	 */
-	public ConsoleWriterThread(InputStream in, MessageConsoleStream out) {
+	public ConsoleWriter(InputStream in, MessageConsoleStream out) {
 		this.out = out;
 		this.in = new BufferedReader(new InputStreamReader(in));
-		terminated=false;
+		this.terminated = false;
 	}
 
 	@Override
@@ -53,6 +54,11 @@ public class ConsoleWriterThread extends Thread {
 			while (!terminated && (line = in.readLine()) != null) {
 				out.write(line + '\n');
 				count += line.length() + 1;
+				
+				// notify observers
+				setChanged();
+                notifyObservers(line);
+                
 				// Clear console every X characters.
 				// X = available Memory / 32 (char == 16 bit); So 1/16 of available
 				// memory seem to be good. May adjust as needed. Fixes Trac #55.
@@ -63,17 +69,16 @@ public class ConsoleWriterThread extends Thread {
 			}
 		} catch (IOException e) {
 			//Log error, but do nothing about it
-			PackagerPlugin.getDefault().getLog().log(new Status(IStatus.WARNING,
-				      PackagerPlugin.PLUGIN_ID, 0,
-				      FedoraPackagerText.ConsoleWriterThread_ioFail, e));
+			FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+			logger.logError(FedoraPackagerText.ConsoleWriterThread_ioFail, e);
 		}
 	}
-
+	
 	/**
-	 * Close/terminate this ConsoleWriterThread.
+	 * Terminate any ongoing reading/writing.
 	 */
-	public void close() {
-		terminated = true;
+	public void stop() {
+		this.terminated = true;
 	}
 
 }

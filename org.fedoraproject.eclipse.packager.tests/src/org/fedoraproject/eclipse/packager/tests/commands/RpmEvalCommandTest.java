@@ -72,7 +72,7 @@ public class RpmEvalCommandTest {
 				.getCommandInstance(RpmEvalCommand.ID);
 		EvalResult result;
 		try {
-			result = eval.variable("%{_arch}").call(new NullProgressMonitor());
+			result = eval.variable(RpmEvalCommand.ARCH).call(new NullProgressMonitor());
 		} catch (Exception e) {
 			fail("Shouldn't have thrown any exception.");
 			return;

@@ -11,16 +11,21 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
-import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.rpm.api.errors.RpmBuildCommandException;
-import org.fedoraproject.eclipse.packager.rpm.internal.core.RpmCommandUtils;
+import org.fedoraproject.eclipse.packager.rpm.internal.core.ConsoleWriter;
+import org.fedoraproject.eclipse.packager.rpm.internal.core.RpmConsoleFilterObserver;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
@@ -45,6 +50,7 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 	
 	private List<String> fullRpmBuildCommand;
 	private List<String> buildTypeFlags;
+	private BuildType buildType;
 	private List<String> distDefines;
 	private List<String> flags;
 	
@@ -74,6 +80,7 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 	 * @return This instance.
 	 */
 	public RpmBuildCommand buildType(BuildType type) {
+		this.buildType = type;
 		buildTypeFlags = new ArrayList<String>(1);
 		switch (type) {
 		case BINARY:
@@ -140,11 +147,17 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 	/**
 	 * Implementation of rpm build command. Triggers a build as configured.
 	 * 
-	 * 
+	 * @throws CommandMisconfiguredException
+	 *             If the command isn't properly configured.
+	 * @throws CommandListenerException
+	 *             If a command listener failed.
+	 * @throws RpmBuildCommandException
+	 *             If some error occurred while building.
 	 */
 	@Override
 	public RpmBuildResult call(IProgressMonitor monitor)
-			throws FedoraPackagerAPIException {
+			throws CommandMisconfiguredException, CommandListenerException,
+			RpmBuildCommandException {
 		try {
 			callPreExecListeners();
 		} catch (CommandListenerException e) {
@@ -164,22 +177,67 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 		
 		InputStream is;
 		String[] cmdList = getBuildCommandList();
-		RpmBuildResult result = new RpmBuildResult(cmdList);
+		RpmBuildResult result = new RpmBuildResult(cmdList, buildType);
 		try {
-			is = Utils.runCommandToInputStream(getBuildCommandList());
-			RpmCommandUtils.runShellCommand(is, monitor);
+			is = Utils.runCommandToInputStream(cmdList);
+			
 		} catch (IOException e) {
 			throw new RpmBuildCommandException(e.getMessage(), e);
 		}
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
+		
+		// Do the console writing
+		final MessageConsole console = FedoraPackagerConsole.getConsole();
+		IConsoleManager manager = ConsolePlugin.getDefault()
+				.getConsoleManager();
+		manager.addConsoles(new IConsole[] { console });
+		console.activate();
+
+		final MessageConsoleStream outStream = console.newMessageStream();
+
+		try {
+			// First create observable console writer
+			ConsoleWriter worker = new ConsoleWriter(is, outStream);
+			// add observer for SRPM builds and binary builds
+			if (this.buildType == BuildType.SOURCE || this.buildType == BuildType.BINARY) {
+				worker.addObserver(new RpmConsoleFilterObserver(result));
+			}
+			// create the thread for process input processing
+			Thread consoleWriterThread = new Thread(worker);
+			consoleWriterThread.start();
+
+			while (!monitor.isCanceled()) {
+				try {
+					// Don't waste system resources
+					Thread.sleep(300);
+					break;
+				} catch (IllegalThreadStateException e) {
+					// Do nothing
+				}
+			}
+
+			if (monitor.isCanceled()) {
+				worker.stop(); // Stop the worker thread
+				throw new OperationCanceledException();
+			}
+
+			// finish reading whatever's left in the buffers
+			consoleWriterThread.join();
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
 
 		// refresh containing folder
 		try {
 			this.projectRoot.getContainer().refreshLocal(IResource.DEPTH_INFINITE,
 					monitor);
-		} catch (CoreException ignored) {}
+		} catch (CoreException ignored) {
+			// ignore
+		}
 		
 		callPostExecListeners();
 		setCallable(false); // reuse of instance's call() not allowed
