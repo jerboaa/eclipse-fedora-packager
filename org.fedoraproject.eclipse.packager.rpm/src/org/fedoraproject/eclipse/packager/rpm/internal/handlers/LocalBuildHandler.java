@@ -10,32 +10,37 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
+import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
-import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
-import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
+import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
+import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand;
+import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand.BuildType;
+import org.fedoraproject.eclipse.packager.rpm.api.errors.RpmBuildCommandException;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
@@ -44,7 +49,7 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
  * Handler for building locally.
  *
  */
-public class LocalBuildHandler extends RpmBuildHandler {
+public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 
 	
 	@Override
@@ -54,18 +59,28 @@ public class LocalBuildHandler extends RpmBuildHandler {
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(event);
-			fedoraProjectRoot = FedoraPackagerUtils.getProjectRoot(eventResource);
-		} catch (InvalidProjectRootException e2) {
-			// TODO Handle this appropriately
-			e2.printStackTrace();
+			fedoraProjectRoot = FedoraPackagerUtils
+					.getProjectRoot(eventResource);
+		} catch (InvalidProjectRootException e) {
+			logger.logError(NLS.bind(
+					FedoraPackagerText.invalidFedoraProjectRootError,
+					NonTranslatableStrings.getDistributionName()), e);
+			FedoraHandlerUtils.showErrorDialog(shell, NonTranslatableStrings
+					.getProductName(), NLS.bind(
+					FedoraPackagerText.invalidFedoraProjectRootError,
+					NonTranslatableStrings.getDistributionName()));
 			return null;
 		}
 		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
-		final DownloadSourceCommand downloadCmd;
+		final RpmBuildCommand rpmBuild;
+		final DownloadSourceCommand download;
 		try {
-			// Get DownloadSourceCommand from Fedora packager registry
-			downloadCmd = (DownloadSourceCommand) fp
+			// need to get sources for an SRPM build
+			download = (DownloadSourceCommand) fp
 					.getCommandInstance(DownloadSourceCommand.ID);
+			// get RPM build command in order to produce an SRPM
+			rpmBuild = (RpmBuildCommand) fp
+					.getCommandInstance(RpmBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
@@ -77,46 +92,54 @@ public class LocalBuildHandler extends RpmBuildHandler {
 					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
-		specfile = fedoraProjectRoot.getSpecFile();
-		Job job = new Job(RpmText.LocalBuildHandler_jobName) {
+		// Make sure we have sources locally
+		Job downloadSourcesJob = new DownloadSourcesJob(RpmText.MockBuildHandler_downloadSourcesForMockBuild,
+				download, fedoraProjectRoot, shell, true);
+		downloadSourcesJob.setUser(true);
+		downloadSourcesJob.schedule();
+		try {
+			// wait for download job to finish
+			downloadSourcesJob.join();
+		} catch (InterruptedException e1) {
+			throw new OperationCanceledException();
+		}
+		if (!downloadSourcesJob.getResult().isOK()) {
+			// bail if something failed
+			return null;
+		}
+		// Do the local build
+		Job job = new Job(NonTranslatableStrings.getProductName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(RpmText.LocalBuildHandler_buildForLocalArch,
 						IProgressMonitor.UNKNOWN);
-				// First download sources				
+				IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
+				List<String> distDefines = RPMUtils.getDistDefines(projectBits);
 				try {
-					downloadCmd.call(monitor);
-				} catch (SourcesUpToDateException e1) {
-					// TODO handle appropriately
-				} catch (DownloadFailedException e1) {
-					// TODO handle appropriately
-				} catch (CommandListenerException e1) {
-					// TODO handle appropriately
-				} catch (CommandMisconfiguredException e1) {
-					// TODO handle appropriately
-				}
-				IStatus result;
-				try {
-					// search for noarch directive, otherwise use local arch
-					final String arch = RPMUtils.rpmQuery(
-							fedoraProjectRoot, "ARCH"); //$NON-NLS-1$
-
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-					// perform rpmbuild
-					ArrayList<String> flags = new ArrayList<String>();
-					flags.add("--target"); //$NON-NLS-1$
-					flags.add(arch);
-					flags.add("-ba"); //$NON-NLS-1$
-					result = rpmBuild(fedoraProjectRoot, flags, monitor);
-
-				} catch (IOException e) {
-					e.printStackTrace();
-					result = FedoraHandlerUtils.handleError(e);
+					rpmBuild.buildType(BuildType.BINARY).distDefines(distDefines).call(monitor);
+				} catch (CommandMisconfiguredException e) {
+					// This shouldn't happen, but report error anyway
+					logger.logError(e.getMessage(), e);
+					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+							e.getMessage(), e);
+				} catch (CommandListenerException e) {
+					// There are no command listeners registered, so shouldn't
+					// happen. Do something reasonable anyway.
+					logger.logError(e.getMessage(), e);
+					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+							e.getMessage(), e);
+				} catch (RpmBuildCommandException e) {
+					logger.logError(e.getMessage(), e.getCause());
+					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+							e.getMessage(), e.getCause());
+				} catch (IllegalArgumentException e) {
+					// setting distDefines failed
+					logger.logError(e.getMessage(), e);
+					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+							e.getMessage(), e);
 				}
 				monitor.done();
-				return result;
+				return Status.OK_STATUS;
 			}
 		};
 		job.setUser(true);

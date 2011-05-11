@@ -37,8 +37,12 @@ public class RpmText extends NLS {
 	/****/ public static String MockBuildHandler_testLocalBuildWithMock;
 	/****/ public static String MockBuildHandler_callMockMsg;
 	/****/ public static String MockBuildHandler_mockNotInstalled;
+	/****/ public static String MockBuildHandler_creatingSrpm;
+	/****/ public static String MockBuildHandler_srpmBuildFailed;
+	/****/ public static String MockBuildHandler_downloadSourcesForMockBuild;
+	/****/ public static String MockBuildHandler_creatingSRPMForMockBuild;
 	// PrepHandler Strings
-	/****/ public static String PrepHandler_attemptApplyPatchMsg;
+	/****/ public static String PrepHandler_prepareSourcesForBuildMsg;
 	/****/ public static String PrepHandler_jobName;
 	// RPMHandler Strings
 	/****/ public static String RpmBuildHandler_consoleName;
@@ -58,9 +62,17 @@ public class RpmText extends NLS {
 	// RpmEvalCommand
 	/****/ public static String RpmEvalCommand_variableMustBeSet;
 	// MockBuildCommand
-	/****/ public static String MockBuildCommand_buildArchNullError;
+	/****/ public static String MockBuildCommand_srpmNullError;
 	/****/ public static String MockBuildCommand_archException;
 	/****/ public static String MockBuildCommand_invalidMockConfigError;
+	/****/ public static String MockBuildCommand_userNotInMockGroupMsg;
+	/****/ public static String MockBuildCommand_srpmPathDoesNotExist;
+	/****/ public static String MockBuildCommand_mockCommandLog;
+	/****/ public static String MockBuildCommand_callMockBuildMsg;
+	// MockBuildCommandException
+	/****/ public static String MockBuildCommandException_msg;
+	// MockNotInstalledException
+	/****/ public static String MockNotInstalledException_msg;
 	// RpmEvalCommandException
 	/****/ public static String RpmEvalCommandException_msg;
 

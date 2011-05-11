@@ -172,13 +172,14 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 		}
 		monitor.subTask(NLS.bind(
 				RpmText.RpmBuildCommand_callRpmBuildMsg, this.projectRoot.getSpecFile().getName()));
-		// log the build command
-		logCommand();
 		
 		InputStream is;
 		String[] cmdList = getBuildCommandList();
 		RpmBuildResult result = new RpmBuildResult(cmdList, buildType);
 		try {
+			// log the build command, which was issued
+			FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+			logger.logInfo(NLS.bind(RpmText.RpmBuildCommand_commandStringMsg, convertCmdList(cmdList)));
 			is = Utils.runCommandToInputStream(cmdList);
 			
 		} catch (IOException e) {
@@ -197,17 +198,20 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 
 		final MessageConsoleStream outStream = console.newMessageStream();
 
-		try {
-			// First create observable console writer
-			ConsoleWriter worker = new ConsoleWriter(is, outStream);
-			// add observer for SRPM builds and binary builds
-			if (this.buildType == BuildType.SOURCE || this.buildType == BuildType.BINARY) {
-				worker.addObserver(new RpmConsoleFilterObserver(result));
-			}
-			// create the thread for process input processing
-			Thread consoleWriterThread = new Thread(worker);
-			consoleWriterThread.start();
+		// First create observable console writer
+		ConsoleWriter worker = new ConsoleWriter(is, outStream);
+		// add observer for SRPM builds (see comment in
+		// RpmConsoleFilterObserver if you are tempted to use this for RPM
+		// builds too.
+		if (this.buildType == BuildType.SOURCE) {
+			worker.addObserver(new RpmConsoleFilterObserver(result));
+		}
+		
+		// create the thread for process input processing
+		Thread consoleWriterThread = new Thread(worker);
+		consoleWriterThread.start();
 
+		try {
 			while (!monitor.isCanceled()) {
 				try {
 					// Don't waste system resources
@@ -225,11 +229,9 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 
 			// finish reading whatever's left in the buffers
 			consoleWriterThread.join();
-
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
 
 		// refresh containing folder
 		try {
@@ -242,10 +244,11 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 		callPostExecListeners();
 		setCallable(false); // reuse of instance's call() not allowed
 		monitor.done();
+		// FIXME: may be set this to be successful, yet rpmbuild may have failed.
 		result.setSuccess(true);
 		return result;
 	}
-	
+
 	/**
 	 * Do some extra initialization. Set build command and required defines
 	 * for this Fedora project root.
@@ -262,8 +265,9 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 	/**
 	 * 
 	 * @return An array of the configured command lists.
+	 * @throws RpmBuildCommandException If the RPM query failed.
 	 */
-	private String[] getBuildCommandList() {
+	private String[] getBuildCommandList() throws RpmBuildCommandException {
 		assert buildTypeFlags != null;
 		// Prep does not need dist defines
 		if (distDefines != null) {
@@ -273,18 +277,31 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 		if (flags != null) {
 			fullRpmBuildCommand.addAll(flags);
 		}
+		// if we have a binary build set the target
+		if (buildType == BuildType.BINARY) {
+			// search for noarch directive, otherwise use local arch
+			String arch;
+			try {
+				arch = RPMUtils.rpmQuery(this.projectRoot, "ARCH"); //$NON-NLS-1$
+			} catch (IOException e) {
+				throw new RpmBuildCommandException(e.getMessage(), e);
+			}
+			List<String> targetFlag = new ArrayList<String>();
+			targetFlag.add("--target"); //$NON-NLS-1$
+			targetFlag.add(arch);
+			fullRpmBuildCommand.addAll(targetFlag);
+		}
 		fullRpmBuildCommand.addAll(buildTypeFlags);
 		fullRpmBuildCommand.add(this.projectRoot.getSpecFile().getLocation().toOSString());
 		return fullRpmBuildCommand.toArray(new String[0]);
 	}
 	
-	private void logCommand() {
+	private String convertCmdList(String[] cmdList) {
 		String cmd = new String();
-		for (String token: getBuildCommandList()) {
+		for (String token: cmdList) {
 			cmd += token + " "; //$NON-NLS-1$;
 		}
-		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		logger.logInfo(NLS.bind(RpmText.RpmBuildCommand_commandStringMsg, cmd));
+		return cmd.trim();
 	}
 
 }

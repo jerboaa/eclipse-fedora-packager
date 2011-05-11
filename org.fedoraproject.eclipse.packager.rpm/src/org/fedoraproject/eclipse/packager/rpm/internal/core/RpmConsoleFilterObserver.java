@@ -6,20 +6,21 @@ import java.util.Observer;
 import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildResult;
 
 /**
- * Observes, what is being printed and filters lines ending
- * with .srpm and .rpm. This is useful for parsing which RPMs/SRPMs
- * have been produced by a build command.
+ * Observes, what is being printed and filters lines ending with .src.rpm. At
+ * the moment this observer is only registered for SRPM builds. A similar thing
+ * could be used for more interesting things, but keep in mind that rpmbuild
+ * output may produce A LOT of output. Doing some analysis on every line of
+ * output may slow down builds quite a bit.
+ * 
+ * For SRPM builds there isn't really a lot of output (one line), so it should
+ * be OK to use it for the SRPM build case.
  * 
  * @see ConsoleWriter
- *
+ * 
  */
 public class RpmConsoleFilterObserver implements Observer {
 	
 	
-	/**
-	 * The suffix of binary RPMs.
-	 */
-	public static final String RPM_SUFFIX = ".rpm"; //$NON-NLS-1$
 	/**
 	 * The suffix of source RPMs.
 	 */
@@ -43,8 +44,6 @@ public class RpmConsoleFilterObserver implements Observer {
 			String line = (String) arg;
 			if (line.endsWith(SRPM_SUFFIX)) {
 				result.addSrpm(line);
-			} else if (line.endsWith(RPM_SUFFIX)) {
-				result.addRpm(line);
 			}
         }
 

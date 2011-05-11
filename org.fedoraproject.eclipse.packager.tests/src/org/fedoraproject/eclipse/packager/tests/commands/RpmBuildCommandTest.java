@@ -1,6 +1,5 @@
 package org.fedoraproject.eclipse.packager.tests.commands;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -13,6 +12,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -22,6 +22,7 @@ import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildResult;
 import org.fedoraproject.eclipse.packager.rpm.api.RpmEvalCommand;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -107,8 +108,6 @@ public class RpmBuildCommandTest {
 		assertNotNull(noArchFolder);
 		// there should be one RPM
 		assertTrue(((IContainer)noArchFolder).members().length == 1);
-		assertNotNull(result.getAbsoluteRpmFilePaths());
-		assertEquals(1, result.getAbsoluteRpmFilePaths().size());
 	}
 	
 	/**
@@ -146,10 +145,12 @@ public class RpmBuildCommandTest {
 				.getCommandInstance(RpmBuildCommand.ID);
 		List<String> nodeps = new ArrayList<String>(1);
 		nodeps.add(RpmBuildCommand.NO_DEPS);
+		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fpRoot);
+		List<String> distDefines = RPMUtils.getDistDefines(projectBits);
 		RpmBuildResult result;
 		try {
 			result = build.buildType(BuildType.SOURCE).flags(nodeps)
-					.call(new NullProgressMonitor());
+					.distDefines(distDefines).call(new NullProgressMonitor());
 		} catch (Exception e) {
 			fail("Shouldn't have thrown any exception.");
 			return;
