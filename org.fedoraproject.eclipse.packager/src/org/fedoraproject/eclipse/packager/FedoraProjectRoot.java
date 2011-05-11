@@ -84,6 +84,15 @@ public class FedoraProjectRoot {
 	public SourcesFile getSourcesFile() {
 		return sourcesFile;
 	}
+	
+	/**
+	 * Returns the name of the package (i.e. the name of the SRPM)
+	 * 
+	 * @return The name of the package
+	 */
+	public String getPackageName() {
+		return this.getSpecfileModel().getName();
+	}
 
 	/**
 	 * Returns the .spec file for the given project.
