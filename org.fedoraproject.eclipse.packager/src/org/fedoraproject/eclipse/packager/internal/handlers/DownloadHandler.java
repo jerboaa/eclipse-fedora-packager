@@ -10,35 +10,23 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.internal.handlers;
 
-import java.net.MalformedURLException;
-
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
-import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
-import org.fedoraproject.eclipse.packager.api.ChecksumValidListener;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
+import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
-import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
-import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
-import org.fedoraproject.eclipse.packager.api.errors.DownloadFailedException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
-import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
-import org.fedoraproject.eclipse.packager.api.errors.SourcesUpToDateException;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
@@ -83,64 +71,11 @@ public class DownloadHandler extends FedoraPackagerAbstractHandler {
 					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
-		Job job = new Job(NonTranslatableStrings.getProductName()) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(
-						FedoraPackagerText.DownloadHandler_downloadSourceTask,
-						fedoraProjectRoot.getSourcesFile().getMissingSources()
-								.size());
-				ChecksumValidListener md5sumListener = new ChecksumValidListener(fedoraProjectRoot);
-				download.addCommandListener(md5sumListener); // want md5sum checking
-				try {
-					String downloadUrl = PackagerPlugin
-							.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
-					if (downloadUrl != null) {
-						// Only set URL explicitly if set in preferences. Lookaside
-						// cache falls back to the default URL if not set.
-						download.setDownloadURL(downloadUrl);
-					}
-					logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
-							DownloadSourceCommand.class.getName()));
-					download.call(monitor);
-				} catch (final SourcesUpToDateException e) {
-					logger.logInfo(e.getMessage(), e);
-					FedoraHandlerUtils.showInformationDialog(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage());
-					return Status.OK_STATUS;
-				} catch (DownloadFailedException e) {
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(
-							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
-				} catch (CommandMisconfiguredException e) {
-					// This shouldn't happen, but report error anyway
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(
-							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
-				} catch (CommandListenerException e) {
-					if (e.getCause() instanceof InvalidCheckSumException) {
-						String message = e.getCause().getMessage();
-						logger.logError(message, e.getCause());
-						return FedoraHandlerUtils.errorStatus(
-								PackagerPlugin.PLUGIN_ID, message, e.getCause());
-					}
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(
-							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
-				} catch (MalformedURLException e) {
-					// setDownloadUrl failed
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(
-							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
-				} finally {
-					monitor.done();
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		job.setUser(true);
-		job.schedule();
+		Job downloadJob = new DownloadSourcesJob(
+				NonTranslatableStrings.getProductName(), download,
+				fedoraProjectRoot, shell);
+		downloadJob.setUser(true);
+		downloadJob.schedule();
 		return null; // must be null
 	}
 }
