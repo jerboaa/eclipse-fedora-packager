@@ -151,7 +151,8 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 				}
 				kojiBuildCmd.distTag(projectBits.getTarget()).nvr(nvr)
 						.isScratchBuild(isScratchBuild());
-				logger.logInfo(KojiText.KojiBuildHandler_callingBuildCmdInfoMsg);
+				logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
+						KojiBuildCommand.class.getName()));
 				// Call build command
 				try {
 					buildResult = kojiBuildCmd.call(monitor);
