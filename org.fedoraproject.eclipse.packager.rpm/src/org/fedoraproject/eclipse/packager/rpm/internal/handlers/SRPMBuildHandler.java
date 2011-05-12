@@ -13,6 +13,8 @@ package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
@@ -80,27 +82,46 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
 					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
-		// Make sure we have sources locally
-		Job downloadSourcesJob = new DownloadSourcesJob(RpmText.MockBuildHandler_downloadSourcesForMockBuild,
-				download, fedoraProjectRoot, shell, true);
-		downloadSourcesJob.setUser(true);
-		downloadSourcesJob.schedule();
-		try {
-			// wait for download job to finish
-			downloadSourcesJob.join();
-		} catch (InterruptedException e1) {
-			throw new OperationCanceledException();
-		}
-		if (!downloadSourcesJob.getResult().isOK()) {
-			// bail if something failed
-			return null;
-		}
-		// Kick off the SRPM job
-		SRPMBuildJob srpmBuildJob = new SRPMBuildJob(
-				NonTranslatableStrings.getProductName(), srpmBuild,
-				fedoraProjectRoot);
-		srpmBuildJob.setUser(true);
-		srpmBuildJob.schedule();
+		// Need to nest jobs into this job for it to show up properly in the
+		// UI
+		Job job = new Job(NonTranslatableStrings.getProductName()) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				// Make sure we have sources locally
+				Job downloadSourcesJob = new DownloadSourcesJob(
+						RpmText.SRPMBuildHandler_downloadSourcesForSRPMBuild,
+						download, fedoraProjectRoot, shell, true);
+				downloadSourcesJob.setUser(true);
+				downloadSourcesJob.schedule();
+				try {
+					// wait for download job to finish
+					downloadSourcesJob.join();
+				} catch (InterruptedException e1) {
+					throw new OperationCanceledException();
+				}
+				if (!downloadSourcesJob.getResult().isOK()) {
+					// bail if something failed
+					return downloadSourcesJob.getResult();
+				}
+				// Kick off the SRPM job
+				SRPMBuildJob srpmBuildJob = new SRPMBuildJob(
+						RpmText.SRPMBuildHandler_buildingSRPM, srpmBuild,
+						fedoraProjectRoot);
+				srpmBuildJob.setUser(true);
+				srpmBuildJob.schedule();
+				try {
+					// wait for job to finish
+					srpmBuildJob.join();
+				} catch (InterruptedException e1) {
+					throw new OperationCanceledException();
+				}
+				return srpmBuildJob.getResult();
+			}
+
+		};
+		job.setSystem(true); // avoid UI for this job
+		job.schedule();
 		return null;
 	}
 

@@ -48,37 +48,44 @@ public class SRPMBuildJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		// build fresh SRPM
-		List<String> nodeps = new ArrayList<String>(1);
-		nodeps.add(RpmBuildCommand.NO_DEPS);
-		// want SRPM build
-		srpmBuild.buildType(BuildType.SOURCE).flags(nodeps);
-		// set dist-defines
-		IFpProjectBits projectBits = FedoraPackagerUtils
-				.getVcsHandler(fedoraProjectRoot);
-		List<String> distDefines = RPMUtils.getDistDefines(projectBits);
-		srpmBuild.distDefines(distDefines);
-		logger.logInfo(NLS.bind(RpmText.MockBuildHandler_creatingSrpm,
-				fedoraProjectRoot.getContainer().getName()));
+		monitor.beginTask(NLS.bind(RpmText.MockBuildHandler_creatingSrpm,
+				fedoraProjectRoot.getPackageName(),
+				fedoraProjectRoot.getPackageName()), IProgressMonitor.UNKNOWN);
 		try {
-			logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
-					RpmBuildCommand.class.getName()));
-			srpmBuildResult = srpmBuild.call(monitor);
-		} catch (CommandMisconfiguredException e) {
-			// This shouldn't happen, but report error anyway
-			logger.logError(e.getMessage(), e);
-			return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-					e.getMessage(), e);
-		} catch (CommandListenerException e) {
-			// There are no command listeners registered, so shouldn't
-			// happen. Do something reasonable anyway.
-			logger.logError(e.getMessage(), e);
-			return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-					e.getMessage(), e);
-		} catch (RpmBuildCommandException e) {
-			logger.logError(e.getMessage(), e.getCause());
-			return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-					e.getMessage(), e.getCause());
+			// build fresh SRPM
+			List<String> nodeps = new ArrayList<String>(1);
+			nodeps.add(RpmBuildCommand.NO_DEPS);
+			// want SRPM build
+			srpmBuild.buildType(BuildType.SOURCE).flags(nodeps);
+			// set dist-defines
+			IFpProjectBits projectBits = FedoraPackagerUtils
+					.getVcsHandler(fedoraProjectRoot);
+			List<String> distDefines = RPMUtils.getDistDefines(projectBits);
+			srpmBuild.distDefines(distDefines);
+			logger.logInfo(NLS.bind(RpmText.MockBuildHandler_creatingSrpm,
+					fedoraProjectRoot.getPackageName()));
+			try {
+				logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
+						RpmBuildCommand.class.getName()));
+				srpmBuildResult = srpmBuild.call(monitor);
+			} catch (CommandMisconfiguredException e) {
+				// This shouldn't happen, but report error anyway
+				logger.logError(e.getMessage(), e);
+				return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+						e.getMessage(), e);
+			} catch (CommandListenerException e) {
+				// There are no command listeners registered, so shouldn't
+				// happen. Do something reasonable anyway.
+				logger.logError(e.getMessage(), e);
+				return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+						e.getMessage(), e);
+			} catch (RpmBuildCommandException e) {
+				logger.logError(e.getMessage(), e.getCause());
+				return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+						e.getMessage(), e.getCause());
+			}
+		} finally {
+			monitor.done();
 		}
 		return Status.OK_STATUS;
 	}

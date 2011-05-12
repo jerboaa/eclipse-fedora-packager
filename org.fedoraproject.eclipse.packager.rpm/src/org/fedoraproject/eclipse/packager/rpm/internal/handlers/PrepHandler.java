@@ -91,53 +91,81 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
-		// Make sure we have sources locally
-		Job downloadSourcesJob = new DownloadSourcesJob(RpmText.MockBuildHandler_downloadSourcesForMockBuild,
-				download, fedoraProjectRoot, shell, true);
-		downloadSourcesJob.setUser(true);
-		downloadSourcesJob.schedule();
-		try {
-			// wait for download job to finish
-			downloadSourcesJob.join();
-		} catch (InterruptedException e1) {
-			throw new OperationCanceledException();
-		}
-		if (!downloadSourcesJob.getResult().isOK()) {
-			// bail if something failed
-			return null;
-		}
-		// Do the prep job
+		// Need to nest jobs into this job for it to show up properly in the UI
+		// in terms of progress
 		Job job = new Job(NonTranslatableStrings.getProductName()) {
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(RpmText.PrepHandler_prepareSourcesForBuildMsg,
-						IProgressMonitor.UNKNOWN);
-				List<String> nodeps = new ArrayList<String>(1);
-				nodeps.add(RpmBuildCommand.NO_DEPS);
+				// Make sure we have sources locally
+				Job downloadSourcesJob = new DownloadSourcesJob(
+						RpmText.PrepHandler_downloadSourcesForPrep,
+						download, fedoraProjectRoot, shell, true);
+				downloadSourcesJob.setUser(true);
+				downloadSourcesJob.schedule();
 				try {
-					prepCommand.buildType(BuildType.PREP).flags(nodeps).call(monitor);
-				} catch (CommandMisconfiguredException e) {
-					// This shouldn't happen, but report error anyway
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							e.getMessage(), e);
-				} catch (CommandListenerException e) {
-					// There are no command listeners registered, so shouldn't
-					// happen. Do something reasonable anyway.
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							e.getMessage(), e);
-				} catch (RpmBuildCommandException e) {
-					logger.logError(e.getMessage(), e.getCause());
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							e.getMessage(), e.getCause());
-				} catch (IllegalArgumentException e) {
-					// nodeps flags can't be null
+					// wait for download job to finish
+					downloadSourcesJob.join();
+				} catch (InterruptedException e1) {
+					throw new OperationCanceledException();
 				}
-				return Status.OK_STATUS;
+				if (!downloadSourcesJob.getResult().isOK()) {
+					// bail if something failed
+					return downloadSourcesJob.getResult();
+				}
+				// Do the prep job
+				Job prepJob = new Job(NonTranslatableStrings.getProductName()) {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						try {
+							monitor.beginTask(
+									RpmText.PrepHandler_prepareSourcesForBuildMsg,
+									IProgressMonitor.UNKNOWN);
+							List<String> nodeps = new ArrayList<String>(1);
+							nodeps.add(RpmBuildCommand.NO_DEPS);
+							try {
+								prepCommand.buildType(BuildType.PREP)
+										.flags(nodeps).call(monitor);
+							} catch (CommandMisconfiguredException e) {
+								// This shouldn't happen, but report error
+								// anyway
+								logger.logError(e.getMessage(), e);
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							} catch (CommandListenerException e) {
+								// There are no command listeners registered, so
+								// shouldn't
+								// happen. Do something reasonable anyway.
+								logger.logError(e.getMessage(), e);
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							} catch (RpmBuildCommandException e) {
+								logger.logError(e.getMessage(), e.getCause());
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(),
+										e.getCause());
+							} catch (IllegalArgumentException e) {
+								// nodeps flags can't be null
+							}
+						} finally {
+							monitor.done();
+						}
+						return Status.OK_STATUS;
+					}
+				};
+				prepJob.setUser(true);
+				prepJob.schedule();
+				try {
+					// wait for job to finish
+					prepJob.join();
+				} catch (InterruptedException e1) {
+					throw new OperationCanceledException();
+				}
+				return prepJob.getResult();
 			}
+			
 		};
-		job.setUser(true);
+		job.setSystem(true); // suppress UI. That's done in encapsulated jobs.
 		job.schedule();
 		return null;
 	}

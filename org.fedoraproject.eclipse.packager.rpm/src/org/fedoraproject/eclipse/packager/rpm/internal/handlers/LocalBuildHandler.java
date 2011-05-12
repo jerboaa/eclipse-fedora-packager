@@ -92,57 +92,84 @@ public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
-		// Make sure we have sources locally
-		Job downloadSourcesJob = new DownloadSourcesJob(RpmText.MockBuildHandler_downloadSourcesForMockBuild,
-				download, fedoraProjectRoot, shell, true);
-		downloadSourcesJob.setUser(true);
-		downloadSourcesJob.schedule();
-		try {
-			// wait for download job to finish
-			downloadSourcesJob.join();
-		} catch (InterruptedException e1) {
-			throw new OperationCanceledException();
-		}
-		if (!downloadSourcesJob.getResult().isOK()) {
-			// bail if something failed
-			return null;
-		}
-		// Do the local build
 		Job job = new Job(NonTranslatableStrings.getProductName()) {
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(RpmText.LocalBuildHandler_buildForLocalArch,
-						IProgressMonitor.UNKNOWN);
-				IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
-				List<String> distDefines = RPMUtils.getDistDefines(projectBits);
+				// Make sure we have sources locally
+				Job downloadSourcesJob = new DownloadSourcesJob(RpmText.LocalBuildHandler_downloadSourcesForLocalBuild,
+						download, fedoraProjectRoot, shell, true);
+				downloadSourcesJob.setUser(true);
+				downloadSourcesJob.schedule();
 				try {
-					rpmBuild.buildType(BuildType.BINARY).distDefines(distDefines).call(monitor);
-				} catch (CommandMisconfiguredException e) {
-					// This shouldn't happen, but report error anyway
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							e.getMessage(), e);
-				} catch (CommandListenerException e) {
-					// There are no command listeners registered, so shouldn't
-					// happen. Do something reasonable anyway.
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							e.getMessage(), e);
-				} catch (RpmBuildCommandException e) {
-					logger.logError(e.getMessage(), e.getCause());
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							e.getMessage(), e.getCause());
-				} catch (IllegalArgumentException e) {
-					// setting distDefines failed
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							e.getMessage(), e);
+					// wait for download job to finish
+					downloadSourcesJob.join();
+				} catch (InterruptedException e1) {
+					throw new OperationCanceledException();
 				}
-				monitor.done();
-				return Status.OK_STATUS;
+				if (!downloadSourcesJob.getResult().isOK()) {
+					// bail if something failed
+					return downloadSourcesJob.getResult();
+				}
+				// Do the local build
+				Job rpmBuildjob = new Job(NonTranslatableStrings.getProductName()) {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						try {
+							monitor.beginTask(
+									RpmText.LocalBuildHandler_buildForLocalArch,
+									IProgressMonitor.UNKNOWN);
+							IFpProjectBits projectBits = FedoraPackagerUtils
+									.getVcsHandler(fedoraProjectRoot);
+							List<String> distDefines = RPMUtils
+									.getDistDefines(projectBits);
+							try {
+								rpmBuild.buildType(BuildType.BINARY)
+										.distDefines(distDefines).call(monitor);
+							} catch (CommandMisconfiguredException e) {
+								// This shouldn't happen, but report error
+								// anyway
+								logger.logError(e.getMessage(), e);
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							} catch (CommandListenerException e) {
+								// There are no command listeners registered, so
+								// shouldn't
+								// happen. Do something reasonable anyway.
+								logger.logError(e.getMessage(), e);
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							} catch (RpmBuildCommandException e) {
+								logger.logError(e.getMessage(), e.getCause());
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(),
+										e.getCause());
+							} catch (IllegalArgumentException e) {
+								// setting distDefines failed
+								logger.logError(e.getMessage(), e);
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							}
+						} finally {
+							monitor.done();
+						}
+						return Status.OK_STATUS;
+					}
+				};
+				rpmBuildjob.setUser(true);
+				rpmBuildjob.schedule();
+				try {
+					// wait for job to finish
+					rpmBuildjob.join();
+				} catch (InterruptedException e1) {
+					throw new OperationCanceledException();
+				}
+				return rpmBuildjob.getResult();
 			}
+			
 		};
-		job.setUser(true);
+		// Suppress UI progress reporting. This is done by sub-jobs within.
+		job.setSystem(true);
 		job.schedule();
 		return null;
 	}

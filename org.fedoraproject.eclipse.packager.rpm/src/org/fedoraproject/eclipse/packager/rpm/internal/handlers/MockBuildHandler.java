@@ -97,100 +97,135 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 					NonTranslatableStrings.getProductName(), e.getMessage());
 			return null;
 		}
-		// Make sure we have sources locally
-		Job downloadSourcesJob = new DownloadSourcesJob(RpmText.MockBuildHandler_downloadSourcesForMockBuild,
-				download, fedoraProjectRoot, shell, true);
-		downloadSourcesJob.setUser(true);
-		downloadSourcesJob.schedule();
-		try {
-			// wait for download job to finish
-			downloadSourcesJob.join();
-		} catch (InterruptedException e1) {
-			throw new OperationCanceledException();
-		}
-		if (!downloadSourcesJob.getResult().isOK()) {
-			// bail if something failed
-			return null;
-		}
-		// Create a brand new SRPM
-		SRPMBuildJob srpmBuildJob = new SRPMBuildJob(NLS.bind(
-				RpmText.MockBuildHandler_creatingSRPMForMockBuild,
-				fedoraProjectRoot.getPackageName()), srpmBuild,
-				fedoraProjectRoot);
-		srpmBuildJob.setUser(true);
-		srpmBuildJob.schedule();
-		try {
-			// wait for SRPM build to finish
-			srpmBuildJob.join();
-		} catch (InterruptedException e1) {
-			throw new OperationCanceledException();
-		}
-		if (!srpmBuildJob.getResult().isOK()) {
-			// bail if something failed
-			return null;
-		}
-		
-		final RpmBuildResult srpmBuildResult = srpmBuildJob.getSRPMBuildResult(); 
-		// do the mock building
 		Job job = new Job(NonTranslatableStrings.getProductName()) {
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(RpmText.MockBuildHandler_testLocalBuildWithMock, IProgressMonitor.UNKNOWN);
-				if (monitor.isCanceled()) {
+				// Make sure we have sources locally
+				Job downloadSourcesJob = new DownloadSourcesJob(RpmText.MockBuildHandler_downloadSourcesForMockBuild,
+						download, fedoraProjectRoot, shell, true);
+				downloadSourcesJob.setUser(true);
+				downloadSourcesJob.schedule();
+				try {
+					// wait for download job to finish
+					downloadSourcesJob.join();
+				} catch (InterruptedException e1) {
 					throw new OperationCanceledException();
 				}
+				if (!downloadSourcesJob.getResult().isOK()) {
+					// bail if something failed
+					return downloadSourcesJob.getResult();
+				}
+				// Create a brand new SRPM
+				SRPMBuildJob srpmBuildJob = new SRPMBuildJob(NLS.bind(
+						RpmText.MockBuildHandler_creatingSRPMForMockBuild,
+						fedoraProjectRoot.getPackageName()), srpmBuild,
+						fedoraProjectRoot);
+				srpmBuildJob.setUser(true);
+				srpmBuildJob.schedule();
+				try {
+					// wait for SRPM build to finish
+					srpmBuildJob.join();
+				} catch (InterruptedException e1) {
+					throw new OperationCanceledException();
+				}
+				if (!srpmBuildJob.getResult().isOK()) {
+					// bail if something failed
+					return srpmBuildJob.getResult();
+				}
 				
-				// kick of the mock build
+				final RpmBuildResult srpmBuildResult = srpmBuildJob.getSRPMBuildResult(); 
+				// do the mock building
+				Job mockBuildJob = new Job(NonTranslatableStrings.getProductName()) {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						try {
+							monitor.beginTask(
+									RpmText.MockBuildHandler_testLocalBuildWithMock,
+									IProgressMonitor.UNKNOWN);
+							if (monitor.isCanceled()) {
+								throw new OperationCanceledException();
+							}
+
+							// kick of the mock build
+							try {
+								mockBuild.pathToSRPM(srpmBuildResult
+										.getAbsoluteSRPMFilePath());
+							} catch (FileNotFoundException e) {
+								e.printStackTrace();
+							} catch (IllegalArgumentException e) {
+								// catch error when creating the SRPM failed.
+								logger.logError(
+										RpmText.MockBuildHandler_srpmBuildFailed,
+										e);
+								return FedoraHandlerUtils
+										.errorStatus(
+												RPMPlugin.PLUGIN_ID,
+												RpmText.MockBuildHandler_srpmBuildFailed,
+												e);
+							}
+							logger.logInfo(NLS.bind(
+									FedoraPackagerText.callingCommand,
+									MockBuildCommand.class.getName()));
+							try {
+								mockBuild.call(monitor);
+							} catch (CommandMisconfiguredException e) {
+								// This shouldn't happen, but report error
+								// anyway
+								logger.logError(e.getMessage(), e);
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							} catch (UserNotInMockGroupException e) {
+								// nothing critical, advise the user what to do.
+								logger.logInfo(e.getMessage());
+								FedoraHandlerUtils
+										.showInformationDialog(shell,
+												NonTranslatableStrings
+														.getProductName(), e
+														.getMessage());
+								return Status.OK_STATUS;
+							} catch (CommandListenerException e) {
+								// There are no command listeners registered, so
+								// shouldn't
+								// happen. Do something reasonable anyway.
+								logger.logError(e.getMessage(), e);
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							} catch (MockBuildCommandException e) {
+								// Some unknown error occurred
+								logger.logError(e.getMessage(), e.getCause());
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(),
+										e.getCause());
+							} catch (MockNotInstalledException e) {
+								// nothing critical, advise the user what to do.
+								logger.logInfo(e.getMessage());
+								FedoraHandlerUtils
+										.showInformationDialog(shell,
+												NonTranslatableStrings
+														.getProductName(), e
+														.getMessage());
+								return Status.OK_STATUS;
+							}
+						} finally {
+							monitor.done();
+						}
+						return Status.OK_STATUS;
+					}
+				};
+				mockBuildJob.setUser(true);
+				mockBuildJob.schedule();
 				try {
-					mockBuild.pathToSRPM(srpmBuildResult.getAbsoluteSRPMFilePath());
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					// catch error when creating the SRPM failed.
-					logger.logError(RpmText.MockBuildHandler_srpmBuildFailed, e);
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							RpmText.MockBuildHandler_srpmBuildFailed, e);
+					// wait for job to finish
+					mockBuildJob.join();
+				} catch (InterruptedException e1) {
+					throw new OperationCanceledException();
 				}
-				logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
-						MockBuildCommand.class.getName()));
-				try {
-					mockBuild.call(monitor);
-				} catch (CommandMisconfiguredException e) {
-					// This shouldn't happen, but report error anyway
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							e.getMessage(), e);
-				} catch (UserNotInMockGroupException e) {
-					// nothing critical, advise the user what to do.
-					logger.logInfo(e.getMessage());
-					FedoraHandlerUtils.showInformationDialog(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage());
-					return Status.OK_STATUS;
-				} catch (CommandListenerException e) {
-					// There are no command listeners registered, so shouldn't
-					// happen. Do something reasonable anyway.
-					logger.logError(e.getMessage(), e);
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							e.getMessage(), e);
-				} catch (MockBuildCommandException e) {
-					// Some unknown error occurred
-					logger.logError(e.getMessage(), e.getCause());
-					return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
-							e.getMessage(), e.getCause());
-				} catch (MockNotInstalledException e) {
-					// nothing critical, advise the user what to do.
-					logger.logInfo(e.getMessage());
-					FedoraHandlerUtils.showInformationDialog(shell,
-							NonTranslatableStrings.getProductName(),
-							e.getMessage());
-					return Status.OK_STATUS;
-				}
-				monitor.done();
-				return Status.OK_STATUS;
+				return mockBuildJob.getResult();
 			}
+			
 		};
-		job.setUser(true);
+		job.setSystem(true); // Suppress UI. That's done in sub-jobs within.
 		job.schedule();
 		return null;
 	}

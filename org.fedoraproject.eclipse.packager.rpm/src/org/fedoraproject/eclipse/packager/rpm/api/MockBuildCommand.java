@@ -34,6 +34,7 @@ import org.fedoraproject.eclipse.packager.rpm.api.errors.MockBuildCommandExcepti
 import org.fedoraproject.eclipse.packager.rpm.api.errors.MockNotInstalledException;
 import org.fedoraproject.eclipse.packager.rpm.api.errors.UserNotInMockGroupException;
 import org.fedoraproject.eclipse.packager.rpm.internal.core.ConsoleWriter;
+import org.fedoraproject.eclipse.packager.rpm.internal.core.MockBuildStatusObserver;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
@@ -189,6 +190,10 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		final MessageConsoleStream outStream = console.newMessageStream();
 		ConsoleWriter worker = new ConsoleWriter(is, outStream);
 		Thread consoleWriterThread = new Thread(worker);
+		
+		// Observe what is printed on the console and update status in
+		// prog monitor.
+		worker.addObserver(new MockBuildStatusObserver(monitor));
 		
 		consoleWriterThread.start();
 		try {

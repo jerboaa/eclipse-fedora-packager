@@ -243,7 +243,6 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 		
 		callPostExecListeners();
 		setCallable(false); // reuse of instance's call() not allowed
-		monitor.done();
 		// FIXME: may be set this to be successful, yet rpmbuild may have failed.
 		result.setSuccess(true);
 		return result;

@@ -32,6 +32,7 @@ public class RpmText extends NLS {
 	// LocalBuildHandler Strings
 	/****/ public static String LocalBuildHandler_buildForLocalArch;
 	/****/ public static String LocalBuildHandler_jobName;
+	/****/ public static String LocalBuildHandler_downloadSourcesForLocalBuild;
 	// MockBuildHandler Strings
 	/****/ public static String MockBuildHandler_jobName;
 	/****/ public static String MockBuildHandler_testLocalBuildWithMock;
@@ -44,6 +45,7 @@ public class RpmText extends NLS {
 	// PrepHandler Strings
 	/****/ public static String PrepHandler_prepareSourcesForBuildMsg;
 	/****/ public static String PrepHandler_jobName;
+	/****/ public static String PrepHandler_downloadSourcesForPrep;
 	// RPMHandler Strings
 	/****/ public static String RpmBuildHandler_consoleName;
 	/****/ public static String RpmBuildHandler_runShellCmds;
@@ -75,6 +77,9 @@ public class RpmText extends NLS {
 	/****/ public static String MockNotInstalledException_msg;
 	// RpmEvalCommandException
 	/****/ public static String RpmEvalCommandException_msg;
+	// SRPMBuildHandler_downloadSourcesForSRPMBuild
+	/****/ public static String SRPMBuildHandler_downloadSourcesForSRPMBuild;
+	/****/ public static String SRPMBuildHandler_buildingSRPM;
 
 	static {
 		// initialize resource bundle
