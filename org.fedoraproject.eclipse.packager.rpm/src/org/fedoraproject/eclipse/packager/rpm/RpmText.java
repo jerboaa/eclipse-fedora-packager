@@ -29,32 +29,18 @@ public class RpmText extends NLS {
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.rpm.rpmtext"; //$NON-NLS-1$
 
 
-	// LocalBuildHandler Strings
+	// LocalBuildHandler
 	/****/ public static String LocalBuildHandler_buildForLocalArch;
-	/****/ public static String LocalBuildHandler_jobName;
 	/****/ public static String LocalBuildHandler_downloadSourcesForLocalBuild;
-	// MockBuildHandler Strings
-	/****/ public static String MockBuildHandler_jobName;
+	// MockBuildHandler
 	/****/ public static String MockBuildHandler_testLocalBuildWithMock;
-	/****/ public static String MockBuildHandler_callMockMsg;
-	/****/ public static String MockBuildHandler_mockNotInstalled;
 	/****/ public static String MockBuildHandler_creatingSrpm;
 	/****/ public static String MockBuildHandler_srpmBuildFailed;
 	/****/ public static String MockBuildHandler_downloadSourcesForMockBuild;
 	/****/ public static String MockBuildHandler_creatingSRPMForMockBuild;
-	// PrepHandler Strings
+	// PrepHandler
 	/****/ public static String PrepHandler_prepareSourcesForBuildMsg;
-	/****/ public static String PrepHandler_jobName;
 	/****/ public static String PrepHandler_downloadSourcesForPrep;
-	// RPMHandler Strings
-	/****/ public static String RpmBuildHandler_consoleName;
-	/****/ public static String RpmBuildHandler_runShellCmds;
-	/****/ public static String RpmBuildHandler_scriptCancelled;
-	/****/ public static String RpmBuildHandler_userWarningMsg;
-	/****/ public static String RpmBuildHandler_terminationMsg;
-	// SRPMHandler Strings
-	/****/ public static String CreateSRPMHandler_jobName;
-	/****/ public static String CreateSRPMHandler_buildSrpm;
 	// RpmBuildCommand
 	/****/ public static String RpmBuildCommand_distDefinesNullError;
 	/****/ public static String RpmBuildCommand_flagsNullError;
@@ -65,14 +51,11 @@ public class RpmText extends NLS {
 	/****/ public static String RpmEvalCommand_variableMustBeSet;
 	// MockBuildCommand
 	/****/ public static String MockBuildCommand_srpmNullError;
-	/****/ public static String MockBuildCommand_archException;
 	/****/ public static String MockBuildCommand_invalidMockConfigError;
 	/****/ public static String MockBuildCommand_userNotInMockGroupMsg;
 	/****/ public static String MockBuildCommand_srpmPathDoesNotExist;
 	/****/ public static String MockBuildCommand_mockCommandLog;
 	/****/ public static String MockBuildCommand_callMockBuildMsg;
-	// MockBuildCommandException
-	/****/ public static String MockBuildCommandException_msg;
 	// MockNotInstalledException
 	/****/ public static String MockNotInstalledException_msg;
 	// RpmEvalCommandException
