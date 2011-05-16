@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -34,6 +35,7 @@ import org.fedoraproject.eclipse.packager.rpm.api.errors.MockBuildCommandExcepti
 import org.fedoraproject.eclipse.packager.rpm.api.errors.MockNotInstalledException;
 import org.fedoraproject.eclipse.packager.rpm.api.errors.UserNotInMockGroupException;
 import org.fedoraproject.eclipse.packager.rpm.internal.core.ConsoleWriter;
+import org.fedoraproject.eclipse.packager.rpm.internal.core.MockBuildCommandSuccessObserver;
 import org.fedoraproject.eclipse.packager.rpm.internal.core.MockBuildStatusObserver;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
@@ -55,6 +57,7 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	private static final String MOCK_CHROOT_CONFIG_OPTION = "-r"; //$NON-NLS-1$
 	private static final String MOCK_REBUILD_OPTION = "--rebuild"; //$NON-NLS-1$
 	private static final String MOCK_RESULT_DIR_OPTION = "--resultdir"; //$NON-NLS-1$
+	private static final String MOCK_NO_CLEANUP_AFTER_OPTION = "--no-cleanup-after"; //$NON-NLS-1$
 	
 	private String localArchitecture; // set in initialize()
 	private String mockConfig; // user may set this explicitly
@@ -194,6 +197,8 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		// Observe what is printed on the console and update status in
 		// prog monitor.
 		worker.addObserver(new MockBuildStatusObserver(monitor));
+		// Observe the status for potential errors
+		worker.addObserver(new MockBuildCommandSuccessObserver(result));
 		
 		consoleWriterThread.start();
 		try {
@@ -229,7 +234,6 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		callPostExecListeners();
 		setCallable(false); // reuse of instance's call() not allowed
 		monitor.done();
-		result.setSuccess();
 		return result;
 	}
 	
@@ -239,6 +243,8 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	 */
 	private void setResultDir() throws MockBuildCommandException {
 		resultDir = new String();
+		resultDir += projectRoot.getContainer().getLocation().toOSString();
+		resultDir += IPath.SEPARATOR;
 		try {
 			resultDir += RPMUtils.getNVR(projectRoot);
 		} catch (IOException e) {
@@ -266,6 +272,8 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	 */
 	private String getDefaultMockcfg() {
 		assert this.mockConfig == null;
+		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+		logger.logInfo(RpmText.MockBuildCommand_usingDefaultMockConfig);
 		IFpProjectBits projectBits =  FedoraPackagerUtils.getVcsHandler(projectRoot);
 		String distvar = projectBits.getDistVariable(); 
 		String distval = projectBits.getDistVal(); 
@@ -392,7 +400,8 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		resDirOpt += "="; //$NON-NLS-1$
 		resDirOpt += this.resultDir;
 		
-		String[] mockCmd = { MOCK_BINARY, MOCK_CHROOT_CONFIG_OPTION, this.mockConfig,
+		String[] mockCmd = { MOCK_BINARY, MOCK_CHROOT_CONFIG_OPTION, 
+				this.mockConfig, MOCK_NO_CLEANUP_AFTER_OPTION,
 				resDirOpt, MOCK_REBUILD_OPTION, srpmAbsPath };
 		return mockCmd;
 	}

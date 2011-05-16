@@ -19,7 +19,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
@@ -38,6 +41,7 @@ import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException
 import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.rpm.api.MockBuildCommand;
+import org.fedoraproject.eclipse.packager.rpm.api.MockBuildResult;
 import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand;
 import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildResult;
 import org.fedoraproject.eclipse.packager.rpm.api.SRPMBuildJob;
@@ -53,9 +57,12 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  */
 public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 	
+	private MockBuildResult result;
+	private Shell shell;
+	
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		final Shell shell = getShell(event);
+		shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		final FedoraProjectRoot fedoraProjectRoot;
 		try {
@@ -168,7 +175,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 									FedoraPackagerText.callingCommand,
 									MockBuildCommand.class.getName()));
 							try {
-								mockBuild.call(monitor);
+								result = mockBuild.call(monitor);
 							} catch (CommandMisconfiguredException e) {
 								// This shouldn't happen, but report error
 								// anyway
@@ -213,6 +220,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 						return Status.OK_STATUS;
 					}
 				};
+				mockBuildJob.addJobChangeListener(getMockJobFinishedJobListener());
 				mockBuildJob.setUser(true);
 				mockBuildJob.schedule();
 				try {
@@ -228,6 +236,41 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 		job.setSystem(true); // Suppress UI. That's done in sub-jobs within.
 		job.schedule();
 		return null;
+	}
+	
+	/**
+	 * 
+	 * @return A job listener for the {@code done} event.
+	 */
+	private IJobChangeListener getMockJobFinishedJobListener() {
+		IJobChangeListener listener = new JobChangeAdapter() {
+
+			// We are only interested in the done event
+			@Override
+			public void done(IJobChangeEvent event) {
+				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+				if (result.wasSuccessful()) {
+					// TODO: Make this a link to the directory
+					String msg = NLS.bind(
+							RpmText.MockBuildHandler_mockSucceededMsg,
+							result.getResultDirectoryPath());
+					logger.logInfo(msg);
+					FedoraHandlerUtils.showInformationDialog(
+							shell,
+							NonTranslatableStrings.getProductName(), msg);
+				} else {
+					String msg = NLS.bind(
+							RpmText.MockBuildHandler_mockFailedMsg,
+							result.getResultDirectoryPath());
+					logger.logInfo(msg);
+					FedoraHandlerUtils.showInformationDialog(
+							shell,
+							NonTranslatableStrings.getProductName(),
+							msg);
+				}
+			}
+		};
+		return listener;
 	}
 
 }

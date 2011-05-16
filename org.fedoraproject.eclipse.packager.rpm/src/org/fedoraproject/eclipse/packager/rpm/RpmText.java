@@ -38,6 +38,8 @@ public class RpmText extends NLS {
 	/****/ public static String MockBuildHandler_srpmBuildFailed;
 	/****/ public static String MockBuildHandler_downloadSourcesForMockBuild;
 	/****/ public static String MockBuildHandler_creatingSRPMForMockBuild;
+	/****/ public static String MockBuildHandler_mockFailedMsg;
+	/****/ public static String MockBuildHandler_mockSucceededMsg;
 	// PrepHandler
 	/****/ public static String PrepHandler_prepareSourcesForBuildMsg;
 	/****/ public static String PrepHandler_downloadSourcesForPrep;
@@ -56,6 +58,7 @@ public class RpmText extends NLS {
 	/****/ public static String MockBuildCommand_srpmPathDoesNotExist;
 	/****/ public static String MockBuildCommand_mockCommandLog;
 	/****/ public static String MockBuildCommand_callMockBuildMsg;
+	/****/ public static String MockBuildCommand_usingDefaultMockConfig;
 	// MockNotInstalledException
 	/****/ public static String MockNotInstalledException_msg;
 	// RpmEvalCommandException

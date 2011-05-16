@@ -16,6 +16,14 @@ public class MockBuildResult extends Result {
 	public MockBuildResult(String[] cmdList, String resultDir) {
 		super(cmdList);
 		this.resultDir = resultDir;
+		// will be set to false by an observer if there was an error
+		this.success = true;
+	}
+	
+	/**
+	 * 
+	 */
+	public void setFailure() {
 		this.success = false;
 	}
 	
