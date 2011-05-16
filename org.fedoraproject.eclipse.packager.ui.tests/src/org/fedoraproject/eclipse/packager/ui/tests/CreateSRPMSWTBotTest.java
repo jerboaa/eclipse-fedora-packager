@@ -12,6 +12,7 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.ContextMenuHelper;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.PackageExplorer;
@@ -71,10 +72,8 @@ public class CreateSRPMSWTBotTest {
 		// Click local build context menu item
 		clickOnCreateSRPM(packagerTree);
 		// Wait for upload process to start
-		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.
-				eclipse.packager.rpm.RpmText.CreateSRPMHandler_jobName));
-		SWTBotShell efpJobWindow = bot.shell(org.fedoraproject.
-				eclipse.packager.rpm.RpmText.CreateSRPMHandler_jobName);
+		bot.waitUntil(Conditions.shellIsActive(NonTranslatableStrings.getProductName()));
+		SWTBotShell efpJobWindow = bot.shell(NonTranslatableStrings.getProductName());
 		assertNotNull(efpJobWindow);
 		// Wait for upload process to finish
 		bot.waitUntil(Conditions.shellCloses(efpJobWindow));
