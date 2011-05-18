@@ -11,7 +11,6 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.fedoraproject.eclipse.packager.bodhi.BodhiNewHandler;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.ContextMenuHelper;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.PackageExplorer;
@@ -48,9 +47,6 @@ public class BodhiUpdateSWTBotTest {
 		efpProject = new GitTestProject("eclipse-fedorapackager");
 		IResource efpSpec = efpProject.getProject().findMember(new Path("eclipse-fedorapackager.spec"));
 		assertNotNull(efpSpec);
-		// Put BodhiNewHandler into testing mode (i.e. this causes it
-		// to uses stubs)
-		BodhiNewHandler.inTestingMode = true;
 	}
  
 	/**
@@ -75,9 +71,9 @@ public class BodhiUpdateSWTBotTest {
 		
 		// Assert success. I.e. look for the update popup message
 		bot.waitUntil(Conditions.shellIsActive(org.fedoraproject.eclipse.
-				packager.bodhi.Messages.bodhiUpdateInfoDialog_updateResponseTitle));
+				packager.bodhi.BodhiText.BodhiUpdateInfoDialog_updateResponseTitle));
 		SWTBotShell updateMsgWindow = bot.shell(org.fedoraproject.eclipse.
-				packager.bodhi.Messages.bodhiUpdateInfoDialog_updateResponseTitle);
+				packager.bodhi.BodhiText.BodhiUpdateInfoDialog_updateResponseTitle);
 		assertNotNull(updateMsgWindow);
 		updateMsgWindow.close();
 	}

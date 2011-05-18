@@ -44,7 +44,7 @@
    <extension
          point="org.eclipse.ui.commands">
          <command
-            defaultHandler="org.fedoraproject.eclipse.packager.bodhi.BodhiNewHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.bodhi.internal.handlers.BodhiNewHandler"
             id="org.fedoraproject.eclipse.packager.bodhi.BodhiNew"
             name="%command.name.8">
       </command>

@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.bodhi;
+package org.fedoraproject.eclipse.packager.bodhi.api;
 
 /**
  * Interface for validating user input.

@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.bodhi;
+package org.fedoraproject.eclipse.packager.bodhi.internal.ui;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,6 +27,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.forms.widgets.FormText;
+import org.fedoraproject.eclipse.packager.bodhi.BodhiPlugin;
+import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
 
 /**
  * Message dialog showing the link to the koji page showing build info
@@ -46,7 +48,7 @@ public class BodhiUpdateInfoDialog extends MessageDialog {
 	 * @param bodhiResponseMsg Placeholder for auxiliary response msg from Bodhi.
 	 */
 	public BodhiUpdateInfoDialog(Shell parentShell, String buildName, String bodhiResponseMsg) {
-		super(parentShell, Messages.bodhiUpdateInfoDialog_updateResponseTitle,
+		super(parentShell, BodhiText.BodhiUpdateInfoDialog_updateResponseTitle,
 				BodhiPlugin.getImageDescriptor("icons/Artwork_DesignService_bodhi-icon-16.png").createImage(),
 				bodhiResponseMsg,
 				MessageDialog.NONE,
@@ -74,7 +76,7 @@ public class BodhiUpdateInfoDialog extends MessageDialog {
 			url = BODHI_UPDATE_BASE_URL + buildName;
 		}
 		taskLink.setText("<form><p>" + //$NON-NLS-1$
-				Messages.bodhiUpdateInfoDialog_updateStatusText + "</p><p>"+ url //$NON-NLS-1$ //$NON-NLS-2$
+				BodhiText.BodhiUpdateInfoDialog_updateStatusText + "</p><p>"+ url //$NON-NLS-1$ //$NON-NLS-2$
 						+ "</p></form>", true, true); //$NON-NLS-1$
 		taskLink.addListener(SWT.Selection, new Listener() {
 			@Override

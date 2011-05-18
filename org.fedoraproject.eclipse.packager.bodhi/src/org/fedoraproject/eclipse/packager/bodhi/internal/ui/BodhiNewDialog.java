@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.bodhi;
+package org.fedoraproject.eclipse.packager.bodhi.internal.ui;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -21,12 +21,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
+import org.fedoraproject.eclipse.packager.bodhi.api.IBodhiNewDialog;
 
 /**
  * Class implementing Bodhi updates dialog.
  */
 public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
-	protected static final String DIALOG_TITLE = Messages.bodhiNewDialog_dialogTitle; 
+	protected static final String DIALOG_TITLE = BodhiText.BodhiNewDialog_dialogTitle; 
 	protected String buildName;
 	protected String release;
 	protected String bugs;
@@ -90,7 +92,14 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	protected Text bugText;
 	protected Text notesText;
 
-	protected BodhiNewDialog(Shell parentShell, String buildName,
+	/**
+	 * @param parentShell
+	 * @param buildName
+	 * @param release
+	 * @param bugs
+	 * @param notes
+	 */
+	public BodhiNewDialog(Shell parentShell, String buildName,
 			String release, String bugs, String notes) {
 		super(parentShell);
 		this.buildName = buildName;
@@ -115,19 +124,19 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 		top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Label buildLabel = new Label(top, SWT.NONE);
-		buildLabel.setText(Messages.bodhiNewDialog_build);
+		buildLabel.setText(BodhiText.BodhiNewDialog_build);
 
 		Label buildText = new Label(top, SWT.NONE);
 		buildText.setText(buildName);
 
 		Label releaseLabel = new Label(top, SWT.NONE);
-		releaseLabel.setText(Messages.bodhiNewDialog_release);
+		releaseLabel.setText(BodhiText.BodhiNewDialog_release);
 
 		Label releaseText = new Label(top, SWT.NONE);
 		releaseText.setText(release);
 
 		Label typeLabel = new Label(top, SWT.NONE);
-		typeLabel.setText(Messages.bodhiNewDialog_type);
+		typeLabel.setText(BodhiText.BodhiNewDialog_type);
 
 		Composite typeComposite = new Composite(top, SWT.BORDER);
 		typeComposite.setLayout(new GridLayout(3, true));
@@ -135,18 +144,18 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 
 		typeButtons = new Button[3];
 		typeButtons[0] = new Button(typeComposite, SWT.RADIO);
-		typeButtons[0].setText(Messages.bodhiNewDialog_security);
+		typeButtons[0].setText(BodhiText.BodhiNewDialog_security);
 		typeButtons[0].setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		typeButtons[0].setSelection(true); // DEFAULT
 		typeButtons[1] = new Button(typeComposite, SWT.RADIO);
-		typeButtons[1].setText(Messages.bodhiNewDialog_bugfix);
+		typeButtons[1].setText(BodhiText.BodhiNewDialog_bugfix);
 		typeButtons[1].setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		typeButtons[2] = new Button(typeComposite, SWT.RADIO);
-		typeButtons[2].setText(Messages.bodhiNewDialog_enhancement);
+		typeButtons[2].setText(BodhiText.BodhiNewDialog_enhancement);
 		typeButtons[2].setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Label requestLabel = new Label(top, SWT.NONE);
-		requestLabel.setText(Messages.bodhiNewDialog_request);
+		requestLabel.setText(BodhiText.BodhiNewDialog_request);
 
 		Composite requestComposite = new Composite(top, SWT.BORDER);
 		requestComposite.setLayout(new GridLayout(3, true));
@@ -154,24 +163,24 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 
 		requestButtons = new Button[2];
 		requestButtons[0] = new Button(requestComposite, SWT.RADIO);
-		requestButtons[0].setText(Messages.bodhiNewDialog_testing);
+		requestButtons[0].setText(BodhiText.BodhiNewDialog_testing);
 		requestButtons[0].setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		requestButtons[0].setSelection(true); // DEFAULT
 		requestButtons[1] = new Button(requestComposite, SWT.RADIO);
-		requestButtons[1].setText(Messages.bodhiNewDialog_stable);
+		requestButtons[1].setText(BodhiText.BodhiNewDialog_stable);
 		requestButtons[1].setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Label bugLabel = new Label(top, SWT.NONE);
-		bugLabel.setText(Messages.bodhiNewDialog_bugIds);
+		bugLabel.setText(BodhiText.BodhiNewDialog_bugIds);
 
 		bugText = new Text(top, SWT.BORDER);
-		bugText.setToolTipText(Messages.bodhiNewDialog_bugIdsMsg);
+		bugText.setToolTipText(BodhiText.BodhiNewDialog_bugIdsMsg);
 		bugText.setText(suggestedBugs);
 		bugText.setLayoutData(new GridData(convertWidthInCharsToPixels(30),
 				SWT.DEFAULT));
 
 		Label notesLabel = new Label(top, SWT.NONE);
-		notesLabel.setText(Messages.bodhiNewDialog_notes); //$NON-NLS-1$
+		notesLabel.setText(BodhiText.BodhiNewDialog_notes); //$NON-NLS-1$
 
 		notesText = new Text(top, SWT.WRAP | SWT.BORDER);
 		notesText.setText(suggestedNotes);
@@ -189,8 +198,8 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	protected void okPressed() {
 		bugs = bugText.getText();
 		if (!bugs.equals("") && !bugs.matches("[0-9]+(,[0-9]+)*")) { //$NON-NLS-1$ //$NON-NLS-2$
-			MessageDialog.openError(getShell(), Messages.bodhiNewDialog_invalidBugIds,
-					Messages.bodhiNewDialog_invalidBugIdsMsg);
+			MessageDialog.openError(getShell(), BodhiText.BodhiNewDialog_invalidBugIds,
+					BodhiText.BodhiNewDialog_invalidBugIdsMsg);
 			return;
 		}
 		

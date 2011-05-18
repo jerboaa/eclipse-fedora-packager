@@ -8,9 +8,11 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.bodhi;
+package org.fedoraproject.eclipse.packager.bodhi.internal.handlers;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.util.regex.Matcher;
@@ -39,15 +41,19 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
-import org.fedoraproject.eclipse.packager.bodhi.stubs.BodhiClientStub;
-import org.fedoraproject.eclipse.packager.bodhi.stubs.BodhiNewDialogStub;
-import org.fedoraproject.eclipse.packager.bodhi.stubs.UserValidationDialogStub;
+import org.fedoraproject.eclipse.packager.bodhi.BodhiPlugin;
+import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
+import org.fedoraproject.eclipse.packager.bodhi.api.BodhiClient;
+import org.fedoraproject.eclipse.packager.bodhi.api.IBodhiClient;
+import org.fedoraproject.eclipse.packager.bodhi.api.IBodhiNewDialog;
+import org.fedoraproject.eclipse.packager.bodhi.api.IUserValidationDialog;
+import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientInitException;
+import org.fedoraproject.eclipse.packager.bodhi.internal.ui.BodhiNewDialog;
+import org.fedoraproject.eclipse.packager.bodhi.internal.ui.BodhiUpdateInfoDialog;
+import org.fedoraproject.eclipse.packager.bodhi.internal.ui.UserValidationDialog;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Handler for pushing Bodhi updates.
@@ -58,20 +64,6 @@ public class BodhiNewHandler extends AbstractHandler {
 	protected IUserValidationDialog authDialog;
 	protected IBodhiClient bodhi;
 	protected Shell shell;
-
-    ///////////////////////////////////////////////////////////////
-	// FIXME: This is used for testing only and is super-ugly, but mocking
-	//        things in conjunction with SWTBotTests doesn't work. We really
-	//        need to refactor this.
-	//        Better ideas very welcome!
-	/**
-	 * Indicates if stub or fleshed out objects are returned.
-	 */
-	public static boolean inTestingMode = false;
-	// stubs
-	private IBodhiNewDialog bodhiDialogStub = new BodhiNewDialogStub(this);
-	private IUserValidationDialog validationDialogStub = new UserValidationDialogStub();
-	private IBodhiClient bodhiClientStub = new BodhiClientStub();
 	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
@@ -90,12 +82,12 @@ public class BodhiNewHandler extends AbstractHandler {
 		// Hence, the instance variable "shell".
 		shell = getShell(e);
 		
-		Job job = new Job(Messages.bodhiNewHandler_jobName) { //$NON-NLS-1$
+		Job job = new Job(BodhiText.BodhiNewHandler_jobName) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.bodhiNewHandler_createUpdateMsg, 
+				monitor.beginTask(BodhiText.BodhiNewHandler_createUpdateMsg, 
 						IProgressMonitor.UNKNOWN);
-				monitor.subTask(Messages.bodhiNewHandler_checkTagMsg);
+				monitor.subTask(BodhiText.BodhiNewHandler_checkTagMsg);
 				try {
 					String tag = RPMUtils.makeTagName(fedoraProjectRoot);
 					String branchName = projectBits.getCurrentBranchName();
@@ -105,7 +97,7 @@ public class BodhiNewHandler extends AbstractHandler {
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
-						monitor.subTask(Messages.bodhiNewHandler_querySpecFileMsg);
+						monitor.subTask(BodhiText.BodhiNewHandler_querySpecFileMsg);
 						// Parsing changelog from spec-file seems to be broken
 						// This always returns "". See #49
 						String clog = "";
@@ -117,12 +109,8 @@ public class BodhiNewHandler extends AbstractHandler {
 							throw new OperationCanceledException();
 						}
 						// if debugging, want to use stub
-						if (!inTestingMode) {
-							setDialog(new BodhiNewDialog(shell, buildName,
+						setDialog(new BodhiNewDialog(shell, buildName,
 									release, bugIDs, clog));
-						} else {
-							setDialog(bodhiDialogStub);
-						}
 						Display.getDefault().syncExec(new Runnable() {
 							@Override
 							public void run() {
@@ -149,15 +137,11 @@ public class BodhiNewHandler extends AbstractHandler {
 							if (monitor.isCanceled()) {
 								throw new OperationCanceledException();
 							}
-							if (!inTestingMode) {
-								setAuthDialog(new UserValidationDialog(
+							setAuthDialog(new UserValidationDialog(
 										shell, BodhiClient.BODHI_URL, cachedUsername,
 										cachedPassword,
-										Messages.bodhiNewHandler_updateLoginMsg,
+										BodhiText.BodhiNewHandler_updateLoginMsg,
 								"icons/bodhi-icon-48.png")); //$NON-NLS-1$
-							} else {
-								setAuthDialog(validationDialogStub);
-							}
 							Display.getDefault().syncExec(new Runnable() {
 								@Override
 								public void run() {
@@ -214,7 +198,7 @@ public class BodhiNewHandler extends AbstractHandler {
 							return Status.CANCEL_STATUS;
 						}
 					} else {
-						return FedoraHandlerUtils.handleError(NLS.bind(Messages.bodhiNewHandler_notCorrectTagFail, branchName, tag));
+						return FedoraHandlerUtils.handleError(NLS.bind(BodhiText.BodhiNewHandler_notCorrectTagFail, branchName, tag));
 					}
 				} catch (CoreException e) {
 					e.printStackTrace();
@@ -223,7 +207,11 @@ public class BodhiNewHandler extends AbstractHandler {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					return null;
+				} catch (BodhiClientInitException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+				return null;
 			}
 		};
 		job.setUser(true);
@@ -264,11 +252,7 @@ public class BodhiNewHandler extends AbstractHandler {
 	 *         depending if inTestingMode returns true or false.
 	 */
 	public IBodhiClient getBodhi() {
-		if (!inTestingMode) {
-			return bodhi;
-		} else {
-			return bodhiClientStub;
-		}
+		return bodhi;
 	}
 
 	/**
@@ -286,11 +270,7 @@ public class BodhiNewHandler extends AbstractHandler {
 	 * @return The user validation dialog.
 	 */
 	public IUserValidationDialog getAuthDialog() {
-		if (!inTestingMode) {
-			return authDialog;
-		} else {
-			return validationDialogStub;
-		}
+		return authDialog;
 	}
 
 	/**
@@ -308,11 +288,7 @@ public class BodhiNewHandler extends AbstractHandler {
 	 * @return The UI dialog.
 	 */
 	public IBodhiNewDialog getDialog() {
-		if (!inTestingMode) {
-			return dialog;
-		} else {
-			return bodhiDialogStub;
-		}
+		return dialog;
 	}
 
 	/**
@@ -367,86 +343,89 @@ public class BodhiNewHandler extends AbstractHandler {
 	 * @param password
 	 * @param monitor
 	 * @return
+	 * @throws BodhiClientInitException 
 	 */
 	protected IStatus newUpdate(String buildName, String release, String type,
 			String request, String bugs, String notes, String username,
-			String password, IProgressMonitor monitor) {
-		IStatus status;
+			String password, IProgressMonitor monitor) throws BodhiClientInitException {
+		IStatus status = null;
 
-		try {
+//		try {
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			monitor.subTask(Messages.bodhiNewHandler_connectToBodhi);
-			if (!inTestingMode) {
-				setBodhi(new BodhiClient());
-			} else {
-				setBodhi(bodhiClientStub);
+			monitor.subTask(BodhiText.BodhiNewHandler_connectToBodhi);
+			URL defaultBodhiURL = null;
+			try {
+				defaultBodhiURL = new URL(BodhiClient.BODHI_URL);
+			} catch (MalformedURLException e) {
+				// ignore
 			}
-
+			setBodhi(new BodhiClient(defaultBodhiURL));
+			
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 			// Login
-			monitor.subTask(Messages.bodhiNewHandler_loginBodhi);
-			JSONObject result = getBodhi().login(username, password);
-			if (result.has("message")) { //$NON-NLS-1$
-				throw new IOException(result.getString("message")); //$NON-NLS-1$
-			}
-
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			// create new update
-			monitor.subTask(Messages.bodhiNewHandler_sendNewUpdate);
-			result = getBodhi().newUpdate(buildName, release, type, request, bugs,
-					notes, result.getString("_csrf_token"));
-			// Note bodhi's "tg_flash" appears to be the Turbo Gears flash message
-			// which shows up in the Web interface indicating something happened
-			String bodhiRespStatus = "";
-			if (result.has("tg_flash")) {
-				bodhiRespStatus = result.getString("tg_flash");
-			}
-			status = new MultiStatus(BodhiPlugin.PLUGIN_ID, IStatus.OK,
-					bodhiRespStatus, null);
-			/* 
-			 * Luke Macken <lmacken@redhat.com> as to what the "save" JSON method
-			 * call returns:
-			 *  
-			 * The save method will return a dictionary of updates that were
-			 * created with the update.  So, you could also grab the update title
-			 * (which is just a comma-delimeted list of n-v-r's) via 
-			 * result['updates'][0]['title'], or something of the sort.
-			 */
-			// If we've got "updates" in the response we should be OK for extracting
-			// the update title.
-			if (result.has("updates")) { //$NON-NLS-1$
-				JSONArray updates = result.getJSONArray("updates");
-				if (updates.length() > 0) {
-					JSONObject update = updates.getJSONObject(0);
-					if (update.has("title")) {
-						((MultiStatus) status).add(new Status(IStatus.OK,
-								BodhiPlugin.PLUGIN_ID, update.getString("title"))); //$NON-NLS-1$
-					}
-				}
-			}
-			
-			// Logout
-			monitor.subTask(Messages.bodhiNewHandler_logoutMsg);
-			getBodhi().logout();
-		} catch (GeneralSecurityException e) {
-			e.printStackTrace();
-			status = FedoraHandlerUtils.handleError(e.getMessage());
-		} catch (IOException e) {
-			e.printStackTrace();
-			status = FedoraHandlerUtils.handleError(e.getMessage());
-		} catch (ParseException e) {
-			e.printStackTrace();
-			status = FedoraHandlerUtils.handleError(e.getMessage());
-		} catch (JSONException e) {
-			e.printStackTrace();
-			status = FedoraHandlerUtils.handleError(e.getMessage());
-		}
+			monitor.subTask(BodhiText.BodhiNewHandler_loginBodhi);
+//			JSONObject result = getBodhi().login(username, password);
+//			if (result.has("message")) { //$NON-NLS-1$
+//				throw new IOException(result.getString("message")); //$NON-NLS-1$
+//			}
+//
+//			if (monitor.isCanceled()) {
+//				throw new OperationCanceledException();
+//			}
+//			// create new update
+//			monitor.subTask(BodhiText.BodhiNewHandler_sendNewUpdate);
+//			result = getBodhi().createNewUpdate(buildName, release, type, request, bugs,
+//					notes, result.getString("_csrf_token"));
+//			// Note bodhi's "tg_flash" appears to be the Turbo Gears flash message
+//			// which shows up in the Web interface indicating something happened
+//			String bodhiRespStatus = "";
+//			if (result.has("tg_flash")) {
+//				bodhiRespStatus = result.getString("tg_flash");
+//			}
+//			status = new MultiStatus(BodhiPlugin.PLUGIN_ID, IStatus.OK,
+//					bodhiRespStatus, null);
+//			/* 
+//			 * Luke Macken <lmacken@redhat.com> as to what the "save" JSON method
+//			 * call returns:
+//			 *  
+//			 * The save method will return a dictionary of updates that were
+//			 * created with the update.  So, you could also grab the update title
+//			 * (which is just a comma-delimeted list of n-v-r's) via 
+//			 * result['updates'][0]['title'], or something of the sort.
+//			 */
+//			// If we've got "updates" in the response we should be OK for extracting
+//			// the update title.
+//			if (result.has("updates")) { //$NON-NLS-1$
+//				JSONArray updates = result.getJSONArray("updates");
+//				if (updates.length() > 0) {
+//					JSONObject update = updates.getJSONObject(0);
+//					if (update.has("title")) {
+//						((MultiStatus) status).add(new Status(IStatus.OK,
+//								BodhiPlugin.PLUGIN_ID, update.getString("title"))); //$NON-NLS-1$
+//					}
+//				}
+//			}
+//			
+//			// Logout
+//			monitor.subTask(BodhiText.BodhiNewHandler_logoutMsg);
+//			getBodhi().logout();
+//		} catch (GeneralSecurityException e) {
+//			e.printStackTrace();
+//			status = FedoraHandlerUtils.handleError(e.getMessage());
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			status = FedoraHandlerUtils.handleError(e.getMessage());
+//		} catch (ParseException e) {
+//			e.printStackTrace();
+//			status = FedoraHandlerUtils.handleError(e.getMessage());
+//		} catch (JSONException e) {
+//			e.printStackTrace();
+//			status = FedoraHandlerUtils.handleError(e.getMessage());
+//		}
 
 		return status;
 	}

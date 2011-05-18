@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.bodhi;
+package org.fedoraproject.eclipse.packager.bodhi.internal.ui;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -26,6 +26,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.fedoraproject.eclipse.packager.bodhi.BodhiPlugin;
+import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
+import org.fedoraproject.eclipse.packager.bodhi.api.IUserValidationDialog;
 
 /**
  * A dialog for prompting for a user name and password
@@ -110,7 +113,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText(Messages.userValidationDialog_passwordRequired);
+		newShell.setText(BodhiText.userValidationDialog_passwordRequired);
 	}
 
 	/**
@@ -179,7 +182,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 		}
 		if (domain != null) {
 			Label d = new Label(main, SWT.WRAP);
-			d.setText(Messages.userValidationDialog_server);
+			d.setText(BodhiText.userValidationDialog_server);
 			data = new GridData();
 			d.setLayoutData(data);
 			Label label = new Label(main, SWT.WRAP);
@@ -200,7 +203,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 		if (cachingCheckbox && domain != null) {
 			allowCachingButton = new Button(main, SWT.CHECK);
 			allowCachingButton
-					.setText(Messages.userValidationDialog_savePassword);
+					.setText(BodhiText.userValidationDialog_savePassword);
 			data = new GridData(GridData.FILL_HORIZONTAL
 					| GridData.GRAB_HORIZONTAL);
 			data.horizontalSpan = 3;
@@ -225,7 +228,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	 *            the parent of the widgets
 	 */
 	protected void createPasswordFields(Composite parent) {
-		new Label(parent, SWT.NONE).setText(Messages.userValidationDialog_password);
+		new Label(parent, SWT.NONE).setText(BodhiText.userValidationDialog_password);
 
 		passwordField = new Text(parent, SWT.BORDER | SWT.PASSWORD);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
@@ -241,7 +244,7 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	 *            the parent of the widgets
 	 */
 	protected void createUsernameFields(Composite parent) {
-		new Label(parent, SWT.NONE).setText(Messages.userValidationDialog_username);
+		new Label(parent, SWT.NONE).setText(BodhiText.userValidationDialog_username);
 
 		usernameField = new Text(parent, SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);

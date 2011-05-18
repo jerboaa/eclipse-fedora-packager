@@ -8,10 +8,10 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.bodhi.stubs;
+package org.fedoraproject.eclipse.packager.tests.utils;
 
 import org.eclipse.jface.window.Window;
-import org.fedoraproject.eclipse.packager.bodhi.IUserValidationDialog;
+import org.fedoraproject.eclipse.packager.bodhi.api.IUserValidationDialog;
 
 public class UserValidationDialogStub implements IUserValidationDialog {
 

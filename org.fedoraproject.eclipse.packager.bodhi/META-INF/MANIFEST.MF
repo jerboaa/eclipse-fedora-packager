@@ -9,21 +9,35 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: org.apache.commons.httpclient,
+Import-Package: com.google.gson,
+ org.apache.commons.httpclient,
  org.apache.commons.httpclient.methods,
  org.apache.commons.httpclient.params,
  org.apache.commons.httpclient.protocol,
  org.apache.commons.ssl,
+ org.apache.http,
+ org.apache.http.message,
+ org.apache.http.entity.mime,
+ org.apache.http.entity.mime.content,
+ org.apache.http.impl.client,
+ org.apache.http.params,
+ org.apache.http.client,
+ org.apache.http.client.methods,
+ org.apache.http.conn,
+ org.apache.http.conn.ssl,
+ org.apache.http.conn.scheme,
+ org.apache.http.util,
  org.eclipse.core.resources,
  org.eclipse.equinox.security.storage;version="1.0.0",
  org.eclipse.ui.forms.widgets,
  org.fedoraproject.eclipse.packager,
+ org.fedoraproject.eclipse.packager.api,
  org.fedoraproject.eclipse.packager.api.errors,
- org.fedoraproject.eclipse.packager.utils,
- org.json
+ org.fedoraproject.eclipse.packager.utils
 Bundle-Localization: plugin
 Export-Package: org.fedoraproject.eclipse.packager.bodhi,
- org.fedoraproject.eclipse.packager.bodhi.stubs
+ org.fedoraproject.eclipse.packager.bodhi.api,
+ org.fedoraproject.eclipse.packager.bodhi.api.errors
 Bundle-ClassPath: eclipse-packager-fragment-bodhi.jar,
  .
 Eclipse-ExtensibleAPI: true
