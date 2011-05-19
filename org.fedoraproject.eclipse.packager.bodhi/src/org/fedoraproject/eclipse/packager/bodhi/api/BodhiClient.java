@@ -11,21 +11,15 @@
 package org.fedoraproject.eclipse.packager.bodhi.api;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.GeneralSecurityException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -33,11 +27,13 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
-import org.fedoraproject.eclipse.packager.FedoraSSL;
-import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientException;
-import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientInitException;
 import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientLoginException;
+import org.fedoraproject.eclipse.packager.bodhi.fas.DateTime;
+import org.fedoraproject.eclipse.packager.bodhi.internal.json.DateTimeDeserializer;
 
 /**
  * Bodhi JSON over HTTP client.
@@ -68,7 +64,8 @@ public class BodhiClient implements IBodhiClient {
 	 */
 	public static final String BODHI_URL = "https://admin.fedoraproject.org/updates/"; //$NON-NLS-1$
 	
-	// Set the "Accept" HTTP header to
+	// We want JSON responses from the server. Use these constants in order
+	// to set the "Accept: application/json" HTTP header accordingly.
 	private static final String ACCEPT_HTTP_HEADER_NAME = "Accept"; //$NON-NLS-1$
 	private static final String MIME_JSON = "application/json"; //$NON-NLS-1$
 	
@@ -84,13 +81,8 @@ public class BodhiClient implements IBodhiClient {
 	 * @param bodhiServerURL
 	 *            The base URL to the Bodhi server.
 	 * 
-	 * @throws BodhiClientInitException
-	 * 
 	 */
-	public BodhiClient(URL bodhiServerURL) throws BodhiClientInitException {
-		// set up a proper client.
-		// FIXME: Make this so that it only uses SSL, but does not require
-		// Fedora certs.
+	public BodhiClient(URL bodhiServerURL) {
 		this.httpclient = getClient();
 		this.bodhiServerUrl = bodhiServerURL;
 	}
@@ -105,8 +97,10 @@ public class BodhiClient implements IBodhiClient {
 	@Override
 	public BodhiLoginResponse login(String username, String password)
 			throws BodhiClientLoginException {
+		BodhiLoginResponse result = null;
 		try {
 			HttpPost post = new HttpPost(getLoginUrl());
+			// Add "Accept: application/json" HTTP header
 			post.addHeader(ACCEPT_HTTP_HEADER_NAME, MIME_JSON);
 
 			// Construct the multipart POST request body.
@@ -126,23 +120,28 @@ public class BodhiClient implements IBodhiClient {
 				throw new BodhiClientLoginException(response.getStatusLine()
 						.getReasonPhrase(), response);
 			} else {
-				String resString = ""; //$NON-NLS-1$
+				// Got a 200, response body is the JSON passed on from the
+				// server.
+				String jsonString = ""; //$NON-NLS-1$
 				if (resEntity != null) {
 					try {
-						resString = parseResponse(resEntity);
+						jsonString = parseResponse(resEntity);
 					} catch (IOException e) {
 						// ignore
+					} finally {
+						EntityUtils.consume(resEntity); // clean up resources
 					}
-					EntityUtils.consume(resEntity); // clean up resources
 				}
-				System.out
-						.println("Response was:\n--------------------------\n"
-								+ resString);
+				// Deserialize from JSON
+				GsonBuilder gsonBuilder = new GsonBuilder();
+				gsonBuilder.registerTypeAdapter(DateTime.class, new DateTimeDeserializer());
+				Gson gson = gsonBuilder.create();
+				result = gson.fromJson(jsonString, BodhiLoginResponse.class);
 			}
 		} catch (IOException e) {
 			throw new BodhiClientLoginException(e.getMessage(), e);
 		}
-		return null;
+		return result;
 	}
 
 	/*
@@ -179,11 +178,18 @@ public class BodhiClient implements IBodhiClient {
 		} catch (IOException e) {
 			throw new BodhiClientException(e.getMessage(), e);
 		} finally {
-			// When HttpClient instance is no longer needed,
-            // shut down the connection manager to ensure
-            // immediate deallocation of all system resources
-			httpclient.getConnectionManager().shutdown();
+			shutDownConnection();
 		}
+	}
+
+	/**
+	 * Shut down the connection of this client.
+	 */
+	public void shutDownConnection() {
+		// When HttpClient instance is no longer needed,
+        // shut down the connection manager to ensure
+        // immediate deallocation of all system resources
+		httpclient.getConnectionManager().shutdown();
 	}
 
 	/*
@@ -253,46 +259,12 @@ public class BodhiClient implements IBodhiClient {
 	/**
 	 * @return A properly configured HTTP client instance
 	 */
-	private HttpClient getClient() throws BodhiClientInitException {
+	private HttpClient getClient() {
 		// Set up client with proper timeout
 		HttpParams params = new BasicHttpParams();
 		params.setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT,
 				CONNECTION_TIMEOUT);
-		HttpClient client = null;
-		try {
-			client = sslEnable(new DefaultHttpClient(params));
-		} catch (FileNotFoundException e) {
-			throw new BodhiClientInitException(e.getMessage(), e);
-		} catch (GeneralSecurityException e) {
-			throw new BodhiClientInitException(e.getMessage(), e);
-		} catch (IOException e) {
-			throw new BodhiClientInitException(e.getMessage(), e);
-		}
-		return client;
-	}
-	
-	/**
-	 * Wrap a basic HttpClient object in a SSL enabled HttpClient (including
-	 * Fedora SSL authentication cert) object.
-	 * 
-	 * @param base The HttpClient to wrap.
-	 * @return The SSL wrapped HttpClient.
-	 * @throws GeneralSecurityException
-	 * @throws IOException
-	 */
-	private HttpClient sslEnable(HttpClient base)
-			throws GeneralSecurityException, FileNotFoundException, IOException {
-		
-		// Get a SSL related instance for setting up SSL connections.
-		FedoraSSL fedoraSSL = FedoraSSLFactory.getInstance();
-		SSLSocketFactory sf = new SSLSocketFactory(
-				fedoraSSL.getInitializedSSLContext(), // may throw FileNotFoundE
-				SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-		ClientConnectionManager ccm = base.getConnectionManager();
-		SchemeRegistry sr = ccm.getSchemeRegistry();
-		Scheme https = new Scheme("https", 443, sf); //$NON-NLS-1$
-		sr.register(https);
-		return new DefaultHttpClient(ccm, base.getParams());
+		return new DefaultHttpClient(params);
 	}
 	
 	/**
@@ -334,7 +306,7 @@ public class BodhiClient implements IBodhiClient {
 	 * @return The login URL.
 	 */
 	private String getLoginUrl() {
-		return this.bodhiServerUrl.toString() + "login?tg_format=json"; //$NON-NLS-1$
+		return this.bodhiServerUrl.toString() + "login"; //$NON-NLS-1$
 	}
 	
 	/**
@@ -342,7 +314,7 @@ public class BodhiClient implements IBodhiClient {
 	 * @return The URL to be used for pushing updates or {@code null}.
 	 */
 	private String getPushUpdateUrl() {
-		return this.bodhiServerUrl.toString() + "save?tg_format=json"; //$NON-NLS-1$		
+		return this.bodhiServerUrl.toString() + "save"; //$NON-NLS-1$		
 	}
 	
 	/**
@@ -350,6 +322,6 @@ public class BodhiClient implements IBodhiClient {
 	 * @return The URL to be used for pushing updates or {@code null}.
 	 */
 	private String getLogoutUrl() {
-		return this.bodhiServerUrl.toString() + "logout?tg_format=json"; //$NON-NLS-1$		
+		return this.bodhiServerUrl.toString() + "logout"; //$NON-NLS-1$		
 	}
 }

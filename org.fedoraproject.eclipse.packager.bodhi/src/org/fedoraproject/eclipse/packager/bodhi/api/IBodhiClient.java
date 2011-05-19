@@ -23,7 +23,7 @@ public interface IBodhiClient {
 	 * 
 	 * @param username
 	 * @param password
-	 * @return The response from the server.
+	 * @return The parsed response from the server or {@code null}.
 	 * @throws BodhiClientLoginException If some error occurred.
 	 */
 	public BodhiLoginResponse login(String username, String password)
