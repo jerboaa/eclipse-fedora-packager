@@ -93,7 +93,7 @@ public class DownloadSourcesJob extends Job {
 			if (!suppressSourcesUpToDateInfo) {
 				FedoraHandlerUtils
 						.showInformationDialog(shell,
-								NonTranslatableStrings.getProductName(),
+								NonTranslatableStrings.getProductName(this.fedoraProjectRoot),
 								e.getMessage());
 			}
 			return Status.OK_STATUS;

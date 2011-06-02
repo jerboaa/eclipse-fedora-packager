@@ -118,6 +118,6 @@ public class FedoraPackager {
 		}
 		throw new FedoraPackagerCommandNotFoundException(NLS.bind(
 				FedoraPackagerText.FedoraPackager_commandNotFoundError,
-				NonTranslatableStrings.getDistributionName(), commandId));
+				NonTranslatableStrings.getDistributionName(this.root), commandId));
 	}
 }

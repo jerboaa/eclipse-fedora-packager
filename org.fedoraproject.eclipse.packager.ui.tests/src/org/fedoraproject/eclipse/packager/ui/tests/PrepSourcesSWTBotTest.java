@@ -12,10 +12,12 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.ContextMenuHelper;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.PackageExplorer;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -27,6 +29,7 @@ public class PrepSourcesSWTBotTest {
  
 	private static SWTWorkbenchBot	bot;
 	private GitTestProject edProject;
+	private FedoraProjectRoot fpRoot;
  
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -50,6 +53,7 @@ public class PrepSourcesSWTBotTest {
 		edProject.checkoutBranch("f13");
 		IResource edSpec = edProject.getProject().findMember(new Path("ed.spec"));
 		assertNotNull(edSpec);
+		fpRoot = FedoraPackagerUtils.getProjectRoot(edProject.getProject());
 	}
  
 	/**
@@ -71,8 +75,8 @@ public class PrepSourcesSWTBotTest {
 		// Click prepare sources context menu item
 		clickOnPrepareSources(packagerTree);
 		// Wait for upload process to start
-		bot.waitUntil(Conditions.shellIsActive(NonTranslatableStrings.getProductName()));
-		SWTBotShell efpJobWindow = bot.shell(NonTranslatableStrings.getProductName());
+		bot.waitUntil(Conditions.shellIsActive(NonTranslatableStrings.getProductName(fpRoot)));
+		SWTBotShell efpJobWindow = bot.shell(NonTranslatableStrings.getProductName(fpRoot));
 		assertNotNull(efpJobWindow);
 		// Wait for upload process to finish
 		bot.waitUntil(Conditions.shellCloses(efpJobWindow));

@@ -190,7 +190,7 @@ public class BodhiNewHandler extends AbstractHandler {
 									storeCredentials(username, password);
 								}
 							} else {
-								FedoraHandlerUtils.handleError(message);
+								return FedoraHandlerUtils.errorStatus(BodhiPlugin.PLUGIN_ID, message);
 							}
 							return result;
 						}
@@ -198,11 +198,11 @@ public class BodhiNewHandler extends AbstractHandler {
 							return Status.CANCEL_STATUS;
 						}
 					} else {
-						return FedoraHandlerUtils.handleError(NLS.bind(BodhiText.BodhiNewHandler_notCorrectTagFail, branchName, tag));
+						return FedoraHandlerUtils.errorStatus(BodhiPlugin.PLUGIN_ID, NLS.bind(BodhiText.BodhiNewHandler_notCorrectTagFail, branchName, tag));
 					}
 				} catch (CoreException e) {
 					e.printStackTrace();
-					return FedoraHandlerUtils.handleError(e);
+					return FedoraHandlerUtils.errorStatus(BodhiPlugin.PLUGIN_ID, e.getMessage());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -308,7 +308,7 @@ public class BodhiNewHandler extends AbstractHandler {
 				node.put("password", password, true); //$NON-NLS-1$
 			} catch (StorageException e) {
 				e.printStackTrace();
-				FedoraHandlerUtils.handleError(e);
+				FedoraHandlerUtils.showErrorDialog(shell, e.getMessage(), e.toString());
 			}
 		}
 	}
@@ -324,7 +324,7 @@ public class BodhiNewHandler extends AbstractHandler {
 			}
 		} catch (StorageException e) {
 			e.printStackTrace();
-			FedoraHandlerUtils.handleError(e);
+			FedoraHandlerUtils.showErrorDialog(shell, e.getMessage(), e.toString());
 		}
 		return null;
 	}

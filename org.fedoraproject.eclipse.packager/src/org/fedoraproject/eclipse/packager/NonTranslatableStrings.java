@@ -10,30 +10,34 @@ public class NonTranslatableStrings {
 	// absolutely change, please ask first.
 	
 	/**
+	 * @param root The project root.
 	 * @return The name of this product.
 	 */
-	public static String getProductName() {
-		return getDistributionName() + " Packager"; //$NON-NLS-1$
+	public static String getProductName(FedoraProjectRoot root) {
+		return getDistributionName(root) + " Packager"; //$NON-NLS-1$
 	}
 	
 	/**
+	 * @param root The project root.
 	 * @return The name of this distribution.
 	 */
-	public static String getDistributionName() {
+	public static String getDistributionName(FedoraProjectRoot root) {
 		return "Fedora"; //$NON-NLS-1$
 	}
 	
 	/**
+	 * @param root The project root.
 	 * @return The name of the build infrastructure.
 	 */
-	public static String getBuildToolName() {
+	public static String getBuildToolName(FedoraProjectRoot root) {
 		return "Koji"; //$NON-NLS-1$
 	}
 	
 	/**
+	 * @param root The project root.
 	 * @return The name of the update infrastructure. 
 	 */
-	public static String getUpdateToolName() {
+	public static String getUpdateToolName(FedoraProjectRoot root) {
 		return "Bodhi"; //$NON-NLS-1$
 	}
 }

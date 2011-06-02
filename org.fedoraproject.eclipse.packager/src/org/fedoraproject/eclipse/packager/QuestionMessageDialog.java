@@ -12,21 +12,24 @@ public class QuestionMessageDialog implements Runnable {
 	private final String question;
 	private boolean okPressed;
 	private Shell shell;
+	private FedoraProjectRoot root;
 
 	/**
 	 * 
 	 * @param question
 	 * @param shell
+	 * @param fpRoot 
 	 */
-	public QuestionMessageDialog(String question, Shell shell) {
+	public QuestionMessageDialog(String question, Shell shell, FedoraProjectRoot fpRoot) {
 		this.question = question;
 		this.shell = shell;
+		this.root = fpRoot;
 	}
 
 	@Override
 	public void run() {
 		okPressed = MessageDialog.openQuestion(shell,
-				NonTranslatableStrings.getProductName(),
+				NonTranslatableStrings.getProductName(root),
 				question);
 	}
 

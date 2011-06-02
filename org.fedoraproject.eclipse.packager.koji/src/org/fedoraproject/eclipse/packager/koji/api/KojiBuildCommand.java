@@ -56,7 +56,7 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 		if (kojiClient == null) {
 			throw new CommandMisconfiguredException(NLS.bind(
 					KojiText.KojiBuildCommand_configErrorNoClient,
-					NonTranslatableStrings.getBuildToolName()));
+					NonTranslatableStrings.getBuildToolName(this.projectRoot)));
 		}
 		// we also require scmURL to be set
 		if (scmUrl == null) {
@@ -179,7 +179,7 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 		// main monitor worked for 20
 		BuildResult result = new BuildResult();
 		monitor.subTask(NLS.bind(KojiText.KojiBuildCommand_kojiLogInTask,
-				NonTranslatableStrings.getBuildToolName()));
+				NonTranslatableStrings.getBuildToolName(this.projectRoot)));
 		// login 
 		this.kojiClient.login();
 		if (monitor.isCanceled()) {

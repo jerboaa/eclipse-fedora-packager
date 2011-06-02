@@ -40,6 +40,7 @@ import org.eclipse.team.internal.core.subscribers.ActiveChangeSetManager;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.cvs.CVSPlugin;
 import org.fedoraproject.eclipse.packager.cvs.Messages;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
@@ -97,7 +98,7 @@ public class CommitHandler extends AbstractHandler {
 						cs.add(new IResource[] { specfile });
 					} catch (CoreException e) {
 						e.printStackTrace();
-						return FedoraHandlerUtils.handleError(e);
+						return FedoraHandlerUtils.errorStatus(CVSPlugin.PLUGIN_ID, e.getMessage(), e);
 					}
 					// add the most recent entry from the specfile's changelog to the
 					// commit message; getClog is broken in rpm-editor, so return ""
@@ -121,7 +122,7 @@ public class CommitHandler extends AbstractHandler {
 									manager.remove(cs);
 								} catch (CVSException e) {
 									e.printStackTrace();
-									FedoraHandlerUtils.handleError(e, true);
+									FedoraHandlerUtils.showErrorDialog(shell, e.getMessage(), e.toString());
 								}
 							}			
 						});

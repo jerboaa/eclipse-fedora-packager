@@ -104,7 +104,7 @@ public abstract class FedoraPackagerCommand<T> {
 			throw new IllegalStateException(
 					NLS.bind(
 							FedoraPackagerText.FedoraPackagerCommand_projectRootSetTwiceError,
-							NonTranslatableStrings.getDistributionName()));
+							NonTranslatableStrings.getDistributionName(projectRoot)));
 		}
 		this.projectRoot = projectRoot;
 	}

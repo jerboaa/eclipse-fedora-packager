@@ -19,7 +19,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -28,8 +27,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.EditorPart;
-import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
 /**
  * Handler bound utility class.
@@ -107,106 +104,6 @@ public class FedoraHandlerUtils {
 		return new Status(IStatus.ERROR, plugInID, message, e);
 	}
 
-	/**
-	 * Create a MessageDialog 
-	 * @param message
-	 * @param exception
-	 * @param isError
-	 * @param showInDialog
-	 * @return
-	 */
-	private static IStatus handleError(final String message, Throwable exception,
-			final boolean isError, boolean showInDialog) {
-		// do not ask for user interaction while in debug mode
-		if (showInDialog) {
-			if (Display.getCurrent() == null) {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						if (isError) {
-							MessageDialog.openError(null, NonTranslatableStrings.getProductName(),
-									message);
-						} else {
-							MessageDialog.openInformation(null,
-									NonTranslatableStrings.getProductName(), message);
-						}
-					}
-				});
-			} else {
-				if (isError) {
-					MessageDialog.openError(null, NonTranslatableStrings.getProductName(), message);
-				} else {
-					MessageDialog.openInformation(null, NonTranslatableStrings.getProductName(),
-							message);
-				}
-			}
-		}
-		return new Status(isError ? IStatus.ERROR : IStatus.OK,
-				PackagerPlugin.PLUGIN_ID, message, exception);
-	}
-
-	/**
-	 * Create a user-friendly IStatus error message.
-	 * 
-	 * @param message
-	 * 		The error which occurred.
-	 * @return The IStatus object.
-	 */
-	@Deprecated
-	public static IStatus handleError(String message) {
-		return handleError(message, null, true, false);
-	}
-
-	/**
-	 * Create a user-friendly IStatus error message.
-	 * @param message
-	 * 		The error which occurred.
-	 * @param showInDialog
-	 * 		Show error inline?
-	 * @return The IStatus object.
-	 */
-	@Deprecated
-	public static IStatus handleError(String message, boolean showInDialog) {
-		return handleError(message, null, true, showInDialog);
-	}
-
-	/**
-	 * Create a user-friendly IStatus message.
-	 * @param message
-	 * 		The message for this status.
-	 * @param showInDialog
-	 * 		Show dialog inline?
-	 * @return The IStatus object.
-	 */
-	@Deprecated
-	public static IStatus handleOK(String message, boolean showInDialog) {
-		return handleError(message, null, false, showInDialog);
-	}
-
-	/**
-	 * Create a user-friendly IStatus error message.
-	 * @param e
-	 * 		The Exception which occurred.
-	 * @return The IStatus object.
-	 */
-	@Deprecated
-	public static IStatus handleError(Exception e) {
-		return handleError(e.getMessage(), e, true, false);
-	}
-
-	/**
-	 * Create a user-friendly IStatus error message.
-	 * @param e
-	 * 		The Exception which occurred.
-	 * @param showInDialog
-	 * 		Show error inline?
-	 * @return The IStatus object.
-	 */
-	@Deprecated
-	public static IStatus handleError(Exception e, boolean showInDialog) {
-		return handleError(e.getMessage(), e, true, showInDialog);
-	}
-	
 	/**
 	 * Show an information dialog.
 	 * 

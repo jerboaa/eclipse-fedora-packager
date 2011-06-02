@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
@@ -52,13 +51,9 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
 			fedoraProjectRoot = FedoraPackagerUtils
 					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e) {
-			logger.logError(NLS.bind(
-					FedoraPackagerText.invalidFedoraProjectRootError,
-					NonTranslatableStrings.getDistributionName()), e);
-			FedoraHandlerUtils.showErrorDialog(shell, NonTranslatableStrings
-					.getProductName(), NLS.bind(
-					FedoraPackagerText.invalidFedoraProjectRootError,
-					NonTranslatableStrings.getDistributionName()));
+			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
+			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
+					FedoraPackagerText.invalidFedoraProjectRootError);
 			return null;
 		}
 		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
@@ -74,17 +69,17 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage());
+					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage());
+					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
 			return null;
 		}
 		// Need to nest jobs into this job for it to show up properly in the
 		// UI
-		Job job = new Job(NonTranslatableStrings.getProductName()) {
+		Job job = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

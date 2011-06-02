@@ -59,24 +59,20 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 	
 	private MockBuildResult result;
 	private Shell shell;
+	private FedoraProjectRoot fedoraProjectRoot;
 	
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		final FedoraProjectRoot fedoraProjectRoot;
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(event);
 			fedoraProjectRoot = FedoraPackagerUtils
 					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e) {
-			logger.logError(NLS.bind(
-					FedoraPackagerText.invalidFedoraProjectRootError,
-					NonTranslatableStrings.getDistributionName()), e);
-			FedoraHandlerUtils.showErrorDialog(shell, NonTranslatableStrings
-					.getProductName(), NLS.bind(
-					FedoraPackagerText.invalidFedoraProjectRootError,
-					NonTranslatableStrings.getDistributionName()));
+			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
+			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
+					FedoraPackagerText.invalidFedoraProjectRootError);
 			return null;
 		}
 		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
@@ -96,15 +92,15 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage());
+					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage());
+					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
 			return null;
 		}
-		Job job = new Job(NonTranslatableStrings.getProductName()) {
+		Job job = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -143,7 +139,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 				
 				final RpmBuildResult srpmBuildResult = srpmBuildJob.getSRPMBuildResult(); 
 				// do the mock building
-				Job mockBuildJob = new Job(NonTranslatableStrings.getProductName()) {
+				Job mockBuildJob = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
@@ -188,7 +184,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 								FedoraHandlerUtils
 										.showInformationDialog(shell,
 												NonTranslatableStrings
-														.getProductName(), e
+														.getProductName(fedoraProjectRoot), e
 														.getMessage());
 								return Status.OK_STATUS;
 							} catch (CommandListenerException e) {
@@ -210,7 +206,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 								FedoraHandlerUtils
 										.showInformationDialog(shell,
 												NonTranslatableStrings
-														.getProductName(), e
+														.getProductName(fedoraProjectRoot), e
 														.getMessage());
 								return Status.OK_STATUS;
 							}
@@ -257,7 +253,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 					logger.logInfo(msg);
 					FedoraHandlerUtils.showInformationDialog(
 							shell,
-							NonTranslatableStrings.getProductName(), msg);
+							NonTranslatableStrings.getProductName(fedoraProjectRoot), msg);
 				} else {
 					String msg = NLS.bind(
 							RpmText.MockBuildHandler_mockFailedMsg,
@@ -265,7 +261,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 					logger.logInfo(msg);
 					FedoraHandlerUtils.showInformationDialog(
 							shell,
-							NonTranslatableStrings.getProductName(),
+							NonTranslatableStrings.getProductName(fedoraProjectRoot),
 							msg);
 				}
 			}

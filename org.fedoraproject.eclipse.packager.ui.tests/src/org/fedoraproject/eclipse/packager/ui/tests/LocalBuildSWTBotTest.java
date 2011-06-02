@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -14,10 +13,12 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.ContextMenuHelper;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.PackageExplorer;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -34,6 +35,7 @@ public class LocalBuildSWTBotTest {
 			"mips", "geode"};
 	private static SWTWorkbenchBot	bot;
 	private GitTestProject edProject;
+	private FedoraProjectRoot fpRoot;
  
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -54,9 +56,10 @@ public class LocalBuildSWTBotTest {
 		// Import ed
 		edProject = new GitTestProject("ed");
 		// use F13 branch of ed
-		edProject.checkoutBranch(Constants.R_HEADS + "f13/master");
+		edProject.checkoutBranch("f13");
 		IResource edSpec = edProject.getProject().findMember(new Path("ed.spec"));
 		assertNotNull(edSpec);
+		fpRoot = FedoraPackagerUtils.getProjectRoot(edProject.getProject());
 	}
  
 	/**
@@ -79,8 +82,8 @@ public class LocalBuildSWTBotTest {
 		// Click local build context menu item
 		clickOnBuildForLocalArchitecture(packagerTree);
 		// Wait for upload process to start
-		bot.waitUntil(Conditions.shellIsActive(NonTranslatableStrings.getProductName()));
-		SWTBotShell efpJobWindow = bot.shell(NonTranslatableStrings.getProductName());
+		bot.waitUntil(Conditions.shellIsActive(NonTranslatableStrings.getProductName(fpRoot)));
+		SWTBotShell efpJobWindow = bot.shell(NonTranslatableStrings.getProductName(fpRoot));
 		assertNotNull(efpJobWindow);
 		// Wait for upload process to finish, extend timeout
 		SWTBotPreferences.TIMEOUT = 5 * 5000;

@@ -75,7 +75,7 @@ public class TagSourcesListener implements ICommandListener {
 	 */
 	private boolean askIfShouldTag() {
 		QuestionMessageDialog op = new QuestionMessageDialog(
-				KojiText.KojiBuildHandler_tagBeforeSendingBuild, shell);
+				KojiText.KojiBuildHandler_tagBeforeSendingBuild, shell, this.projectRoot);
 		Display.getDefault().syncExec(op);
 		return op.isOkPressed();
 	}

@@ -80,13 +80,9 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 		try {
 			fedoraProjectRoot = FedoraPackagerUtils.getProjectRoot(resource);
 		} catch (InvalidProjectRootException e) {
-			logger.logError(NLS.bind(
-					FedoraPackagerText.invalidFedoraProjectRootError,
-					NonTranslatableStrings.getDistributionName()), e);
-			FedoraHandlerUtils.showErrorDialog(shell, NonTranslatableStrings
-					.getProductName(), NLS.bind(
-					FedoraPackagerText.invalidFedoraProjectRootError,
-					NonTranslatableStrings.getDistributionName()));
+			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
+			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
+					FedoraPackagerText.invalidFedoraProjectRootError);
 			return null;
 		}
 		FedoraPackager packager = new FedoraPackager(fedoraProjectRoot);
@@ -98,12 +94,12 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage());
+					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(), e.getMessage());
+					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
 			return null;
 		}
 		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
@@ -125,7 +121,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 								FedoraPackagerText.UploadHandler_versionOfFileExistsAndUpToDate,
 								resource.getName()));
 						FedoraHandlerUtils.showInformationDialog(shell,
-								NonTranslatableStrings.getProductName(),
+								NonTranslatableStrings.getProductName(fedoraProjectRoot),
 								NLS.bind(
 										FedoraPackagerText.UploadHandler_versionOfFileExistsAndUpToDate,
 										resource.getName()));
@@ -166,7 +162,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 						vcsIgnoreFileUpdater.postExecution();
 						// report that there was no upload required.
 						FedoraHandlerUtils.showInformationDialog(shell,
-								NonTranslatableStrings.getProductName(),
+								NonTranslatableStrings.getProductName(fedoraProjectRoot),
 								e.getMessage());
 						return Status.OK_STATUS;
 					} 
@@ -196,7 +192,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 				} catch (InvalidUploadFileException e) {
 					logger.logInfo(e.getMessage(), e);
 					FedoraHandlerUtils.showInformationDialog(shell,
-							NonTranslatableStrings.getProductName(),
+							NonTranslatableStrings.getProductName(fedoraProjectRoot),
 							e.getMessage());
 					return Status.OK_STATUS;
 				} catch (MalformedURLException e) {
@@ -207,7 +203,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 							e.getMessage());
 					logger.logInfo(message, e);
 					FedoraHandlerUtils.showInformationDialog(shell,
-							NonTranslatableStrings.getProductName(), message);
+							NonTranslatableStrings.getProductName(fedoraProjectRoot), message);
 					return Status.OK_STATUS;
 				}
 

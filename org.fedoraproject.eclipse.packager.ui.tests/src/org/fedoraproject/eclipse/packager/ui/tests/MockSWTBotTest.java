@@ -23,10 +23,12 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.ContextMenuHelper;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.PackageExplorer;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -39,6 +41,7 @@ public class MockSWTBotTest {
 	private static SWTWorkbenchBot	bot;
 	private GitTestProject edProject;
 	private Map<String, Boolean> expectedResources = new HashMap<String, Boolean>();
+	private FedoraProjectRoot fpRoot;
  
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -67,6 +70,7 @@ public class MockSWTBotTest {
 		expectedResources.put("state.log", false);
 		expectedResources.put("build.log", false);
 		expectedResources.put("RPM", false);
+		fpRoot = FedoraPackagerUtils.getProjectRoot(edProject.getProject());
 	}
  
 	/**
@@ -76,7 +80,6 @@ public class MockSWTBotTest {
 	 * 
 	 * @throws Exception
 	 */
-	@SuppressWarnings("static-access")
 	@Test
 	public void canMockBuildOnLocalArchitecture() throws Exception {
 		
@@ -92,8 +95,8 @@ public class MockSWTBotTest {
 		// Click mock build context menu item
 		clickOnMockBuild(packagerTree);
 		// Wait for fedora packager job to start
-		bot.waitUntil(Conditions.shellIsActive(NonTranslatableStrings.getProductName()));
-		SWTBotShell efpJobWindow = bot.shell(NonTranslatableStrings.getProductName());
+		bot.waitUntil(Conditions.shellIsActive(NonTranslatableStrings.getProductName(fpRoot)));
+		SWTBotShell efpJobWindow = bot.shell(NonTranslatableStrings.getProductName(fpRoot));
 		assertNotNull(efpJobWindow);
 		// Wait for mock build to finish, this takes a while so increase timeout
 		SWTBotPreferences.TIMEOUT = 5 * 60 * 1000; // set this to 5 minutes for now

@@ -3,7 +3,6 @@ package org.fedoraproject.eclipse.packager.rpm.api;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.MessageConsole;
-import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
 
 /**
@@ -12,7 +11,7 @@ import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
  */
 public class FedoraPackagerConsole {
 	
-	private static final String CONSOLE_NAME = NonTranslatableStrings.getProductName();
+	private static final String CONSOLE_NAME = "Packager Console"; //$NON-NLS-1$
 	
 	/**
 	 * @return A console instance.
