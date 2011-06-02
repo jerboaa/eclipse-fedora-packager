@@ -73,10 +73,10 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 	/**
 	 * Shell for message dialogs, etc.
 	 */
-	private Shell shell;
-	private BuildResult buildResult;
-	private URL kojiWebUrl;
-	private FedoraProjectRoot fedoraProjectRoot;
+	protected Shell shell;
+	protected BuildResult buildResult;
+	protected URL kojiWebUrl;
+	protected FedoraProjectRoot fedoraProjectRoot;
 	
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
