@@ -2,7 +2,9 @@ package org.fedoraproject.eclipse.packager.koji.api;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -52,7 +54,9 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 	protected void checkConfiguration() throws CommandMisconfiguredException {
 		// require a client
 		if (kojiClient == null) {
-			throw new CommandMisconfiguredException(KojiText.KojiBuildCommand_configErrorNoClient);
+			throw new CommandMisconfiguredException(NLS.bind(
+					KojiText.KojiBuildCommand_configErrorNoClient,
+					NonTranslatableStrings.getBuildToolName()));
 		}
 		// we also require scmURL to be set
 		if (scmUrl == null) {
@@ -174,7 +178,8 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 		
 		// main monitor worked for 20
 		BuildResult result = new BuildResult();
-		monitor.subTask(KojiText.KojiBuildCommand_kojiLogInTask);
+		monitor.subTask(NLS.bind(KojiText.KojiBuildCommand_kojiLogInTask,
+				NonTranslatableStrings.getBuildToolName()));
 		// login 
 		this.kojiClient.login();
 		if (monitor.isCanceled()) {

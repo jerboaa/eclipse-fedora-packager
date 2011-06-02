@@ -119,7 +119,7 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(KojiText.KojiBuildHandler_pushBuildToKoji,
+				monitor.beginTask(NLS.bind(KojiText.KojiBuildHandler_pushBuildToKoji, NonTranslatableStrings.getBuildToolName()),
 						100);
 				monitor.worked(5);
 				UnpushedChangesListener unpushedChangesListener = new UnpushedChangesListener(
@@ -133,9 +133,13 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 				try {
 					kojiClient = getHubClient();
 				} catch (MalformedURLException e) {
-					logger.logError(KojiText.KojiBuildHandler_invalidHubUrl, e);
+					logger.logError(NLS.bind(
+							KojiText.KojiBuildHandler_invalidHubUrl,
+							NonTranslatableStrings.getBuildToolName()), e);
 					return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
-							KojiText.KojiBuildHandler_invalidHubUrl, e);
+							NLS.bind(KojiText.KojiBuildHandler_invalidHubUrl,
+									NonTranslatableStrings.getBuildToolName()),
+							e);
 				}
 				kojiBuildCmd.setKojiClient(kojiClient);
 				kojiBuildCmd.scmUrl(projectBits
@@ -242,11 +246,14 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 		Image titleImage = descriptor.createImage();
 		Image msgContentImage = KojiPlugin.getImageDescriptor("icons/koji.png") //$NON-NLS-1$
 				.createImage();
-		KojiMessageDialog msgDialog = new KojiMessageDialog(shell,
-				KojiText.KojiBuildHandler_kojiBuild, titleImage,
+		KojiMessageDialog msgDialog = new KojiMessageDialog(shell, NLS.bind(
+				KojiText.KojiBuildHandler_kojiBuild,
+				NonTranslatableStrings.getBuildToolName()), titleImage,
 				MessageDialog.NONE, new String[] { IDialogConstants.OK_LABEL },
-				0, kojiWebUrl, taskId,
-				KojiText.KojiMessageDialog_buildResponseMsg, msgContentImage);
+				0, kojiWebUrl, taskId, NLS.bind(
+						KojiText.KojiMessageDialog_buildResponseMsg,
+						NonTranslatableStrings.getBuildToolName()),
+				msgContentImage);
 		return msgDialog;
 	}
 	
@@ -291,7 +298,9 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 		} catch (MalformedURLException e) {
 			// nothing critical, use default koji URL instead and log the bogus
 			// Web url set in preferences.
-			logger.logError(NLS.bind(KojiText.KojiBuildHandler_invalidKojiWebUrl, webUrl), e);
+			logger.logError(NLS.bind(
+					KojiText.KojiBuildHandler_invalidKojiWebUrl,
+					NonTranslatableStrings.getBuildToolName(), webUrl), e);
 			try {
 				kojiWebUrl = new URL(FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
 			} catch (MalformedURLException ignored) {};
@@ -310,7 +319,10 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 								if (jobStatus.isOK() && buildResult != null && buildResult.wasSuccessful()) {
 									FedoraPackagerLogger logger = FedoraPackagerLogger
 											.getInstance();
-									logger.logInfo(KojiText.KojiMessageDialog_buildResponseMsg
+									logger.logInfo(NLS
+											.bind(KojiText.KojiMessageDialog_buildResponseMsg,
+													NonTranslatableStrings
+															.getBuildToolName())
 											+ " " //$NON-NLS-1$
 											+ KojiUrlUtils.constructTaskUrl(
 													buildResult.getTaskId(),

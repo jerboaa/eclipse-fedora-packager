@@ -27,6 +27,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.forms.widgets.FormText;
+import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 
 /**
  * Message dialog showing the link to the Koji Web page showing build info.
@@ -67,7 +68,8 @@ public class KojiMessageDialog extends MessageDialog {
 			String[] dialogButtonLabels, int defaultIndex, URL kojiWebURL,
 			int taskId, String messageText, Image dialogContentImage) {
 		super(shell, dialogTitle, dialogTitleImage, NLS.bind(
-				KojiText.KojiMessageDialog_buildNumberMsg, taskId),
+				KojiText.KojiMessageDialog_buildNumberMsg,
+				NonTranslatableStrings.getBuildToolName(), taskId),
 				dialogImageType, dialogButtonLabels, defaultIndex);
 		this.kojiWebUrl = kojiWebURL;
 		this.taskId = taskId;
