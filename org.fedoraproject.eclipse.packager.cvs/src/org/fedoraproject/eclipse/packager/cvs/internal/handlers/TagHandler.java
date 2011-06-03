@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.cvs.handlers;
+package org.fedoraproject.eclipse.packager.cvs.internal.handlers;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
-import org.fedoraproject.eclipse.packager.cvs.Messages;
+import org.fedoraproject.eclipse.packager.cvs.CVSText;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
@@ -41,10 +41,10 @@ public class TagHandler extends AbstractHandler {
 			e1.printStackTrace();
 			return null;
 		}
-		Job job = new Job(Messages.tagHandler_jobName) {
+		Job job = new Job(CVSText.TagHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.tagHandler_tagTaskName, 
+				monitor.beginTask(CVSText.TagHandler_tagTaskName, 
 						IProgressMonitor.UNKNOWN);
 				// Do VCS tagging
 				IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);

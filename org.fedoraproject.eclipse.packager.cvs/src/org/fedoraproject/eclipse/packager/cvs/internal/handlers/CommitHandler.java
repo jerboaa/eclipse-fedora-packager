@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.cvs.handlers;
+package org.fedoraproject.eclipse.packager.cvs.internal.handlers;
 
 import java.util.Arrays;
 
@@ -41,7 +41,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.cvs.CVSPlugin;
-import org.fedoraproject.eclipse.packager.cvs.Messages;
+import org.fedoraproject.eclipse.packager.cvs.CVSText;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
@@ -68,12 +68,12 @@ public class CommitHandler extends AbstractHandler {
 			return null;
 		}
 		shell = getShell(e);
-		Job job = new Job(Messages.commitHandler_jobName) {
+		Job job = new Job(CVSText.CommitHandler_jobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				monitor.beginTask(Messages.commitHandler_commitFedoraCVS, 
+				monitor.beginTask(CVSText.CommitHandler_commitFedoraCVS, 
 						IProgressMonitor.UNKNOWN);
-				monitor.subTask(Messages.commitHandler_prepCommitMsg);
+				monitor.subTask(CVSText.CommitHandler_prepCommitMsg);
 				// check all out of sync resources in this project for a specfile
 				IFile specfile = fedoraProjectRoot.getSpecFile();
 				IProject project = specfile.getProject();

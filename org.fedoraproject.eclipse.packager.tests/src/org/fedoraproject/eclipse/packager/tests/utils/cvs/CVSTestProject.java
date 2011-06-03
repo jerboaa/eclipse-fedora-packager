@@ -12,23 +12,10 @@ package org.fedoraproject.eclipse.packager.tests.utils.cvs;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.core.ICVSRemoteFolder;
-import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
-import org.eclipse.team.internal.ccvs.core.client.Command.LocalOption;
-import org.eclipse.team.internal.ccvs.core.connection.CVSRepositoryLocation;
-import org.eclipse.team.internal.ccvs.core.resources.RemoteFolder;
-import org.eclipse.team.internal.ccvs.core.resources.RemoteModule;
-import org.eclipse.team.internal.ccvs.ui.operations.CheckoutSingleProjectOperation;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.IProgressService;
+import org.fedoraproject.eclipse.packager.cvs.CVSCheckoutOperation;
 
-@SuppressWarnings("restriction")
 public class CVSTestProject {
 	
 	private String scmURL;
@@ -43,19 +30,10 @@ public class CVSTestProject {
 	 * @throws Exception
 	 */
 	public void checkoutModule(String name) throws Exception {
-		ICVSRepositoryLocation repo = CVSRepositoryLocation.fromString(getScmURL());
-		ICVSRemoteFolder remoteFolder = repo.getRemoteFolder("rpms", null);
-		RemoteModule remoteModule = new RemoteModule(name, (RemoteFolder) remoteFolder, repo, name,new LocalOption[]{}, new CVSTag(), true);
-		
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		project = root.getProject(name);
-		
-		IProgressService progress = PlatformUI.getWorkbench().getProgressService();
-		IRunnableWithProgress op = new CheckoutSingleProjectOperation(null, remoteModule, project, null, false);
-		progress.busyCursorWhile(op);
-		
-		project.refreshLocal(IResource.DEPTH_INFINITE, null);
-		
+		CVSCheckoutOperation checkout = new CVSCheckoutOperation();
+		checkout.setModuleName(name);
+		checkout.setScmURL(getScmURL());
+		project = checkout.run();
 		// switch to the devel branch
 		currentBranch = project.findMember(new Path("devel"));
 	}

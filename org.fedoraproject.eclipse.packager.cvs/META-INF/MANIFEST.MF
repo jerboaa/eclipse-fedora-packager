@@ -32,12 +32,14 @@ Import-Package: org.apache.commons.httpclient,
  org.eclipse.team.internal.ccvs.ui,
  org.eclipse.team.internal.ccvs.ui.wizards,
  org.eclipse.team.internal.core.subscribers,
+ org.eclipse.team.internal.ccvs.ui.operations,
+ org.eclipse.team.ui,
+ org.eclipse.ui.console,
  org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.api.errors,
  org.fedoraproject.eclipse.packager.rpm,
  org.fedoraproject.eclipse.packager.utils
-Export-Package: org.fedoraproject.eclipse.packager.cvs,
- org.fedoraproject.eclipse.packager.cvs.handlers
+Export-Package: org.fedoraproject.eclipse.packager.cvs
 Bundle-ClassPath: eclipse-packager-fragment-cvs.jar,
  .
 Eclipse-ExtensibleAPI: true

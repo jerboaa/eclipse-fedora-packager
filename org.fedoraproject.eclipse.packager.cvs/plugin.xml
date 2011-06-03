@@ -58,12 +58,12 @@
    <extension
          point="org.eclipse.ui.commands">
          <command
-            defaultHandler="org.fedoraproject.eclipse.packager.cvs.handlers.CommitHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.cvs.internal.handlers.CommitHandler"
             id="org.fedoraproject.eclipse.packager.CommitCommand"
             name="%command.name.1">
       </command>
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.cvs.handlers.TagHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.cvs.internal.handlers.TagHandler"
             id="org.fedoraproject.eclipse.packager.TagCommand"
             name="%command.name.10">
       </command>
@@ -76,4 +76,19 @@
          name="CVS">
    </vcs>
 </extension>
+<!-- Disabled by default.
+<extension
+         point="org.eclipse.ui.importWizards">
+      <wizard
+            category="org.eclipse.egit.ui.internal.clone.gitclonecategory"
+            class="org.fedoraproject.eclipse.packager.cvs.internal.ui.FedoraPackagerCheckoutWizard"
+            icon="icons/newconnect_wiz.gif"
+            id="org.fedoraproject.eclipse.packager.cvs.FedoraPackagerCVSImportWizard"
+            name="%FedoraCVSWizardName">
+         <description>
+            %FedoraCVSWizardDescription
+         </description>
+      </wizard>
+   </extension>
+-->
 </plugin>
