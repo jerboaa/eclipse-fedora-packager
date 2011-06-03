@@ -12,6 +12,7 @@ package org.fedoraproject.eclipse.packager.cvs.internal.ui;
 
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
@@ -67,7 +68,15 @@ public class FedoraPackagerCheckoutWizard extends Wizard implements IImportWizar
 			CVSCheckoutOperation cloneOp = new CVSCheckoutOperation();
 			cloneOp.setModuleName(page.getPackageName());
 			
-			IProject newProject = cloneOp.run();
+			// set the runnable and the project
+			cloneOp.prepareRunable();
+			IRunnableWithProgress op = cloneOp.getRunnable();
+			IProject newProject = cloneOp.getProject();
+			
+			// Finally, run the runnable :)
+			getContainer().run(true, true, op);
+			
+			
 			// Set persistent property so that we know when to show the context
 			// menu item.
 			newProject.setPersistentProperty(PackagerPlugin.PROJECT_PROP,

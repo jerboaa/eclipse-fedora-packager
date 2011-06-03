@@ -80,7 +80,7 @@
 <extension
          point="org.eclipse.ui.importWizards">
       <wizard
-            category="org.eclipse.egit.ui.internal.clone.gitclonecategory"
+            category="org.eclipse.team.cvs.ui.importWizards"
             class="org.fedoraproject.eclipse.packager.cvs.internal.ui.FedoraPackagerCheckoutWizard"
             icon="icons/newconnect_wiz.gif"
             id="org.fedoraproject.eclipse.packager.cvs.FedoraPackagerCVSImportWizard"

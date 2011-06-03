@@ -1,7 +1,6 @@
 package org.fedoraproject.eclipse.packager.cvs;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -13,8 +12,6 @@ import org.eclipse.team.internal.ccvs.core.connection.CVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.core.resources.RemoteFolder;
 import org.eclipse.team.internal.ccvs.core.resources.RemoteModule;
 import org.eclipse.team.internal.ccvs.ui.operations.CheckoutSingleProjectOperation;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.IProgressService;
 
 /**
  * Operation for checking out a module from CVS
@@ -27,6 +24,8 @@ public class CVSCheckoutOperation {
 	private String moduleName;
 	private IProject project;
 	private String scmURL;
+	private IRunnableWithProgress runnable;
+	private boolean hasRun = false;
 	
 	/**
 	 * Set the module name, which should get checked out.
@@ -47,12 +46,11 @@ public class CVSCheckoutOperation {
 	}
 	
 	/**
-	 * Run the checkout.
-	 * @return The checked out project.
+	 * Prepare the checkout operation.
 	 * 
 	 * @throws Exception
 	 */
-	public IProject run() throws Exception {
+	public void prepareRunable() throws Exception {
 		// make sure module name is properly set
 		if (moduleName == null) {
 			throw new IllegalStateException();
@@ -63,23 +61,45 @@ public class CVSCheckoutOperation {
 		
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		project = root.getProject(moduleName);
-		
-		IProgressService progress = PlatformUI.getWorkbench().getProgressService();
-		IRunnableWithProgress op = new CheckoutSingleProjectOperation(null, remoteModule, project, null, false);
-		progress.busyCursorWhile(op);
-		
-		project.refreshLocal(IResource.DEPTH_INFINITE, null);
-		return project;
+		runnable = new CheckoutSingleProjectOperation(null, remoteModule, project, null, false);
+		hasRun = true;
 	}
 	
 	/**
 	 * @return the scmURL
 	 */
-	protected String getScmURL() {
+	public String getScmURL() {
 		// return the default if not set explicitly
 		if (this.scmURL == null) {
 			return CVSUtils.getDefaultCVSBaseUrl();
 		}
 		return scmURL;
 	}
+	
+	/**
+	 * 
+	 * @return the runnable.
+	 * 
+	 * @throws IllegalAccessException
+	 */
+	public IRunnableWithProgress getRunnable() throws IllegalAccessException {
+		if (!hasRun) {
+			throw new IllegalAccessException();
+		}
+		return this.runnable;
+	}
+	
+	/**
+	 * 
+	 * @return the underlying project of this op.
+	 * 
+	 * @throws IllegalAccessException
+	 */
+	public IProject getProject() throws IllegalAccessException {
+		if (!hasRun) {
+			throw new IllegalAccessException();
+		}
+		return this.project;
+	}
+	
 }
