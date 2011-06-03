@@ -40,7 +40,7 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 	/**
 	 * The distribution tag (e.g. dist-rawhide)
 	 */
-	private String distribution;
+	private String buildTarget;
 	/**
 	 * The name-version-release token to push a build for
 	 */
@@ -63,7 +63,7 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 			throw new CommandMisconfiguredException(KojiText.KojiBuildCommand_configErrorNoScmURL);
 		}
 		// distribution can't be null
-		if (distribution == null) {
+		if (buildTarget == null) {
 			throw new CommandMisconfiguredException(KojiText.KojiBuildCommand_configErrorNoDistribution);
 		}
 		// nvr can't be null
@@ -108,13 +108,13 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 	}
 	
 	/**
-	 * Sets the distribution tag for which to push the build for.
+	 * Sets the build target for which to push the build for.
 	 * 
-	 * @param distribution The tag to build for.
+	 * @param buildTarget The target to build for.
 	 * @return This instance.
 	 */
-	public KojiBuildCommand distTag(String distribution) {
-		this.distribution = distribution;
+	public KojiBuildCommand buildTarget(String buildTarget) {
+		this.buildTarget = buildTarget;
 		return this;
 	}
 	
@@ -195,7 +195,7 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 			logger.logInfo(KojiText.KojiBuildCommand_buildLogMsg);
 		}
 		// attempt to push build
-		int taskId = this.kojiClient.build(distribution, scmUrl.toString(), nvr, scratchBuild);
+		int taskId = this.kojiClient.build(buildTarget, scmUrl.toString(), nvr, scratchBuild);
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}

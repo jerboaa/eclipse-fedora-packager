@@ -73,10 +73,10 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 	/**
 	 * Shell for message dialogs, etc.
 	 */
-	protected Shell shell;
-	protected BuildResult buildResult;
-	protected URL kojiWebUrl;
-	protected FedoraProjectRoot fedoraProjectRoot;
+	private Shell shell;
+	private BuildResult buildResult;
+	private URL kojiWebUrl;
+	private FedoraProjectRoot fedoraProjectRoot;
 	
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -151,7 +151,7 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 					return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
 							KojiText.KojiBuildHandler_errorGettingNVR, e);
 				}
-				kojiBuildCmd.distTag(projectBits.getTarget()).nvr(nvr)
+				kojiBuildCmd.buildTarget(projectBits.getTarget()).nvr(nvr)
 						.isScratchBuild(isScratchBuild());
 				logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
 						KojiBuildCommand.class.getName()));
