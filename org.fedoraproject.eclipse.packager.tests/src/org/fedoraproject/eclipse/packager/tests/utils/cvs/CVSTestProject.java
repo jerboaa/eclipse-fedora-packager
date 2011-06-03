@@ -14,6 +14,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressService;
 import org.fedoraproject.eclipse.packager.cvs.CVSCheckoutOperation;
 
 public class CVSTestProject {
@@ -33,7 +36,13 @@ public class CVSTestProject {
 		CVSCheckoutOperation checkout = new CVSCheckoutOperation();
 		checkout.setModuleName(name);
 		checkout.setScmURL(getScmURL());
-		project = checkout.run();
+		checkout.prepareRunable();
+		IRunnableWithProgress runnable = checkout.getRunnable();
+		project = checkout.getProject();
+		IProgressService progress = PlatformUI.getWorkbench().getProgressService();		
+		progress.busyCursorWhile(runnable);
+		
+		project.refreshLocal(IResource.DEPTH_INFINITE, null);
 		// switch to the devel branch
 		currentBranch = project.findMember(new Path("devel"));
 	}
