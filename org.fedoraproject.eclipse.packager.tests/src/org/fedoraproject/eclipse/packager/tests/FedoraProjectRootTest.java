@@ -84,7 +84,8 @@ public class FedoraProjectRootTest {
 		
 		// CVS case
 		fpRoot = null;
-		cvsTestProject = new CVSTestProject("eclipse-rpm-editor");
+		cvsTestProject = new CVSTestProject();
+		cvsTestProject.checkoutModule("eclipse-rpm-editor");
 		IContainer cvsF12Container = (IContainer) cvsTestProject.getProject()
 				.findMember(new Path("F-12"));
 		fpRoot = FedoraPackagerUtils.getProjectRoot(cvsF12Container);
@@ -106,7 +107,8 @@ public class FedoraProjectRootTest {
 		assertSame(gitTestProject.getProject(), fpRoot.getContainer());
 		
 		// CVS case
-		cvsTestProject = new CVSTestProject("eclipse-rpm-editor");
+		cvsTestProject = new CVSTestProject();
+		cvsTestProject.checkoutModule("eclipse-rpm-editor");
 		IContainer cvsF12Container = (IContainer) cvsTestProject.getProject()
 				.findMember(new Path("F-12"));
 		assertNotNull(cvsF12Container);
@@ -128,7 +130,8 @@ public class FedoraProjectRootTest {
 		assertSame(gitTestProject.getProject(), fpRoot.getProject());
 		
 		// CVS case
-		cvsTestProject = new CVSTestProject("eclipse-rpm-editor");
+		cvsTestProject = new CVSTestProject();
+		cvsTestProject.checkoutModule("eclipse-rpm-editor");
 		IContainer cvsF12Container = (IContainer) cvsTestProject.getProject()
 				.findMember(new Path("F-12"));
 		assertNotNull(cvsF12Container);
@@ -169,7 +172,8 @@ public class FedoraProjectRootTest {
 		assertEquals(ProjectType.GIT, fpRoot.getProjectType());
 		
 		// CVS case
-		cvsTestProject = new CVSTestProject("eclipse-rpm-editor");
+		cvsTestProject = new CVSTestProject();
+		cvsTestProject.checkoutModule("eclipse-rpm-editor");
 		IContainer cvsF12Container = (IContainer) cvsTestProject.getProject()
 				.findMember(new Path("F-12"));
 		assertNotNull(cvsF12Container);
@@ -195,7 +199,8 @@ public class FedoraProjectRootTest {
 		assertEquals(GIT_IGNOREFILE_NAME, ignoreFile.getName());
 		
 		// CVS case
-		cvsTestProject = new CVSTestProject("eclipse-rpm-editor");
+		cvsTestProject = new CVSTestProject();
+		cvsTestProject.checkoutModule("eclipse-rpm-editor");
 		IContainer cvsF12Container = (IContainer) cvsTestProject.getProject()
 				.findMember(new Path("F-12"));
 		assertNotNull(cvsF12Container);

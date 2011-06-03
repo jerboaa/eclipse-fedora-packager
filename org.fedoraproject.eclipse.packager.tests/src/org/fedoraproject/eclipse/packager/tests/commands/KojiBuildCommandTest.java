@@ -76,7 +76,7 @@ public class KojiBuildCommandTest {
 		KojiBuildCommand build = (KojiBuildCommand) packager
 				.getCommandInstance(KojiBuildCommand.ID);
 		build.setKojiClient(new KojiGenericHubClientStub());
-		build.distTag("dist-rawhide").nvr("eclipse-fedorapackager-0.1.12-1.fc15");
+		build.buildTarget("dist-rawhide").nvr("eclipse-fedorapackager-0.1.12-1.fc15");
 		build.scmUrl("git://pkgs.stg.fedoraproject.org/eclipse-fedorapackager.git?#7526fb6c2c150dcc3480a9838540426a501d0553");
 		try {
 			build.isScratchBuild(true).call(new NullProgressMonitor());

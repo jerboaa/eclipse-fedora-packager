@@ -11,8 +11,10 @@ Require-Bundle: org.eclipse.ui,
 Eclipse-RegisterBuddy: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Export-Package: org.fedoraproject.eclipse.packager.tests.utils.cvs;x-friends:=org.fedoraproject.eclipse.packager.ui.tests,
- org.fedoraproject.eclipse.packager.tests.utils.git;x-friends:=org.fedoraproject.eclipse.packager.ui.tests
+Export-Package: org.fedoraproject.eclipse.packager.tests.utils.cvs,
+ org.fedoraproject.eclipse.packager.tests.utils.git,
+ org.fedoraproject.eclipse.packager.tests.utils.cvs,
+ org.fedoraproject.eclipse.packager.tests.utils
 Import-Package: com.google.gson,
  org.apache.commons.httpclient,
  org.apache.commons.ssl,
