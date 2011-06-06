@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager.internal.preferences;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 
@@ -27,7 +28,7 @@ public class FedoraPackagerPreferenceInitializer extends AbstractPreferenceIniti
 	 */
 	@Override
 	public void initializeDefaultPreferences() {
-		// set default preferences for this plug-in
+		// make sure fields get pre-filled.
 		IEclipsePreferences node = new DefaultScope().getNode(PackagerPlugin.PLUGIN_ID);
 		// General
 		node.putBoolean(FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE, FedoraPackagerPreferencesConstants.DEFAULT_DEBUG_MODE);
@@ -39,6 +40,18 @@ public class FedoraPackagerPreferenceInitializer extends AbstractPreferenceIniti
 		// Koji prefs
 		node.put(FedoraPackagerPreferencesConstants.PREF_KOJI_WEB_URL, FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
 		node.put(FedoraPackagerPreferencesConstants.PREF_KOJI_HUB_URL, FedoraPackagerPreferencesConstants.DEFAULT_KOJI_HUB_URL);
+		
+		// make sure default preferences (set to default button) work propperly
+		IPreferenceStore prefStore = PackagerPlugin.getDefault().getPreferenceStore();
+		prefStore.setDefault(FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE, FedoraPackagerPreferencesConstants.DEFAULT_DEBUG_MODE);
+		// set default preferences for lookaside
+		prefStore.setDefault(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL,
+				FedoraPackagerPreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
+		prefStore.setDefault(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL,
+				FedoraPackagerPreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
+		// Koji prefs
+		prefStore.setDefault(FedoraPackagerPreferencesConstants.PREF_KOJI_WEB_URL, FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
+		prefStore.setDefault(FedoraPackagerPreferencesConstants.PREF_KOJI_HUB_URL, FedoraPackagerPreferencesConstants.DEFAULT_KOJI_HUB_URL);
 	}
 
 }

@@ -115,17 +115,4 @@ public class PackagerPlugin extends AbstractUIPlugin {
 		}
 		return candidate;
 	}
-	
-	/** 
-	 * Initializes a preference store with default preference values 
-	 * for this plug-in.
-	 */
-	@Override
-	protected void initializeDefaultPreferences(IPreferenceStore store) {
-		store.setDefault(FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE, FedoraPackagerPreferencesConstants.DEFAULT_DEBUG_MODE);
-		store.setDefault(FedoraPackagerPreferencesConstants.PREF_KOJI_HUB_URL, FedoraPackagerPreferencesConstants.DEFAULT_KOJI_HUB_URL);
-		store.setDefault(FedoraPackagerPreferencesConstants.PREF_KOJI_WEB_URL, FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
-		store.setDefault(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL, FedoraPackagerPreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
-		store.setDefault(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, FedoraPackagerPreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
-	}
 }
