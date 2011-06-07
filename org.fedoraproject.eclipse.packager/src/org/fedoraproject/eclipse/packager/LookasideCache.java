@@ -40,7 +40,7 @@ public class LookasideCache {
 	 * Allow for various types of lookaside caches. E.g. Fedora, EPEL, etc.
 	 * For now only FEDORA is supported.
 	 */
-	public enum CacheType {
+	public static enum CacheType {
 		/**
 		 * Fedora lookaside cache type.
 		 */
