@@ -70,7 +70,6 @@ public class TagSourcesListener implements ICommandListener {
 	 * Ask for tagging of sources. This is only necessary for CVS based source
 	 * control.
 	 * 
-	 * @param shell
 	 * @return {@code true} if the user requested a tag of sources.
 	 */
 	private boolean askIfShouldTag() {
