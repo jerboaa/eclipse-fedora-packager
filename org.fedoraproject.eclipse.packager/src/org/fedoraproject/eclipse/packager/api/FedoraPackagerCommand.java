@@ -111,7 +111,7 @@ public abstract class FedoraPackagerCommand<T> {
 
 	/**
 	 * Checks that the property {@link #callable} is {@code true}. If not then
-	 * an {@link IllegalStateException} is thrown
+	 * an {@link IllegalStateException} is thrown.
 	 *
 	 * @throws IllegalStateException
 	 *             when this method is called and the property {@link #callable}
