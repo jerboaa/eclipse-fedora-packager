@@ -10,6 +10,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -29,6 +33,7 @@ import org.apache.http.util.EntityUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.osgi.util.NLS;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
@@ -81,8 +86,11 @@ public class UploadSourceCommand extends
 
 	// The file to upload
 	private File fileToUpload;
-	// State info if SSL should be used or not
-	private boolean sslEnabled = false;
+	// State info if Fedora SSL should be used or not
+	private boolean fedoraSslEnabled = false;
+	// State info if a basic all trusting https enabled client
+	// should be used or not
+	private boolean trustAllSSLEnabled = false;
 	
 	/*
 	 * (non-Javadoc)
@@ -106,13 +114,26 @@ public class UploadSourceCommand extends
 	}
 	
 	/**
-	 * Set to true if upload host requires SSL authentication.
+	 * Set to true if upload host requires Fedora SSL authentication.
 	 * 
 	 * @param newValue
 	 * @return this instance.
 	 */
-	public UploadSourceCommand setSSLEnabled(boolean newValue) {
-		this.sslEnabled = newValue;
+	public UploadSourceCommand setFedoraSSLEnabled(boolean newValue) {
+		this.fedoraSslEnabled = newValue;
+		return this;
+	}
+	
+	/**
+	 * Set to true if a basic accept-all hostname verifier should be
+	 * used. Useful for {@code https} based connections, which do not
+	 * require authentication via SSL.
+	 * 
+	 * @param newValue
+	 * @return this instance.
+	 */
+	public UploadSourceCommand setAcceptAllSSLEnabled(boolean newValue) {
+		this.trustAllSSLEnabled = newValue;
 		return this;
 	}
 
@@ -204,16 +225,29 @@ public class UploadSourceCommand extends
 					.toString();
 			assert uploadURI != null;
 			
-			if (sslEnabled) {
-				// user requested SSL enabled client
+			if (fedoraSslEnabled) {
+				// user requested Fedora SSL enabled client
 				try {
-					client = sslEnable(client);
+					client = fedoraSslEnable(client);
+				} catch (GeneralSecurityException e) {
+					throw new UploadFailedException(e.getMessage(), e);
+				}
+			} else if (trustAllSSLEnabled) {
+				// use accept all SSL enabled client
+				try {
+					client = trustAllSslEnable(client);
 				} catch (GeneralSecurityException e) {
 					throw new UploadFailedException(e.getMessage(), e);
 				}
 			}
 			
 			HttpPost post = new HttpPost(uploadURI);
+
+			// provide hint which URL is going to be used
+			FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+			logger.logInfo(NLS.bind(
+					FedoraPackagerText.UploadSourceCommand_usingUploadURLMsg,
+					uploadURI));
 
 			// Construct the multipart POST request body.
 			MultipartEntity reqEntity = new MultipartEntity();
@@ -284,9 +318,12 @@ public class UploadSourceCommand extends
 			String uploadUrl = projectRoot.getLookAsideCache().getUploadUrl()
 					.toString();
 			
-			if (sslEnabled) {
-				// user requested an SSL enabled client
-				client = sslEnable(client);
+			if (fedoraSslEnabled) {
+				// user requested a Fedora SSL enabled client
+				client = fedoraSslEnable(client);
+			} else if (trustAllSSLEnabled) {
+				// use an trust-all SSL enabled client
+				client = trustAllSslEnable(client);
 			}
 			
 			HttpPost post = new HttpPost(uploadUrl);
@@ -372,7 +409,7 @@ public class UploadSourceCommand extends
 	}
 
 	/**
-	 * Wrap a basic HttpClient object in a SSL enabled HttpClient (including
+	 * Wrap a basic HttpClient object in a Fedora SSL enabled HttpClient (which includes
 	 * Fedora SSL authentication cert) object.
 	 * 
 	 * @param base The HttpClient to wrap.
@@ -380,7 +417,7 @@ public class UploadSourceCommand extends
 	 * @throws GeneralSecurityException
 	 * @throws IOException
 	 */
-	private HttpClient sslEnable(HttpClient base)
+	private HttpClient fedoraSslEnable(HttpClient base)
 			throws GeneralSecurityException, FileNotFoundException, IOException {
 		
 		// Get a SSL related instance for setting up SSL connections.
@@ -388,6 +425,49 @@ public class UploadSourceCommand extends
 		SSLSocketFactory sf = new SSLSocketFactory(
 				fedoraSSL.getInitializedSSLContext(), // may throw FileNotFoundE
 				SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+		ClientConnectionManager ccm = base.getConnectionManager();
+		SchemeRegistry sr = ccm.getSchemeRegistry();
+		Scheme https = new Scheme("https", 443, sf); //$NON-NLS-1$
+		sr.register(https);
+		return new DefaultHttpClient(ccm, base.getParams());
+	}
+	
+	/**
+	 * Wrap a basic HttpClient object in an all trusting SSL enabled
+	 * HttpClient object.
+	 * 
+	 * @param base The HttpClient to wrap.
+	 * @return The SSL wrapped HttpClient.
+	 * @throws GeneralSecurityException
+	 * @throws IOException
+	 */
+	private HttpClient trustAllSslEnable(HttpClient base)
+			throws GeneralSecurityException {
+		// Get an initialized SSL context
+		// Create a trust manager that does not validate certificate chains
+		TrustManager[] trustAllCerts = new TrustManager[]{
+		    new X509TrustManager() {
+		        @Override
+				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+		            return null;
+		        }
+		        @Override
+				public void checkClientTrusted(
+		            java.security.cert.X509Certificate[] certs, String authType) {
+		        }
+		        @Override
+				public void checkServerTrusted(
+		            java.security.cert.X509Certificate[] certs, String authType) {
+		        }
+		    }
+		};
+
+		// set up the all-trusting trust manager
+		SSLContext sc = SSLContext.getInstance("SSL"); //$NON-NLS-1$
+		sc.init(null, trustAllCerts, new java.security.SecureRandom());		
+		
+		SSLSocketFactory sf = new SSLSocketFactory(
+				sc,	SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 		ClientConnectionManager ccm = base.getConnectionManager();
 		SchemeRegistry sr = ccm.getSchemeRegistry();
 		Scheme https = new Scheme("https", 443, sf); //$NON-NLS-1$

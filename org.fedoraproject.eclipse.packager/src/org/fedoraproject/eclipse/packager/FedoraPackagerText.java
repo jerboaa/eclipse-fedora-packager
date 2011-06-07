@@ -29,6 +29,7 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String UploadSourceCommand_uploadFileUnspecified;
 	/****/ public static String UploadSourceCommand_uploadFileInvalid;
 	/****/ public static String UploadSourceCommand_uploadingFileSubTaskName;
+	/****/ public static String UploadSourceCommand_usingUploadURLMsg;
 	// FileAvailableInLookasideCacheException
 	/****/ public static String FileAvailableInLookasideCacheException_message;
 	// DownloadSourceCommand
@@ -37,6 +38,7 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String DownloadSourceCommand_downloadFileError;
 	/****/ public static String DownloadSourceCommand_invalidURL;
 	/****/ public static String DownloadSourceCommand_downloadingFileXofY;
+	/****/ public static String DownloadSourceCommand_usingDownloadURLMsg;
 	// SourcesFile
 	/****/ public static String SourcesFile_saveFailedMsg;
 	/****/ public static String SourcesFile_saveJob;

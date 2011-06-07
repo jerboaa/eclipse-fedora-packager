@@ -146,7 +146,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 					}
 					uploadCmd.setFileToUpload(newUploadFile);
 					// enable SLL authentication
-					uploadCmd.setSSLEnabled(true);
+					uploadCmd.setFedoraSSLEnabled(true);
 					uploadCmd.addCommandListener(sourcesUpdater);
 					uploadCmd.addCommandListener(vcsIgnoreFileUpdater);
 					logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
