@@ -62,7 +62,7 @@
        <command
              defaultHandler="org.fedoraproject.eclipse.packager.git.internal.ui.ImportFromFedoraGitHandler"
              id="org.fedoraproject.eclipse.packager.git.ImportFromFedoraGit"
-             name="Pseudo command used for keyboard shortcut of the import from Fedora Git dialog">
+             name="%FedoraGitWizardCommandName">
        </command>
     </extension>
 </plugin>
