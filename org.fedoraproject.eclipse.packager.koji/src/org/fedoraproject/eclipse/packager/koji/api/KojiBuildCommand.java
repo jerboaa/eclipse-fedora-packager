@@ -64,7 +64,7 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 		}
 		// distribution can't be null
 		if (buildTarget == null) {
-			throw new CommandMisconfiguredException(KojiText.KojiBuildCommand_configErrorNoDistribution);
+			throw new CommandMisconfiguredException(KojiText.KojiBuildCommand_configErrorNoBuildTarget);
 		}
 		// nvr can't be null
 		if (nvr == null) {

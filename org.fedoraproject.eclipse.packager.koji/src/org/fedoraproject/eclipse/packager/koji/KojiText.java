@@ -53,7 +53,7 @@ public class KojiText extends NLS {
 	/****/ public static String KojiBuildCommand_kojiLogoutTask;
 	/****/ public static String KojiBuildCommand_configErrorNoClient;
 	/****/ public static String KojiBuildCommand_configErrorNoScmURL;
-	/****/ public static String KojiBuildCommand_configErrorNoDistribution;
+	/****/ public static String KojiBuildCommand_configErrorNoBuildTarget;
 	/****/ public static String KojiBuildCommand_configErrorNoNVR;
 	/****/ public static String KojiBuildCommand_kojiLogInTask;
 	/****/ public static String KojiBuildCommand_scratchBuildLogMsg;
