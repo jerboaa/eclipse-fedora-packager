@@ -79,8 +79,6 @@ public class KojiMessageDialog extends MessageDialog {
 
 	@Override
 	public Image getImage() {
-//		return KojiPlugin.getImageDescriptor("icons/koji.png") //$NON-NLS-1$
-//				.createImage();
 		return this.dialogContentImage;
 	}
 
