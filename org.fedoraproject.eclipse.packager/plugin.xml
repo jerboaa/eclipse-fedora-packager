@@ -175,4 +175,14 @@
                 class="org.fedoraproject.eclipse.packager.api.DownloadSourceCommand">
        </command>
     </extension>
+    <!-- Keyboard shortcut definitions -->
+    <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.fedoraproject.eclipse.packager.DownloadCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+F D">
+      </key>
+    </extension>
 </plugin>

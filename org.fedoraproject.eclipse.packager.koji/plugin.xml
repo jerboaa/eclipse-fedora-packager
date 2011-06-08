@@ -78,5 +78,21 @@
        	        class="org.fedoraproject.eclipse.packager.koji.api.KojiBuildCommand">
        </command>
    </extension>
+   <!-- Keyboard shortcut definitions -->
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.fedoraproject.eclipse.packager.koji.BuildCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+F K">
+      </key>
+      <key
+            commandId="org.fedoraproject.eclipse.packager.koji.ScratchBuildCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+F X">
+      </key>
+    </extension>
 
 </plugin>

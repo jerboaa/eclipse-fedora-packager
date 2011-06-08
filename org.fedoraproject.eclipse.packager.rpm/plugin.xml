@@ -146,4 +146,32 @@
        	        class="org.fedoraproject.eclipse.packager.rpm.api.MockBuildCommand">
        </command>
    </extension>
+   <!-- Keyboard shortcut definitions -->
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.fedoraproject.eclipse.packager.PrepCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+F P">
+      </key>
+      <key
+            commandId="org.fedoraproject.eclipse.packager.LocalCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+F L">
+      </key>
+      <key
+            commandId="org.fedoraproject.eclipse.packager.MockCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+F M">
+      </key>
+      <key
+            commandId="org.fedoraproject.eclipse.packager.SRPMCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+F S">
+      </key>
+    </extension>
 </plugin>
