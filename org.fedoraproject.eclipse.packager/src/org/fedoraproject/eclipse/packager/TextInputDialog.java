@@ -1,6 +1,7 @@
 package org.fedoraproject.eclipse.packager;
 
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -9,6 +10,8 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class TextInputDialog extends InputDialog implements Runnable {
 
+	private boolean cancelled = false;
+	
 	/**
 	 * 
 	 * @param shell
@@ -21,7 +24,16 @@ public class TextInputDialog extends InputDialog implements Runnable {
 
 	@Override
 	public void run() {
-		open();
+		int returnCode = open();
+		if (returnCode == Window.CANCEL) {
+			cancelled = true;
+		}
 	}
 	
+	/**
+	 * @return {@code true} if and only if cancelled was pressed.
+	 */
+	public boolean isCancelled() {
+		return cancelled;
+	}
 }
