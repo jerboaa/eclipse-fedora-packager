@@ -1,10 +1,8 @@
 package org.fedoraproject.eclipse.packager.git;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -12,6 +10,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.RepositoryUtil;
+import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -25,7 +24,6 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
-import org.fedoraproject.eclipse.packager.git.internal.CloneOperation2;
 
 /**
  * Convenience class for Fedora Git clones. All relevant Fedora specific things
@@ -92,11 +90,10 @@ public class FedoraPackagerGitCloneOperation {
 							this.getClass().getName()));
 		}
 		
-		// TODO: replace CloneOperation2 with standard EGit API
-		final CloneOperation2 clone = new CloneOperation2(uri, true,
-				new ArrayList<Ref>(), new File(ResourcesPlugin.getWorkspace()
-						.getRoot().getLocation().toFile(), packageName),
-				Constants.R_HEADS + Constants.MASTER, "origin", 0); //$NON-NLS-1$
+		final CloneOperation clone = new CloneOperation(uri, true, null,
+				ResourcesPlugin.getWorkspace().getRoot().getLocation()
+						.append(packageName).toFile(), Constants.R_HEADS
+						+ Constants.MASTER, "origin", 0); //$NON-NLS-1$
 		clone.run(monitor);
 		if (monitor.isCanceled()) {
 			throw new InterruptedException();
