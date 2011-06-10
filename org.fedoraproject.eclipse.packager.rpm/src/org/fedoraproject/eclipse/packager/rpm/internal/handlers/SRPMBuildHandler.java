@@ -8,10 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.rpm.handlers;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -19,36 +16,32 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
-import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
-import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
-import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand;
-import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand.BuildType;
-import org.fedoraproject.eclipse.packager.rpm.api.errors.RpmBuildCommandException;
+import org.fedoraproject.eclipse.packager.rpm.api.SRPMBuildJob;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
- * Handler for preparing sources (prior building it). This is useful for testing
- * if patches apply propperly.
- * 
+ * Handler for the creating an SRPM
+ *
  */
-public class PrepHandler extends FedoraPackagerAbstractHandler {
+public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -66,14 +59,14 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 			return null;
 		}
 		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
-		final RpmBuildCommand prepCommand;
+		final RpmBuildCommand srpmBuild;
 		final DownloadSourceCommand download;
 		try {
 			// need to get sources for an SRPM build
 			download = (DownloadSourceCommand) fp
 					.getCommandInstance(DownloadSourceCommand.ID);
 			// get RPM build command in order to produce an SRPM
-			prepCommand = (RpmBuildCommand) fp
+			srpmBuild = (RpmBuildCommand) fp
 					.getCommandInstance(RpmBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
@@ -86,16 +79,18 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
 			return null;
 		}
-		// Need to nest jobs into this job for it to show up properly in the UI
-		// in terms of progress
+		// Need to nest jobs into this job for it to show up properly in the
+		// UI
 		Job job = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// Make sure we have sources locally
+				final String downloadUrlPreference = PackagerPlugin
+				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
 				Job downloadSourcesJob = new DownloadSourcesJob(
-						RpmText.PrepHandler_downloadSourcesForPrep,
-						download, fedoraProjectRoot, shell, true);
+						RpmText.SRPMBuildHandler_downloadSourcesForSRPMBuild,
+						download, fedoraProjectRoot, shell, downloadUrlPreference, true);
 				downloadSourcesJob.setUser(true);
 				downloadSourcesJob.schedule();
 				try {
@@ -108,59 +103,23 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 					// bail if something failed
 					return downloadSourcesJob.getResult();
 				}
-				// Do the prep job
-				Job prepJob = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						try {
-							monitor.beginTask(
-									RpmText.PrepHandler_prepareSourcesForBuildMsg,
-									IProgressMonitor.UNKNOWN);
-							List<String> nodeps = new ArrayList<String>(1);
-							nodeps.add(RpmBuildCommand.NO_DEPS);
-							try {
-								prepCommand.buildType(BuildType.PREP)
-										.flags(nodeps).call(monitor);
-							} catch (CommandMisconfiguredException e) {
-								// This shouldn't happen, but report error
-								// anyway
-								logger.logError(e.getMessage(), e);
-								return FedoraHandlerUtils.errorStatus(
-										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
-							} catch (CommandListenerException e) {
-								// There are no command listeners registered, so
-								// shouldn't
-								// happen. Do something reasonable anyway.
-								logger.logError(e.getMessage(), e);
-								return FedoraHandlerUtils.errorStatus(
-										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
-							} catch (RpmBuildCommandException e) {
-								logger.logError(e.getMessage(), e.getCause());
-								return FedoraHandlerUtils.errorStatus(
-										RPMPlugin.PLUGIN_ID, e.getMessage(),
-										e.getCause());
-							} catch (IllegalArgumentException e) {
-								// nodeps flags can't be null
-							}
-						} finally {
-							monitor.done();
-						}
-						return Status.OK_STATUS;
-					}
-				};
-				prepJob.setUser(true);
-				prepJob.schedule();
+				// Kick off the SRPM job
+				SRPMBuildJob srpmBuildJob = new SRPMBuildJob(
+						RpmText.SRPMBuildHandler_buildingSRPM, srpmBuild,
+						fedoraProjectRoot);
+				srpmBuildJob.setUser(true);
+				srpmBuildJob.schedule();
 				try {
 					// wait for job to finish
-					prepJob.join();
+					srpmBuildJob.join();
 				} catch (InterruptedException e1) {
 					throw new OperationCanceledException();
 				}
-				return prepJob.getResult();
+				return srpmBuildJob.getResult();
 			}
-			
+
 		};
-		job.setSystem(true); // suppress UI. That's done in encapsulated jobs.
+		job.setSystem(true); // avoid UI for this job
 		job.schedule();
 		return null;
 	}

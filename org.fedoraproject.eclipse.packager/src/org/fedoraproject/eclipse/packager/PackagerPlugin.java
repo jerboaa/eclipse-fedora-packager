@@ -107,7 +107,7 @@ public class PackagerPlugin extends AbstractUIPlugin {
 	 * @return The value of the prefrence in question, or {@code null} if not
 	 *         set.
 	 */
-	public static synchronized String getStringPreference(final String prefrenceIdentifier) {
+	public static String getStringPreference(final String prefrenceIdentifier) {
 		IPreferenceStore store = getDefault().getPreferenceStore();
 		String candidate = store.getString(prefrenceIdentifier);
 		if (candidate.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {

@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.rpm.handlers;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 
 import java.io.FileNotFoundException;
 
@@ -26,9 +26,11 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
@@ -105,8 +107,10 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// Make sure we have sources locally
+				final String downloadUrlPreference = PackagerPlugin
+				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
 				Job downloadSourcesJob = new DownloadSourcesJob(RpmText.MockBuildHandler_downloadSourcesForMockBuild,
-						download, fedoraProjectRoot, shell, true);
+						download, fedoraProjectRoot, shell, downloadUrlPreference, true);
 				downloadSourcesJob.setUser(true);
 				downloadSourcesJob.schedule();
 				try {

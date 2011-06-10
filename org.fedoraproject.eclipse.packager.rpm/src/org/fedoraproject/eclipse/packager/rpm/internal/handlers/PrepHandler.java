@@ -8,8 +8,9 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.rpm.handlers;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -22,10 +23,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
@@ -42,15 +44,14 @@ import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand.BuildType;
 import org.fedoraproject.eclipse.packager.rpm.api.errors.RpmBuildCommandException;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
-import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
- * Handler for building locally.
- *
+ * Handler for preparing sources (prior building it). This is useful for testing
+ * if patches apply propperly.
+ * 
  */
-public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
+public class PrepHandler extends FedoraPackagerAbstractHandler {
 
-	
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		final Shell shell = getShell(event);
@@ -67,14 +68,14 @@ public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 			return null;
 		}
 		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
-		final RpmBuildCommand rpmBuild;
+		final RpmBuildCommand prepCommand;
 		final DownloadSourceCommand download;
 		try {
 			// need to get sources for an SRPM build
 			download = (DownloadSourceCommand) fp
 					.getCommandInstance(DownloadSourceCommand.ID);
 			// get RPM build command in order to produce an SRPM
-			rpmBuild = (RpmBuildCommand) fp
+			prepCommand = (RpmBuildCommand) fp
 					.getCommandInstance(RpmBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
@@ -87,13 +88,18 @@ public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
 			return null;
 		}
+		// Need to nest jobs into this job for it to show up properly in the UI
+		// in terms of progress
 		Job job = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// Make sure we have sources locally
-				Job downloadSourcesJob = new DownloadSourcesJob(RpmText.LocalBuildHandler_downloadSourcesForLocalBuild,
-						download, fedoraProjectRoot, shell, true);
+				final String downloadUrlPreference = PackagerPlugin
+				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+				Job downloadSourcesJob = new DownloadSourcesJob(
+						RpmText.PrepHandler_downloadSourcesForPrep,
+						download, fedoraProjectRoot, shell, downloadUrlPreference, true);
 				downloadSourcesJob.setUser(true);
 				downloadSourcesJob.schedule();
 				try {
@@ -106,21 +112,19 @@ public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 					// bail if something failed
 					return downloadSourcesJob.getResult();
 				}
-				// Do the local build
-				Job rpmBuildjob = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
+				// Do the prep job
+				Job prepJob = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
 							monitor.beginTask(
-									RpmText.LocalBuildHandler_buildForLocalArch,
+									RpmText.PrepHandler_prepareSourcesForBuildMsg,
 									IProgressMonitor.UNKNOWN);
-							IFpProjectBits projectBits = FedoraPackagerUtils
-									.getVcsHandler(fedoraProjectRoot);
-							List<String> distDefines = RPMUtils
-									.getDistDefines(projectBits);
+							List<String> nodeps = new ArrayList<String>(1);
+							nodeps.add(RpmBuildCommand.NO_DEPS);
 							try {
-								rpmBuild.buildType(BuildType.BINARY)
-										.distDefines(distDefines).call(monitor);
+								prepCommand.buildType(BuildType.PREP)
+										.flags(nodeps).call(monitor);
 							} catch (CommandMisconfiguredException e) {
 								// This shouldn't happen, but report error
 								// anyway
@@ -140,10 +144,7 @@ public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 										RPMPlugin.PLUGIN_ID, e.getMessage(),
 										e.getCause());
 							} catch (IllegalArgumentException e) {
-								// setting distDefines failed
-								logger.logError(e.getMessage(), e);
-								return FedoraHandlerUtils.errorStatus(
-										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+								// nodeps flags can't be null
 							}
 						} finally {
 							monitor.done();
@@ -151,20 +152,19 @@ public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 						return Status.OK_STATUS;
 					}
 				};
-				rpmBuildjob.setUser(true);
-				rpmBuildjob.schedule();
+				prepJob.setUser(true);
+				prepJob.schedule();
 				try {
 					// wait for job to finish
-					rpmBuildjob.join();
+					prepJob.join();
 				} catch (InterruptedException e1) {
 					throw new OperationCanceledException();
 				}
-				return rpmBuildjob.getResult();
+				return prepJob.getResult();
 			}
 			
 		};
-		// Suppress UI progress reporting. This is done by sub-jobs within.
-		job.setSystem(true);
+		job.setSystem(true); // suppress UI. That's done in encapsulated jobs.
 		job.schedule();
 		return null;
 	}
