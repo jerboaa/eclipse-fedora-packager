@@ -107,25 +107,12 @@ public class PackagerPlugin extends AbstractUIPlugin {
 	 * @return The value of the prefrence in question, or {@code null} if not
 	 *         set.
 	 */
-	public static String getStringPreference(final String prefrenceIdentifier) {
+	public static synchronized String getStringPreference(final String prefrenceIdentifier) {
 		IPreferenceStore store = getDefault().getPreferenceStore();
 		String candidate = store.getString(prefrenceIdentifier);
 		if (candidate.equals(IPreferenceStore.STRING_DEFAULT_DEFAULT)) {
 			return null;
 		}
 		return candidate;
-	}
-	
-	/** 
-	 * Initializes a preference store with default preference values 
-	 * for this plug-in.
-	 */
-	@Override
-	protected void initializeDefaultPreferences(IPreferenceStore store) {
-		store.setDefault(FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE, FedoraPackagerPreferencesConstants.DEFAULT_DEBUG_MODE);
-		store.setDefault(FedoraPackagerPreferencesConstants.PREF_KOJI_HUB_URL, FedoraPackagerPreferencesConstants.DEFAULT_KOJI_HUB_URL);
-		store.setDefault(FedoraPackagerPreferencesConstants.PREF_KOJI_WEB_URL, FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
-		store.setDefault(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL, FedoraPackagerPreferencesConstants.DEFAULT_LOOKASIDE_DOWNLOAD_URL);
-		store.setDefault(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL, FedoraPackagerPreferencesConstants.DEFAULT_LOOKASIDE_UPLOAD_URL);
 	}
 }
