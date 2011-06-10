@@ -16,9 +16,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
@@ -66,9 +68,11 @@ public class DownloadHandler extends FedoraPackagerAbstractHandler {
 					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
 			return null;
 		}
+		final String downloadUrlPreference = PackagerPlugin
+				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
 		Job downloadJob = new DownloadSourcesJob(
 				NonTranslatableStrings.getProductName(fedoraProjectRoot), download,
-				fedoraProjectRoot, shell);
+				fedoraProjectRoot, shell, downloadUrlPreference);
 		downloadJob.setUser(true);
 		downloadJob.schedule();
 		return null; // must be null

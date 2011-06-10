@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
-import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
@@ -31,21 +30,25 @@ public class DownloadSourcesJob extends Job {
 	private FedoraPackagerLogger logger;
 	private Shell shell;
 	private boolean suppressSourcesUpToDateInfo = false;
-	
+	private String downloadUrlPreference = null;
+
 	/**
 	 * @param jobName
 	 * @param download
 	 *            The download command to use
+	 * @param downloadUrlPreference
+	 *            A preference to use as download URL or {@code null}.
 	 * @param fedoraProjectRoot
 	 * @param shell
 	 *            A valid shell.
 	 */
 	public DownloadSourcesJob(String jobName, DownloadSourceCommand download,
-			IProjectRoot fedoraProjectRoot, Shell shell) {
+			IProjectRoot fedoraProjectRoot, Shell shell, String downloadUrlPreference) {
 		super(jobName);
 		this.download = download;
 		this.fedoraProjectRoot = fedoraProjectRoot;
 		this.logger = FedoraPackagerLogger.getInstance();
+		this.downloadUrlPreference = downloadUrlPreference;
 	}
 
 	/**
@@ -55,18 +58,20 @@ public class DownloadSourcesJob extends Job {
 	 * @param fedoraProjectRoot
 	 * @param shell
 	 *            A valid shell.
+	 * @param downloadUrlPreference A preference to use as download URL or {@code null}.
 	 * @param suppressSourcesUpToDateInfo
 	 *            Indicating if information message dialog reporting sources are
 	 *            up-to-date should be suppressed.
 	 */
 	public DownloadSourcesJob(String jobName, DownloadSourceCommand download,
-			IProjectRoot fedoraProjectRoot, Shell shell,
+			IProjectRoot fedoraProjectRoot, Shell shell, String downloadUrlPreference,
 			boolean suppressSourcesUpToDateInfo) {
 		super(jobName);
 		this.download = download;
 		this.fedoraProjectRoot = fedoraProjectRoot;
 		this.logger = FedoraPackagerLogger.getInstance();
 		this.suppressSourcesUpToDateInfo = suppressSourcesUpToDateInfo;
+		this.downloadUrlPreference = downloadUrlPreference;
 	}
 
 	@Override
@@ -78,12 +83,10 @@ public class DownloadSourcesJob extends Job {
 				fedoraProjectRoot);
 		download.addCommandListener(md5sumListener); // want md5sum checking
 		try {
-			String downloadUrl = PackagerPlugin
-					.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
-			if (downloadUrl != null) {
+			if (downloadUrlPreference != null) {
 				// Only set URL explicitly if set in preferences. Lookaside
 				// cache falls back to the default URL if not set.
-				download.setDownloadURL(downloadUrl);
+				download.setDownloadURL(downloadUrlPreference);
 			}
 			logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
 					DownloadSourceCommand.class.getName()));
