@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
@@ -27,7 +27,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 public class DownloadSourcesJob extends Job {
 	
 	private DownloadSourceCommand download;
-	private FedoraProjectRoot fedoraProjectRoot;
+	private IProjectRoot fedoraProjectRoot;
 	private FedoraPackagerLogger logger;
 	private Shell shell;
 	private boolean suppressSourcesUpToDateInfo = false;
@@ -41,7 +41,7 @@ public class DownloadSourcesJob extends Job {
 	 *            A valid shell.
 	 */
 	public DownloadSourcesJob(String jobName, DownloadSourceCommand download,
-			FedoraProjectRoot fedoraProjectRoot, Shell shell) {
+			IProjectRoot fedoraProjectRoot, Shell shell) {
 		super(jobName);
 		this.download = download;
 		this.fedoraProjectRoot = fedoraProjectRoot;
@@ -60,7 +60,7 @@ public class DownloadSourcesJob extends Job {
 	 *            up-to-date should be suppressed.
 	 */
 	public DownloadSourcesJob(String jobName, DownloadSourceCommand download,
-			FedoraProjectRoot fedoraProjectRoot, Shell shell,
+			IProjectRoot fedoraProjectRoot, Shell shell,
 			boolean suppressSourcesUpToDateInfo) {
 		super(jobName);
 		this.download = download;

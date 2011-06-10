@@ -12,8 +12,8 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.rpm.api.MockBuildCommand;
@@ -38,7 +38,7 @@ public class MockBuildCommandTest {
 	// main interface class
 	private FedoraPackager packager;
 	// Fedora packager root
-	private FedoraProjectRoot fpRoot;
+	private IProjectRoot fpRoot;
 	// Path to SRPM
 	private String srpmPath;
 	

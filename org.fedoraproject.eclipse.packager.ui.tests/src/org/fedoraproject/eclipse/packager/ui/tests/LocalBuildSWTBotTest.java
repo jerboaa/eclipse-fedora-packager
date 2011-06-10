@@ -14,6 +14,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.ContextMenuHelper;
@@ -35,7 +36,7 @@ public class LocalBuildSWTBotTest {
 			"mips", "geode"};
 	private static SWTWorkbenchBot	bot;
 	private GitTestProject edProject;
-	private FedoraProjectRoot fpRoot;
+	private IProjectRoot fpRoot;
  
 	@BeforeClass
 	public static void beforeClass() throws Exception {

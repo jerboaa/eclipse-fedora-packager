@@ -13,6 +13,9 @@
 <plugin>
    <extension-point id="vcsContribution" name="VCS interaction" schema="schema/vcsContribution.exsd"/>
    <extension-point id="packagerCommandContribution" name="Eclipse Fedora Packager Command Contribution" schema="schema/packagerCommandContribution.exsd"/>
+   <extension-point id="productNamesProvider" name="Product Names Provider" schema="schema/productNamesProvider.exsd"/>
+   <extension-point id="projectRootProvider" name="Project Root Provider" schema="schema/projectRootProvider.exsd"/>
+   <extension-point id="lookasideCacheProvider" name="Lookaside Cache Provider" schema="schema/lookasideCacheProvider.exsd"/>
    
    <extension point="org.eclipse.core.expressions.definitions">
       <definition
@@ -184,5 +187,23 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+F D">
       </key>
+    </extension>
+    <extension
+          point="org.fedoraproject.eclipse.packager.projectRootProvider">
+       <projectRoot
+             class="org.fedoraproject.eclipse.packager.FedoraProjectRoot">
+       </projectRoot>
+    </extension>
+    <extension
+          point="org.fedoraproject.eclipse.packager.lookasideCacheProvider">
+       <cache
+             class="org.fedoraproject.eclipse.packager.LookasideCache">
+       </cache>
+    </extension>
+    <extension
+          point="org.fedoraproject.eclipse.packager.productNamesProvider">
+       <provider
+             class="org.fedoraproject.eclipse.packager.ProductStringsNonTranslatable">
+       </provider>
     </extension>
 </plugin>

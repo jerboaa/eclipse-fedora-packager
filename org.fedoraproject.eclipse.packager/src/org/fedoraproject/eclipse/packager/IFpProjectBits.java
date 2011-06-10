@@ -82,7 +82,7 @@ public interface IFpProjectBits {
 	 * @param monitor The monitor to show progress.
 	 * @return The status of the operation.
 	 */
-	public IStatus updateVCS(FedoraProjectRoot projectRoot, IProgressMonitor monitor);
+	public IStatus updateVCS(IProjectRoot projectRoot, IProgressMonitor monitor);
 	
 	/**
 	 * Ignores the given resource.
@@ -96,7 +96,7 @@ public interface IFpProjectBits {
 	 * 
 	 * @param fedoraProjectRoot The underlying fedoraprojectRoot object.
 	 */
-	public void initialize(FedoraProjectRoot fedoraProjectRoot);
+	public void initialize(IProjectRoot fedoraProjectRoot);
 	
 	/**
 	 * Tag a revision of the VCS.
@@ -105,7 +105,7 @@ public interface IFpProjectBits {
 	 * @param monitor
 	 * @return The status of the tagging operation.
 	 */
-	public IStatus tagVcs(FedoraProjectRoot projectRoot, IProgressMonitor monitor);
+	public IStatus tagVcs(IProjectRoot projectRoot, IProgressMonitor monitor);
 	
 	/**
 	 * Determine if tag exists in VCS.
@@ -114,7 +114,7 @@ public interface IFpProjectBits {
 	 * @param tag
 	 * @return True if tag exists, false otherwise.
 	 */
-	public boolean isVcsTagged(FedoraProjectRoot fedoraProjectRoot, String tag);
+	public boolean isVcsTagged(IProjectRoot fedoraProjectRoot, String tag);
 	
 	/**
 	 * Utility method to check whether the given VCS needs to tag.
@@ -127,7 +127,7 @@ public interface IFpProjectBits {
 	 * @param fedoraProjectRoot The fedora project root.
 	 * @return The scm url as expected by koji.
 	 */
-	public String getScmUrlForKoji(FedoraProjectRoot fedoraProjectRoot);
+	public String getScmUrlForKoji(IProjectRoot fedoraProjectRoot);
 
 	/**
 	 * Checks whether there are local changes.
@@ -135,5 +135,5 @@ public interface IFpProjectBits {
 	 * 
 	 * @return Whether there are local changes or not.
 	 */
-	public boolean hasLocalChanges(FedoraProjectRoot fedoraProjectRoot);
+	public boolean hasLocalChanges(IProjectRoot fedoraProjectRoot);
 }

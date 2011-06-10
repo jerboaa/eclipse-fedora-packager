@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
@@ -25,12 +25,12 @@ public class FedoraPackager {
 	private static final String CMD_ELEMENT_NAME = "command"; //$NON-NLS-1$
 	private static final String CMD_CLASS_ATTRIBUTE_NAME = "class"; //$NON-NLS-1$
 	
-	private final FedoraProjectRoot root;
+	private final IProjectRoot root;
 	
 	/**
 	 * @param root
 	 */
-	public FedoraPackager(FedoraProjectRoot root) {
+	public FedoraPackager(IProjectRoot root) {
 		if (root == null)
 			throw new NullPointerException();
 		this.root = root;
@@ -41,7 +41,7 @@ public class FedoraPackager {
 	 * 
 	 * @return The Fedora project root.
 	 */
-	public FedoraProjectRoot getFedoraProjectRoot() {
+	public IProjectRoot getFedoraProjectRoot() {
 		return this.root;
 	}
 	

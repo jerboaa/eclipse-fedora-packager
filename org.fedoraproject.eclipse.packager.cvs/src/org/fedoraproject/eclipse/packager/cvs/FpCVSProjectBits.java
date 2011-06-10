@@ -47,8 +47,8 @@ import org.eclipse.team.internal.ccvs.core.client.Tag;
 import org.eclipse.team.internal.ccvs.core.client.listeners.TagListener;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
 import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
@@ -64,7 +64,7 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 @SuppressWarnings("restriction")
 public class FpCVSProjectBits implements IFpProjectBits {
 
-	private FedoraProjectRoot fedoraprojectRoot; // The underlying project root
+	private IProjectRoot fedoraprojectRoot; // The underlying project root
 	private IResource container; 				 // The underlying container
 	private HashMap<String, HashMap<String, String>> branches; // All branches
 	private boolean initialized = false; 		 // keep track if instance is initialized
@@ -270,10 +270,10 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	/**
 	 * Do CVS update to get updated "sources" and ".cvsignore" file.
 	 * 
-	 * See {@link IFpProjectBits#updateVCS(FedoraProjectRoot, IProgressMonitor)}
+	 * See {@link IFpProjectBits#updateVCS(IProjectRoot, IProgressMonitor)}
 	 */
 	@Override
-	public IStatus updateVCS(FedoraProjectRoot projectRoot,
+	public IStatus updateVCS(IProjectRoot projectRoot,
 			IProgressMonitor monitor) {
 		IStatus status = Status.OK_STATUS;
 		IFile specfile = projectRoot.getSpecFile();
@@ -346,7 +346,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	 * @param fedoraProjectRoot The underlying project.
 	 */
 	@Override
-	public void initialize(FedoraProjectRoot fedoraProjectRoot) {
+	public void initialize(IProjectRoot fedoraProjectRoot) {
 		this.fedoraprojectRoot = fedoraProjectRoot;
 		this.container = fedoraProjectRoot.getContainer();
 		this.branches = getBranches();
@@ -399,10 +399,10 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	/**
 	 * Do CVS tag.
 	 * 
-	 * See {@link IFpProjectBits#tagVcs(FedoraProjectRoot, IProgressMonitor)}
+	 * See {@link IFpProjectBits#tagVcs(IProjectRoot, IProgressMonitor)}
 	 */
 	@Override
-	public IStatus tagVcs(FedoraProjectRoot projectRoot,
+	public IStatus tagVcs(IProjectRoot projectRoot,
 			IProgressMonitor monitor) {
 //		monitor.subTask("Generating Tag Name from Specfile");
 		final String tagName;
@@ -446,7 +446,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	}
 	
 	private IStatus createCVSTag(String tagName, boolean forceTag,
-			IProgressMonitor monitor, FedoraProjectRoot projectRoot) {
+			IProgressMonitor monitor, IProjectRoot projectRoot) {
 		IStatus result;
 		IFile specfile = projectRoot.getSpecFile();
 		IProject proj = specfile.getProject();
@@ -507,10 +507,10 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	/**
 	 * Determine if CVS tag exists.
 	 * 
-	 * See {@link IFpProjectBits#isVcsTagged(FedoraProjectRoot, String)}
+	 * See {@link IFpProjectBits#isVcsTagged(IProjectRoot, String)}
 	 */
 	@Override
-	public boolean isVcsTagged(FedoraProjectRoot fedoraProjectRoot, String tagName) {
+	public boolean isVcsTagged(IProjectRoot fedoraProjectRoot, String tagName) {
 		if (!isInitialized()) {
 			return false; // can't do this without being initialized
 		}
@@ -549,7 +549,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	}
 
 	@Override
-	public String getScmUrlForKoji(FedoraProjectRoot projectRoot) {
+	public String getScmUrlForKoji(IProjectRoot projectRoot) {
 		try {
 			return getScmUrl() + "#" + RPMUtils.makeTagName(projectRoot);
 		} catch (IOException e) {
@@ -563,12 +563,12 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	 * Getter for internal use.
 	 * @return The FedoraProjectRoot for this branch
 	 */
-	protected FedoraProjectRoot getFedoraProjectRoot() {
+	protected IProjectRoot getFedoraProjectRoot() {
 		return this.fedoraprojectRoot;
 	}
 
 	@Override
-	public boolean hasLocalChanges(FedoraProjectRoot fedoraProjectRoot) {
+	public boolean hasLocalChanges(IProjectRoot fedoraProjectRoot) {
 		//TODO implement
 		return false;
 	}

@@ -10,8 +10,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
@@ -29,7 +29,7 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 public class SRPMBuildJob extends Job {
 	
 	private RpmBuildCommand srpmBuild;
-	private FedoraProjectRoot fedoraProjectRoot;
+	private IProjectRoot fedoraProjectRoot;
 	private FedoraPackagerLogger logger;
 	private RpmBuildResult srpmBuildResult;
 	
@@ -39,7 +39,7 @@ public class SRPMBuildJob extends Job {
 	 * @param fedoraProjectRoot
 	 */
 	public SRPMBuildJob(String jobName, RpmBuildCommand rpmBuild,
-			FedoraProjectRoot fedoraProjectRoot) {
+			IProjectRoot fedoraProjectRoot) {
 		super(jobName);
 		this.fedoraProjectRoot = fedoraProjectRoot;
 		this.logger = FedoraPackagerLogger.getInstance();

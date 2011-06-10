@@ -21,8 +21,8 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
@@ -307,7 +307,7 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	 * @see org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand#initialize(org.fedoraproject.eclipse.packager.FedoraProjectRoot)
 	 */
 	@Override
-	public void initialize(FedoraProjectRoot fp) throws FedoraPackagerCommandInitializationException {
+	public void initialize(IProjectRoot fp) throws FedoraPackagerCommandInitializationException {
 		super.initialize(fp);
 		// set the local architecture
 		EvalResult archResult;

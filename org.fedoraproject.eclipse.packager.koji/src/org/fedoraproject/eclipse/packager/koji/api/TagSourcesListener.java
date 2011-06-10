@@ -6,6 +6,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.QuestionMessageDialog;
 import org.fedoraproject.eclipse.packager.api.ICommandListener;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
@@ -20,7 +21,7 @@ public class TagSourcesListener implements ICommandListener {
 	/**
 	 * The fedora project root to work with.
 	 */
-	private FedoraProjectRoot projectRoot;
+	private IProjectRoot projectRoot;
 	private IProgressMonitor mainMonitor;
 	private Shell shell;
 	
@@ -31,7 +32,7 @@ public class TagSourcesListener implements ICommandListener {
 	 * @param monitor The main monitor to create a submonitor from.
 	 * @param shell The shell to be used for message dialog prompting
 	 */
-	public TagSourcesListener(FedoraProjectRoot root, IProgressMonitor monitor, Shell shell) {
+	public TagSourcesListener(IProjectRoot root, IProgressMonitor monitor, Shell shell) {
 		this.projectRoot = root;
 		this.mainMonitor = monitor;
 		this.shell = shell;

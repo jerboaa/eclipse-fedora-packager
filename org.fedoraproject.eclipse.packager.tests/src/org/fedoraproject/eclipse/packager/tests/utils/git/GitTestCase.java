@@ -2,6 +2,7 @@ package org.fedoraproject.eclipse.packager.tests.utils.git;
 
 import org.eclipse.core.resources.IProject;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 import junit.framework.TestCase;
@@ -10,7 +11,7 @@ public class GitTestCase extends TestCase {
 	
 	private GitTestProject project;
 	private IProject iProject;
-	private FedoraProjectRoot fedoraprojectRoot;
+	private IProjectRoot fedoraprojectRoot;
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -23,7 +24,7 @@ public class GitTestCase extends TestCase {
 	/**
 	 * @return the fedoraprojectRoot
 	 */
-	public FedoraProjectRoot getFedoraprojectRoot() {
+	public IProjectRoot getFedoraprojectRoot() {
 		return fedoraprojectRoot;
 	}
 

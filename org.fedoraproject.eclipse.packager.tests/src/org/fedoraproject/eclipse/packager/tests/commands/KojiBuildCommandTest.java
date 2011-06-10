@@ -6,7 +6,7 @@ package org.fedoraproject.eclipse.packager.tests.commands;
 import static org.junit.Assert.*;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.koji.api.KojiBuildCommand;
@@ -28,7 +28,7 @@ public class KojiBuildCommandTest {
 	// main interface class
 	private FedoraPackager packager;
 	// Fedora packager root
-	private FedoraProjectRoot fpRoot;
+	private IProjectRoot fpRoot;
 	
 	/**
 	 * Clone a test project to be used for testing.

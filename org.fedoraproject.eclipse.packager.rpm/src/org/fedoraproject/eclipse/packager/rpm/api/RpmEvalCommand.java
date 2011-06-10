@@ -7,7 +7,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -97,7 +97,7 @@ public class RpmEvalCommand extends FedoraPackagerCommand<EvalResult> {
 	 * @throws FedoraPackagerCommandInitializationException
 	 */
 	@Override
-	public void initialize(FedoraProjectRoot fp) throws FedoraPackagerCommandInitializationException {
+	public void initialize(IProjectRoot fp) throws FedoraPackagerCommandInitializationException {
 		super.initialize(fp);
 		this.command = new ArrayList<String>();
 		this.command.add(RPM_CMD);

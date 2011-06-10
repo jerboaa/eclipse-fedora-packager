@@ -20,7 +20,7 @@ import java.util.Map;
  * lookaside cache.
  *
  */
-public class LookasideCache {
+public class LookasideCache implements ILookasideCache {
 	
 	/**
 	 * Default upload URL for the Fedora lookaside cache
@@ -35,16 +35,13 @@ public class LookasideCache {
 	private static final int UPLOAD_URL_INDEX = 0;
 	private static final int DOWNLOAD_URL_INDEX = 1;
 	private CacheType type;
-	
+
 	/**
-	 * Allow for various types of lookaside caches. E.g. Fedora, EPEL, etc.
-	 * For now only FEDORA is supported.
+	 * Default no-arg constructor. Required for instance creation via
+	 * reflections.
 	 */
-	public static enum CacheType {
-		/**
-		 * Fedora lookaside cache type.
-		 */
-		FEDORA
+	public LookasideCache() {
+		// nothing
 	}
 	
 	/**
@@ -52,7 +49,8 @@ public class LookasideCache {
 	 * 
 	 * @param type The cache type to create.
 	 */
-	public LookasideCache(CacheType type) {
+	@Override
+	public void initialize(CacheType type) {
 		this.urlMap = new HashMap<CacheType, URL[]>();
 		URL[] urls = new URL[2];
 		switch (type) {
@@ -81,6 +79,7 @@ public class LookasideCache {
 	/**
 	 * @return the proper download URL for this lookaside cache type.
 	 */
+	@Override
 	public URL getDownloadUrl() {
 		return this.urlMap.get(this.type)[DOWNLOAD_URL_INDEX];
 	}
@@ -91,6 +90,7 @@ public class LookasideCache {
 	 * @param downloadUrl The new download URL. 
 	 * @throws MalformedURLException If the new URL is invalid.
 	 */
+	@Override
 	public void setDownloadUrl(String downloadUrl) throws MalformedURLException {
 		this.urlMap.get(this.type)[DOWNLOAD_URL_INDEX] = new URL(downloadUrl);
 	}
@@ -98,6 +98,7 @@ public class LookasideCache {
 	/**
 	 * @return the uploadUrl for this lookaside cache type.
 	 */
+	@Override
 	public URL getUploadUrl() {
 		return this.urlMap.get(this.type)[UPLOAD_URL_INDEX];
 	}
@@ -108,6 +109,7 @@ public class LookasideCache {
 	 * @param uploadUrl The new upload URL. 
 	 * @throws MalformedURLException If the new URL is invalid.
 	 */
+	@Override
 	public void setUploadUrl(String uploadUrl) throws MalformedURLException {
 		this.urlMap.get(this.type)[UPLOAD_URL_INDEX] = new URL(uploadUrl);
 	}

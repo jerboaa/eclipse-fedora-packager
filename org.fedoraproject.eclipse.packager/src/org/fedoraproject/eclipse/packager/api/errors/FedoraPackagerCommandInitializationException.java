@@ -4,7 +4,7 @@ package org.fedoraproject.eclipse.packager.api.errors;
  * Exception thrown if packager command initialization failed.
  */
 public class FedoraPackagerCommandInitializationException extends
-		FedoraPackagerAPIException {
+		FedoraPackagerExtensionPointException {
 
 	/**
 	 * 

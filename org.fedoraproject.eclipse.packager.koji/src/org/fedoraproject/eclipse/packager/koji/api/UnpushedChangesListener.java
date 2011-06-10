@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.ICommandListener;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.koji.KojiText;
@@ -19,7 +20,7 @@ public class UnpushedChangesListener implements ICommandListener {
 	/**
 	 * The fedora project root to work with.
 	 */
-	private FedoraProjectRoot projectRoot;
+	private IProjectRoot projectRoot;
 	private IProgressMonitor mainMonitor;
 	
 	/**
@@ -28,7 +29,7 @@ public class UnpushedChangesListener implements ICommandListener {
 	 * @param root The Fedora project root.
 	 * @param monitor The main monitor to create a submonitor from.
 	 */
-	public UnpushedChangesListener(FedoraProjectRoot root, IProgressMonitor monitor) {
+	public UnpushedChangesListener(IProjectRoot root, IProgressMonitor monitor) {
 		this.projectRoot = root;
 		this.mainMonitor = monitor;
 	}

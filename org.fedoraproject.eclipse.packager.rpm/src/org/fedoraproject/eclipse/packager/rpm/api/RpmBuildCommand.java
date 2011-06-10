@@ -17,7 +17,7 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -253,7 +253,7 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 	 * for this Fedora project root.
 	 */
 	@Override
-	public void initialize(FedoraProjectRoot fp) throws FedoraPackagerCommandInitializationException {
+	public void initialize(IProjectRoot fp) throws FedoraPackagerCommandInitializationException {
 		super.initialize(fp);
 		fullRpmBuildCommand = new ArrayList<String>();
 		fullRpmBuildCommand.add(RPMBUILD_CMD);

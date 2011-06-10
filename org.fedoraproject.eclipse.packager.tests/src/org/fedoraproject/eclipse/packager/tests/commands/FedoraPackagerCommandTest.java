@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -28,7 +28,7 @@ import org.junit.Test;
 public class FedoraPackagerCommandTest {
 
 	// Fedora packager root
-	private static FedoraProjectRoot fpRoot;
+	private static IProjectRoot fpRoot;
 	private static GitTestProject testProject;
 	
 	/**

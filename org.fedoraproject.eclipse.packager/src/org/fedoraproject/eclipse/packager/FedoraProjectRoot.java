@@ -19,11 +19,15 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
-import org.fedoraproject.eclipse.packager.LookasideCache.CacheType;
-import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
+import org.eclipse.osgi.util.NLS;
+import org.fedoraproject.eclipse.packager.ILookasideCache.CacheType;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerExtensionPointException;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
 
 /**
@@ -31,74 +35,88 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
  * branch. It can be a folder in the cvs case or a project in the git case.
  * 
  */
-public class FedoraProjectRoot {
-
+public class FedoraProjectRoot implements IProjectRoot {
+	
+	private static final String LOOKASIDE_CACHE_EXTENSIONPOINT_NAME =
+		"lookasideCacheProvider"; //$NON-NLS-1$
+	private static final String LOOKASIDE_CACHE_ELEMENT_NAME = "cache"; //$NON-NLS-1$
+	private static final String LOOKASIDE_CACHE_CLASS_ATTRIBUTE_NAME = "class"; //$NON-NLS-1$
+	private static final String PR_STRING_EXTENSIONPOINT_NAME =
+		"productNamesProvider"; //$NON-NLS-1$
+	private static final String PR_STRING_ELEMENT_NAME = "provider"; //$NON-NLS-1$
+	private static final String PR_STRING_CLASS_ATTRIBUTE_NAME = "class"; //$NON-NLS-1$
+	
 	private IContainer rootContainer;
 	private SourcesFile sourcesFile;
 	private ProjectType type;
-	private LookasideCache lookAsideCache; // The lookaside cache abstraction
+	private ILookasideCache lookAsideCache; // The lookaside cache abstraction
+	private IProductStrings productStrings;
 
 	/**
-	 * Creates the FedoraProjectRoot using the given container. It is
-	 * discouraged to use this constructor directly.
-	 * {@link FedoraPackagerUtils#getProjectRoot(IResource)} should be used
-	 * instead.
-	 * 
-	 * @param container
-	 *            The root container either IFolder(cvs) or IProject(git).
-	 * @param type The project type (either Git or CVS).
-	 * @see FedoraPackagerUtils#getProjectRoot(IResource)
+	 * Default no-arg constructor. Required for instance creation via
+	 * reflections.
 	 */
-	public FedoraProjectRoot(IContainer container, ProjectType type) {
+	public FedoraProjectRoot() {
+		// nothing
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#initialize(org.eclipse.core.resources.IContainer, org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType)
+	 */
+	@Override
+	public void initialize(IContainer container, ProjectType type) throws FedoraPackagerExtensionPointException {
 		this.rootContainer = container;
 		this.sourcesFile = new SourcesFile(rootContainer.getFile(new Path(
 				SourcesFile.SOURCES_FILENAME)));
 		assert type != null;
 		this.type = type;
-		this.lookAsideCache = new LookasideCache(CacheType.FEDORA);
+		// statically pass Fedora type
+		this.lookAsideCache = createNewLookasideCacheObject(CacheType.FEDORA);
+		this.productStrings = createNewNonTranslatableStringsObject(this);
 	}
 
-	/**
-	 * Returns the root container.
-	 * 
-	 * @return The root container.
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getContainer()
 	 */
+	@Override
 	public IContainer getContainer() {
 		return rootContainer;
 	}
 	
-	/**
-	 * Get the project containing this FedoraProjectRoot.
-	 * 
-	 * @return The project for this FedoraProjectRoot instance.
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getProject()
 	 */
+	@Override
 	public IProject getProject() {
 		return this.rootContainer.getProject();
 	}
 
-	/**
-	 * Returns the sources file containing the sources for the given srpm.
-	 * 
-	 * @return The sources file.
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getSourcesFile()
 	 */
+	@Override
 	public SourcesFile getSourcesFile() {
 		return sourcesFile;
 	}
 	
-	/**
-	 * Returns the name of the package (i.e. the name of the SRPM)
-	 * 
-	 * @return The name of the package
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getPackageName()
 	 */
+	@Override
 	public String getPackageName() {
 		return this.getSpecfileModel().getName();
 	}
 
-	/**
-	 * Returns the .spec file for the given project.
-	 * 
-	 * @return The specfile
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getSpecFile()
 	 */
+	@Override
 	public IFile getSpecFile() {
 		try {
 			for (IResource resource : rootContainer.members()) {
@@ -115,11 +133,11 @@ public class FedoraProjectRoot {
 		return null;
 	}
 
-	/**
-	 * Returns the parsed .spec file model to ease retrieving data from it.
-	 * 
-	 * @return The parsed .spec file.
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getSpecfileModel()
 	 */
+	@Override
 	public Specfile getSpecfileModel() {
 		SpecfileParser parser = new SpecfileParser();
 		StringBuilder sb = new StringBuilder();
@@ -141,20 +159,20 @@ public class FedoraProjectRoot {
 		return specfile;
 	}
 
-	/**
-	 * Returns the project type.
-	 * 
-	 * @return The project type based on the VCS used.
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getProjectType()
 	 */
+	@Override
 	public ProjectType getProjectType() {
 		return type;
 	}
 
-	/**
-	 * Get the ignore file based on the project type.
-	 * 
-	 * @return The ignore file (.cvsignore or .gitignore).
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getIgnoreFile()
 	 */
+	@Override
 	public IFile getIgnoreFile() {
 		String ignoreFileName = null;
 		switch (type) {
@@ -177,11 +195,107 @@ public class FedoraProjectRoot {
 		return ignoreFile;
 	}
 
-	/**
-	 * @return the lookAsideCache
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getLookAsideCache()
 	 */
-	public LookasideCache getLookAsideCache() {
+	@Override
+	public ILookasideCache getLookAsideCache() {
 		return lookAsideCache;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getProductStrings()
+	 */
+	@Override
+	public IProductStrings getProductStrings() {
+		return this.productStrings;
+	}
+
+	/**
+	 * Instantiate a new lookaside cache object using the lookasideCacheProvider
+	 * extension point.
+	 * @param cacheType 
+	 * 
+	 * @return the newly created and initialized instance.
+	 * @throws FedoraPackagerExtensionPointException 
+	 */
+	private ILookasideCache createNewLookasideCacheObject(CacheType cacheType)
+			throws FedoraPackagerExtensionPointException {
+		IExtensionPoint lookasideCacheExtension = Platform
+				.getExtensionRegistry().getExtensionPoint(
+						PackagerPlugin.PLUGIN_ID,
+						LOOKASIDE_CACHE_EXTENSIONPOINT_NAME);
+		if (lookasideCacheExtension != null) {
+			for (IConfigurationElement lookasideCacheElement : lookasideCacheExtension
+					.getConfigurationElements()) {
+				if (lookasideCacheElement.getName().equals(
+						LOOKASIDE_CACHE_ELEMENT_NAME)) {
+					// found extension point element
+					try {
+						ILookasideCache cache = (ILookasideCache) lookasideCacheElement
+								.createExecutableExtension(LOOKASIDE_CACHE_CLASS_ATTRIBUTE_NAME);
+						assert cache != null;
+						// Do initialization
+						cache.initialize(cacheType);
+						return cache;
+					} catch (IllegalStateException e) {
+						throw new FedoraPackagerExtensionPointException(
+								e.getMessage(), e);
+					} catch (CoreException e) {
+						throw new FedoraPackagerExtensionPointException(
+								e.getMessage(), e);
+					}
+				}
+			}
+		}
+		throw new FedoraPackagerExtensionPointException(NLS.bind(
+				FedoraPackagerText.extensionNotFoundError,
+				LOOKASIDE_CACHE_EXTENSIONPOINT_NAME));
+	}
+
+	/**
+	 * Instantiate a new non translatable strings object using the nonTranslatableStringsProvider
+	 * extension point.
+	 * @param fedoraProjectRoot 
+	 * 
+	 * @return the newly created and initialized instance.
+	 * @throws FedoraPackagerExtensionPointException 
+	 */
+	private IProductStrings createNewNonTranslatableStringsObject(
+			IProjectRoot fedoraProjectRoot)
+			throws FedoraPackagerExtensionPointException {
+		IExtensionPoint productStringsExtension = Platform
+				.getExtensionRegistry()
+				.getExtensionPoint(PackagerPlugin.PLUGIN_ID,
+						PR_STRING_EXTENSIONPOINT_NAME);
+		if (productStringsExtension != null) {
+			for (IConfigurationElement providerElement : productStringsExtension
+					.getConfigurationElements()) {
+				if (providerElement.getName().equals(
+						PR_STRING_ELEMENT_NAME)) {
+					// found extension point element
+					try {
+						IProductStrings productStrings = (IProductStrings) providerElement
+								.createExecutableExtension(PR_STRING_CLASS_ATTRIBUTE_NAME);
+						assert productStrings != null;
+						// Do initialization
+						productStrings.initialize(fedoraProjectRoot);
+						return productStrings;
+					} catch (IllegalStateException e) {
+						throw new FedoraPackagerExtensionPointException(
+								e.getMessage(), e);
+					} catch (CoreException e) {
+						throw new FedoraPackagerExtensionPointException(
+								e.getMessage(), e);
+					}
+				}
+			}
+		}
+		throw new FedoraPackagerExtensionPointException(NLS.bind(
+				FedoraPackagerText.extensionNotFoundError,
+				PR_STRING_EXTENSIONPOINT_NAME));
 	}
 
 	/**

@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 
 /**
  * Utility class for RPM related things.
@@ -45,7 +45,7 @@ public class RPMUtils {
 	 * @return The result of the query.
 	 * @throws IOException If rpm command failed.
 	 */
-	public static String rpmQuery(FedoraProjectRoot projectRoot, String format)
+	public static String rpmQuery(IProjectRoot projectRoot, String format)
 			throws IOException {
 		IResource parent = projectRoot.getSpecFile().getParent();
 		String dir = parent.getLocation().toString();
@@ -77,7 +77,7 @@ public class RPMUtils {
 	 * @return The tag name.
 	 * @throws IOException
 	 */
-	public static String makeTagName(FedoraProjectRoot projectRoot)
+	public static String makeTagName(IProjectRoot projectRoot)
 			throws IOException {
 		return getNVR(projectRoot).replaceAll("\\.", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -90,7 +90,7 @@ public class RPMUtils {
 	 * @return N-V-R (Name-Version-Release) retrieved.
 	 * @throws IOException if RPM query failed.
 	 */
-	public static String getNVR(FedoraProjectRoot projectRoot)
+	public static String getNVR(IProjectRoot projectRoot)
 			throws IOException {
 		String name = rpmQuery(projectRoot, "NAME").replaceAll("^[0-9]+", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String version = rpmQuery(projectRoot, "VERSION"); //$NON-NLS-1$

@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -54,7 +55,7 @@ public abstract class FedoraPackagerCommand<T> {
 	/**
 	 * The project root to work with.
 	 */
-	protected FedoraProjectRoot projectRoot;
+	protected IProjectRoot projectRoot;
 	
 	/**
 	 * A list of command listeners to call
@@ -76,14 +77,14 @@ public abstract class FedoraPackagerCommand<T> {
 	
 	/**
 	 * Initialize a FedoraPackagerCommand instance with the
-	 * {@link FedoraProjectRoot} to work with. Called on object creation.
+	 * {@link IProjectRoot} to work with. Called on object creation.
 	 * 
 	 * @param projectRoot
 	 * @throws FedoraPackagerCommandInitializationException
 	 *             If the project root was already set. I.e. this method has
 	 *             been called more than once.
 	 */
-	public void initialize(FedoraProjectRoot projectRoot) throws FedoraPackagerCommandInitializationException {
+	public void initialize(IProjectRoot projectRoot) throws FedoraPackagerCommandInitializationException {
 		try {
 			setProjectRoot(projectRoot);
 		} catch (IllegalStateException e) {
@@ -98,7 +99,7 @@ public abstract class FedoraPackagerCommand<T> {
 	 * @param projectRoot
 	 *            the projectRoot to set
 	 */
-	private void setProjectRoot(FedoraProjectRoot projectRoot)
+	private void setProjectRoot(IProjectRoot projectRoot)
 			throws IllegalStateException {
 		if (this.projectRoot != null) {
 			throw new IllegalStateException(

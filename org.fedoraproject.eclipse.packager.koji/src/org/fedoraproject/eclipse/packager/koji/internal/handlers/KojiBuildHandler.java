@@ -34,8 +34,8 @@ import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
@@ -76,7 +76,7 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 	private Shell shell;
 	private BuildResult buildResult;
 	private URL kojiWebUrl;
-	private FedoraProjectRoot fedoraProjectRoot;
+	private IProjectRoot fedoraProjectRoot;
 	
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {

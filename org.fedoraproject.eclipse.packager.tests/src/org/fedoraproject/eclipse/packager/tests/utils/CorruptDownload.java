@@ -7,7 +7,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.ICommandListener;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
@@ -19,9 +19,9 @@ import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
  */
 public class CorruptDownload implements ICommandListener {
 	
-	private FedoraProjectRoot fedoraProjectRoot;
+	private IProjectRoot fedoraProjectRoot;
 	
-	public CorruptDownload(FedoraProjectRoot fpRoot) {
+	public CorruptDownload(IProjectRoot fpRoot) {
 		this.fedoraProjectRoot = fpRoot;
 	}
 

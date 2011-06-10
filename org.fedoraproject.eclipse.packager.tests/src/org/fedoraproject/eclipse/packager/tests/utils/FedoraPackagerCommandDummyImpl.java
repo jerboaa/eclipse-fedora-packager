@@ -1,7 +1,7 @@
 package org.fedoraproject.eclipse.packager.tests.utils;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -18,7 +18,7 @@ public class FedoraPackagerCommandDummyImpl extends FedoraPackagerCommand<DummyR
 	private boolean configured = false;
 
 	@Override
-	public void initialize(FedoraProjectRoot root) {
+	public void initialize(IProjectRoot root) {
 		try {
 			super.initialize(root);
 		} catch (FedoraPackagerCommandInitializationException e) {

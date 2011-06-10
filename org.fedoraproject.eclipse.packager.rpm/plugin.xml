@@ -114,22 +114,22 @@
          point="org.eclipse.ui.commands">
       
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.rpm.internal.handlers.PrepHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.rpm.handlers.PrepHandler"
             id="org.fedoraproject.eclipse.packager.PrepCommand"
             name="%command.name.2">
       </command>
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.rpm.internal.handlers.LocalBuildHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.rpm.handlers.LocalBuildHandler"
             id="org.fedoraproject.eclipse.packager.LocalCommand"
             name="%command.name.3">
       </command>
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.rpm.internal.handlers.SRPMBuildHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.rpm.handlers.SRPMBuildHandler"
             id="org.fedoraproject.eclipse.packager.SRPMCommand"
             name="%command.name.4">
       </command>
       <command
-            defaultHandler="org.fedoraproject.eclipse.packager.rpm.internal.handlers.MockBuildHandler"
+            defaultHandler="org.fedoraproject.eclipse.packager.rpm.handlers.MockBuildHandler"
             id="org.fedoraproject.eclipse.packager.MockCommand"
             name="%command.name.5">
       </command>

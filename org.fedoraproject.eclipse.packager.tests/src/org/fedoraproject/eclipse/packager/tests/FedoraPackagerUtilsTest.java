@@ -17,8 +17,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.git.FpGitProjectBits;
@@ -62,7 +62,7 @@ public class FedoraPackagerUtilsTest {
 	@Test
 	public void canGetProjectRootFromResource() throws CoreException, FileNotFoundException {
 		try {
-			FedoraProjectRoot fpRoot = FedoraPackagerUtils.getProjectRoot(packagerProject);
+			IProjectRoot fpRoot = FedoraPackagerUtils.getProjectRoot(packagerProject);
 			assertNotNull(fpRoot);
 		} catch (InvalidProjectRootException e) {
 			fail("Should have been a valid project root");
@@ -112,7 +112,7 @@ public class FedoraPackagerUtilsTest {
 	@Test
 	public void testGetProjectType() throws Exception {
 		gitProject = new GitTestProject("eclipse-fedorapackager");
-		FedoraProjectRoot fproot = FedoraPackagerUtils.getProjectRoot(gitProject.getProject());
+		IProjectRoot fproot = FedoraPackagerUtils.getProjectRoot(gitProject.getProject());
 		assertNotNull(fproot);
 		assertEquals(ProjectType.GIT, fproot.getProjectType());
 	}
@@ -120,7 +120,7 @@ public class FedoraPackagerUtilsTest {
 	@Test
 	public void testGetVcsHandler() throws Exception {
 		gitProject = new GitTestProject("eclipse-fedorapackager");
-		FedoraProjectRoot fproot = FedoraPackagerUtils.getProjectRoot(gitProject.getProject());
+		IProjectRoot fproot = FedoraPackagerUtils.getProjectRoot(gitProject.getProject());
 		assertNotNull(fproot);
 		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fproot);
 		assertTrue(projectBits instanceof FpGitProjectBits);

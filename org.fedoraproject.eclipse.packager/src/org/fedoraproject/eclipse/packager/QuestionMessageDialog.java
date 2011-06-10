@@ -12,7 +12,7 @@ public class QuestionMessageDialog implements Runnable {
 	private final String question;
 	private boolean okPressed;
 	private Shell shell;
-	private FedoraProjectRoot root;
+	private IProjectRoot root;
 
 	/**
 	 * 
@@ -20,7 +20,7 @@ public class QuestionMessageDialog implements Runnable {
 	 * @param shell
 	 * @param fpRoot 
 	 */
-	public QuestionMessageDialog(String question, Shell shell, FedoraProjectRoot fpRoot) {
+	public QuestionMessageDialog(String question, Shell shell, IProjectRoot fpRoot) {
 		this.question = question;
 		this.shell = shell;
 		this.root = fpRoot;

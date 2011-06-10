@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidCheckSumException;
 
@@ -16,14 +16,14 @@ public class ChecksumValidListener implements ICommandListener {
 	/**
 	 * The fedora project root to work with.
 	 */
-	private FedoraProjectRoot projectRoot;
+	private IProjectRoot projectRoot;
 	
 	/**
 	 * Create a MD5Sum checker
 	 * 
 	 * @param root The Fedora project root.
 	 */
-	public ChecksumValidListener(FedoraProjectRoot root) {
+	public ChecksumValidListener(IProjectRoot root) {
 		this.projectRoot = root;
 	}
 	

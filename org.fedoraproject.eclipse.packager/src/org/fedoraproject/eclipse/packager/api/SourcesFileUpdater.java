@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.SourcesFileUpdateException;
@@ -17,7 +17,7 @@ import org.fedoraproject.eclipse.packager.api.errors.SourcesFileUpdateException;
  */
 public class SourcesFileUpdater implements ICommandListener {
 	
-	private FedoraProjectRoot fpRoot;
+	private IProjectRoot fpRoot;
 	private File fileToAdd;
 	private boolean shouldReplace = false;
 
@@ -29,7 +29,7 @@ public class SourcesFileUpdater implements ICommandListener {
 	 * @param fileToAdd
 	 *            The file which should get added to the {@code sources} file.
 	 */
-	public SourcesFileUpdater(FedoraProjectRoot fpRoot, File fileToAdd) {
+	public SourcesFileUpdater(IProjectRoot fpRoot, File fileToAdd) {
 		this.fpRoot = fpRoot;
 		this.fileToAdd = fileToAdd;
 	}

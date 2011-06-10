@@ -8,7 +8,7 @@ import org.fedoraproject.eclipse.packager.api.FedoraPackager;
  *
  */
 public class FedoraPackagerCommandNotFoundException extends
-		FedoraPackagerAPIException {
+		FedoraPackagerExtensionPointException {
 
 	/**
 	 * 

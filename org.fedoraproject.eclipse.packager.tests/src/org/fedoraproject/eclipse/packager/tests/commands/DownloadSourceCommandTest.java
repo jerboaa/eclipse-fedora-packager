@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 import java.net.MalformedURLException;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.ChecksumValidListener;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
@@ -31,7 +31,7 @@ public class DownloadSourceCommandTest {
 	// main interface class
 	private FedoraPackager packager;
 	// Fedora packager root
-	private FedoraProjectRoot fpRoot;
+	private IProjectRoot fpRoot;
 	
 	/**
 	 * Set up a Fedora project and run the command.

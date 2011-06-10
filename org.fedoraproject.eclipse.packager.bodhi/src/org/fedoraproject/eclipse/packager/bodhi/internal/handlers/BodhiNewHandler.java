@@ -13,8 +13,6 @@ package org.fedoraproject.eclipse.packager.bodhi.internal.handlers;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
-import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +23,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -38,8 +35,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiPlugin;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
@@ -67,7 +64,7 @@ public class BodhiNewHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final FedoraProjectRoot fedoraProjectRoot;
+		final IProjectRoot fedoraProjectRoot;
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(e);
 			fedoraProjectRoot = FedoraPackagerUtils
@@ -227,7 +224,7 @@ public class BodhiNewHandler extends AbstractHandler {
 	 * @return The release name.
 	 * @throws CoreException
 	 */
-	public String getReleaseName(FedoraProjectRoot projectRoot) throws CoreException {
+	public String getReleaseName(IProjectRoot projectRoot) throws CoreException {
 		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(projectRoot);
 		return projectBits.getCurrentBranchName().replaceAll("-", "");
 	}
@@ -239,7 +236,7 @@ public class BodhiNewHandler extends AbstractHandler {
 	 * @return The build name as specified in the spec file.
 	 * @throws IOException
 	 */
-	public String getBuildName(FedoraProjectRoot projectRoot) throws IOException {
+	public String getBuildName(IProjectRoot projectRoot) throws IOException {
 		return RPMUtils.rpmQuery(projectRoot, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
 		+ RPMUtils.rpmQuery(projectRoot, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
 		+ RPMUtils.rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$

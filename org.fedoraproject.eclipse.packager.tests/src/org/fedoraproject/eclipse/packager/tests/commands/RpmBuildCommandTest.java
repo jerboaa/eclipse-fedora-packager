@@ -11,8 +11,8 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -39,7 +39,7 @@ public class RpmBuildCommandTest {
 	// main interface class
 	private FedoraPackager packager;
 	// Fedora packager root
-	private FedoraProjectRoot fpRoot;
+	private IProjectRoot fpRoot;
 	
 	/**
 	 * Clone a test project to be used for testing.

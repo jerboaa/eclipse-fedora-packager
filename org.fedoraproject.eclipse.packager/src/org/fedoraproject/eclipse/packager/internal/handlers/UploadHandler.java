@@ -32,8 +32,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
@@ -76,7 +76,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 		final Shell shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		final IResource resource = FedoraHandlerUtils.getResource(event);
-		final FedoraProjectRoot fedoraProjectRoot;
+		final IProjectRoot fedoraProjectRoot;
 		try {
 			fedoraProjectRoot = FedoraPackagerUtils.getProjectRoot(resource);
 		} catch (InvalidProjectRootException e) {

@@ -8,10 +8,9 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
+package org.fedoraproject.eclipse.packager.rpm.handlers;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.FileNotFoundException;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -20,11 +19,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
@@ -37,24 +40,31 @@ import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFou
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
+import org.fedoraproject.eclipse.packager.rpm.api.MockBuildCommand;
+import org.fedoraproject.eclipse.packager.rpm.api.MockBuildResult;
 import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand;
-import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand.BuildType;
-import org.fedoraproject.eclipse.packager.rpm.api.errors.RpmBuildCommandException;
+import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildResult;
+import org.fedoraproject.eclipse.packager.rpm.api.SRPMBuildJob;
+import org.fedoraproject.eclipse.packager.rpm.api.errors.MockBuildCommandException;
+import org.fedoraproject.eclipse.packager.rpm.api.errors.MockNotInstalledException;
+import org.fedoraproject.eclipse.packager.rpm.api.errors.UserNotInMockGroupException;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
- * Handler for preparing sources (prior building it). This is useful for testing
- * if patches apply propperly.
- * 
+ * Handler for building locally using mock.
+ *
  */
-public class PrepHandler extends FedoraPackagerAbstractHandler {
-
+public class MockBuildHandler extends FedoraPackagerAbstractHandler {
+	
+	private MockBuildResult result;
+	private Shell shell;
+	private IProjectRoot fedoraProjectRoot;
+	
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		final Shell shell = getShell(event);
+		shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		final FedoraProjectRoot fedoraProjectRoot;
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(event);
 			fedoraProjectRoot = FedoraPackagerUtils
@@ -66,15 +76,19 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 			return null;
 		}
 		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
-		final RpmBuildCommand prepCommand;
+		final RpmBuildCommand srpmBuild;
+		final MockBuildCommand mockBuild;
 		final DownloadSourceCommand download;
 		try {
 			// need to get sources for an SRPM build
 			download = (DownloadSourceCommand) fp
 					.getCommandInstance(DownloadSourceCommand.ID);
 			// get RPM build command in order to produce an SRPM
-			prepCommand = (RpmBuildCommand) fp
+			srpmBuild = (RpmBuildCommand) fp
 					.getCommandInstance(RpmBuildCommand.ID);
+			// the mock build command we are going to use
+			mockBuild = (MockBuildCommand) fp
+					.getCommandInstance(MockBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
@@ -86,15 +100,12 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
 			return null;
 		}
-		// Need to nest jobs into this job for it to show up properly in the UI
-		// in terms of progress
 		Job job = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// Make sure we have sources locally
-				Job downloadSourcesJob = new DownloadSourcesJob(
-						RpmText.PrepHandler_downloadSourcesForPrep,
+				Job downloadSourcesJob = new DownloadSourcesJob(RpmText.MockBuildHandler_downloadSourcesForMockBuild,
 						download, fedoraProjectRoot, shell, true);
 				downloadSourcesJob.setUser(true);
 				downloadSourcesJob.schedule();
@@ -108,25 +119,74 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 					// bail if something failed
 					return downloadSourcesJob.getResult();
 				}
-				// Do the prep job
-				Job prepJob = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
+				// Create a brand new SRPM
+				SRPMBuildJob srpmBuildJob = new SRPMBuildJob(NLS.bind(
+						RpmText.MockBuildHandler_creatingSRPMForMockBuild,
+						fedoraProjectRoot.getPackageName()), srpmBuild,
+						fedoraProjectRoot);
+				srpmBuildJob.setUser(true);
+				srpmBuildJob.schedule();
+				try {
+					// wait for SRPM build to finish
+					srpmBuildJob.join();
+				} catch (InterruptedException e1) {
+					throw new OperationCanceledException();
+				}
+				if (!srpmBuildJob.getResult().isOK()) {
+					// bail if something failed
+					return srpmBuildJob.getResult();
+				}
+				
+				final RpmBuildResult srpmBuildResult = srpmBuildJob.getSRPMBuildResult(); 
+				// do the mock building
+				Job mockBuildJob = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
 							monitor.beginTask(
-									RpmText.PrepHandler_prepareSourcesForBuildMsg,
+									RpmText.MockBuildHandler_testLocalBuildWithMock,
 									IProgressMonitor.UNKNOWN);
-							List<String> nodeps = new ArrayList<String>(1);
-							nodeps.add(RpmBuildCommand.NO_DEPS);
+							if (monitor.isCanceled()) {
+								throw new OperationCanceledException();
+							}
+
+							// kick of the mock build
 							try {
-								prepCommand.buildType(BuildType.PREP)
-										.flags(nodeps).call(monitor);
+								mockBuild.pathToSRPM(srpmBuildResult
+										.getAbsoluteSRPMFilePath());
+							} catch (FileNotFoundException e) {
+								e.printStackTrace();
+							} catch (IllegalArgumentException e) {
+								// catch error when creating the SRPM failed.
+								logger.logError(
+										RpmText.MockBuildHandler_srpmBuildFailed,
+										e);
+								return FedoraHandlerUtils
+										.errorStatus(
+												RPMPlugin.PLUGIN_ID,
+												RpmText.MockBuildHandler_srpmBuildFailed,
+												e);
+							}
+							logger.logInfo(NLS.bind(
+									FedoraPackagerText.callingCommand,
+									MockBuildCommand.class.getName()));
+							try {
+								result = mockBuild.call(monitor);
 							} catch (CommandMisconfiguredException e) {
 								// This shouldn't happen, but report error
 								// anyway
 								logger.logError(e.getMessage(), e);
 								return FedoraHandlerUtils.errorStatus(
 										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							} catch (UserNotInMockGroupException e) {
+								// nothing critical, advise the user what to do.
+								logger.logInfo(e.getMessage());
+								FedoraHandlerUtils
+										.showInformationDialog(shell,
+												NonTranslatableStrings
+														.getProductName(fedoraProjectRoot), e
+														.getMessage());
+								return Status.OK_STATUS;
 							} catch (CommandListenerException e) {
 								// There are no command listeners registered, so
 								// shouldn't
@@ -134,13 +194,21 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 								logger.logError(e.getMessage(), e);
 								return FedoraHandlerUtils.errorStatus(
 										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
-							} catch (RpmBuildCommandException e) {
+							} catch (MockBuildCommandException e) {
+								// Some unknown error occurred
 								logger.logError(e.getMessage(), e.getCause());
 								return FedoraHandlerUtils.errorStatus(
 										RPMPlugin.PLUGIN_ID, e.getMessage(),
 										e.getCause());
-							} catch (IllegalArgumentException e) {
-								// nodeps flags can't be null
+							} catch (MockNotInstalledException e) {
+								// nothing critical, advise the user what to do.
+								logger.logInfo(e.getMessage());
+								FedoraHandlerUtils
+										.showInformationDialog(shell,
+												NonTranslatableStrings
+														.getProductName(fedoraProjectRoot), e
+														.getMessage());
+								return Status.OK_STATUS;
 							}
 						} finally {
 							monitor.done();
@@ -148,21 +216,57 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 						return Status.OK_STATUS;
 					}
 				};
-				prepJob.setUser(true);
-				prepJob.schedule();
+				mockBuildJob.addJobChangeListener(getMockJobFinishedJobListener());
+				mockBuildJob.setUser(true);
+				mockBuildJob.schedule();
 				try {
 					// wait for job to finish
-					prepJob.join();
+					mockBuildJob.join();
 				} catch (InterruptedException e1) {
 					throw new OperationCanceledException();
 				}
-				return prepJob.getResult();
+				return mockBuildJob.getResult();
 			}
 			
 		};
-		job.setSystem(true); // suppress UI. That's done in encapsulated jobs.
+		job.setSystem(true); // Suppress UI. That's done in sub-jobs within.
 		job.schedule();
 		return null;
+	}
+	
+	/**
+	 * 
+	 * @return A job listener for the {@code done} event.
+	 */
+	private IJobChangeListener getMockJobFinishedJobListener() {
+		IJobChangeListener listener = new JobChangeAdapter() {
+
+			// We are only interested in the done event
+			@Override
+			public void done(IJobChangeEvent event) {
+				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+				if (result.wasSuccessful()) {
+					// TODO: Make this a link to the directory
+					String msg = NLS.bind(
+							RpmText.MockBuildHandler_mockSucceededMsg,
+							result.getResultDirectoryPath());
+					logger.logInfo(msg);
+					FedoraHandlerUtils.showInformationDialog(
+							shell,
+							NonTranslatableStrings.getProductName(fedoraProjectRoot), msg);
+				} else {
+					String msg = NLS.bind(
+							RpmText.MockBuildHandler_mockFailedMsg,
+							result.getResultDirectoryPath());
+					logger.logInfo(msg);
+					FedoraHandlerUtils.showInformationDialog(
+							shell,
+							NonTranslatableStrings.getProductName(fedoraProjectRoot),
+							msg);
+				}
+			}
+		};
+		return listener;
 	}
 
 }

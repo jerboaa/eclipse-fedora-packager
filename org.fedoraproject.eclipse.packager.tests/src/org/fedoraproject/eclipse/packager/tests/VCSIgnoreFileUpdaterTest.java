@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.VCSIgnoreFileUpdater;
 import org.fedoraproject.eclipse.packager.tests.utils.TestsUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
@@ -32,7 +33,7 @@ import org.junit.Test;
  */
 public class VCSIgnoreFileUpdaterTest {
 
-	private FedoraProjectRoot fpRoot;
+	private IProjectRoot fpRoot;
 	private IFile vcsIgnoreFile; // The .gitignore abstraction
 	private IProject tempProject;
 	private Stack<File> tempDirsAndFiles = new Stack<File>();
@@ -49,7 +50,8 @@ public class VCSIgnoreFileUpdaterTest {
 		File copySource = new File(dirName);
 				
 		tempProject = TestsUtils.createProjectFromTemplate(copySource);
-		fpRoot = new FedoraProjectRoot(tempProject, ProjectType.GIT);
+		fpRoot = new FedoraProjectRoot();
+		fpRoot.initialize(tempProject, ProjectType.GIT);
 		assertNotNull(fpRoot);
 		
 		// Get an IFile handle it shouldn't matter if it exists or not.

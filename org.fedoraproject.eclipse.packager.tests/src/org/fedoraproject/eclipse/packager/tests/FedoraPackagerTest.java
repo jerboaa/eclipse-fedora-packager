@@ -36,7 +36,8 @@ public class FedoraPackagerTest {
 		File origSourceDir = new File(dirName);
 				
 		packagerProject = TestsUtils.createProjectFromTemplate(origSourceDir);
-		fpRoot = new FedoraProjectRoot(packagerProject, ProjectType.GIT);
+		fpRoot = new FedoraProjectRoot();
+		fpRoot.initialize(packagerProject, ProjectType.GIT);
 		assertNotNull(fpRoot);
 		packager = new FedoraPackager(fpRoot);
 		assertNotNull(packager);

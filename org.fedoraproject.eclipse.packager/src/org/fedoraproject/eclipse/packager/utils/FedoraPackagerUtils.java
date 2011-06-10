@@ -16,10 +16,13 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.osgi.util.NLS;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerExtensionPointException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 
 /**
@@ -27,6 +30,11 @@ import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException
  * as it's not RPM related. If it's RPM related, RPMUtils is the better choice.
  */
 public class FedoraPackagerUtils {
+	
+	private static final String PROJECT_ROOT_EXTENSIONPOINT_NAME =
+		"projectRootProvider"; //$NON-NLS-1$
+	private static final String PROJECT_ROOT_ELEMENT_NAME = "projectRoot"; //$NON-NLS-1$
+	private static final String PROJECT_ROOT_CLASS_ATTRIBUTE_NAME = "class"; //$NON-NLS-1$
 
 	private static final String GIT_REPOSITORY = "org.eclipse.egit.core.GitProvider"; //$NON-NLS-1$
 	private static final String CVS_REPOSITORY = "org.eclipse.team.cvs.core.cvsnature"; //$NON-NLS-1$
@@ -75,18 +83,24 @@ public class FedoraPackagerUtils {
 	 * 
 	 * @return The retrieved FedoraProjectRoot.
 	 */
-	public static FedoraProjectRoot getProjectRoot(IResource resource)
+	public static IProjectRoot getProjectRoot(IResource resource)
 			throws InvalidProjectRootException {
-		IContainer canditate = null;
+		IContainer candidate = null;
 		if (resource instanceof IFolder || resource instanceof IProject) {
-			canditate = (IContainer) resource;
+			candidate = (IContainer) resource;
 		} else if (resource instanceof IFile) {
-			canditate = resource.getParent();
+			candidate = resource.getParent();
 		}
-		ProjectType type = getProjectType(canditate);
-		if (canditate != null && isValidFedoraProjectRoot(canditate)
+		ProjectType type = getProjectType(candidate);
+		if (candidate != null && isValidFedoraProjectRoot(candidate)
 				&& type != null) {
-			return new FedoraProjectRoot(canditate, type);
+			try {
+				return instantiateProjectRoot(candidate, type);
+			} catch (FedoraPackagerExtensionPointException e) {
+				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+				logger.logError(e.getMessage(), e);
+				throw new InvalidProjectRootException(e.getMessage());
+			}
 		} else {
 			throw new InvalidProjectRootException(FedoraPackagerText.FedoraPackagerUtils_invalidProjectRootError);
 		}
@@ -124,7 +138,7 @@ public class FedoraPackagerUtils {
 	 * @param fedoraprojectRoot The project for which to get the VCS specific parts.
 	 * @return The needed IFpProjectBits.
 	 */
-	public static IFpProjectBits getVcsHandler(FedoraProjectRoot fedoraprojectRoot) {
+	public static IFpProjectBits getVcsHandler(IProjectRoot fedoraprojectRoot) {
 		IResource project = fedoraprojectRoot.getProject();
 		ProjectType type = getProjectType(project);
 		IExtensionPoint vcsExtensions = Platform.getExtensionRegistry()
@@ -176,5 +190,45 @@ public class FedoraPackagerUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Instatiate a project root instance using the projectRoot extension point.
+	 * @param type 
+	 * @param container 
+	 * 
+	 * @return the newly created instance
+	 * @throws FedoraPackagerExtensionPointException 
+	 */
+	private static IProjectRoot instantiateProjectRoot(IContainer container, ProjectType type)
+			throws FedoraPackagerExtensionPointException {
+		IExtensionPoint projectRootExtension = Platform.getExtensionRegistry()
+				.getExtensionPoint(PackagerPlugin.PLUGIN_ID,
+						PROJECT_ROOT_EXTENSIONPOINT_NAME);
+		if (projectRootExtension != null) {
+			for (IConfigurationElement projectRoot : projectRootExtension
+					.getConfigurationElements()) {
+				if (projectRoot.getName().equals(PROJECT_ROOT_ELEMENT_NAME)) {
+					// found extension point element
+					try {
+						IProjectRoot root = (IProjectRoot) projectRoot
+								.createExecutableExtension(PROJECT_ROOT_CLASS_ATTRIBUTE_NAME);
+						assert root != null;
+						// Do initialization
+						root.initialize(container, type);
+						return root;
+					} catch (IllegalStateException e) {
+						throw new FedoraPackagerExtensionPointException(
+								e.getMessage(), e);
+					} catch (CoreException e) {
+						throw new FedoraPackagerExtensionPointException(
+								e.getMessage(), e);
+					}
+				}
+			}
+		}
+		throw new FedoraPackagerExtensionPointException(NLS.bind(
+				FedoraPackagerText.extensionNotFoundError,
+				PROJECT_ROOT_EXTENSIONPOINT_NAME));
 	}
 }

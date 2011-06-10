@@ -35,9 +35,9 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RefSpec;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 
 /**
  * Git specific project bits (branches management and such).
@@ -121,10 +121,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 	/**
 	 * Git should always return anonymous checkout with git protocol for koji.
 	 * 
-	 * @see org.fedoraproject.eclipse.packager.IFpProjectBits#getScmUrlForKoji(FedoraProjectRoot)
+	 * @see org.fedoraproject.eclipse.packager.IFpProjectBits#getScmUrlForKoji(IProjectRoot)
 	 */
 	@Override
-	public String getScmUrlForKoji(FedoraProjectRoot projectRoot) {
+	public String getScmUrlForKoji(IProjectRoot projectRoot) {
 		if (!isInitialized()) {
 			return null;
 		}
@@ -178,10 +178,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 	/**
 	 * Do instance specific initialization.
 	 * 
-	 * See {@link IFpProjectBits#initialize(FedoraProjectRoot)}
+	 * See {@link IFpProjectBits#initialize(IProjectRoot)}
 	 */
 	@Override
-	public void initialize(FedoraProjectRoot fedoraprojectRoot) {
+	public void initialize(IProjectRoot fedoraprojectRoot) {
 		this.project = fedoraprojectRoot.getProject();
 		// now set Git Repository object
 		this.git = new Git(getGitRepository());
@@ -317,10 +317,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 	}
 
 	/**
-	 * See {@link IFpProjectBits#updateVCS(FedoraProjectRoot, IProgressMonitor)}
+	 * See {@link IFpProjectBits#updateVCS(IProjectRoot, IProgressMonitor)}
 	 */
 	@Override
-	public IStatus updateVCS(FedoraProjectRoot projectRoot,
+	public IStatus updateVCS(IProjectRoot projectRoot,
 			IProgressMonitor monitor) {
 		// FIXME: Not working just, yet. Use projectRoot and monitor!.
 //		return performPull();
@@ -391,10 +391,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 	/**
 	 * Determine if Git tag exists.
 	 * 
-	 * See {@link IFpProjectBits#isVcsTagged(FedoraProjectRoot, String)}
+	 * See {@link IFpProjectBits#isVcsTagged(IProjectRoot, String)}
 	 */
 	@Override
-	public boolean isVcsTagged(FedoraProjectRoot fedoraProjectRoot, String tag) {
+	public boolean isVcsTagged(IProjectRoot fedoraProjectRoot, String tag) {
 		if (!isInitialized()) {
 			return false; // If we are not initialized we can't go any further!
 		}
@@ -418,10 +418,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 	/**
 	 * Create new Git tag.
 	 * 
-	 * See {@link IFpProjectBits#tagVcs(FedoraProjectRoot, IProgressMonitor)}
+	 * See {@link IFpProjectBits#tagVcs(IProjectRoot, IProgressMonitor)}
 	 */
 	@Override
-	public IStatus tagVcs(FedoraProjectRoot projectRoot,
+	public IStatus tagVcs(IProjectRoot projectRoot,
 			IProgressMonitor monitor) {
 		if (!isInitialized()) {
 			return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Git tag error. Not initialized!");
@@ -445,7 +445,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	 * @return If there are unpushed changes.
 	 */
 	@Override
-	public boolean hasLocalChanges(FedoraProjectRoot fedoraProjectRoot) {
+	public boolean hasLocalChanges(IProjectRoot fedoraProjectRoot) {
 		if (!isInitialized()) {
 			// FIXME: raise exception instead.
 			return true; // If we are not initialized we can't go any further!

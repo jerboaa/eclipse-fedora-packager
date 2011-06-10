@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.SourcesFileUpdater;
@@ -70,8 +71,8 @@ public class UploadSourceCommandTest {
 	@Before
 	public void setUp() throws Exception {
 		this.testProject = new GitTestProject("eclipse-fedorapackager");
-		FedoraProjectRoot fpRoot = new FedoraProjectRoot(
-				this.testProject.getProject(), ProjectType.GIT);
+		IProjectRoot fpRoot = new FedoraProjectRoot();
+		fpRoot.initialize(this.testProject.getProject(), ProjectType.GIT);
 		this.packager = new FedoraPackager(fpRoot);
 	}
 
@@ -190,7 +191,7 @@ public class UploadSourceCommandTest {
 		File sourcesFile = new File(testProject.getProject().getLocation().toFile().getAbsolutePath()
 				+ File.separatorChar + SourcesFile.SOURCES_FILENAME);
 		String sourcesFileContentPre = TestsUtils.readContents(sourcesFile);
-		FedoraProjectRoot root = FedoraPackagerUtils.getProjectRoot(testProject
+		IProjectRoot root = FedoraPackagerUtils.getProjectRoot(testProject
 				.getProject());
 		
 		// create listener
