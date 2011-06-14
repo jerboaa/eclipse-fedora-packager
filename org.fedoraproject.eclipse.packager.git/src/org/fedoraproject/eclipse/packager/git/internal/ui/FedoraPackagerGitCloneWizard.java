@@ -142,7 +142,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 				});
 			} catch (InvocationTargetException e) {
 				// if repo wasn't found make this apparent
-				if (e.getCause() instanceof NoRemoteRepositoryException) {
+				if (e.getTargetException().getCause() instanceof NoRemoteRepositoryException) {
 					// Refuse to clone, give user a chance to correct
 					final String errorMessage = NLS
 							.bind(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_repositoryNotFound,
@@ -150,7 +150,8 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 					cloneFailChecked(errorMessage);
 					return false; // let user correct
 					// Caused by: org.eclipse.jgit.errors.NotSupportedException: URI not supported: ssh:///jeraal@alkldal.test.comeclipse-callgraph.git
-				} else if (e.getCause() instanceof NotSupportedException || e.getCause() instanceof TransportException) {
+				} else if (e.getTargetException().getCause() instanceof NotSupportedException || 
+							e.getTargetException().getCause() instanceof TransportException) {
 					final String errorMessage = NLS
 					.bind(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_badURIError,
 							Activator.getStringPreference(GitPreferencesConstants.PREF_CLONE_BASE_URL));
