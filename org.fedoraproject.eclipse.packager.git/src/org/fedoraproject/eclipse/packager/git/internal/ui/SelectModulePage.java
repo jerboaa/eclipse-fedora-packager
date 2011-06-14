@@ -22,6 +22,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -39,6 +40,7 @@ import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitText;
 public class SelectModulePage extends WizardPage {
 
 	private Text projectText;
+	private Button anonButton;
 
 	private final WorkingSetGroup workingSetGroup;
 
@@ -81,8 +83,19 @@ public class SelectModulePage extends WizardPage {
 		// Working set controls
 		Control workingSetControl = workingSetGroup.createControl(composite);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
+		
+		anonButton = new Button(composite, SWT.CHECK);
+		anonButton.setText(FedoraPackagerGitText.SelectModulePage_anonymousCheckout);
+		
 		setControl(composite);
+	}
+	/**
+	 * 
+	 * @return True if button checked, false otherwise.
+	 */
+	public boolean getButtonChecked() {
+		return anonButton.getSelection();
+		
 	}
 
 	/**
