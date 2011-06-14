@@ -149,7 +149,11 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 									page.getPackageName());
 					cloneFailChecked(errorMessage);
 					return false; // let user correct
-					// Caused by: org.eclipse.jgit.errors.NotSupportedException: URI not supported: ssh:///jeraal@alkldal.test.comeclipse-callgraph.git
+				} else if (e.getTargetException().getCause().getCause() != null && 
+							e.getTargetException().getCause().getCause().getMessage() == "Auth fail"){ //$NON-NLS-1$
+					cloneFailChecked(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_authFail);
+					return false;
+				// Caused by: org.eclipse.jgit.errors.NotSupportedException: URI not supported: ssh:///jeraal@alkldal.test.comeclipse-callgraph.git
 				} else if (e.getTargetException().getCause() instanceof NotSupportedException || 
 							e.getTargetException().getCause() instanceof TransportException) {
 					final String errorMessage = NLS
