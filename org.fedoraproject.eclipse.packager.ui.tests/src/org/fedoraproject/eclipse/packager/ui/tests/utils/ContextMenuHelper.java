@@ -1,14 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2010, SAP AG
- *
+ * Copyright (c) 2010-2011 Red Hat Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    Stefan Seelmann - initial implementation posted to
- *    http://www.eclipse.org/forums/index.php?t=msg&th=11863&start=2
+ *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.ui.tests.utils;
 
