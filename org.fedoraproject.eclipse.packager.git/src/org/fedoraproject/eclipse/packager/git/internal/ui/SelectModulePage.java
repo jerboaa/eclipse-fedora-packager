@@ -79,6 +79,7 @@ public class SelectModulePage extends WizardPage {
 		projectText = new Text(composite, SWT.BORDER | SWT.SINGLE);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		projectText.setLayoutData(gd);
+		projectText.setFocus();
 
 		// Working set controls
 		Control workingSetControl = workingSetGroup.createControl(composite);

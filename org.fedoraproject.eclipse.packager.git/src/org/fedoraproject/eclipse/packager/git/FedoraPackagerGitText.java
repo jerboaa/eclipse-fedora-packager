@@ -17,15 +17,15 @@ import org.eclipse.osgi.util.NLS;
  *
  */
 public class FedoraPackagerGitText extends NLS {
-	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.git.fedorapackagergittext"; //$NON-NLS-1$
 	
-	public static String FedoraPackagerGitCloneWizard_authFail;
-
+	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.git.fedorapackagergittext"; //$NON-NLS-1$
 	// FedoraCheckoutWizard Strings
+	/****/ public static String FedoraPackagerGitCloneWizard_authFail;
 	/****/ public static String FedoraPackagerGitCloneWizard_cloneFail;
 	/****/ public static String FedoraPackagerGitCloneWizard_cloneCancel;
-	/****/ public static String FedoraPackagerGitCloneWizard_projectExists;
-	/****/ public static String FedoraPackagerGitCloneWizard_filesystemResourceExists;
+	/****/ public static String FedoraPackagerGitCloneWizard_confirmDialogTitle;
+	/****/ public static String FedoraPackagerGitCloneWizard_confirmOverwirteProjectExists;
+	/****/ public static String FedoraPackagerGitCloneWizard_filesystemResourceExistsQuestion;
 	/****/ public static String FedoraPackagerGitCloneWizard_createLocalBranchesJob;
 	/****/ public static String FedoraPackagerGitCloneWizard_repositoryNotFound;
 	/****/ public static String FedoraPackagerGitCloneWizard_wizardTitle;

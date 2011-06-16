@@ -10,18 +10,55 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.cvs;
 
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
 
 /**
  * 
  * The CVS plug-in activator.
  *
  */
-public class CVSPlugin extends PackagerPlugin {
+public class CVSPlugin extends AbstractUIPlugin {
 
+	private static CVSPlugin plugin;
+	
 	/**
 	 * The plug-in ID.
 	 */
 	public static final String PLUGIN_ID = "org.fedoraproject.eclipse.packager.cvs";
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext
+	 * )
+	 */
+	@Override
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		plugin = this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext
+	 * )
+	 */
+	@Override
+	public void stop(BundleContext context) throws Exception {
+		plugin = null;
+		super.stop(context);
+	}
+
+	/**
+	 * Returns the shared instance
+	 * 
+	 * @return the shared instance
+	 */
+	public static CVSPlugin getDefault() {
+		return plugin;
+	}
 }

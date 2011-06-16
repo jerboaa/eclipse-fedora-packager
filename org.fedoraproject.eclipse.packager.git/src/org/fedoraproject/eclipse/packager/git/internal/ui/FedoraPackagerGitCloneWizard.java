@@ -35,6 +35,7 @@ import org.eclipse.jgit.errors.NoRemoteRepositoryException;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkingSet;
@@ -42,11 +43,13 @@ import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.QuestionMessageDialog;
 import org.fedoraproject.eclipse.packager.git.Activator;
 import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitCloneOperation;
 import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitText;
 import org.fedoraproject.eclipse.packager.git.GitPreferencesConstants;
 import org.fedoraproject.eclipse.packager.git.GitUtils;
+
 
 /**
  * Wizard to checkout package content from Fedora Git.
@@ -75,7 +78,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 		addPage(page);
 		page.init(selection);
 	}
-
+	
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -85,7 +88,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.selection = selection;
 	}
-
+	
 	@Override
 	public boolean performFinish() {
 		try {
@@ -93,12 +96,15 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 			// Bail out if project already exists
 			IResource project = wsRoot.findMember(new Path(page.getPackageName()));
 			if (project != null && project.exists()) {
-				final String errorMessage = NLS
-						.bind(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_projectExists,
+				final String confirmOverwriteProjectMessage = NLS
+						.bind(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_confirmOverwirteProjectExists,
 								project.getName());
-				cloneFailChecked(errorMessage);
-				// let's give user a chance to fix this minor problem
-				return false;
+				if (!confirmOverwriteQuestion(confirmOverwriteProjectMessage)) {
+					return performCancel();
+				} else {
+					// delete project
+					project.delete(true, null);
+				}
 			}
 			// Make sure to be created directory does not exist or is
 			// empty
@@ -107,12 +113,14 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 			if (newDir.exists() && newDir.isDirectory()) {
 				String contents[] = newDir.list();
 				if (contents.length != 0) {
-					// Refuse to clone, give user a chance to correct
-					final String errorMessage = NLS
-							.bind(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_filesystemResourceExists,
+					// ask for confirmation before we overwrite
+					final String confirmOverwriteQuestion = NLS
+							.bind(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_filesystemResourceExistsQuestion,
 									page.getPackageName());
-					cloneFailChecked(errorMessage);
-					return false;
+					if (!confirmOverwriteQuestion(confirmOverwriteQuestion)) {
+						// bail
+						return performCancel();
+					}
 				}
 			}
 
@@ -200,6 +208,21 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 		}
 	}
 	
+	/**
+	 * Prompt for confirmation if a resource exists, either the project already exists,
+	 * or a folder exists in the workspace and would conflict with the newly created project.
+	 * 
+	 * @param errorMessage
+	 * @return {@code true} if the user confirmed, {@code false} otherwise.
+	 */
+	private boolean confirmOverwriteQuestion(String errorMessage) {
+		QuestionMessageDialog op = new QuestionMessageDialog(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_confirmDialogTitle,
+				errorMessage,
+				getShell());
+		Display.getDefault().syncExec(op);
+		return op.isOkPressed();
+	}
+
 	/**
 	 * Opens error dialog with provided reason in error message.
 	 * 
