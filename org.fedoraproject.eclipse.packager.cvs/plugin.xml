@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.2"?><!--
-    Copyright (c) 2010 Red Hat Inc. and others.
+<?eclipse version="3.2"?>
+<!--
+    Copyright (c) 2010-2011 Red Hat Inc. and others.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -11,63 +12,6 @@
  -->
 
 <plugin>
-   <extension
-         point="org.eclipse.ui.menus">         
-            <menuContribution
-                  locationURI="popup:org.eclipse.fedoraproject.packager.main?before=org.fedoraproject.eclipse.packager.cvssep">
-             <menu
-                  label="%menu.label.1"
-                  mnemonic="%menu.mnemonic.0">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <with
-                           variable="activeMenuSelection">
-                        <reference
-                              definitionId="org.fedoraproject.eclipse.packager.project">
-                        </reference>
-                     </with>
-                     <with
-                           variable="activeMenuEditorInput">
-                        <reference
-                              definitionId="org.fedoraproject.eclipse.packager.project">
-                        </reference>
-                     </with>
-                  </or>
-               </visibleWhen>
-            </menu>
-            <command
-                  commandId="org.fedoraproject.eclipse.packager.CommitCommand"
-                  label="%command.label.6"
-                  mnemonic="%command.mnemonic.6"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                  <with variable="activeMenuSelection">
-                     <reference definitionId="org.fedoraproject.eclipse.packager.cvsproject"/>
-                  </with>
-                  <with variable="activeMenuEditorInput">
-                     <reference definitionId="org.fedoraproject.eclipse.packager.cvsproject"/>
-                  </with>
-               </or>
-               </visibleWhen>
-            </command>
-            </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commands">
-         <command
-            defaultHandler="org.fedoraproject.eclipse.packager.cvs.internal.handlers.CommitHandler"
-            id="org.fedoraproject.eclipse.packager.CommitCommand"
-            name="%command.name.1">
-      </command>
-      <command
-            defaultHandler="org.fedoraproject.eclipse.packager.cvs.internal.handlers.TagHandler"
-            id="org.fedoraproject.eclipse.packager.TagCommand"
-            name="%command.name.10">
-      </command>
-   </extension>
 <extension
       point="org.fedoraproject.eclipse.packager.vcsContribution">
    <vcs
@@ -76,19 +20,4 @@
          name="CVS">
    </vcs>
 </extension>
-<!-- Disabled by default.
-<extension
-         point="org.eclipse.ui.importWizards">
-      <wizard
-            category="org.eclipse.team.cvs.ui.importWizards"
-            class="org.fedoraproject.eclipse.packager.cvs.internal.ui.FedoraPackagerCheckoutWizard"
-            icon="icons/newconnect_wiz.gif"
-            id="org.fedoraproject.eclipse.packager.cvs.FedoraPackagerCVSImportWizard"
-            name="%FedoraCVSWizardName">
-         <description>
-            %FedoraCVSWizardDescription
-         </description>
-      </wizard>
-   </extension>
--->
 </plugin>
