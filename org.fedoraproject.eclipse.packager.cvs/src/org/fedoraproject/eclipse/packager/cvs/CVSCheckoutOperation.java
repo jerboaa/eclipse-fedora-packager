@@ -68,7 +68,6 @@ public class CVSCheckoutOperation {
 		ICVSRepositoryLocation repo = CVSRepositoryLocation.fromString(getScmURL());
 		ICVSRemoteFolder remoteFolder = repo.getRemoteFolder("rpms", null);
 		RemoteModule remoteModule = new RemoteModule(moduleName, (RemoteFolder) remoteFolder, repo, moduleName,new LocalOption[]{}, new CVSTag(), true);
-		
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		project = root.getProject(moduleName);
 		runnable = new CheckoutSingleProjectOperation(null, remoteModule, project, null, false);
