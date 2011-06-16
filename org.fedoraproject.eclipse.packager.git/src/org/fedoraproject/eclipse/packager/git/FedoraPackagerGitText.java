@@ -23,8 +23,9 @@ public class FedoraPackagerGitText extends NLS {
 	/****/ public static String FedoraPackagerGitCloneWizard_authFail;
 	/****/ public static String FedoraPackagerGitCloneWizard_cloneFail;
 	/****/ public static String FedoraPackagerGitCloneWizard_cloneCancel;
-	/****/ public static String FedoraPackagerGitCloneWizard_projectExists;
-	/****/ public static String FedoraPackagerGitCloneWizard_filesystemResourceExists;
+	/****/ public static String FedoraPackagerGitCloneWizard_confirmDialogTitle;
+	/****/ public static String FedoraPackagerGitCloneWizard_confirmOverwirteProjectExists;
+	/****/ public static String FedoraPackagerGitCloneWizard_filesystemResourceExistsQuestion;
 	/****/ public static String FedoraPackagerGitCloneWizard_createLocalBranchesJob;
 	/****/ public static String FedoraPackagerGitCloneWizard_repositoryNotFound;
 	/****/ public static String FedoraPackagerGitCloneWizard_wizardTitle;
