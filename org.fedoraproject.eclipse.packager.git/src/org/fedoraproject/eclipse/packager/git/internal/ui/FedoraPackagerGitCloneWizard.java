@@ -257,9 +257,9 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 				.getStringPreference(GitPreferencesConstants.PREF_CLONE_BASE_URL);
 		String fasUserName = FedoraSSLFactory.getInstance()
 				.getUsernameFromCert();
-		if (gitBaseURL != null && !page.getButtonChecked()) {
+		if (gitBaseURL != null && !page.getCloneAnonymousButtonChecked()) {
 			return GitUtils.getFullGitURL(gitBaseURL, page.getPackageName());
-		} else if (!fasUserName.equals(FedoraSSL.UNKNOWN_USER) && !page.getButtonChecked()) {
+		} else if (!fasUserName.equals(FedoraSSL.UNKNOWN_USER) && !page.getCloneAnonymousButtonChecked()) {
 			return GitUtils.getFullGitURL(
 					GitUtils.getAuthenticatedGitBaseUrl(fasUserName),
 					page.getPackageName());

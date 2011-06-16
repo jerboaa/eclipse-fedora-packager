@@ -90,11 +90,12 @@ public class SelectModulePage extends WizardPage {
 		
 		setControl(composite);
 	}
+	
 	/**
 	 * 
-	 * @return True if button checked, false otherwise.
+	 * @return {code true} if the user chose an anonymous clone, {code false} otherwise.
 	 */
-	public boolean getButtonChecked() {
+	public boolean getCloneAnonymousButtonChecked() {
 		return anonButton.getSelection();
 		
 	}
