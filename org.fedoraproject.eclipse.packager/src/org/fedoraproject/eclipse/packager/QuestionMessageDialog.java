@@ -13,6 +13,7 @@ public class QuestionMessageDialog implements Runnable {
 	private boolean okPressed;
 	private Shell shell;
 	private IProjectRoot root;
+	private String title;
 
 	/**
 	 * 
@@ -25,12 +26,32 @@ public class QuestionMessageDialog implements Runnable {
 		this.shell = shell;
 		this.root = fpRoot;
 	}
+	
+	/**
+	 * 
+	 * @param question
+	 * @param shell
+	 * @param title The title of the question dialog.
+	 */
+	public QuestionMessageDialog(String title, String question, Shell shell) {
+		this.question = question;
+		this.shell = shell;
+		this.title = title;
+	}
+	
 
 	@Override
 	public void run() {
-		okPressed = MessageDialog.openQuestion(shell,
-				NonTranslatableStrings.getProductName(root),
-				question);
+		if (root != null) {
+			okPressed = MessageDialog.openQuestion(shell,
+					NonTranslatableStrings.getProductName(root), question);
+		} else if (title != null) {
+			okPressed = MessageDialog.openQuestion(shell,
+					title, question);
+		} else {
+			// either need a title, or project root.
+			throw new IllegalStateException();
+		}
 	}
 
 	/**
