@@ -19,7 +19,6 @@ import org.eclipse.osgi.util.NLS;
 public class FedoraPackagerGitText extends NLS {
 	
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.git.fedorapackagergittext"; //$NON-NLS-1$
-	
 	// FedoraCheckoutWizard Strings
 	/****/ public static String FedoraPackagerGitCloneWizard_authFail;
 	/****/ public static String FedoraPackagerGitCloneWizard_cloneFail;
