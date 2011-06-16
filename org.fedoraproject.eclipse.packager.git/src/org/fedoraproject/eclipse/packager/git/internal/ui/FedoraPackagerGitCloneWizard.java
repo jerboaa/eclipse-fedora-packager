@@ -30,6 +30,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.errors.NoRemoteRepositoryException;
 import org.eclipse.jgit.errors.NotSupportedException;
 import org.eclipse.jgit.errors.TransportException;
@@ -142,7 +143,8 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 				});
 			} catch (InvocationTargetException e) {
 				// if repo wasn't found make this apparent
-				if (e.getTargetException().getCause() instanceof NoRemoteRepositoryException) {
+				if (e.getTargetException().getCause() instanceof NoRemoteRepositoryException || 
+						e.getTargetException().getCause() instanceof InvalidRemoteException) {
 					// Refuse to clone, give user a chance to correct
 					final String errorMessage = NLS
 							.bind(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_repositoryNotFound,
