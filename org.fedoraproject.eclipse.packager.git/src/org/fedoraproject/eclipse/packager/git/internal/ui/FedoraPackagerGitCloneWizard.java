@@ -77,7 +77,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 		addPage(page);
 		page.init(selection);
 	}
-
+	
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -87,7 +87,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.selection = selection;
 	}
-
+	
 	@Override
 	public boolean performFinish() {
 		try {
