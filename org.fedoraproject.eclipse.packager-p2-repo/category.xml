@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.fedoraproject.eclipse.packager_0.2.0.qualifier.jar" id="org.fedoraproject.eclipse.packager" version="0.2.0.qualifier">
+      <category name="fedora-packager"/>
+   </feature>
+   <category-def name="fedora-packager" label="Fedora Packager for Eclipse">
+      <description>
+         Fedora Packager for Eclipse and related plug-ins.
+      </description>
+   </category-def>
+</site>
