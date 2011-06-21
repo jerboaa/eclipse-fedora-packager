@@ -19,14 +19,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
-import org.eclipse.osgi.util.NLS;
-import org.fedoraproject.eclipse.packager.ILookasideCache.CacheType;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerExtensionPointException;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
 
@@ -36,15 +32,6 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
  * 
  */
 public class FedoraProjectRoot implements IProjectRoot {
-	
-	private static final String LOOKASIDE_CACHE_EXTENSIONPOINT_NAME =
-		"lookasideCacheProvider"; //$NON-NLS-1$
-	private static final String LOOKASIDE_CACHE_ELEMENT_NAME = "cache"; //$NON-NLS-1$
-	private static final String LOOKASIDE_CACHE_CLASS_ATTRIBUTE_NAME = "class"; //$NON-NLS-1$
-	private static final String PR_STRING_EXTENSIONPOINT_NAME =
-		"productNamesProvider"; //$NON-NLS-1$
-	private static final String PR_STRING_ELEMENT_NAME = "provider"; //$NON-NLS-1$
-	private static final String PR_STRING_CLASS_ATTRIBUTE_NAME = "class"; //$NON-NLS-1$
 	
 	private IContainer rootContainer;
 	private SourcesFile sourcesFile;
@@ -72,8 +59,8 @@ public class FedoraProjectRoot implements IProjectRoot {
 		assert type != null;
 		this.type = type;
 		// statically pass Fedora type
-		this.lookAsideCache = createNewLookasideCacheObject(CacheType.FEDORA);
-		this.productStrings = createNewNonTranslatableStringsObject(this);
+		this.lookAsideCache = new LookasideCache();
+		this.productStrings = new ProductStringsNonTranslatable(this);
 	}
 
 	/*
@@ -213,89 +200,13 @@ public class FedoraProjectRoot implements IProjectRoot {
 		return this.productStrings;
 	}
 
-	/**
-	 * Instantiate a new lookaside cache object using the lookasideCacheProvider
-	 * extension point.
-	 * @param cacheType 
-	 * 
-	 * @return the newly created and initialized instance.
-	 * @throws FedoraPackagerExtensionPointException 
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getSupportedProjectPropertyNames()
 	 */
-	private ILookasideCache createNewLookasideCacheObject(CacheType cacheType)
-			throws FedoraPackagerExtensionPointException {
-		IExtensionPoint lookasideCacheExtension = Platform
-				.getExtensionRegistry().getExtensionPoint(
-						PackagerPlugin.PLUGIN_ID,
-						LOOKASIDE_CACHE_EXTENSIONPOINT_NAME);
-		if (lookasideCacheExtension != null) {
-			for (IConfigurationElement lookasideCacheElement : lookasideCacheExtension
-					.getConfigurationElements()) {
-				if (lookasideCacheElement.getName().equals(
-						LOOKASIDE_CACHE_ELEMENT_NAME)) {
-					// found extension point element
-					try {
-						ILookasideCache cache = (ILookasideCache) lookasideCacheElement
-								.createExecutableExtension(LOOKASIDE_CACHE_CLASS_ATTRIBUTE_NAME);
-						assert cache != null;
-						// Do initialization
-						cache.initialize(cacheType);
-						return cache;
-					} catch (IllegalStateException e) {
-						throw new FedoraPackagerExtensionPointException(
-								e.getMessage(), e);
-					} catch (CoreException e) {
-						throw new FedoraPackagerExtensionPointException(
-								e.getMessage(), e);
-					}
-				}
-			}
-		}
-		throw new FedoraPackagerExtensionPointException(NLS.bind(
-				FedoraPackagerText.extensionNotFoundError,
-				LOOKASIDE_CACHE_EXTENSIONPOINT_NAME));
-	}
-
-	/**
-	 * Instantiate a new non translatable strings object using the nonTranslatableStringsProvider
-	 * extension point.
-	 * @param fedoraProjectRoot 
-	 * 
-	 * @return the newly created and initialized instance.
-	 * @throws FedoraPackagerExtensionPointException 
-	 */
-	private IProductStrings createNewNonTranslatableStringsObject(
-			IProjectRoot fedoraProjectRoot)
-			throws FedoraPackagerExtensionPointException {
-		IExtensionPoint productStringsExtension = Platform
-				.getExtensionRegistry()
-				.getExtensionPoint(PackagerPlugin.PLUGIN_ID,
-						PR_STRING_EXTENSIONPOINT_NAME);
-		if (productStringsExtension != null) {
-			for (IConfigurationElement providerElement : productStringsExtension
-					.getConfigurationElements()) {
-				if (providerElement.getName().equals(
-						PR_STRING_ELEMENT_NAME)) {
-					// found extension point element
-					try {
-						IProductStrings productStrings = (IProductStrings) providerElement
-								.createExecutableExtension(PR_STRING_CLASS_ATTRIBUTE_NAME);
-						assert productStrings != null;
-						// Do initialization
-						productStrings.initialize(fedoraProjectRoot);
-						return productStrings;
-					} catch (IllegalStateException e) {
-						throw new FedoraPackagerExtensionPointException(
-								e.getMessage(), e);
-					} catch (CoreException e) {
-						throw new FedoraPackagerExtensionPointException(
-								e.getMessage(), e);
-					}
-				}
-			}
-		}
-		throw new FedoraPackagerExtensionPointException(NLS.bind(
-				FedoraPackagerText.extensionNotFoundError,
-				PR_STRING_EXTENSIONPOINT_NAME));
+	@Override
+	public QualifiedName[] getSupportedProjectPropertyNames() {
+		return new QualifiedName[] { PackagerPlugin.PROJECT_PROP };
 	}
 
 	/**

@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerExtensionPointException;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
@@ -106,4 +107,15 @@ public interface IProjectRoot {
 	 * @return the product strings mapper.
 	 */
 	public IProductStrings getProductStrings();
+
+	/**
+	 * Get a list of the supported qualified names which this project root
+	 * supports. This is useful if some plug-in provides {@link IProjectRoot}
+	 * support based on a persistent project property of the underlying
+	 * resource. This list will allow the plug-in to provide the best possible
+	 * match of an {@link IProjectRoot} for the given underlying container.
+	 * 
+	 * @return the list of qualified names this project root supports.
+	 */
+	public QualifiedName[] getSupportedProjectPropertyNames();
 }

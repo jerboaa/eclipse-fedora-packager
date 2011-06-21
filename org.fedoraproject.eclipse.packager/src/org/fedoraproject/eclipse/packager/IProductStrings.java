@@ -17,13 +17,6 @@ package org.fedoraproject.eclipse.packager;
  *
  */
 public interface IProductStrings {
-
-	/**
-	 * Called on object creation in order to perform initialization.
-	 * 
-	 * @param root
-	 */
-	public void initialize(IProjectRoot root);
 	
 	/**
 	 * @return The name of this product.

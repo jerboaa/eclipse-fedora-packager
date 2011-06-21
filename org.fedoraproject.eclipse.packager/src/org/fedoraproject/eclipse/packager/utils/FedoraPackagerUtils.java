@@ -11,6 +11,8 @@
 package org.fedoraproject.eclipse.packager.utils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -216,6 +218,7 @@ public class FedoraPackagerUtils {
 				.getExtensionPoint(PackagerPlugin.PLUGIN_ID,
 						PROJECT_ROOT_EXTENSIONPOINT_NAME);
 		if (projectRootExtension != null) {
+			List<IProjectRoot> projectRootList = new ArrayList<IProjectRoot>();
 			for (IConfigurationElement projectRoot : projectRootExtension
 					.getConfigurationElements()) {
 				if (projectRoot.getName().equals(PROJECT_ROOT_ELEMENT_NAME)) {
@@ -224,9 +227,7 @@ public class FedoraPackagerUtils {
 						IProjectRoot root = (IProjectRoot) projectRoot
 								.createExecutableExtension(PROJECT_ROOT_CLASS_ATTRIBUTE_NAME);
 						assert root != null;
-						// Do initialization
-						root.initialize(container, type);
-						return root;
+						projectRootList.add(root);
 					} catch (IllegalStateException e) {
 						throw new FedoraPackagerExtensionPointException(
 								e.getMessage(), e);
@@ -236,9 +237,59 @@ public class FedoraPackagerUtils {
 					}
 				}
 			}
+			// We need at least one project root
+			if (projectRootList.size() == 0) {
+				throw new FedoraPackagerExtensionPointException(NLS.bind(
+						FedoraPackagerText.extensionNotFoundError,
+						PROJECT_ROOT_EXTENSIONPOINT_NAME));
+			}
+			// Get the best matching project root
+			IProjectRoot projectRoot = findBestMatchingProjectRoot(projectRootList, container);
+			if (projectRoot == null) {
+				// can't continue
+				throw new FedoraPackagerExtensionPointException(NLS.bind(
+						FedoraPackagerText.extensionNotFoundError,
+						PROJECT_ROOT_EXTENSIONPOINT_NAME));
+			}
+			// Do initialization
+			projectRoot.initialize(container, type);
+			return projectRoot;
 		}
 		throw new FedoraPackagerExtensionPointException(NLS.bind(
 				FedoraPackagerText.extensionNotFoundError,
 				PROJECT_ROOT_EXTENSIONPOINT_NAME));
+	}
+
+	/**
+	 * Determine the project root, which is the best match for the given
+	 * container.
+	 * 
+	 * @param projectRootList
+	 * @param container
+	 * @return The project root which has support for the project property of
+	 *         the container or {@code null} if no such project root exists.
+	 */
+	private static IProjectRoot findBestMatchingProjectRoot(
+			List<IProjectRoot> projectRootList, IContainer container) {
+		for (IProjectRoot root: projectRootList) {
+			for (QualifiedName propName : root
+					.getSupportedProjectPropertyNames()) {
+				try {
+					String property = container.getProject()
+							.getPersistentProperty(propName);
+					if (property != null) {
+						// match found
+						FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+						logger.logInfo(NLS
+								.bind(FedoraPackagerText.FedoraPackagerUtils_projectRootClassNameMsg,
+										root.getClass().getName()));
+						return root;
+					}
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
 	}
 }

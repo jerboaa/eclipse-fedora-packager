@@ -26,7 +26,6 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
@@ -81,15 +80,15 @@ public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
+					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
+					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
-		Job job = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
+		Job job = new Job(fedoraProjectRoot.getProductStrings().getProductName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -111,7 +110,7 @@ public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 					return downloadSourcesJob.getResult();
 				}
 				// Do the local build
-				Job rpmBuildjob = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
+				Job rpmBuildjob = new Job(fedoraProjectRoot.getProductStrings().getProductName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {

@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -106,7 +105,7 @@ public class DownloadSourcesJob extends Job {
 			if (!suppressSourcesUpToDateInfo) {
 				FedoraHandlerUtils
 						.showInformationDialog(shell,
-								NonTranslatableStrings.getProductName(this.fedoraProjectRoot),
+								fedoraProjectRoot.getProductStrings().getProductName(),
 								e.getMessage());
 			}
 			return Status.OK_STATUS;

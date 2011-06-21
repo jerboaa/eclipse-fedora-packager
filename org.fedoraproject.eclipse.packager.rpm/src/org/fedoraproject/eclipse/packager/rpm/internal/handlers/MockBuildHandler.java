@@ -29,7 +29,6 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
@@ -94,15 +93,15 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
+					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
+					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
-		Job job = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
+		Job job = new Job(fedoraProjectRoot.getProductStrings().getProductName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -143,7 +142,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 				
 				final RpmBuildResult srpmBuildResult = srpmBuildJob.getSRPMBuildResult(); 
 				// do the mock building
-				Job mockBuildJob = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
+				Job mockBuildJob = new Job(fedoraProjectRoot.getProductStrings().getProductName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
@@ -187,8 +186,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 								logger.logInfo(e.getMessage());
 								FedoraHandlerUtils
 										.showInformationDialog(shell,
-												NonTranslatableStrings
-														.getProductName(fedoraProjectRoot), e
+												fedoraProjectRoot.getProductStrings().getProductName(), e
 														.getMessage());
 								return Status.OK_STATUS;
 							} catch (CommandListenerException e) {
@@ -209,8 +207,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 								logger.logInfo(e.getMessage());
 								FedoraHandlerUtils
 										.showInformationDialog(shell,
-												NonTranslatableStrings
-														.getProductName(fedoraProjectRoot), e
+												fedoraProjectRoot.getProductStrings().getProductName(), e
 														.getMessage());
 								return Status.OK_STATUS;
 							}
@@ -257,7 +254,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 					logger.logInfo(msg);
 					FedoraHandlerUtils.showInformationDialog(
 							shell,
-							NonTranslatableStrings.getProductName(fedoraProjectRoot), msg);
+							fedoraProjectRoot.getProductStrings().getProductName(), msg);
 				} else {
 					String msg = NLS.bind(
 							RpmText.MockBuildHandler_mockFailedMsg,
@@ -265,7 +262,7 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 					logger.logInfo(msg);
 					FedoraHandlerUtils.showInformationDialog(
 							shell,
-							NonTranslatableStrings.getProductName(fedoraProjectRoot),
+							fedoraProjectRoot.getProductStrings().getProductName(),
 							msg);
 				}
 			}

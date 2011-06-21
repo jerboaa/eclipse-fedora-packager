@@ -35,15 +35,6 @@ public interface ILookasideCache {
 		 */
 		EPEL
 	}
-
-	/**
-	 * Initialize an ILookasideCache object to the requested type. This method
-	 * is called on object creation.
-	 * 
-	 * @param type
-	 *            The cache type to create.
-	 */
-	public void initialize(CacheType type);
 	
 	/**
 	 * @return the proper download URL for this lookaside cache type.
