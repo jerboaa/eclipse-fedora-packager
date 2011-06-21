@@ -87,17 +87,6 @@ public class PackagerPlugin extends AbstractUIPlugin {
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
-
-	/** 
-	 * Get an ImageDescriptor for the given path and pluginId.
-	 * @param pluginId	The plugin id for which to return the ImageDescriptor
-	 * @param path	The path to the image.
-	 * 
-	 * @return The ImageDescriptor in question.
-	 */
-	public static ImageDescriptor getImageDescriptor(String pluginId, String path) {
-		return imageDescriptorFromPlugin(pluginId, path);
-	}
 	
 	/**
 	 * Get a String preference related to this plug-in.
