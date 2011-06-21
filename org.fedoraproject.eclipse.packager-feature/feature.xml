@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.fedoraproject.eclipse.packager"
-      label="Eclipse Fedora Packager Tools"
+      label="Fedora Packager for Eclipse"
       version="0.2.0.qualifier"
       provider-name="Fedoraproject.org">
 
@@ -18,6 +18,11 @@
    <license url="license.html">
       %license
    </license>
+
+   <includes
+         id="org.eclipse.egit"
+         version="0.0.0"
+         name="EGit"/>
 
    <requires>
       <import plugin="org.eclipse.ui"/>
@@ -39,22 +44,22 @@
       <import plugin="org.eclipse.team.cvs.ui"/>
       <import plugin="org.eclipse.team.ui"/>
       <import plugin="org.apache.ws.commons.util"/>
+      <import plugin="org.apache.xmlrpc.common"/>
       <import plugin="org.apache.xmlrpc"/>
       <import plugin="org.eclipse.core.commands"/>
       <import plugin="org.eclipse.core.jobs"/>
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.eclipse.ui.browser"/>
-      <import plugin="org.eclipse.egit.core" version="0.9.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jgit" version="0.9.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="javax.servlet"/>
       <import plugin="avalon-framework-impl-4.3"/>
       <import plugin="org.apache.commons.logging"/>
       <import plugin="avalon-logkit-2.1"/>
-      <import plugin="log4j"/>
-      <import plugin="org.apache.xmlrpc.common"/>
+      <import feature="org.eclipse.egit" version="1.0.0.qualifier" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.egit.core" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jgit" version="1.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
@@ -100,6 +105,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.fedoraproject.eclipse.packager.rpm"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.httpcomponents.httpclient"
          download-size="0"
          install-size="0"
@@ -128,7 +140,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.fedoraproject.eclipse.packager.rpm"
+         id="org.apache.log4j"
          download-size="0"
          install-size="0"
          version="0.0.0"
