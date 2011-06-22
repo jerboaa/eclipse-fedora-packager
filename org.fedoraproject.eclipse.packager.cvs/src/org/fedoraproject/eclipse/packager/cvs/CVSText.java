@@ -28,13 +28,6 @@ public class CVSText extends NLS {
 	/****/ public static String SelectModulePage_choosePackage;
 	/****/ public static String SelectModulePage_packageName;
 	/****/ public static String SelectModulePage_workingSets;
-	// CommitHandler Strings
-	/****/ public static String CommitHandler_jobName;
-	/****/ public static String CommitHandler_commitFedoraCVS;
-	/****/ public static String CommitHandler_prepCommitMsg;
-	// TagHandler Strings
-	/****/ public static String TagHandler_jobName;
-	/****/ public static String TagHandler_tagTaskName;
 	
 	static {
 		// initialize resource bundle
