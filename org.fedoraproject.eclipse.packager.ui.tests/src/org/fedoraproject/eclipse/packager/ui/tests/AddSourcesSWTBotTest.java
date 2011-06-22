@@ -131,7 +131,7 @@ public class AddSourcesSWTBotTest {
 	 * 
 	 * @throws Exception
 	 */
-	@SuppressWarnings({ "static-access", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void cannotUploadNonEmptySourceFileWithInvalidExtensionAddSourcesHandler() throws Exception {
 		// Create non-empty, invalid source file in project
@@ -173,7 +173,6 @@ public class AddSourcesSWTBotTest {
 	 * 
 	 * @throws Exception
 	 */
-	@SuppressWarnings("static-access")
 	@Test
 	public void canUploadValidSourceFileAddSourcesHandler() throws Exception {
 		

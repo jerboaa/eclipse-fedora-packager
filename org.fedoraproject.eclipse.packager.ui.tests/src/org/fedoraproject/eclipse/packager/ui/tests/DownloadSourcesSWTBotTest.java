@@ -65,7 +65,6 @@ public class DownloadSourcesSWTBotTest {
 	 * 
 	 * @throws Exception
 	 */
-	@SuppressWarnings("static-access")
 	@Test
 	public void canDownloadSources() throws Exception {
 		// Get Package Explorer tree

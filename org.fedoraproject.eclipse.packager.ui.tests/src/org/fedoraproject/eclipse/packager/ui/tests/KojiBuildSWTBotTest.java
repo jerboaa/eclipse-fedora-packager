@@ -89,7 +89,7 @@ public class KojiBuildSWTBotTest {
 	 * 
 	 * @throws Exception
 	 */
-	@SuppressWarnings({ "static-access", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void canPushBuildToKoji() throws Exception {
 		
