@@ -54,7 +54,7 @@ public class FedoraPackagerLogger {
 		// Should we use DebugOptionsListener here?
 		IPreferenceStore prefStore = PackagerPlugin.getDefault().getPreferenceStore();
 		boolean debugEnabled = prefStore.getBoolean(FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE);
-		if (debugEnabled) {
+		if (PackagerPlugin.inDebugMode() || debugEnabled) {
 			currentLogLevel = LogLevel.DEBUG;
 		} else {
 			currentLogLevel = LogLevel.ERROR;

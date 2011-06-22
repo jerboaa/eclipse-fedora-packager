@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -103,5 +104,17 @@ public class PackagerPlugin extends AbstractUIPlugin {
 			return null;
 		}
 		return candidate;
+	}
+	
+	/**
+	 * 
+	 * @return {@code true} when platform was started in debug mode (
+	 *         {@code -debug} switch) and
+	 *         {@code org.fedoraproject.eclipse.packager/debug=true} is set in
+	 *         some .options file either in $HOME/.options or $(pwd)/.options.
+	 */
+	public static boolean inDebugMode() {
+		return Platform.inDebugMode()
+				&& Platform.getDebugOption(PLUGIN_ID + "/debug").equals("true"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
