@@ -233,4 +233,9 @@ public class DownloadSourceCommand extends
 		tempFile.delete();
 		subMonitor.done();
 	}
+	public String getDownloadFolderPath(){
+		return projectRoot.getContainer().getWorkspace().getRoot()
+			.getRawLocationURI().getPath()
+			.concat(projectRoot.getContainer().getFullPath().toOSString());
+	}
 }

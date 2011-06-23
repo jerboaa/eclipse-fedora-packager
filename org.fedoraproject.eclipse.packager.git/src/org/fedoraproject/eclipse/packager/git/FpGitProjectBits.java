@@ -54,7 +54,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	private HashMap<String, String> branches; // All branches
 	private Git git; // The Git repository abstraction for this project
 	private boolean initialized = false; // keep track if instance is initialized
-	
+	private String currentBranch = null;
 	// String regexp pattern used for branch mapping this should basically be the
 	// same pattern as fedpkg uses. ATM this pattern is:
 	// BRANCHFILTER = 'f\d\d\/master|master|el\d\/master|olpc\d\/master'
@@ -86,7 +86,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 		if (!isInitialized()) {
 			return null;
 		}
-		String currentBranch = null;
+		currentBranch = null;
 		try {
 			// make sure it's a named branch
 			if (!isNamedBranch(this.git.getRepository().getFullBranch())) {
@@ -98,6 +98,12 @@ public class FpGitProjectBits implements IFpProjectBits {
 			e.printStackTrace();
 		}
 		return mapBranchName(currentBranch);
+	}
+	
+	@Override
+	public String getRawCurrentBranchName(){
+		getCurrentBranchName();
+		return currentBranch;
 	}
 
 	/**
@@ -424,10 +430,10 @@ public class FpGitProjectBits implements IFpProjectBits {
 	public IStatus tagVcs(IProjectRoot projectRoot,
 			IProgressMonitor monitor) {
 		if (!isInitialized()) {
-			return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Git tag error. Not initialized!");
+			return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Git tag error. Not initialized!"); //$NON-NLS-1$
 		}
 		//FIXME: no-op ATM. use git.tag().
-		return new Status(IStatus.OK, Activator.PLUGIN_ID, "Tag succeeded!");
+		return new Status(IStatus.OK, Activator.PLUGIN_ID, "Tag succeeded!"); //$NON-NLS-1$
 	}
 
 	/**

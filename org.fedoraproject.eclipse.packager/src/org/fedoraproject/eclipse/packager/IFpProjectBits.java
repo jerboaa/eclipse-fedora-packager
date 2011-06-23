@@ -31,6 +31,13 @@ public interface IFpProjectBits {
 	public String getCurrentBranchName();
 	
 	/**
+	 * Get the version of the current branch name used for repository management
+	 * 
+	 * @return The raw version of the current branch name.
+	 */
+	public String getRawCurrentBranchName();
+	
+	/**
 	 * Returns the branch name specified by branchName.
 	 * 
 	 * @param branchName Branch name for which to get the actual name for.

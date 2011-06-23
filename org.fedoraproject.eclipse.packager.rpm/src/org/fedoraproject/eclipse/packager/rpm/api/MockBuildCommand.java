@@ -62,19 +62,18 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	 */
 	public static final String ID = "MockBuildCommand"; //$NON-NLS-1$
 	
-	private static final String MOCK_GROUP_NAME = "mock"; //$NON-NLS-1$
-	private static final String MOCK_BINARY = "/usr/bin/mock"; //$NON-NLS-1$
-	private static final String MOCK_CHROOT_CONFIG_OPTION = "-r"; //$NON-NLS-1$
-	private static final String MOCK_REBUILD_OPTION = "--rebuild"; //$NON-NLS-1$
-	private static final String MOCK_RESULT_DIR_OPTION = "--resultdir"; //$NON-NLS-1$
-	private static final String MOCK_NO_CLEANUP_AFTER_OPTION = "--no-cleanup-after"; //$NON-NLS-1$
+	protected static final String MOCK_GROUP_NAME = "mock"; //$NON-NLS-1$
+	protected static final String MOCK_BINARY = "/usr/bin/mock"; //$NON-NLS-1$
+	protected static final String MOCK_CHROOT_CONFIG_OPTION = "-r"; //$NON-NLS-1$
+	protected static final String MOCK_REBUILD_OPTION = "--rebuild"; //$NON-NLS-1$
+	protected static final String MOCK_RESULT_DIR_OPTION = "--resultdir"; //$NON-NLS-1$
+	protected static final String MOCK_NO_CLEANUP_AFTER_OPTION = "--no-cleanup-after"; //$NON-NLS-1$
 	
-	private String localArchitecture; // set in initialize()
-	private String mockConfig; // user may set this explicitly
+	protected String localArchitecture; // set in initialize()
+	protected String mockConfig; // user may set this explicitly
 	// path to SRPM which gets rebuild in the chrooted env.
 	private String srpmAbsPath;
-	private String resultDir;
-	
+	protected String resultDir;
 	/**
 	 * Set the mock config.
 	 * 
@@ -142,7 +141,7 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	 *             If the current user was not member of the system group
 	 *             "mock".
 	 * @throws CommandListenerException
-	 *             If a command listener throwed an exception.
+	 *             If a command listener threw an exception.
 	 * @throws MockBuildCommandException
 	 *             If some other error occurred.
 	 * @throws MockNotInstalledException
@@ -402,20 +401,18 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	 * 
 	 * @return The complete mock CLI command.
 	 */
-	private String[] buildMockCLICommand() {
-		assert srpmAbsPath != null && this.mockConfig != null;
-		// if mockconfig was not set, get the default one for the local arch
-		
+	protected String[] buildMockCLICommand() {
 		String resDirOpt = MOCK_RESULT_DIR_OPTION;
 		resDirOpt += "="; //$NON-NLS-1$
 		resDirOpt += this.resultDir;
-		
-		String[] mockCmd = { MOCK_BINARY, MOCK_CHROOT_CONFIG_OPTION, 
-				this.mockConfig, MOCK_NO_CLEANUP_AFTER_OPTION,
-				resDirOpt, MOCK_REBUILD_OPTION, srpmAbsPath };
+		String[] mockCmd;
+		//default non-SCM flags
+		assert this.srpmAbsPath != null;
+		mockCmd = new String[] { MOCK_BINARY, MOCK_CHROOT_CONFIG_OPTION, 
+					this.mockConfig, MOCK_NO_CLEANUP_AFTER_OPTION,
+					resDirOpt, MOCK_REBUILD_OPTION, srpmAbsPath };
 		return mockCmd;
 	}
-	
 	/**
 	 * Convenience method to convert the command list into a String.
 	 * 

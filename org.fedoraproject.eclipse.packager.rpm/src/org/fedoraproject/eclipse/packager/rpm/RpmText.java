@@ -59,6 +59,8 @@ public class RpmText extends NLS {
 	/****/ public static String MockBuildCommand_mockCommandLog;
 	/****/ public static String MockBuildCommand_callMockBuildMsg;
 	/****/ public static String MockBuildCommand_usingDefaultMockConfig;
+	// SCMMockBuildCommand
+	/****/ public static String SCMMockBuildCommand_invalidRepoType;
 	// MockNotInstalledException
 	/****/ public static String MockNotInstalledException_msg;
 	// RpmEvalCommandException

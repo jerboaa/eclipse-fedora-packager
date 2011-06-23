@@ -108,6 +108,29 @@
                   </or>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.fedoraproject.eclipse.packager.SCMMockCommand"
+                  label="%command.label.11"
+                  mnemonic="%command.label.11"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <with
+                           variable="activeMenuSelection">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.project">
+                        </reference>
+                     </with>
+                     <with
+                           variable="activeMenuEditorInput">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.project">
+                        </reference>
+                     </with>
+                  </or>
+               </visibleWhen>
+            </command>
          </menuContribution>
             
       </extension>
@@ -134,9 +157,15 @@
             id="org.fedoraproject.eclipse.packager.MockCommand"
             name="%command.name.5">
       </command>
+      <command
+            defaultHandler="org.fedoraproject.eclipse.packager.rpm.internal.handlers.SCMMockBuildHandler"
+            id="org.fedoraproject.eclipse.packager.SCMMockCommand"
+            name="%command.name.6">
+      </command>
    </extension>
    <extension
-          point="org.fedoraproject.eclipse.packager.packagerCommandContribution">
+         name="SCMMockBuildCommand"
+         point="org.fedoraproject.eclipse.packager.packagerCommandContribution">
        <command id="RpmEvalCommand"
        	        class="org.fedoraproject.eclipse.packager.rpm.api.RpmEvalCommand">
        </command>
@@ -145,6 +174,10 @@
        </command>
        <command id="MockBuildCommand"
        	        class="org.fedoraproject.eclipse.packager.rpm.api.MockBuildCommand">
+       </command>
+       <command
+             class="org.fedoraproject.eclipse.packager.rpm.api.SCMMockBuildCommand"
+             id="SCMMockBuildCommand">
        </command>
    </extension>
    <!-- Keyboard shortcut definitions -->

@@ -102,6 +102,13 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		// default to devel
 		return "devel"; //$NON-NLS-1$
 	}
+	/**
+	 * See {@link IFpProjectBits#getRawCurrentBranchName()}
+	 */
+	@Override
+	public String getRawCurrentBranchName(){
+		return getCurrentBranchName();
+	}
 
 	/**
 	 * See {@link IFpProjectBits#getBranchName(String)}

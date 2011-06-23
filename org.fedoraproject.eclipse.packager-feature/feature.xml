@@ -54,6 +54,7 @@
       <import plugin="avalon-framework-impl-4.3"/>
       <import plugin="org.apache.commons.logging"/>
       <import plugin="avalon-logkit-2.1"/>
+
    </requires>
 
    <plugin
