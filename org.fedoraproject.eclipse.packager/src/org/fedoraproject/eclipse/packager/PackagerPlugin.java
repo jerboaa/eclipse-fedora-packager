@@ -114,7 +114,12 @@ public class PackagerPlugin extends AbstractUIPlugin {
 	 *         some .options file either in $HOME/.options or $(pwd)/.options.
 	 */
 	public static boolean inDebugMode() {
-		return Platform.inDebugMode()
-				&& Platform.getDebugOption(PLUGIN_ID + "/debug").equals("true"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (Platform.inDebugMode()) {
+			String debugOption = Platform.getDebugOption(PLUGIN_ID + "/debug"); //$NON-NLS-1$
+			if (debugOption != null && debugOption.equals("true")) { //$NON-NLS-1$
+				return true;
+			}
+		}
+		return false;
 	}
 }
