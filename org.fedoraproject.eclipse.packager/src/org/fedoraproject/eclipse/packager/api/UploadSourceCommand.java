@@ -338,10 +338,11 @@ public class UploadSourceCommand extends
 			
 			HttpPost post = new HttpPost(uploadUrl);
 			FileBody uploadFileBody = new FileBody(fileToUpload);
+			// For the actual upload we must not provide the
+			// "filename" parameter (FILENAME_PARAM_NAME). Otherwise,
+			// the file won't be stored in the lookaside cache.
             MultipartEntity reqEntity = new MultipartEntity();
             reqEntity.addPart(FILE_PARAM_NAME, uploadFileBody);
-            reqEntity.addPart(FILENAME_PARAM_NAME,
-					new StringBody(fileToUpload.getName()));
             reqEntity.addPart(PACKAGENAME_PARAM_NAME, new StringBody(
             		projectRoot.getSpecfileModel().getName()));
             reqEntity.addPart(CHECKSUM_PARAM_NAME, new StringBody(
