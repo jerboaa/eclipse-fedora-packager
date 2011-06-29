@@ -1,0 +1,7 @@
+a#fedorapackager-overview img {
+	background-image: url(../../images/ov_fedorapackager48.gif);
+}
+
+a#fedorapackager-overview:hover img {
+	background-image: url(../../images/ov_fedorapackager48_hov.gif);
+}

@@ -10,9 +10,9 @@
 	<property name="imageFolder" value="images" />
 
 	<path id="wikitext.tasks.classpath">
-		<fileset dir="/usr/share/eclipse/dropins/mylyn-wikitext/eclipse/plugins">
+		<fileset dir="/usr/share/eclipse/dropins/mylyn-docs-wikitext/eclipse/plugins">
 					<include name="org.eclipse.mylyn.wikitext.*core*.jar" />
-				</fileset>
+		</fileset>
 	</path>
 
 	<taskdef classpathref="wikitext.tasks.classpath" resource="org/eclipse/mylyn/internal/wikitext/mediawiki/core/tasks/tasks.properties" />
@@ -28,16 +28,15 @@
 		</delete>
 	</target>
 
-	<target name="all" depends="generate-help, test" />
+	<target name="all" depends="generate-help" />
 
-	<target name="generate-help" depends="init" description="An example to generate Eclipse help content from the wiki">
+	<target name="generate-help" depends="init" description="Create a user guide for maintainers of fedora packages">
 		<sequential>
             <delete failonerror="false">
                <fileset dir="${basedir}/${outputFolder}/images" />
             </delete>
 			<mediawiki-to-eclipse-help wikiBaseUrl="${help.doc.url.base}"
-				validate="true"
-				failonvalidationerror="true"
+
 				prependImagePrefix="${imageFolder}"
 				helpprefix="${outputFolder}"
 				formatoutput="true"
@@ -62,6 +61,13 @@ https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide
 		</sequential>
 	</target>
 
+	<!--
+	Internal links to this user-guide should be revised in the .html page after they are created.
+	e.g. 
+	<a href="https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide#Switching_Branches_.28Git_Checkout.29">checkout</a>
+	should be changed to
+	<a href="Using-Eclipse-Fedorapackager.html#Switching_Branches_.28Git_Checkout.29">checkout</a>
+	-->
 	<target name="test" depends="init" description="verify that all of the HTML files are well-formed XML">
 		<echo level="info">
 Validating help content XML and HTML files: The Eclipse help system expects well-formed XML
