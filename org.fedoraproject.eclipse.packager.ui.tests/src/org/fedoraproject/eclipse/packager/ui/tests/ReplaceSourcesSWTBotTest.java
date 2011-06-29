@@ -91,7 +91,7 @@ public class ReplaceSourcesSWTBotTest {
 	 * 
 	 * @throws Exception
 	 */
-	@SuppressWarnings({ "static-access", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void cannotUploadEmptySourceFileReplaceSourcesHandler() throws Exception {
 		// Create empty source file and try to upload
@@ -130,7 +130,7 @@ public class ReplaceSourcesSWTBotTest {
 	 * 
 	 * @throws Exception
 	 */
-	@SuppressWarnings({ "static-access", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	@Test
 	public void cannotUploadNonEmptySourceFileWithInvalidExtensionReplaceSourcesHandler() throws Exception {
 		// Create non-empty, invalid source file in project
@@ -171,7 +171,6 @@ public class ReplaceSourcesSWTBotTest {
 	 * 
 	 * @throws Exception
 	 */
-	@SuppressWarnings("static-access")
 	@Test
 	public void canUploadValidSourceFileReplaceSourcesHandler() throws Exception {
 		

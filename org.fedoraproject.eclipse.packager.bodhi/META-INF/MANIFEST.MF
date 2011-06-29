@@ -11,10 +11,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.gson,
  com.google.gson.reflect,
- org.apache.commons.httpclient,
- org.apache.commons.httpclient.methods,
- org.apache.commons.httpclient.params,
- org.apache.commons.httpclient.protocol,
  org.apache.commons.ssl,
  org.apache.http,
  org.apache.http.client,

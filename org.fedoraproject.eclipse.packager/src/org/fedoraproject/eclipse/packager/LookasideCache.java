@@ -12,8 +12,6 @@ package org.fedoraproject.eclipse.packager;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Class responsible for management of the
@@ -31,49 +29,21 @@ public class LookasideCache implements ILookasideCache {
 	 */
 	public static final String DEFAULT_FEDORA_DOWNLOAD_URL = "http://pkgs.fedoraproject.org/repo/pkgs"; //$NON-NLS-1$
 	
-	private Map<CacheType, URL[]> urlMap;
-	private static final int UPLOAD_URL_INDEX = 0;
-	private static final int DOWNLOAD_URL_INDEX = 1;
-	private CacheType type;
-
-	/**
-	 * Default no-arg constructor. Required for instance creation via
-	 * reflections.
-	 */
-	public LookasideCache() {
-		// nothing
-	}
+	
+	private URL downloadUrl;
+	private URL uploadUrl;
 	
 	/**
-	 * Create lookaside cache of the requested type.
+	 * Create lookaside cache abstraction.
 	 * 
-	 * @param type The cache type to create.
 	 */
-	@Override
-	public void initialize(CacheType type) {
-		this.urlMap = new HashMap<CacheType, URL[]>();
-		URL[] urls = new URL[2];
-		switch (type) {
-			case FEDORA:
-				try {
-					urls[UPLOAD_URL_INDEX] = new URL(DEFAULT_FEDORA_UPLOAD_URL);
-					urls[DOWNLOAD_URL_INDEX] = new URL(DEFAULT_FEDORA_DOWNLOAD_URL);
-				} catch (MalformedURLException e) {
-					//ignore
-				}
-				break;
-			default:
-				// default to Fedora
-				try {
-					urls[UPLOAD_URL_INDEX] = new URL(DEFAULT_FEDORA_UPLOAD_URL);
-					urls[DOWNLOAD_URL_INDEX] = new URL(DEFAULT_FEDORA_DOWNLOAD_URL);
-				} catch (MalformedURLException e) {
-					//ignore
-				}
-				break;
+	LookasideCache() {
+		try {
+			this.downloadUrl = new URL(DEFAULT_FEDORA_DOWNLOAD_URL);
+			this.uploadUrl = new URL(DEFAULT_FEDORA_UPLOAD_URL);
+		} catch (MalformedURLException e) {
+			// ignore
 		}
-		this.urlMap.put(type, urls);
-		this.type = type;
 	}
 
 	/**
@@ -81,7 +51,7 @@ public class LookasideCache implements ILookasideCache {
 	 */
 	@Override
 	public URL getDownloadUrl() {
-		return this.urlMap.get(this.type)[DOWNLOAD_URL_INDEX];
+		return this.downloadUrl;
 	}
 
 	/**
@@ -92,7 +62,7 @@ public class LookasideCache implements ILookasideCache {
 	 */
 	@Override
 	public void setDownloadUrl(String downloadUrl) throws MalformedURLException {
-		this.urlMap.get(this.type)[DOWNLOAD_URL_INDEX] = new URL(downloadUrl);
+		this.downloadUrl = new URL(downloadUrl);
 	}
 
 	/**
@@ -100,7 +70,7 @@ public class LookasideCache implements ILookasideCache {
 	 */
 	@Override
 	public URL getUploadUrl() {
-		return this.urlMap.get(this.type)[UPLOAD_URL_INDEX];
+		return this.uploadUrl;
 	}
 
 	/**
@@ -111,6 +81,6 @@ public class LookasideCache implements ILookasideCache {
 	 */
 	@Override
 	public void setUploadUrl(String uploadUrl) throws MalformedURLException {
-		this.urlMap.get(this.type)[UPLOAD_URL_INDEX] = new URL(uploadUrl);
+		this.uploadUrl = new URL(uploadUrl);
 	}
 }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -87,17 +88,6 @@ public class PackagerPlugin extends AbstractUIPlugin {
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
-
-	/** 
-	 * Get an ImageDescriptor for the given path and pluginId.
-	 * @param pluginId	The plugin id for which to return the ImageDescriptor
-	 * @param path	The path to the image.
-	 * 
-	 * @return The ImageDescriptor in question.
-	 */
-	public static ImageDescriptor getImageDescriptor(String pluginId, String path) {
-		return imageDescriptorFromPlugin(pluginId, path);
-	}
 	
 	/**
 	 * Get a String preference related to this plug-in.
@@ -114,5 +104,22 @@ public class PackagerPlugin extends AbstractUIPlugin {
 			return null;
 		}
 		return candidate;
+	}
+	
+	/**
+	 * 
+	 * @return {@code true} when platform was started in debug mode (
+	 *         {@code -debug} switch) and
+	 *         {@code org.fedoraproject.eclipse.packager/debug=true} is set in
+	 *         some .options file either in $HOME/.options or $(pwd)/.options.
+	 */
+	public static boolean inDebugMode() {
+		if (Platform.inDebugMode()) {
+			String debugOption = Platform.getDebugOption(PLUGIN_ID + "/debug"); //$NON-NLS-1$
+			if (debugOption != null && debugOption.equals("true")) { //$NON-NLS-1$
+				return true;
+			}
+		}
+		return false;
 	}
 }

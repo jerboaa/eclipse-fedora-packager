@@ -22,11 +22,8 @@ public class ProductStringsNonTranslatable implements IProductStrings {
 	// This has been implemented this way for a reason. If you think this must
 	// absolutely change, please ask first.
 	
-	/**
-	 * No-arg default constructor.
-	 */
-	public ProductStringsNonTranslatable() {
-		// empty
+	ProductStringsNonTranslatable(IProjectRoot root) {
+		this.root = root;
 	}
 	
 	/**
@@ -59,10 +56,5 @@ public class ProductStringsNonTranslatable implements IProductStrings {
 	@Override
 	public String getUpdateToolName() {
 		return "Bodhi"; //$NON-NLS-1$
-	}
-
-	@Override
-	public void initialize(IProjectRoot root) {
-		this.root = root;
 	}
 }

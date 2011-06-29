@@ -29,3 +29,4 @@ Import-Package: org.eclipse.jgit.lib,
  org.fedoraproject.eclipse.packager.tests.utils.cvs,
  org.fedoraproject.eclipse.packager.tests.utils.git,
  org.fedoraproject.eclipse.packager.utils
+Eclipse-RegisterBuddy: org.apache.log4j

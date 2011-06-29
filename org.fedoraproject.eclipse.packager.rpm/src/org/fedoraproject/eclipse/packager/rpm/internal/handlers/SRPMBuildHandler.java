@@ -22,7 +22,6 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
@@ -71,17 +70,17 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
+					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					NonTranslatableStrings.getProductName(fedoraProjectRoot), e.getMessage());
+					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
 		// Need to nest jobs into this job for it to show up properly in the
 		// UI
-		Job job = new Job(NonTranslatableStrings.getProductName(fedoraProjectRoot)) {
+		Job job = new Job(fedoraProjectRoot.getProductStrings().getProductName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

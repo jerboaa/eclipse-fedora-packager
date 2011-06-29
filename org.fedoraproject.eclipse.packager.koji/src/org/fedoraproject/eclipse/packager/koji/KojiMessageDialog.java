@@ -75,10 +75,13 @@ public class KojiMessageDialog extends MessageDialog {
 		this.kojiWebUrl = kojiWebURL;
 		this.taskId = taskId;
 		this.messageText = messageText;
+		// required for getImage()
+		this.dialogContentImage = dialogContentImage;
 	}
 
 	@Override
 	public Image getImage() {
+		// sets the content image as we want it.
 		return this.dialogContentImage;
 	}
 

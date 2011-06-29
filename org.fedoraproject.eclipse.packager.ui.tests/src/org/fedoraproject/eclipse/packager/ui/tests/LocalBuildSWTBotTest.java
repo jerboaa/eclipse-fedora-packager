@@ -23,9 +23,7 @@ import org.eclipse.swtbot.swt.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.ContextMenuHelper;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.PackageExplorer;
@@ -93,8 +91,8 @@ public class LocalBuildSWTBotTest {
 		// Click local build context menu item
 		clickOnBuildForLocalArchitecture(packagerTree);
 		// Wait for upload process to start
-		bot.waitUntil(Conditions.shellIsActive(NonTranslatableStrings.getProductName(fpRoot)));
-		SWTBotShell efpJobWindow = bot.shell(NonTranslatableStrings.getProductName(fpRoot));
+		bot.waitUntil(Conditions.shellIsActive(fpRoot.getProductStrings().getProductName()));
+		SWTBotShell efpJobWindow = bot.shell(fpRoot.getProductStrings().getProductName());
 		assertNotNull(efpJobWindow);
 		// Wait for upload process to finish, extend timeout
 		SWTBotPreferences.TIMEOUT = 5 * 5000;

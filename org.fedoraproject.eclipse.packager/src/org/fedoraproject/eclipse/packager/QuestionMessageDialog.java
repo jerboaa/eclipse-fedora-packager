@@ -54,7 +54,7 @@ public class QuestionMessageDialog implements Runnable {
 	public void run() {
 		if (root != null) {
 			okPressed = MessageDialog.openQuestion(shell,
-					NonTranslatableStrings.getProductName(root), question);
+					root.getProductStrings().getProductName(), question);
 		} else if (title != null) {
 			okPressed = MessageDialog.openQuestion(shell,
 					title, question);

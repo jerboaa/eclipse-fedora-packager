@@ -18,7 +18,6 @@ import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.FedoraProjectRoot;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
@@ -105,7 +104,7 @@ public abstract class FedoraPackagerCommand<T> {
 			throw new IllegalStateException(
 					NLS.bind(
 							FedoraPackagerText.FedoraPackagerCommand_projectRootSetTwiceError,
-							NonTranslatableStrings.getDistributionName(projectRoot)));
+							projectRoot.getProductStrings().getDistributionName()));
 		}
 		this.projectRoot = projectRoot;
 	}

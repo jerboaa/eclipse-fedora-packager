@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
@@ -128,6 +127,6 @@ public class FedoraPackager {
 		}
 		throw new FedoraPackagerCommandNotFoundException(NLS.bind(
 				FedoraPackagerText.FedoraPackager_commandNotFoundError,
-				NonTranslatableStrings.getDistributionName(this.root), commandId));
+				root.getProductStrings().getDistributionName(), commandId));
 	}
 }

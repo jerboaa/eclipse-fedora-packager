@@ -34,7 +34,6 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.NonTranslatableStrings;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.ContextMenuHelper;
 import org.fedoraproject.eclipse.packager.ui.tests.utils.PackageExplorer;
@@ -105,8 +104,8 @@ public class MockSWTBotTest {
 		// Click mock build context menu item
 		clickOnMockBuild(packagerTree);
 		// Wait for fedora packager job to start
-		bot.waitUntil(Conditions.shellIsActive(NonTranslatableStrings.getProductName(fpRoot)));
-		SWTBotShell efpJobWindow = bot.shell(NonTranslatableStrings.getProductName(fpRoot));
+		bot.waitUntil(Conditions.shellIsActive(fpRoot.getProductStrings().getProductName()));
+		SWTBotShell efpJobWindow = bot.shell(fpRoot.getProductStrings().getProductName());
 		assertNotNull(efpJobWindow);
 		// Wait for mock build to finish, this takes a while so increase timeout
 		SWTBotPreferences.TIMEOUT = 5 * 60 * 1000; // set this to 5 minutes for now

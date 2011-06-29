@@ -26,10 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
-import org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.eclipse.finder.waits.Conditions;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -72,7 +69,6 @@ public class DistGitImportSWTBotTest {
 	 * 
 	 * @throws Exception
 	 */
-	@SuppressWarnings("static-access")
 	@Test
 	public void canImportNewFedoraDistGitProject() throws Exception {
 		bot.menu("File").menu("Import...").click();
