@@ -62,11 +62,13 @@ https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide
 	</target>
 
 	<!--
-	Internal links to this user-guide should be revised in the .html page after they are created.
-	e.g. 
-	<a href="https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide#Switching_Branches_.28Git_Checkout.29">checkout</a>
-	should be changed to
-	<a href="Using-Eclipse-Fedorapackager.html#Switching_Branches_.28Git_Checkout.29">checkout</a>
+	To be able to parse internal links to this user guide, links in wiki page should follow this sysntax:
+	e.g.
+	For this page on wiki -> "https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide#Creating_Review_Request"
+	link you should be:
+	[[#Creating Review Request | Creating Review Request]]
+	as opposed to:
+	[[#Creating_Review_Request | Creating Review Request]]
 	-->
 	<target name="test" depends="init" description="verify that all of the HTML files are well-formed XML">
 		<echo level="info">
