@@ -20,6 +20,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -32,6 +33,7 @@ import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitCloneOperation;
 import org.fedoraproject.eclipse.packager.git.GitUtils;
 
@@ -69,40 +71,48 @@ public class GitTestProject {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				project = ResourcesPlugin.getWorkspace().getRoot()
-				.getProject(packageName);
-				try {
-					project.create(null);
-				} catch (CoreException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				try {
-					project.open(null);
-				} catch (CoreException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				ConnectProviderOperation connect = new ConnectProviderOperation(
-						project);
-				try {
-					connect.execute(null);
-				} catch (CoreException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				try {
-					project.refreshLocal(IResource.DEPTH_INFINITE, null);
-				} catch (CoreException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				return null;
+				return Status.OK_STATUS;
 			}
 		};
 		cloneProjectJob.schedule();
 		// wait for it to finish
 		cloneProjectJob.join();
+		
+		project = ResourcesPlugin.getWorkspace().getRoot()
+		.getProject(packageName);
+		try {
+			project.create(null);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			project.open(null);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			project.setPersistentProperty(PackagerPlugin.PROJECT_PROP,
+			"true" /* unused value */);
+		} catch (CoreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		ConnectProviderOperation connect = new ConnectProviderOperation(
+				project);
+		try {
+			connect.execute(null);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			project.refreshLocal(IResource.DEPTH_INFINITE, null);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void dispose() throws Exception {
