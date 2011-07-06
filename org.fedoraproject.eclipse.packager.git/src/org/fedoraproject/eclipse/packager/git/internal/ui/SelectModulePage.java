@@ -14,12 +14,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -55,6 +58,8 @@ public class SelectModulePage extends WizardPage {
 
 		workingSetGroup= new WorkingSetGroup();
 		setWorkingSets(EMPTY_WORKING_SET_ARRAY);
+		setPageComplete(false);
+		setErrorMessage(FedoraPackagerGitText.SelectModulePage_badPackageName);
 	}
 
 	/**
@@ -80,6 +85,19 @@ public class SelectModulePage extends WizardPage {
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		projectText.setLayoutData(gd);
 		projectText.setFocus();
+		projectText.addModifyListener(new ModifyListener(){
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (projectText.getText() == null || projectText.getText().trim().equals("")){ //$NON-NLS-1$
+					setPageComplete(false);
+					setErrorMessage(FedoraPackagerGitText.SelectModulePage_badPackageName);
+				} else {
+					setPageComplete(true);
+					setErrorMessage(null);
+				}
+			}
+		});
 
 		// Working set controls
 		Control workingSetControl = workingSetGroup.createControl(composite);
