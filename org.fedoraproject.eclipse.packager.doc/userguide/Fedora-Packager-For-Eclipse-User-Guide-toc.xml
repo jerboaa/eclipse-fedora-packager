@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<toc topic="userguide/Fedora_Packager_For_Eclipse_User_Guide/Fedora-Packager-For-Eclipse-User-Guide.html" label="Fedora Packager User Guide">
+	<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Fedora-Packager-For-Eclipse-User-Guide.html" label="What is Fedora Packager for Eclipse?"></topic>
+	<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html" label="Getting Started as Maintainer for a New Fedora Package">
+		<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Creating_Account_for_New_Contributors" label="Creating Account for New Contributors">
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Creating_a_new_account_in_Fedora_Account_System" label="Creating a new account in Fedora Account System"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Creating_a_Bugzilla_Account" label="Creating a Bugzilla Account"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Initial_Setup" label="Initial Setup"></topic>
+		</topic>
+		<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Making_a_Package" label="Making a Package">
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Packaging_Guidlines" label="Packaging Guidlines"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Creating_an_RPM_package:" label="Creating an RPM package:"></topic>
+		</topic>
+		<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Submiting_For_Review" label="Submiting For Review">
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Introduce_Yourself_Using_Fedora_Mailing_Lists" label="Introduce Yourself Using Fedora Mailing Lists"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Uploading_the_Package" label="Uploading the Package"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Creating_Review_Request" label="Creating Review Request"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Bugzilla_feedback" label="Bugzilla feedback"></topic>
+		</topic>
+		<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Ready_to_Ship" label="Ready to Ship">
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Requesting_a_new_package_SCM" label="Requesting a new package SCM"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Checking_Out_the_Empty_Module_from_SCM" label="Checking Out the Empty Module from SCM"></topic>
+		</topic>
+		<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Updating_the_SCM" label="Updating the SCM">
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Importing_and_Committing_the_Package_Contents" label="Importing and Committing the Package Contents"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Building_the_Package" label="Building the Package"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Closing_the_Bugzilla_Ticket" label="Closing the Bugzilla Ticket"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Updating_Your_Package" label="Updating Your Package"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Enabling_Upstream_Release_Monitoring" label="Enabling Upstream Release Monitoring"></topic>
+		</topic>
+	</topic>
+	<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html" label="Using Fedora Packager for Eclipse">
+		<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Importing_a_Fedora_Git_Project" label="Importing a Fedora Git Project"></topic>
+		<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Fedora_Packaging_Work" label="Fedora Packaging Work">
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Uploading_Source_Files_Required_for_a_Package" label="Uploading Source Files Required for a Package"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Downloading_Source_Files_Required_for_a_Package" label="Downloading Source Files Required for a Package"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Using_the_Specfile_Editor" label="Using the Specfile Editor"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Committing_Changes_on_the_Local_Git_Working_Directory" label="Committing Changes on the Local Git Working Directory"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Switching_Branches_.28Git_Checkout.29" label="Switching Branches (Git Checkout)"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Building_the_Package_Locally" label="Building the Package Locally">
+				<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Preparing_Sources_for_Build" label="Preparing Sources for Build"></topic>
+				<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Building_RPM_for_a_Local_Architecture" label="Building RPM for a Local Architecture"></topic>
+			</topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Make_Locally_Committed_Changes_Public_.28Git_Push.29" label="Make Locally Committed Changes Public (Git Push)"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Pushing_a_Build_to_Koji" label="Pushing a Build to Koji"></topic>
+			<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Using-Fedora-Packager-for-Eclipse.html#Pushing_a_Bodhi_Update" label="Pushing a Bodhi Update"></topic>
+		</topic>
+	</topic>
+	<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Feedback-Reporting-Bugs.html" label="Feedback/Reporting Bugs"></topic>
+	<topic href="userguide/Fedora_Packager_For_Eclipse_User_Guide/Updating-This-Document.html" label="Updating This Document"></topic>
+</toc>

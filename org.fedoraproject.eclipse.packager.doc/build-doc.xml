@@ -28,7 +28,83 @@
 		</delete>
 	</target>
 
-	<target name="all" depends="generate-help" />
+	<target name="all" depends="fix" />
+		
+	<!--
+		Target 'fix' is used to:
+		1- Enable the use of internal help contents.
+		2- Remove the 'installation on eclipse' part
+		2- To remove some unparsed tags in the generated .html files, e.g.
+		  {{admon/caution|NOTE!| Do not add upstream sources!}}	-->
+	<target name="fix" depends="generate-help" description="fixes uri to internal help system" >
+	    <replaceregexp byline="true"
+	      match="First, install fedora packager for eclipse:"
+	      replace=""
+	      file="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide/Fedora-Packager-For-Eclipse-User-Guide.html">
+	    </replaceregexp>
+			
+	    <replaceregexp byline="true"
+	      match="yum install eclipse-fedorapackager"
+	        replace=""
+	        file="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide/Fedora-Packager-For-Eclipse-User-Guide.html">
+	      </replaceregexp>
+		
+		<replaceregexp byline="true"
+			match="&lt;ul>\s*&lt;li>.*\s*&lt;/ul>\s*&lt;pre>.+\s*&lt;/pre>"
+			replace="">
+		  <fileset dir="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide">
+		    <include name="*.html"/>
+		  </fileset>
+		</replaceregexp>
+		
+		<replaceregexp byline="true"
+			match="http://wiki.eclipse.org/EGit/User_Guide#Rebasing"
+			replace="../../../org.eclipse.egit.doc/help/EGit/User_Guide/Tasks.html?path=9_0_2_8#Rebasing">
+		  <fileset dir="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide">
+		    <include name="*.html"/>
+		  </fileset>
+		</replaceregexp>
+		
+		<replaceregexp byline="true"
+			match="http://wiki.eclipse.org/EGit/User_Guide#Local_Destination"
+			replace="../../../org.eclipse.egit.doc/help/EGit/User_Guide/Tasks.html?path=9_0_2_2_0#Cloning_Remote_Repositories">
+		  <fileset dir="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide">
+		    <include name="*.html"/>
+		  </fileset>
+		</replaceregexp>
+
+		<replaceregexp byline="true"
+			match="http://wiki.eclipse.org/EGit/User_Guide"
+			replace="../../../org.eclipse.egit.doc/help/EGit/User_Guide/User-Guide.html">
+		  <fileset dir="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide">
+		    <include name="*.html"/>
+		  </fileset>
+		</replaceregexp>
+		
+		<replaceregexp byline="true"
+			match="http://wiki.eclipse.org/Linux_Tools_Project/ChangeLog/User_Guide#ChangeLog_Preferences"
+			replace="../../../org.eclipse.linuxtools.changelog.doc/userguide/ChangeLog Reference.html">
+		  <fileset dir="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide">
+		    <include name="*.html"/>
+		  </fileset>
+		</replaceregexp>
+		
+		<replaceregexp byline="true"
+			match="http://wiki.eclipse.org/Linux_Tools_Project/SpecfileEditor/User_Guide"
+			replace="../../../org.eclipse.linuxtools.rpm.ui.editor.doc/userguide/SpecfileEditorReference.html">
+		  <fileset dir="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide">
+		    <include name="*.html"/>
+		  </fileset>
+		</replaceregexp>
+
+		<replaceregexp byline="true"
+			match="\{\{(.+)\}\}"
+			replace="&lt;Blockquote>&lt;b>Note!\$1&lt;\/b>&lt;\/Blockquote>">
+		  <fileset dir="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide">
+		    <include name="*.html"/>
+		  </fileset>
+		</replaceregexp>		
+	</target>
 
 	<target name="generate-help" depends="init" description="Create a user guide for maintainers of fedora packages">
 		<sequential>
@@ -42,16 +118,16 @@
 				formatoutput="true"
 				navigationimages="true"
 				dest="${outputFolder}"
-				title="Eclipse Fedora Packager User Guide"
+				title="Fedora Packager User Guide"
 				fetchimages="true">
 				
-				<path name="Eclipse_Fedora_Packager_User_Guide" title="Fedora Packager User Guide" generateToc="true" />
+				<path name="Fedora_Packager_For_Eclipse_User_Guide" title="Fedora Packager For Eclipse User Guide" generateToc="true" />
 				<stylesheet url="book.css" />
 				<pageAppendum>
 = Updating This Document =
 
 This document is maintained in a collaborative wiki.  If you wish to update or modify this document please visit 
-https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide
+https://fedoraproject.org/wiki/Fedora_Packager_For_Eclipse_User_Guide
     	  		</pageAppendum>
 			</mediawiki-to-eclipse-help>
 			<mkdir dir="${basedir}/${outputFolder}/images" />
@@ -62,13 +138,24 @@ https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide
 	</target>
 
 	<!--
-	To be able to parse internal links to this user guide, links in wiki page should follow this sysntax:
-	e.g.
-	For this page on wiki -> "https://fedoraproject.org/wiki/Eclipse_Fedora_Packager_User_Guide#Creating_Review_Request"
-	link you should be:
-	[[#Creating Review Request | Creating Review Request]]
-	as opposed to:
-	[[#Creating_Review_Request | Creating Review Request]]
+	NOTE FOR FIX!
+		To be able to parse internal links to this user guide, links in wiki page should follow this sysntax:
+		e.g.
+		For this page on wiki -> "https://fedoraproject.org/wiki/Fedora_Packager_For_Eclipse_User_Guide#Creating_Review_Request"
+		link you should be:
+		[[#Creating Review Request | Creating Review Request]]
+		as opposed to:
+		[[#Creating_Review_Request | Creating Review Request]]
+	
+	NOTE FOR FIX!
+		The main wiki page for this user guide contains a template for enabling use of other languages. 
+		Since this is feature is not available in mylyn-wikitext yet, the generated code for this template 
+		should be removed from Eclipse-Fedora-Packager-User-Guide.html.
+		The entire paragraph from: 
+		  <p>{{{plain|<div id="otherlangs" class="plainlinks" style="padding-left: 26px;">
+		up to correspondant tag:
+		   }}}</p> 
+	    should be removed.
 	-->
 	<target name="test" depends="init" description="verify that all of the HTML files are well-formed XML">
 		<echo level="info">

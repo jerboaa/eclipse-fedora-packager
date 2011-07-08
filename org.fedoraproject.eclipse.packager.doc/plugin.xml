@@ -14,7 +14,7 @@
    <extension
          point="org.eclipse.help.toc">
       <toc
-            file="userguide/Eclipse-Fedora-Packager-User-Guide-toc.xml"
+            file="userguide/Fedora-Packager-For-Eclipse-User-Guide-toc.xml"
             primary="true">
       </toc>
    </extension>

@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Eclipse Fedora Packager Documentation Plug-in
+Bundle-Name: Fedora Packager For Eclipse Documentation Plug-in
 Bundle-SymbolicName: org.fedoraproject.eclipse.packager.doc;singleton:=true
 Bundle-Version: 0.2.0.qualifier
 Require-Bundle: org.eclipse.help
