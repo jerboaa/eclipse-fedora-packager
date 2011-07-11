@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.ui.resourcePerspective">
+         <actionSet
+               id="org.fedoraproject.eclipse.packager.compatibility.FedoraPackagerActionSet">
+         </actionSet>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            description="Actions associated with Fedora Packager."
+            id="org.fedoraproject.eclipse.packager.compatibility.FedoraPackagerActionSet"
+            label="Fedora Packager Action Set">
+         <action
+               class="org.fedoraproject.eclipse.packager.compatibility.TrackExistingAction"
+               icon="icons/fedora16x16.png"
+               id="org.fedoraproject.eclipse.packager.compatibility.FedoraPackagerConversionAction"
+               label="Upgrade existing Fedora Packager projects"
+               state="false"
+               style="push"
+               toolbarPath="org.fedoraproject.eclipse.packager.compatibility.FedoraPackagerActionSet/resource"
+               tooltip="Converts Fedora Packager 0.1.12 projects so that the proper context menu appears in Fedora Packager 0.2.">
+         </action>
+      </actionSet>
+   </extension>
+
+</plugin>
