@@ -7,7 +7,8 @@ Bundle-Activator: org.fedoraproject.eclipse.packager.koji.KojiPlugin
 Bundle-Vendor: %Bundle-Vendor.0
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
-Import-Package: org.apache.ws.commons.util,
+Import-Package: org.apache.commons.codec.binary,
+ org.apache.ws.commons.util,
  org.apache.xmlrpc,
  org.apache.xmlrpc.client,
  org.apache.xmlrpc.common,
@@ -29,6 +30,8 @@ Import-Package: org.apache.ws.commons.util,
  org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.api,
  org.fedoraproject.eclipse.packager.api.errors,
+ org.fedoraproject.eclipse.packager.rpm,
+ org.fedoraproject.eclipse.packager.rpm.api,
  org.fedoraproject.eclipse.packager.utils
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy

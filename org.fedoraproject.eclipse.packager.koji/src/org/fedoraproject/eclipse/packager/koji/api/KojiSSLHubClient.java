@@ -110,7 +110,7 @@ public class KojiSSLHubClient extends AbstractKojiHubBaseClient {
 	/**
 	 * Initialize SSL connection
 	 */
-	private void initSSLConnection() throws FileNotFoundException, GeneralSecurityException, IOException {
+	protected void initSSLConnection() throws FileNotFoundException, GeneralSecurityException, IOException {
 		// Create empty HostnameVerifier
 		HostnameVerifier hv = new HostnameVerifier() {
 			@Override

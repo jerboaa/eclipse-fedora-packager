@@ -26,9 +26,6 @@ public class KojiText extends NLS {
 	 * This is the path to the file containing externalized strings.
 	 */
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.koji.kojitext"; //$NON-NLS-1$
-
-
-
 	
 	// KojiBuildHandler Strings
 	/****/ public static String KojiBuildHandler_tagBeforeSendingBuild;
@@ -60,8 +57,22 @@ public class KojiText extends NLS {
 	/****/ public static String KojiBuildCommand_buildLogMsg;
 	// BuildAlreadyExistsException
 	/****/ public static String BuildAlreadyExistsException_msg;
+	// KojiSRPMScratchBuildHandler
+	/****/public static String KojiSRPMScratchBuildHandler_UploadFileDialogTitle;
 	// KojiHubClientLoginException
 	/****/ public static String KojiHubClientLoginException_loginFailedMsg;
+	// KojiSRPMBuildJob
+	/****/ public static String KojiSRPMBuildJob_ChooseSRPM;
+	/****/ public static String KojiSRPMBuildJob_NoSRPMsFound;
+	// KojiUploadSRPMCommand
+	/****/ public static String KojiUploadSRPMCommand_CouldNotRead;
+	/****/ public static String KojiUploadSRPMCommand_FileNotFound;
+	/****/ public static String KojiUploadSRPMCommand_InvalidSRPM;
+	/****/ public static String KojiUploadSRPMCommand_NoMD5;
+	/****/ public static String KojiUploadSRPMCommand_NoSRPM;
+	/****/ public static String KojiUploadSRPMCommand_NoUploadPath;
+	// KojiUplaodSRPMJob
+	/****/ public static String KojiUploadSRPMJob_KojiUpload;
 	// Generic Strings
 	/****/ public static String xmlRPCconfigNotInitialized;
 	

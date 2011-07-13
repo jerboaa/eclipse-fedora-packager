@@ -58,6 +58,15 @@
                            </or>
                         </visibleWhen>
                      </command>
+                     <command
+                           commandId="org.fedoraproject.eclipse.packager.koji.SRPMScratchBuildCommand"
+                           icon="icons/Artwork_DesignService_koji-icon-16.png"
+                           label="%command.label.2"
+                           style="push">
+                        <visibleWhen
+                              checkEnabled="false">
+                        </visibleWhen>
+                     </command>
       </menuContribution>
    </extension>
    <extension
@@ -72,11 +81,20 @@
             id="org.fedoraproject.eclipse.packager.koji.ScratchBuildCommand"
             name="%command.name.1">
       </command>
+      <command
+            defaultHandler="org.fedoraproject.eclipse.packager.koji.internal.handlers.KojiSRPMScratchBuildHandler"
+            id="org.fedoraproject.eclipse.packager.koji.SRPMScratchBuildCommand"
+            name="%command.name.2">
+      </command>
    </extension>
    <extension
           point="org.fedoraproject.eclipse.packager.packagerCommandContribution">
        <command id="KojiBuildCommand"
        	        class="org.fedoraproject.eclipse.packager.koji.api.KojiBuildCommand">
+       </command>
+       <command
+             class="org.fedoraproject.eclipse.packager.koji.api.KojiUploadSRPMCommand"
+             id="KojiUploadSRPMCommand">
        </command>
    </extension>
    <!-- Keyboard shortcut definitions -->
@@ -93,6 +111,12 @@
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+F X">
+      </key>
+      <key
+            commandId="org.fedoraproject.eclipse.packager.koji.SRPMScratchBuildCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+F U">
       </key>
     </extension>
 

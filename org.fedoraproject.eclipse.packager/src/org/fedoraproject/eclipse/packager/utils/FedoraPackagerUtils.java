@@ -11,9 +11,11 @@
 package org.fedoraproject.eclipse.packager.utils;
 
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -291,5 +293,47 @@ public class FedoraPackagerUtils {
 			}
 		}
 		return null;
+	}
+	/**
+	 * @return A (probably) unique String.
+	 */
+	public static String getUniqueIdentifier(){
+		//ensure number is not in scientific notation and does not use grouping
+		NumberFormat nf = NumberFormat.getInstance();
+		nf.setMaximumIntegerDigits(9);
+		nf.setGroupingUsed(false);
+		//get time stamp for upload folder
+		String timestamp = nf.format(((double)System.currentTimeMillis()) / 1000);
+		//get random String to ensure that uploads that occur in the same millisecond don't collide
+		//two simultaneous uploads of the same srpm still have a 1 in 200 billion chance of collision
+		String randomDifferentiator = ""; //$NON-NLS-1$
+		for (int i = 0; i < 8; i++){
+			randomDifferentiator = randomDifferentiator.concat(Character.toString((char) (new Random().nextInt('Z' - 'A') + 'A')));
+		}
+		return timestamp + "." + randomDifferentiator; //$NON-NLS-1$
+	}
+	/**
+	 * This function gets the likely target from the SRPM name. 
+	 * @param srpmName 
+	 * @return The target build platform for the SRPM.
+	 */
+	public static String getTargetFromSRPM(String srpmName){
+		String[] splitSRPM = srpmName.split("\\."); //$NON-NLS-1$
+		String target = splitSRPM[splitSRPM.length - 3];
+		if (target.startsWith("fc")){ //$NON-NLS-1$
+			if (Integer.parseInt(target.substring(2)) < 16){
+				return "dist-f" + target.substring(2) + "-updates-candidate"; //$NON-NLS-1$ //$NON-NLS-2$
+			} else {
+				return "dist-rawhide"; //$NON-NLS-1$
+			}
+		} else if (target.startsWith("el")){ //$NON-NLS-1$
+			if (Integer.parseInt(target.substring(2)) < 6) {
+				return "dist-" + target.substring(2) + "E-epel-testing-candidate"; //$NON-NLS-1$ //$NON-NLS-2$
+			} else {
+				return "dist-rawhide"; //$NON-NLS-1$
+			}
+		} else { 
+			return null;
+		}
 	}
 }

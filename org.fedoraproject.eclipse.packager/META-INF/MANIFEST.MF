@@ -9,7 +9,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.linuxtools.rpm.core
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.apache.commons.codec.digest,
+Import-Package: org.apache.commons.codec.binary,
+ org.apache.commons.codec.digest,
  org.apache.commons.ssl,
  org.apache.http,
  org.apache.http.client,

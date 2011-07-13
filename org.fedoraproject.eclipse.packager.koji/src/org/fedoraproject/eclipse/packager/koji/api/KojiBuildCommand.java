@@ -35,7 +35,7 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 	/**
 	 * The URL into the VCS repo which should be used for the build. 
 	 */
-	private String scmUrl;
+	private String location;
 	/**
 	 * The distribution tag (e.g. dist-rawhide)
 	 */
@@ -58,7 +58,7 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 					this.projectRoot.getProductStrings().getBuildToolName()));
 		}
 		// we also require scmURL to be set
-		if (scmUrl == null) {
+		if (location == null) {
 			throw new CommandMisconfiguredException(KojiText.KojiBuildCommand_configErrorNoScmURL);
 		}
 		// distribution can't be null
@@ -98,11 +98,13 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 	 * Sets the URL into the source control management system, in order to
 	 * be able to determine which tag/revision to build.
 	 * 
-	 * @param scmUrl The URL into the VCS repository.
+	 * @param location 
+	 * 	The location of the source: either an SCM location with a specfile and 
+	 * 	a tarball or the location of an uploaded srpm on the Koji server.
 	 * @return This instance.
 	 */
-	public KojiBuildCommand scmUrl(String scmUrl) {
-		this.scmUrl = scmUrl;
+	public KojiBuildCommand sourceLocation(String location) {
+		this.location = location;
 		return this;
 	}
 	
@@ -194,7 +196,7 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 			logger.logInfo(KojiText.KojiBuildCommand_buildLogMsg);
 		}
 		// attempt to push build
-		int taskId = this.kojiClient.build(buildTarget, scmUrl.toString(), nvr, scratchBuild);
+		int taskId = this.kojiClient.build(buildTarget, location.toString(), nvr, scratchBuild);
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}

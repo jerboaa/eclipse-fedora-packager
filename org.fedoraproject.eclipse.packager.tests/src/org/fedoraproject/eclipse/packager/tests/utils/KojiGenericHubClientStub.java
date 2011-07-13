@@ -71,5 +71,8 @@ public class KojiGenericHubClientStub implements IKojiHubClient {
 		rawBuildinfoMap.put("nvr", "eclipse-fedorapackager-0.1.12-2.fc15");
 		return new KojiBuildInfo(rawBuildinfoMap);
 	}
+	
+	@Override
+	public boolean uploadFile(String path, String name, int size, String md5sum, int offset, String data){ return true; }
 
 }
