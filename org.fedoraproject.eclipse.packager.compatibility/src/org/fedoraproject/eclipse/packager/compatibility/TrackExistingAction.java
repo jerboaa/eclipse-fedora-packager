@@ -40,7 +40,8 @@ public class TrackExistingAction implements IWorkbenchWindowActionDelegate {
 				shell, wsProjects, new ArrayContentProvider(), 
 				new WorkbenchLabelProvider(), 
 				FedoraPackagerCompatibilityText.TrackExistingAction_Description);
-		if (lsd.open() == Window.OK){
+		int buttonCode = lsd.open();
+		if (buttonCode == Window.OK){
 			for (Object selected: lsd.getResult()){
 				try {
 					String selectedString = ((IProject) selected).getName();
@@ -48,7 +49,7 @@ public class TrackExistingAction implements IWorkbenchWindowActionDelegate {
 					.getProject(selectedString)
 					.setPersistentProperty(
 							PackagerPlugin.PROJECT_PROP, "true"); //$NON-NLS-1$
-					message.concat(" " + selectedString);
+					message = message.concat(" " + selectedString);
 				} catch (CoreException e) {
 					logger.logError(e.getMessage(), e);
 					FedoraHandlerUtils.showErrorDialog(shell, 
@@ -59,8 +60,10 @@ public class TrackExistingAction implements IWorkbenchWindowActionDelegate {
 			}
 		}
 		lsd.close();
-		FedoraHandlerUtils.showInformationDialog(
-				shell, FedoraPackagerCompatibilityText.TrackExistingAction_NotificationTitle, message);
+		if (buttonCode == Window.OK){
+			FedoraHandlerUtils.showInformationDialog(
+					shell, FedoraPackagerCompatibilityText.TrackExistingAction_NotificationTitle, message);
+		}
 	}
 
 	@Override
