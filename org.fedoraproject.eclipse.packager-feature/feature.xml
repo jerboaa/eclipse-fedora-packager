@@ -54,7 +54,6 @@
       <import plugin="avalon-framework-impl-4.3"/>
       <import plugin="org.apache.commons.logging"/>
       <import plugin="avalon-logkit-2.1"/>
-
    </requires>
 
    <plugin
@@ -135,7 +134,35 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.log4j"
+         id="com.google.gson"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.xmlrpc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.xmlrpc.common"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.ws.commons.util"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.ssl"
          download-size="0"
          install-size="0"
          version="0.0.0"
