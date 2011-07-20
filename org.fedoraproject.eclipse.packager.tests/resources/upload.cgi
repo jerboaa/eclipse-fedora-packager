@@ -39,16 +39,17 @@ except OSError:
 orig_cwd = os.getcwd()
 form = cgi.FieldStorage()
 
-def save_uploaded_file (form, form_field, upload_dir, checksum, filename, name):
+def save_uploaded_file (form, form_field, upload_dir, checksum, name):
     """This saves an upload file into path "upload_dir/name/filename/checksum"
        using the name of the file as it was provided in the POST request.
     """
     if not form.has_key(form_field): return None
     fileitem = form[form_field]
     if not fileitem.file: return None
+    filename = os.path.basename(fileitem.filename)
     try:
         os.lstat(os.path.join(upload_dir, name))
-    except OSError as e:
+    except OSError:
         # package dir does not exist, so create it
         os.mkdir(os.path.join(upload_dir, name))
     try:
@@ -77,6 +78,14 @@ def get_checksum_name_filename(form):
          raise InvalidParamsError("Missing required parameters")
     return (form["md5sum"].value, form["name"].value, form["filename"].value)
 
+def get_checksum_name(form):
+    """ Get required parameters form request """
+    if ((not form.has_key("md5sum")) or
+        (not form.has_key("file")) or
+        (not form.has_key("name"))):
+         raise InvalidParamsError("Missing required parameters")
+    return (form["md5sum"].value, form["name"].value)
+
 def check_file_available(form):
     """Test if file is present in directory
        LOOKASIDE_LOCATION/<md5sum>/filename/<md5sum>. If it is
@@ -101,15 +110,15 @@ try:
 except InvalidParamsError as e:
     response_text = e.value
     
-if response_text:
+if not form.has_key("file") and response_text:
     print "Content-type: text/plain\n"
     print response_text
     os.chdir(orig_cwd)
     sys.exit(0)
 
-if not available and form.has_key("file"):
-    (checksum, name, filename) = get_checksum_name_filename(form)
-    save_uploaded_file(form, "file", LOOKASIDE_LOCATION, checksum, filename, name)
+if form.has_key("file"):
+    (checksum, name) = get_checksum_name(form)
+    save_uploaded_file(form, "file", LOOKASIDE_LOCATION, checksum, name)
     os.chdir(orig_cwd)
     print "Content-type: text/plain\n"
     print "Upload successful!"
