@@ -54,8 +54,8 @@ import org.junit.Test;
 /**
  * Eclipse plug-in test for UploadSourceCommand. Note: in order to run this test
  * successfully, one has to deploy the upload.cgi Python script as provided in
- * the resources folder on the test machine. Make sure the script is reachable
- * by the URL as specified in the UPLOAD_URL_FOR_TESTING constant.
+ * the resources folder on a test machine. After that make sure to set the
+ * "org.fedoraproject.eclipse.packager.tests.LookasideUploadUrl" system property to point to the appropriate URL.
  */
 public class UploadSourceCommandTest {
 
@@ -67,8 +67,8 @@ public class UploadSourceCommandTest {
 		"resources/callgraph-factorial.zip"; // $NON-NLS-1$
 	private static final String INVALID_UPLOAD_FILE =
 		"resources/invalid_upload_file.exe"; // $NON-NLS-1$
-	private static final String UPLOAD_URL_FOR_TESTING =
-		"http://upload-cgi/cgi-bin/upload.cgi"; //$NON-NLS-1$
+	private static final String UPLOAD_URL_PROP = "org.fedoraproject.eclipse.packager.tests.LookasideUploadUrl"; //$NON-NLS-1$
+	private String uploadURLForTesting;
 	
 	// List of temporary resources which should get deleted after test runs
 	private Stack<File> tempFilesAndDirectories = new Stack<File>();
@@ -80,6 +80,11 @@ public class UploadSourceCommandTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
+		String uploadURL = System.getProperty(UPLOAD_URL_PROP);
+		if (uploadURL == null) {
+			fail(UPLOAD_URL_PROP  + " not set");
+		}
+		this.uploadURLForTesting = uploadURL;
 		this.testProject = new GitTestProject("eclipse-fedorapackager");
 		IProjectRoot fpRoot = new FedoraProjectRoot();
 		fpRoot.initialize(this.testProject.getProject(), ProjectType.GIT);
@@ -130,7 +135,7 @@ public class UploadSourceCommandTest {
 		UploadSourceCommand uploadCmd = (UploadSourceCommand) packager
 				.getCommandInstance(UploadSourceCommand.ID);
 		try {
-			uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING)
+			uploadCmd.setUploadURL(uploadURLForTesting)
 				.setFileToUpload(file).call(new NullProgressMonitor());
 		} catch (FileAvailableInLookasideCacheException e) {
 			// don't care
@@ -138,7 +143,7 @@ public class UploadSourceCommandTest {
 		uploadCmd = (UploadSourceCommand) packager
 				.getCommandInstance(UploadSourceCommand.ID);
 		try {
-			uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING)
+			uploadCmd.setUploadURL(uploadURLForTesting)
 				.setFileToUpload(file).call(new NullProgressMonitor());
 			// File already available
 			fail("File should be present in lookaside cache.");
@@ -166,7 +171,7 @@ public class UploadSourceCommandTest {
 		writeRandomContentToFile(newUploadFile);
 		UploadSourceResult result = null;
 		try {
-			result = uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING)
+			result = uploadCmd.setUploadURL(uploadURLForTesting)
 					.setFileToUpload(newUploadFile)
 					.call(new NullProgressMonitor());
 		} catch (FileAvailableInLookasideCacheException e) {
@@ -210,7 +215,7 @@ public class UploadSourceCommandTest {
 		UploadSourceCommand uploadCmd = (UploadSourceCommand) packager
 				.getCommandInstance(UploadSourceCommand.ID);
 		uploadCmd.setFileToUpload(newUploadFile);
-		uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING);
+		uploadCmd.setUploadURL(uploadURLForTesting);
 		uploadCmd.addCommandListener(sourcesUpdater);
 		UploadSourceResult result = null;
 		try {
@@ -287,7 +292,7 @@ public class UploadSourceCommandTest {
 		UploadSourceCommand uploadCmd = (UploadSourceCommand) packager
 				.getCommandInstance(UploadSourceCommand.ID);
 		uploadCmd.setFileToUpload(newUploadFile);
-		uploadCmd.setUploadURL(UPLOAD_URL_FOR_TESTING);
+		uploadCmd.setUploadURL(uploadURLForTesting);
 		VCSIgnoreFileUpdater vcsUpdater = new VCSIgnoreFileUpdater(newUploadFile,
 				vcsIgnoreFile);
 		uploadCmd.addCommandListener(vcsUpdater);
