@@ -21,7 +21,9 @@ import org.junit.runners.Suite.SuiteClasses;
 	UploadSourceCommandTest.class,
 	KojiBuildCommandTest.class,
 	RpmBuildCommandTest.class,
-	RpmEvalCommandTest.class
+	RpmEvalCommandTest.class,
+	SCMMockBuildCommandGitTest.class,
+	MockBuildCommandTest.class
 })
 
 public class AllCommandsTests {
