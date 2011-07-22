@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.bodhi.internal.json;
+package org.fedoraproject.eclipse.packager.bodhi.deserializers;
 
 import java.lang.reflect.Type;
 

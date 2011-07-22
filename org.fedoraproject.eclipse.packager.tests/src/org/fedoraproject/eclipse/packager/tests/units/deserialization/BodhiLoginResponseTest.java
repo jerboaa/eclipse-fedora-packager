@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class BodhiLoginResponseDeserializationTest {
+public class BodhiLoginResponseTest {
 
 	private static final String EXAMPLE_LOGIN_JSON_RESPONSE =
 			"{"+
