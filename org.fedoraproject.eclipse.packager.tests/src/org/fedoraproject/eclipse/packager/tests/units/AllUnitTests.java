@@ -21,6 +21,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	AssertionsEnabledTest.class,
 	KojiBuildInfoTest.class,
 	KojiHubClientLoginExceptionTest.class,
+	BodhiClientTest.class
 })
 
 public class AllUnitTests {
