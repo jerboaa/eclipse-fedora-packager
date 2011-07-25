@@ -28,7 +28,7 @@ public interface IBodhiClient {
 	 */
 	public BodhiLoginResponse login(String username, String password)
 			throws BodhiClientLoginException;
-
+	
 	/**
 	 * Push a new Bodhi update for one or more builds (i.e. N-V-Rs).
 	 * 
@@ -39,13 +39,19 @@ public interface IBodhiClient {
 	 * @param bugs Numbers of bugs to close automatically (comma separated).
 	 * @param notes The comment for this update.
 	 * @param csrf_token
+	 * @param suggestReboot If a reboot is suggested after this update.
+	 * @param enableKarmaAutomatism If Karma automatism should be enabled.
+	 * @param unpushKarmaThreshold The lower unpushing Karma threshold.
+	 * @param stableKarmaThreshold The upper stable Karma threshold.
 	 * @return The update response.
 	 * @throws BodhiClientException
 	 *             If some error occurred.
 	 */
 	public BodhiUpdateResponse createNewUpdate(String[] builds, String release,
-			String type, String request, String bugs, String notes, String csrf_token)
-			throws BodhiClientException;
+			String type, String request, String bugs, String notes,
+			String csrf_token, boolean suggestReboot,
+			boolean enableKarmaAutomatism, int stableKarmaThreshold,
+			int unpushKarmaThreshold) throws BodhiClientException;
 
 	/**
 	 * Log out from Bodhi server.
