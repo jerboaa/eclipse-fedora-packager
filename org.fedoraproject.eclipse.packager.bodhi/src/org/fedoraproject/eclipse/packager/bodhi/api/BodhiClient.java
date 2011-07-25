@@ -30,10 +30,15 @@ import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import org.eclipse.osgi.util.NLS;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
 import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientException;
 import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientLoginException;
+import org.fedoraproject.eclipse.packager.bodhi.deserializers.DateTimeDeserializer;
 import org.fedoraproject.eclipse.packager.bodhi.fas.DateTime;
-import org.fedoraproject.eclipse.packager.bodhi.internal.json.DateTimeDeserializer;
 
 /**
  * Bodhi JSON over HTTP client.
@@ -117,8 +122,9 @@ public class BodhiClient implements IBodhiClient {
 			int returnCode = response.getStatusLine().getStatusCode();
 
 			if (returnCode != HttpURLConnection.HTTP_OK) {
-				throw new BodhiClientLoginException(response.getStatusLine()
-						.getReasonPhrase(), response);
+				throw new BodhiClientLoginException(NLS.bind(
+						"{0} {1}", response.getStatusLine().getStatusCode(), //$NON-NLS-1$
+						response.getStatusLine().getReasonPhrase()), response);
 			} else {
 				// Got a 200, response body is the JSON passed on from the
 				// server.
@@ -131,6 +137,11 @@ public class BodhiClient implements IBodhiClient {
 					} finally {
 						EntityUtils.consume(resEntity); // clean up resources
 					}
+				}
+				// log JSON string if in debug mode
+				if (PackagerPlugin.inDebugMode()) {
+					FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+					logger.logInfo(NLS.bind(BodhiText.BodhiClient_rawJsonStringMsg, jsonString));
 				}
 				// Deserialize from JSON
 				GsonBuilder gsonBuilder = new GsonBuilder();
@@ -158,22 +169,25 @@ public class BodhiClient implements IBodhiClient {
 			HttpEntity resEntity = response.getEntity();
 			int returnCode = response.getStatusLine().getStatusCode();
 
-			if (returnCode != HttpURLConnection.HTTP_OK) {
-				throw new BodhiClientException(response.getStatusLine()
-						.getReasonPhrase(), response);
+			if (returnCode >= 400) {
+				throw new BodhiClientException(NLS.bind(
+						"{0} {1}", response.getStatusLine().getStatusCode(), //$NON-NLS-1$
+						response.getStatusLine().getReasonPhrase()), response);
 			} else {
-				String resString = ""; //$NON-NLS-1$
+				String responseString = ""; //$NON-NLS-1$
 				if (resEntity != null) {
 					try {
-						resString = parseResponse(resEntity);
+						responseString = parseResponse(resEntity);
 					} catch (IOException e) {
 						// ignore
 					}
 					EntityUtils.consume(resEntity); // clean up resources
 				}
-				System.out
-						.println("Response was:\n--------------------------\n"
-								+ resString);
+				// log JSON string if in debug mode
+				if (PackagerPlugin.inDebugMode()) {
+					FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+					logger.logInfo(NLS.bind(BodhiText.BodhiClient_rawJsonStringMsg, responseString));
+				}
 			}
 		} catch (IOException e) {
 			throw new BodhiClientException(e.getMessage(), e);
@@ -234,26 +248,33 @@ public class BodhiClient implements IBodhiClient {
 			int returnCode = response.getStatusLine().getStatusCode();
 
 			if (returnCode != HttpURLConnection.HTTP_OK) {
-				throw new BodhiClientException(response.getStatusLine()
-						.getReasonPhrase(), response);
+				throw new BodhiClientException(NLS.bind(
+						"{0} {1}", response.getStatusLine().getStatusCode(), //$NON-NLS-1$
+						response.getStatusLine().getReasonPhrase()), response);
 			} else {
-				String resString = ""; //$NON-NLS-1$
+				String rawJsonString = ""; //$NON-NLS-1$
 				if (resEntity != null) {
 					try {
-						resString = parseResponse(resEntity);
+						rawJsonString = parseResponse(resEntity);
 					} catch (IOException e) {
 						// ignore
 					}
 					EntityUtils.consume(resEntity); // clean up resources
 				}
-				System.out
-						.println("Response was:\n--------------------------\n"
-								+ resString);
+				// log JSON string if in debug mode
+				if (PackagerPlugin.inDebugMode()) {
+					FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+					logger.logInfo(NLS.bind(BodhiText.BodhiClient_rawJsonStringMsg, rawJsonString));
+				}
+				// deserialize the result from the JSON response
+				GsonBuilder gsonBuilder = new GsonBuilder();
+				Gson gson = gsonBuilder.create();
+				BodhiUpdateResponse result = gson.fromJson(rawJsonString, BodhiUpdateResponse.class);
+				return result;
 			}
 		} catch (IOException e) {
 			throw new BodhiClientException(e.getMessage(), e);
 		}
-		return null;
 	}
 	
 	/**
