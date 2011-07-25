@@ -33,10 +33,10 @@ public interface IBodhiClient {
 	 * Push a new Bodhi update for one or more builds (i.e. N-V-Rs).
 	 * 
 	 * @param builds N-V-R's for which to push an update for
-	 * @param release
-	 * @param type
+	 * @param release For example "F15".
+	 * @param type One of "bugfix", "security", "enhancement", "newpackage".
 	 * @param request {@code testing} or {@code stable}.
-	 * @param bugs Numbers of bugs to close automatically.
+	 * @param bugs Numbers of bugs to close automatically (comma separated).
 	 * @param notes The comment for this update.
 	 * @param csrf_token
 	 * @return The update response.
