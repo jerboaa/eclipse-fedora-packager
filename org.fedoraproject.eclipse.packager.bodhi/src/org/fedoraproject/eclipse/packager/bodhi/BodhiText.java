@@ -30,6 +30,8 @@ public class BodhiText extends NLS {
 	
 	// BodhiClient Strings
 	/****/ public static String BodhiClient_serverResponseMsg;
+	/****/ public static String BodhiClient_rawJsonStringMsg;
+	/****/ public static String BodhiClient_httpResponseStringMsg;
 	// BodhiNewDialog Strings
 	/****/ public static String BodhiNewDialog_dialogTitle;
 	/****/ public static String BodhiNewDialog_build;
