@@ -27,11 +27,18 @@ public class BodhiText extends NLS {
 	 * This is the path to the file containing externalized strings.
 	 */
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.bodhi.bodhitext"; //$NON-NLS-1$
+
 	
 	// BodhiClient Strings
 	/****/ public static String BodhiClient_serverResponseMsg;
 	/****/ public static String BodhiClient_rawJsonStringMsg;
 	/****/ public static String BodhiClient_httpResponseStringMsg;
+	// PushUpdateCommand
+	/****/ public static String PushUpdateCommand_configErrorNoClient;
+	/****/ public static String PushUpdateCommand_configErrorNoUpdateType;
+	/****/ public static String PushUpdateCommand_configErrorNoFedoraRelease;
+	/****/ public static String PushUpdateCommand_configErrorNoUpdateComment;
+	/****/ public static String PushUpdateCommand_configErrorNoBuilds;
 	// BodhiNewDialog Strings
 	/****/ public static String BodhiNewDialog_dialogTitle;
 	/****/ public static String BodhiNewDialog_build;
@@ -68,6 +75,8 @@ public class BodhiText extends NLS {
 	/****/ public static String userValidationDialog_savePassword;
 	/****/ public static String userValidationDialog_password;
 	/****/ public static String userValidationDialog_username;
+
+
 
 	static {
 		// initialize resource bundle

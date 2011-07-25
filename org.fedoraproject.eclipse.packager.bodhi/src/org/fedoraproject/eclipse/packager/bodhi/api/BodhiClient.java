@@ -63,6 +63,9 @@ public class BodhiClient implements IBodhiClient {
 	private static final String CSRF_PARAM_NAME = "_csrf_token"; //$NON-NLS-1$
 	private static final String AUTOKARMA_PARAM_NAME = "autokarma"; //$NON-NLS-1$
 	private static final String NOTES_PARAM_NAME = "notes"; //$NON-NLS-1$
+	private static final String SUGGEST_REBOOT = "suggest_reboot"; //$NON-NLS-1$
+	private static final String STABLE_KARMA = "stable_karma"; //$NON-NLS-1$
+	private static final String UNSTABLE_KARMA = "unstable_karma"; //$NON-NLS-1$
 	
 	/**
 	 *  URL of the Bodhi server to which to connect to.
@@ -205,18 +208,22 @@ public class BodhiClient implements IBodhiClient {
         // immediate deallocation of all system resources
 		httpclient.getConnectionManager().shutdown();
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.fedoraproject.eclipse.packager.IBodhiClient#newUpdate(java.lang.String
-	 * , java.lang.String, java.lang.String, java.lang.String, java.lang.String,
-	 * java.lang.String)
+	 * org.fedoraproject.eclipse.packager.bodhi.api.IBodhiClient#createNewUpdate
+	 * (java.lang.String[], java.lang.String, java.lang.String,
+	 * java.lang.String, java.lang.String, java.lang.String, java.lang.String,
+	 * boolean, boolean, int, int)
 	 */
 	@Override
-	public BodhiUpdateResponse createNewUpdate(String[] builds, String release, String type,
-			String request, String bugs, String notes, String csrfToken) throws BodhiClientException {
+	public BodhiUpdateResponse createNewUpdate(String[] builds, String release,
+			String type, String request, String bugs, String notes,
+			String csrfToken, boolean suggestReboot,
+			boolean enableKarmaAutomatism, int stableKarmaThreshold,
+			int unstableKarmaThreshold) throws BodhiClientException {
 		try {
 			HttpPost post = new HttpPost(getPushUpdateUrl());
 			post.addHeader(ACCEPT_HTTP_HEADER_NAME, MIME_JSON);
@@ -238,8 +245,14 @@ public class BodhiClient implements IBodhiClient {
 			reqEntity.addPart(BUGS_PARAM_NAME, new StringBody(bugs));
 			reqEntity.addPart(CSRF_PARAM_NAME, new StringBody(csrfToken));
 			reqEntity.addPart(AUTOKARMA_PARAM_NAME,
-					new StringBody(String.valueOf(true)));
+					new StringBody(String.valueOf(enableKarmaAutomatism)));
 			reqEntity.addPart(NOTES_PARAM_NAME, new StringBody(notes));
+			reqEntity.addPart(SUGGEST_REBOOT,
+					new StringBody(String.valueOf(suggestReboot)));
+			reqEntity.addPart(STABLE_KARMA,
+					new StringBody(String.valueOf(stableKarmaThreshold)));
+			reqEntity.addPart(UNSTABLE_KARMA,
+					new StringBody(String.valueOf(unstableKarmaThreshold)));
 
 			post.setEntity(reqEntity);
 
