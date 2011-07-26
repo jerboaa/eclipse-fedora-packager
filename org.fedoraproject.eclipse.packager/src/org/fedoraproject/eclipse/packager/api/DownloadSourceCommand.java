@@ -233,6 +233,11 @@ public class DownloadSourceCommand extends
 		tempFile.delete();
 		subMonitor.done();
 	}
+	
+	/**
+	 * 
+	 * @return The folder where sources got downloaded to.
+	 */
 	public String getDownloadFolderPath(){
 		return projectRoot.getContainer().getWorkspace().getRoot()
 			.getRawLocationURI().getPath()
