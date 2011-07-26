@@ -41,10 +41,10 @@ public class BodhiClientTest {
 	private URL bodhiUrl;
 	
 	// URL should end with '/'
-	private static final String BODHI_STAGING = "https://admin.stg.fedoraproject.org/updates/";
+	private static final String BODHI_STAGING = "https://admin.stg.fedoraproject.org/updates/"; //$NON-NLS-1$
 	private static final String BODHI_ADMIN_USERNAME = "guest"; //$NON-NLS-1$
 	private static final String BODHI_ADMIN_PASSWORD = "guest"; //$NON-NLS-1$
-	private static final String PACKAGE_UPDATE_NVR = "ed-1.5-3.fc15";
+	private static final String PACKAGE_UPDATE_NVR = "ed-1.5-3.fc15"; //$NON-NLS-1$
 	private static final String FAS_USERNAME_PROP = "org.fedoraproject.eclipse.packager.tests.bodhi.fasUsername"; //$NON-NLS-1$
 	private static final String FAS_PASSWORD_PROP = "org.fedoraproject.eclipse.packager.tests.bodhi.fasPassword"; //$NON-NLS-1$
 	private static final String BODHI_TEST_INSTANCE_URL_PROP = "org.fedoraproject.eclipse.packager.tests.bodhi.testInstanceURL"; //$NON-NLS-1$
@@ -98,6 +98,7 @@ public class BodhiClientTest {
 		}
 		assertNotNull(resp);
 		assertEquals(fasUsername, resp.getUser().getUsername());
+		assertNotNull(resp.getCsrfToken());
 	}
 
 	@Test

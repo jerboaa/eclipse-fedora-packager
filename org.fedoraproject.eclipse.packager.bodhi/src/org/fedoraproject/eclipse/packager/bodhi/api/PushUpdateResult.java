@@ -17,10 +17,32 @@ import org.fedoraproject.eclipse.packager.api.ICommandResult;
  */
 public class PushUpdateResult implements ICommandResult {
 
+	// The underlying update response as it was parsed from
+	// JSON
+	private BodhiUpdateResponse response;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param response The parsed JSON response object.
+	 */
+	public PushUpdateResult(BodhiUpdateResponse response) {
+		this.response = response;
+	}
+	
+	/**
+	 * @return the response object of the update push.
+	 */
+	public BodhiUpdateResponse getUpdateResponse() {
+		return this.response;
+	}
+	
+	/**
+	 * Will be successful if any one of the desired builds was successfully pushed.
+	 */
 	@Override
 	public boolean wasSuccessful() {
-		// TODO Auto-generated method stub
-		return false;
+		return response.getUpdates()[0].getBuilds().length > 0;
 	}
 
 }

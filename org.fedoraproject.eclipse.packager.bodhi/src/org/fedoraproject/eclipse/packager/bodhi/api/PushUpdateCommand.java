@@ -11,10 +11,13 @@
 package org.fedoraproject.eclipse.packager.bodhi.api;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
+import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientException;
+import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientLoginException;
 
 /**
  * Command for pushing an update to Bodhi
@@ -22,6 +25,11 @@ import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
  */
 public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 
+	/**
+	 * The unique ID of this command.
+	 */
+	public static final String ID = "PushUpdateCommand"; //$NON-NLS-1$
+	
 	private IBodhiClient client;
 	private String[] builds; // the list of builds for the update
 	private String release;  // the Fedora release for the update
@@ -52,6 +60,8 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 	private boolean enableKarmaAutomatism = true;
 	private int stableKarmaThreshold = 3;
 	private int unpushKarmaThreshold = -3;
+	private String username;
+	private String password;
 	
 	/**
 	 * Use this if no bugs should get changed with this update.
@@ -190,13 +200,13 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 	 * @param client A bodhi client.
 	 * @return this instance.
 	 */
-	public PushUpdateCommand setClient(IBodhiClient client) {
+	public PushUpdateCommand client(IBodhiClient client) {
 		this.client = client;
 		return this;
 	}
 	
 	/**
-	 * Set the advisory comment for the update. Required.
+	 * Set the advisory comment for the update. Required and may not be empty.
 	 * 
 	 * @param comment The advisory comment.
 	 * @return this instance.
@@ -258,6 +268,18 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 		return this;
 	}
 	
+	/**
+	 * Sets the username/password combination for the update push.
+	 * @param username The username
+	 * @param password The password
+	 * @return this instance
+	 */
+	public PushUpdateCommand usernamePassword(String username, String password) {
+		this.username = username;
+		this.password = password;
+		return this;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand#checkConfiguration()
@@ -268,6 +290,11 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 		if (client == null) {
 			throw new CommandMisconfiguredException(
 					BodhiText.PushUpdateCommand_configErrorNoClient);
+		}
+		// require username/password
+		if (username == null || password == null) {
+			throw new CommandMisconfiguredException(
+					BodhiText.PushUpdateCommand_configErrorUsernamePasswordUnset);
 		}
 		// need to know the updated type
 		if (updateType == null) {
@@ -280,7 +307,7 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 					BodhiText.PushUpdateCommand_configErrorNoFedoraRelease);
 		}
 		// require a comment
-		if (comment == null) {
+		if (comment == null || comment.equals("")) { //$NON-NLS-1$
 			throw new CommandMisconfiguredException(
 					BodhiText.PushUpdateCommand_configErrorNoUpdateComment);
 		}
@@ -301,10 +328,12 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 	 * 
 	 * @return the result of the update. You may use it to determine
 	 *         success/failure and/or retrieve other information.
+	 * @throws BodhiClientLoginException If the login to bodhi failed.
+	 * @throws BodhiClientException If pushing the update failed.
 	 */
 	@Override
 	public PushUpdateResult call(IProgressMonitor monitor)
-			throws CommandListenerException, CommandMisconfiguredException {
+			throws CommandListenerException, CommandMisconfiguredException, BodhiClientLoginException, BodhiClientException {
 		try {
 			callPreExecListeners();
 		} catch (CommandListenerException e) {
@@ -318,12 +347,36 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 		if (this.bugs == null) {
 			this.bugs = NO_BUGS;
 		}
+		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+		logger.logInfo(BodhiText.PushUpdateCommand_pushingBodhiUpdateTaskMsg);
 		
+		assert this.client != null;
 		
+		monitor.beginTask(BodhiText.PushUpdateCommand_pushingBodhiUpdateTaskMsg, 4);
+		monitor.subTask(BodhiText.PushUpdateCommand_loggingIn);
+		monitor.worked(1);
+		// login
+		BodhiLoginResponse resp = this.client.login(username, password);
+		monitor.worked(2);
+		monitor.subTask(BodhiText.PushUpdateCommand_pushingUpdate);
+		// push update
+		String csrfToken = "";
+		if (resp.getCsrfToken() != null) {
+			csrfToken = resp.getCsrfToken();
+		}
+		BodhiUpdateResponse updateResponse = this.client.createNewUpdate(builds, release, updateType, requestType,
+				bugs, comment, csrfToken, suggestReboot,
+				enableKarmaAutomatism, stableKarmaThreshold,
+				unpushKarmaThreshold);
+		PushUpdateResult result = new PushUpdateResult(updateResponse);
+		monitor.worked(3);
+		monitor.subTask(BodhiText.PushUpdateCommand_loggingOut);
+		// logout
+		this.client.logout();
 		callPostExecListeners();
 		setCallable(false); // reuse of instance's call() not allowed
-		
-		return null;
+		monitor.done();
+		return result;
 	}
 
 }
