@@ -60,5 +60,12 @@
             sequence="M1+M3+F B">
       </key>
     </extension>
+   <extension
+         point="org.fedoraproject.eclipse.packager.packagerCommandContribution">
+      <command
+            class="org.fedoraproject.eclipse.packager.bodhi.api.PushUpdateCommand"
+            id="PushUpdateCommand">
+      </command>
+   </extension>
 
 </plugin>

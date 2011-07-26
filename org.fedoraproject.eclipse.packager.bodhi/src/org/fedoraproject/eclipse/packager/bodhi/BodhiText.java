@@ -39,6 +39,10 @@ public class BodhiText extends NLS {
 	/****/ public static String PushUpdateCommand_configErrorNoFedoraRelease;
 	/****/ public static String PushUpdateCommand_configErrorNoUpdateComment;
 	/****/ public static String PushUpdateCommand_configErrorNoBuilds;
+	/****/ public static String PushUpdateCommand_pushingBodhiUpdateTaskMsg;
+	/****/ public static String PushUpdateCommand_loggingIn;
+	/****/ public static String PushUpdateCommand_pushingUpdate;
+	/****/ public static String PushUpdateCommand_loggingOut;
 	// BodhiNewDialog Strings
 	/****/ public static String BodhiNewDialog_dialogTitle;
 	/****/ public static String BodhiNewDialog_build;
@@ -75,6 +79,11 @@ public class BodhiText extends NLS {
 	/****/ public static String userValidationDialog_savePassword;
 	/****/ public static String userValidationDialog_password;
 	/****/ public static String userValidationDialog_username;
+
+
+	public static String PushUpdateCommand_configErrorUsernamePasswordUnset;
+
+
 
 
 
