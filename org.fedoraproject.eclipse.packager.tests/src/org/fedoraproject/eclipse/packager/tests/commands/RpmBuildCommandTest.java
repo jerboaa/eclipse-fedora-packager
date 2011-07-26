@@ -114,6 +114,7 @@ public class RpmBuildCommandTest {
 			return;
 		}
 		assertTrue(result.wasSuccessful());
+		fpRoot.getContainer().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		IResource noArchFolder = fpRoot.getContainer().findMember(new Path("noarch"));
 		assertNotNull(noArchFolder);
 		// there should be one RPM
@@ -138,6 +139,7 @@ public class RpmBuildCommandTest {
 			return;
 		}
 		assertTrue(result.wasSuccessful());
+		fpRoot.getContainer().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		IResource expandedSourcesFolder = fpRoot.getContainer().findMember(new Path("eclipse-fedorapackager"));
 		assertNotNull(expandedSourcesFolder);
 		// there should be some files in that folder
@@ -167,6 +169,7 @@ public class RpmBuildCommandTest {
 		}
 		assertTrue(result.wasSuccessful());
 		// should contain at least one SRPM
+		fpRoot.getContainer().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		boolean found = false;
 		for(IResource res: fpRoot.getContainer().members()) {
 			if (res.getName().contains("src.rpm")) {

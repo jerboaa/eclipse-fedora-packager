@@ -89,8 +89,7 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String invalidFedoraProjectRootError;
 	/****/ public static String callingCommand;
 	/****/ public static String extensionNotFoundError;
-	
-	
+
 	static {
 		initializeMessages(BUNDLE_NAME,	FedoraPackagerText.class);
 	}

@@ -10,17 +10,16 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.rpm.api;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -36,6 +35,7 @@ import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.rpm.api.errors.RpmBuildCommandException;
 import org.fedoraproject.eclipse.packager.rpm.internal.core.ConsoleWriter;
 import org.fedoraproject.eclipse.packager.rpm.internal.core.RpmConsoleFilterObserver;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
@@ -177,85 +177,28 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 			}
 			throw e;
 		}
+		
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
 		monitor.subTask(NLS.bind(
 				RpmText.RpmBuildCommand_callRpmBuildMsg, this.projectRoot.getSpecFile().getName()));
-		
-		InputStream is;
 		String[] cmdList = getBuildCommandList();
-		RpmBuildResult result = new RpmBuildResult(cmdList, buildType);
-		try {
-			// log the build command, which was issued
-			FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-			logger.logInfo(NLS.bind(RpmText.RpmBuildCommand_commandStringMsg, convertCmdList(cmdList)));
-			is = Utils.runCommandToInputStream(cmdList);
-			
-		} catch (IOException e) {
-			throw new RpmBuildCommandException(e.getMessage(), e);
-		}
+		
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		
-		// Do the console writing
-		final MessageConsole console = FedoraPackagerConsole.getConsole();
-		IConsoleManager manager = ConsolePlugin.getDefault()
-				.getConsoleManager();
-		manager.addConsoles(new IConsole[] { console });
-		console.activate();
-
-		final MessageConsoleStream outStream = console.newMessageStream();
-
-		// First create observable console writer
-		ConsoleWriter worker = new ConsoleWriter(is, outStream);
-		// add observer for SRPM builds (see comment in
-		// RpmConsoleFilterObserver if you are tempted to use this for RPM
-		// builds too.
-		if (this.buildType == BuildType.SOURCE) {
-			worker.addObserver(new RpmConsoleFilterObserver(result));
-		}
-		
-		// create the thread for process input processing
-		Thread consoleWriterThread = new Thread(worker);
-		consoleWriterThread.start();
-
-		try {
-			while (!monitor.isCanceled()) {
-				try {
-					// Don't waste system resources
-					Thread.sleep(300);
-					break;
-				} catch (IllegalThreadStateException e) {
-					// Do nothing
-				}
-			}
-
-			if (monitor.isCanceled()) {
-				worker.stop(); // Stop the worker thread
+		RpmBuildThread rbt = new RpmBuildThread(buildType, cmdList);
+		rbt.start();
+		while (rbt.getState() != Thread.State.TERMINATED){
+			if (monitor.isCanceled()){
+				rbt.interrupt();
 				throw new OperationCanceledException();
 			}
-
-			// finish reading whatever's left in the buffers
-			consoleWriterThread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
-
-		// refresh containing folder
-		try {
-			this.projectRoot.getContainer().refreshLocal(IResource.DEPTH_INFINITE,
-					monitor);
-		} catch (CoreException ignored) {
-			// ignore
-		}
-		
 		callPostExecListeners();
-		setCallable(false); // reuse of instance's call() not allowed
-		// FIXME: may be set this to be successful, yet rpmbuild may have failed.
-		result.setSuccess(true);
-		return result;
+		setCallable(false); // reuse of instance's call() not allowed	
+		return rbt.getResult();
 	}
 
 	/**
@@ -311,6 +254,72 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 			cmd += token + " "; //$NON-NLS-1$;
 		}
 		return cmd.trim();
+	}
+	
+	private class RpmBuildThread extends Thread{
+		private BuildType buildType;
+		private String[] cmdList;
+		private RpmBuildResult result;
+		public RpmBuildThread(BuildType buildType, String[] cmdList){
+			super();
+			this.buildType = buildType;
+			this.cmdList = cmdList;
+		}
+		@Override
+		public void run(){
+			InputStream is = null;
+			result = new RpmBuildResult(cmdList, buildType);
+			Process child = null;
+			try {
+				// log the build command, which was issued
+				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+				logger.logInfo(NLS.bind(RpmText.RpmBuildCommand_commandStringMsg, convertCmdList(cmdList)));
+				ProcessBuilder pBuilder = new ProcessBuilder(cmdList);
+				pBuilder = pBuilder.redirectErrorStream(true);
+				child = pBuilder.start();
+				is = new BufferedInputStream(child.getInputStream());
+				
+			} catch (IOException e) {
+				FedoraHandlerUtils.showErrorDialog(new Shell(), RpmText.RpmBuildCommand_BuildFailure, RpmText.RpmBuildCommand_BuildDidNotStart);
+			}
+			// Do the console writing
+			final MessageConsole console = FedoraPackagerConsole.getConsole();
+			IConsoleManager manager = ConsolePlugin.getDefault()
+					.getConsoleManager();
+			manager.addConsoles(new IConsole[] { console });
+			console.activate();
+
+			final MessageConsoleStream outStream = console.newMessageStream();
+
+			// First create observable console writer
+			ConsoleWriter worker = new ConsoleWriter(is, outStream);
+			// add observer for SRPM builds (see comment in
+			// RpmConsoleFilterObserver if you are tempted to use this for RPM
+			// builds too.
+			if (this.buildType == BuildType.SOURCE) {
+				worker.addObserver(new RpmConsoleFilterObserver(result));
+			}
+			// create the thread for process input processing
+			Thread consoleWriterThread = new Thread(worker);
+			consoleWriterThread.start();
+			try {
+				consoleWriterThread.join();
+			} catch (InterruptedException e) {
+				child.destroy();
+				result.setSuccess(false);
+			}
+			try {
+				result.setSuccess(child.waitFor() == 0);
+			} catch (InterruptedException e) {
+				//should not occur
+				e.printStackTrace();
+			}
+		}
+		
+		public RpmBuildResult getResult(){
+			return result;
+		}
+		
 	}
 
 }

@@ -99,5 +99,4 @@ public class RpmBuildResult extends Result {
 	public Set<String> getAbsoluteRpmFilePaths() {
 		return this.rpms;
 	}
-
 }

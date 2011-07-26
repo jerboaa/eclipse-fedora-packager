@@ -32,6 +32,8 @@ public class RpmText extends NLS {
 	// LocalBuildHandler
 	/****/ public static String LocalBuildHandler_buildForLocalArch;
 	/****/ public static String LocalBuildHandler_downloadSourcesForLocalBuild;
+	/****/ public static String LocalBuildHandler_buildCanceled;
+	/****/ public static String LocalBuildHandler_buildCancelationResponse;
 	// MockBuildHandler
 	/****/ public static String MockBuildHandler_testLocalBuildWithMock;
 	/****/ public static String MockBuildHandler_creatingSrpm;
@@ -51,6 +53,8 @@ public class RpmText extends NLS {
 	/****/ public static String RpmBuildCommand_commandStringMsg;
 	/****/ public static String RpmBuildCommand_buildTypeRequired;
 	/****/ public static String RpmBuildCommand_callRpmBuildMsg;
+	/****/ public static String RpmBuildCommand_BuildDidNotStart;
+	/****/ public static String RpmBuildCommand_BuildFailure;
 	// RpmEvalCommand
 	/****/ public static String RpmEvalCommand_variableMustBeSet;
 	// MockBuildCommand
