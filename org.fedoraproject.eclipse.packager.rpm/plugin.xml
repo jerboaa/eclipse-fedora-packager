@@ -111,7 +111,7 @@
             <command
                   commandId="org.fedoraproject.eclipse.packager.SCMMockCommand"
                   label="%command.label.11"
-                  mnemonic="%command.label.11"
+                  mnemonic="%command.mnemonic.11"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -199,13 +199,19 @@
             commandId="org.fedoraproject.eclipse.packager.MockCommand"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="M1+M3+F M">
+            sequence="M1+M3+F R">
       </key>
       <key
             commandId="org.fedoraproject.eclipse.packager.SRPMCommand"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+F S">
+      </key>
+      <key
+            commandId="org.fedoraproject.eclipse.packager.SCMMockCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+F M">
       </key>
     </extension>
 </plugin>

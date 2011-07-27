@@ -2,6 +2,7 @@ package org.fedoraproject.eclipse.packager.rpm.api;
 
 import java.io.FileNotFoundException;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -13,12 +14,8 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
-import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
-import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
-import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -41,30 +38,28 @@ public class MockBuildJob extends Job {
 	private final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 	private IProjectRoot fpr;
 	private MockBuildResult result;
-	private RpmBuildCommand srpmBuild;
 	private MockBuildCommand mockBuild;
-	private DownloadSourceCommand download;
+	private IPath srpmPath;
 	/** 
-	 * @param name
-	 * @param shell 
-	 * @param fpRoot 
+	 * @param name The name of the job.
+	 * @param shell The shell the job is run in.
+	 * @param fpRoot The root of the Fedora project being built.
+	 * @param srpmPath The path to the built SRPM/
 	 */
-	public MockBuildJob(String name, Shell shell, IProjectRoot fpRoot) {
+	public MockBuildJob(String name, Shell shell, IProjectRoot fpRoot, IPath srpmPath) {
 		super(name);
 		this.shell = shell;
 		fpr = fpRoot;
+		this.srpmPath = srpmPath;
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+	 */
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		FedoraPackager fp = new FedoraPackager(fpr);
 		try {
-			// need to get sources for an SRPM build
-			download = (DownloadSourceCommand) fp
-				.getCommandInstance(DownloadSourceCommand.ID);
-			// get RPM build command in order to produce an SRPM
-			srpmBuild = (RpmBuildCommand) fp
-					.getCommandInstance(RpmBuildCommand.ID);
 			mockBuild = (MockBuildCommand) fp
 				.getCommandInstance(MockBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
@@ -89,45 +84,8 @@ public class MockBuildJob extends Job {
 		logger.logInfo(NLS.bind(
 				FedoraPackagerText.callingCommand,
 				MockBuildCommand.class.getName()));
-		//sources need to be downloaded
-		final String downloadUrlPreference = PackagerPlugin
-		.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
-		Job downloadSourcesJob = new DownloadSourcesJob(RpmText.MockBuildHandler_downloadSourcesForMockBuild,
-				download, fpr, shell, downloadUrlPreference, true);
-		downloadSourcesJob.setUser(true);
-		downloadSourcesJob.schedule();
 		try {
-			// wait for download job to finish
-			downloadSourcesJob.join();
-		} catch (InterruptedException e1) {
-			throw new OperationCanceledException();
-		}
-		if (!downloadSourcesJob.getResult().isOK()) {
-				// bail if something failed
-			return downloadSourcesJob.getResult();
-		}
-			//srpms need to be built
-			// Create a brand new SRPM
-		SRPMBuildJob srpmBuildJob = new SRPMBuildJob(NLS.bind(
-			RpmText.MockBuildHandler_creatingSRPMForMockBuild,
-			fpr.getPackageName()), srpmBuild,
-			fpr);
-		srpmBuildJob.setUser(true);
-		srpmBuildJob.schedule();
-		try {
-			// wait for SRPM build to finish
-			srpmBuildJob.join();
-		} catch (InterruptedException e1) {
-			throw new OperationCanceledException();
-		}
-		if (!srpmBuildJob.getResult().isOK()) {
-			// bail if something failed
-			return srpmBuildJob.getResult();
-		}
-		final RpmBuildResult srpmBuildResult = srpmBuildJob.getSRPMBuildResult(); 
-		try {
-			mockBuild.pathToSRPM(srpmBuildResult
-				.getAbsoluteSRPMFilePath());
+			mockBuild.pathToSRPM(srpmPath.toOSString());
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {

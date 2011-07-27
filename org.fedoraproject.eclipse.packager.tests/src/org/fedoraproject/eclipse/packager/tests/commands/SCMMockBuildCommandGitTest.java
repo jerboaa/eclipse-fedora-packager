@@ -7,8 +7,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
@@ -16,12 +14,9 @@ import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
-import org.fedoraproject.eclipse.packager.rpm.api.MockBuildCommand;
 import org.fedoraproject.eclipse.packager.rpm.api.MockBuildResult;
-import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildResult;
 import org.fedoraproject.eclipse.packager.rpm.api.SCMMockBuildCommand;
 import org.fedoraproject.eclipse.packager.rpm.api.SCMMockBuildCommand.RepoType;
-import org.fedoraproject.eclipse.packager.rpm.api.SCMMockBuildJob;
 import org.fedoraproject.eclipse.packager.rpm.api.errors.MockBuildCommandException;
 import org.fedoraproject.eclipse.packager.rpm.api.errors.MockNotInstalledException;
 import org.fedoraproject.eclipse.packager.rpm.api.errors.UserNotInMockGroupException;
@@ -43,7 +38,7 @@ public class SCMMockBuildCommandGitTest {
 	private FedoraPackager packager;
 	// download source command
 	private DownloadSourceCommand download;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		this.testProject = new GitTestProject("eclipse-fedorapackager");
@@ -63,21 +58,24 @@ public class SCMMockBuildCommandGitTest {
 		this.testProject.dispose();
 	}
 
-	
 	@Test
-	public void canCreateF15SCMMockBuild() throws CoreException, 
-	InterruptedException, FedoraPackagerCommandInitializationException, 
-	FedoraPackagerCommandNotFoundException, CommandMisconfiguredException, 
-	UserNotInMockGroupException, CommandListenerException, 
-	MockBuildCommandException, MockNotInstalledException{
+	public void canCreateF15SCMMockBuild() throws CoreException,
+			FedoraPackagerCommandInitializationException,
+			FedoraPackagerCommandNotFoundException,
+			CommandMisconfiguredException, UserNotInMockGroupException,
+			CommandListenerException, MockBuildCommandException,
+			MockNotInstalledException {
 		SCMMockBuildCommand mockBuild = (SCMMockBuildCommand) packager
-		.getCommandInstance(SCMMockBuildCommand.ID);
+				.getCommandInstance(SCMMockBuildCommand.ID);
 		MockBuildResult result = mockBuild
-		.useDownloadedSourceDirectory(download.getDownloadFolderPath())
-		.useBranch("f15").usePackage("eclipse-fedorapackager")
-		.useRepoPath(fpRoot.getContainer().getParent().getRawLocation().toString())
-		.useRepoType(RepoType.GIT).useSpec(fpRoot.getSpecFile().getName())
-		.call(new NullProgressMonitor());
+				.useDownloadedSourceDirectory(download.getDownloadFolderPath())
+				.useBranch("f15")
+				.usePackage("eclipse-fedorapackager")
+				.useRepoPath(
+						fpRoot.getContainer().getParent().getRawLocation()
+								.toString()).useRepoType(RepoType.GIT)
+				.useSpec(fpRoot.getSpecFile().getName())
+				.call(new NullProgressMonitor());
 		assertTrue(result.wasSuccessful());
 		String resultDirectoryPath = result.getResultDirectoryPath();
 		assertNotNull(resultDirectoryPath);
@@ -87,7 +85,7 @@ public class SCMMockBuildCommandGitTest {
 		File resultPath = new File(resultDirectoryPath);
 		IContainer container = (IContainer) this.testProject.getProject()
 				.findMember(new Path(resultPath.getName()));
-		for (IResource file: container.members()) {
+		for (IResource file : container.members()) {
 			if (file.getName().endsWith(".rpm")) {
 				// not interested in source RPMs
 				if (!file.getName().endsWith(".src.rpm")) {

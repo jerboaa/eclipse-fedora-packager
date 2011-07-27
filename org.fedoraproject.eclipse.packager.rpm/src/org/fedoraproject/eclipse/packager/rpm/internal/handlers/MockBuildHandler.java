@@ -13,13 +13,21 @@ package org.fedoraproject.eclipse.packager.rpm.internal.handlers;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
+import org.fedoraproject.eclipse.packager.api.FileDialogRunable;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
+import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.rpm.api.MockBuildCommand;
 import org.fedoraproject.eclipse.packager.rpm.api.MockBuildJob;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
@@ -47,7 +55,29 @@ public class MockBuildHandler extends FedoraPackagerAbstractHandler {
 					FedoraPackagerText.invalidFedoraProjectRootError);
 			return null;
 		}
-		Job job = new MockBuildJob(fedoraProjectRoot.getProductStrings().getProductName(), shell, fedoraProjectRoot);
+		IPath srpmPath;
+		try {
+			srpmPath = FedoraHandlerUtils.chooseRootFileOfType(shell, 
+					fedoraProjectRoot, ".src.rpm", //$NON-NLS-1$
+					RpmText.MockBuildHandler_RootListMessage); 
+		} catch (OperationCanceledException e) {
+			return null;
+		} catch (CoreException e) {
+			logger.logError(e.getMessage(), e);
+			return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+					e.getMessage(), e);
+		}
+		if (srpmPath == null){
+			FileDialogRunable fdr = new FileDialogRunable("*.src.rpm",  //$NON-NLS-1$
+					RpmText.MockBuildHandler_FileSystemDialogTitle);
+			shell.getDisplay().syncExec(fdr);
+			String srpm = fdr.getFile();
+			if (srpm == null){
+				return Status.CANCEL_STATUS;
+			}
+			srpmPath = new Path(srpm);
+		}
+		Job job = new MockBuildJob(fedoraProjectRoot.getProductStrings().getProductName(), shell, fedoraProjectRoot, srpmPath);
 		job.setSystem(true); // Suppress UI. That's done in sub-jobs within.
 		job.schedule();
 		return null;

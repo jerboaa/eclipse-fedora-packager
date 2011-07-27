@@ -9,15 +9,12 @@ import java.security.NoSuchAlgorithmException;
 import org.apache.ws.commons.util.Base64;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
-import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.koji.KojiText;
 import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientException;
 import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientLoginException;
-import org.fedoraproject.eclipse.packager.koji.api.errors.TagSourcesException;
-import org.fedoraproject.eclipse.packager.koji.api.errors.UnpushedChangesException;
 import org.apache.commons.codec.binary.Hex;
 
 /**

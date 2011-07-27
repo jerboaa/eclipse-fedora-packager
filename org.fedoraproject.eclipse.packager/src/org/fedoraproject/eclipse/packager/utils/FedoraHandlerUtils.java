@@ -10,23 +10,34 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.utils;
 
+import java.util.HashSet;
+
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.part.EditorPart;
+import org.fedoraproject.eclipse.packager.IProjectRoot;
 
 /**
  * Handler bound utility class.
@@ -137,5 +148,47 @@ public class FedoraHandlerUtils {
 				MessageDialog.openError(shell, title, message);
 			}
 		});
+	}
+	
+	/**
+	 * Prompt user to select a file from within a root filtered by a given extension.
+	 * @param shell The shell to run the prompt in.
+	 * @param fedoraProjectRoot The root to find the file in.
+	 * @param extension The extension filter for the file list.
+	 * @param message The message that the accompanies the prompt.
+	 * @return The path to the chosen file.
+	 * @throws CoreException occurs if the root container cannot be found.
+	 * @throws OperationCanceledException thrown if user cancels prompt.
+	 */
+	public static IPath chooseRootFileOfType(Shell shell, 
+			IProjectRoot fedoraProjectRoot, String extension, 
+			final String message) 
+	throws CoreException, OperationCanceledException{
+		HashSet<IResource> options = new HashSet<IResource>();
+		for (IResource resource : fedoraProjectRoot.getContainer()
+				.members(IContainer.INCLUDE_PHANTOMS)){
+			if (resource.getName().endsWith(extension)){
+				options.add(resource);
+			}
+		}
+		if (options.size() == 0){
+			return null;
+		}
+		final IResource[] syncOptions = options.toArray(new IResource[0]);
+		final ListDialog ld = new ListDialog(shell);
+		shell.getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run(){
+				ld.setContentProvider(new ArrayContentProvider());
+				ld.setLabelProvider(new WorkbenchLabelProvider());
+				ld.setInput(syncOptions);
+				ld.setMessage(message);
+				ld.open();
+			}
+		});
+		if (ld.getReturnCode() == Window.CANCEL){
+			throw new OperationCanceledException();
+		}
+		return ((IResource)ld.getResult()[0]).getLocation();
 	}
 }

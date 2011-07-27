@@ -34,7 +34,7 @@ public class FedoraPackagerGitText extends NLS {
 
 	// SelectModulePage Strings
 	/****/ public static String SelectModulePage_anonymousCheckout;
-	public static String SelectModulePage_badPackageName;
+	/****/ public static String SelectModulePage_badPackageName;
 	/****/ public static String SelectModulePage_packageSelection;
 	/****/ public static String SelectModulePage_choosePackage;
 	/****/ public static String SelectModulePage_packageName;
