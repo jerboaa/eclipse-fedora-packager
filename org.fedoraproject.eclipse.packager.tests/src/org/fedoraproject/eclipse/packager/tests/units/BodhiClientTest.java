@@ -140,7 +140,7 @@ public class BodhiClientTest {
 		String[] builds = { PACKAGE_UPDATE_NVR };
 		BodhiUpdateResponse updateResponse = client.createNewUpdate(builds,
 				"F15", "enhancement", "testing", "",
-				"This is a test. Please disregard", "", false, true, 3, -3);
+				"This is a test. Please disregard", "", false, true, 3, -3, true);
 		assertEquals("Update successfully created", updateResponse.getFlashMsg());
 		assertEquals("ed", updateResponse.getUpdates()[0].getBuilds()[0].getPkg().getName());
 	}

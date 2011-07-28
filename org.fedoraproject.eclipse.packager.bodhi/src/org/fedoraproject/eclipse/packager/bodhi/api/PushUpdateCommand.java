@@ -26,6 +26,27 @@ import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientLoginExcep
 public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 
 	/**
+	 * Default value for karma automatism
+	 */
+	public static final boolean DEFAULT_KARMA_AUTOMATISM = true;
+	/**
+	 * Default value for closing bugs when update becomes stable
+	 */
+	public static final boolean DEFAULT_CLOSE_BUGS_WHEN_STABLE = true;
+	/**
+	 * Default stable karma threshold
+	 */
+	public static final int DEFAULT_STABLE_KARMA_THRESHOLD = 3;
+	/**
+	 * Default unstable karma threshold
+	 */
+	public static final int DEFAULT_UNSTABLE_KARMA_THRESHOLD = -3;
+	/**
+	 * Default suggestion of reboot: {@code false}
+	 */
+	public static final boolean DEFAULT_SUGGEST_REBOOT = false;
+	
+	/**
 	 * The unique ID of this command.
 	 */
 	public static final String ID = "PushUpdateCommand"; //$NON-NLS-1$
@@ -53,13 +74,14 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 	/*
 	 * State info if reboot after this update is suggested
 	 */
-	private boolean suggestReboot = false;
+	private boolean suggestReboot = DEFAULT_SUGGEST_REBOOT;
 	/*
 	 * State info if karma automatism should be used for pushing/unpushing
 	 */
-	private boolean enableKarmaAutomatism = true;
-	private int stableKarmaThreshold = 3;
-	private int unpushKarmaThreshold = -3;
+	private boolean enableKarmaAutomatism = DEFAULT_KARMA_AUTOMATISM;
+	private int stableKarmaThreshold = DEFAULT_STABLE_KARMA_THRESHOLD;
+	private int unpushKarmaThreshold = DEFAULT_UNSTABLE_KARMA_THRESHOLD;
+	private boolean closeBugsWhenStable = DEFAULT_CLOSE_BUGS_WHEN_STABLE;
 	private String username;
 	private String password;
 	
@@ -269,6 +291,19 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 	}
 	
 	/**
+	 * Boolean flag which sets if associated bugs should get closed when the
+	 * update becomes stable.
+	 * 
+	 * @param newValue
+	 *            The new value.
+	 * @return this instance
+	 */
+	public PushUpdateCommand closeBugsWhenStable(boolean newValue) {
+		this.closeBugsWhenStable = newValue;
+		return this;
+	}
+	
+	/**
 	 * Sets the username/password combination for the update push.
 	 * @param username The username
 	 * @param password The password
@@ -367,7 +402,7 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 		BodhiUpdateResponse updateResponse = this.client.createNewUpdate(builds, release, updateType, requestType,
 				bugs, comment, csrfToken, suggestReboot,
 				enableKarmaAutomatism, stableKarmaThreshold,
-				unpushKarmaThreshold);
+				unpushKarmaThreshold, closeBugsWhenStable);
 		PushUpdateResult result = new PushUpdateResult(updateResponse);
 		monitor.worked(3);
 		monitor.subTask(BodhiText.PushUpdateCommand_loggingOut);

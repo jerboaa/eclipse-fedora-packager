@@ -66,6 +66,7 @@ public class BodhiClient implements IBodhiClient {
 	private static final String SUGGEST_REBOOT = "suggest_reboot"; //$NON-NLS-1$
 	private static final String STABLE_KARMA = "stable_karma"; //$NON-NLS-1$
 	private static final String UNSTABLE_KARMA = "unstable_karma"; //$NON-NLS-1$
+	private static final String CLOSE_BUGS_WHEN_STABLE = "close_bugs"; //$NON-NLS-1$
 	
 	/**
 	 *  URL of the Bodhi server to which to connect to.
@@ -216,14 +217,14 @@ public class BodhiClient implements IBodhiClient {
 	 * org.fedoraproject.eclipse.packager.bodhi.api.IBodhiClient#createNewUpdate
 	 * (java.lang.String[], java.lang.String, java.lang.String,
 	 * java.lang.String, java.lang.String, java.lang.String, java.lang.String,
-	 * boolean, boolean, int, int)
+	 * boolean, boolean, int, int, boolean)
 	 */
 	@Override
 	public BodhiUpdateResponse createNewUpdate(String[] builds, String release,
 			String type, String request, String bugs, String notes,
 			String csrfToken, boolean suggestReboot,
 			boolean enableKarmaAutomatism, int stableKarmaThreshold,
-			int unstableKarmaThreshold) throws BodhiClientException {
+			int unstableKarmaThreshold, boolean closeBugsWhenStable) throws BodhiClientException {
 		try {
 			HttpPost post = new HttpPost(getPushUpdateUrl());
 			post.addHeader(ACCEPT_HTTP_HEADER_NAME, MIME_JSON);
@@ -253,6 +254,8 @@ public class BodhiClient implements IBodhiClient {
 					new StringBody(String.valueOf(stableKarmaThreshold)));
 			reqEntity.addPart(UNSTABLE_KARMA,
 					new StringBody(String.valueOf(unstableKarmaThreshold)));
+			reqEntity.addPart(CLOSE_BUGS_WHEN_STABLE,
+					new StringBody(String.valueOf(closeBugsWhenStable)));
 
 			post.setEntity(reqEntity);
 
