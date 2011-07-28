@@ -32,17 +32,30 @@ public interface IBodhiClient {
 	/**
 	 * Push a new Bodhi update for one or more builds (i.e. N-V-Rs).
 	 * 
-	 * @param builds N-V-R's for which to push an update for
-	 * @param release For example "F15".
-	 * @param type One of "bugfix", "security", "enhancement", "newpackage".
-	 * @param request {@code testing} or {@code stable}.
-	 * @param bugs Numbers of bugs to close automatically (comma separated).
-	 * @param notes The comment for this update.
+	 * @param builds
+	 *            N-V-R's for which to push an update for
+	 * @param release
+	 *            For example "F15".
+	 * @param type
+	 *            One of "bugfix", "security", "enhancement", "newpackage".
+	 * @param request
+	 *            {@code testing} or {@code stable}.
+	 * @param bugs
+	 *            Numbers of bugs to close automatically (comma separated).
+	 * @param notes
+	 *            The comment for this update.
 	 * @param csrf_token
-	 * @param suggestReboot If a reboot is suggested after this update.
-	 * @param enableKarmaAutomatism If Karma automatism should be enabled.
-	 * @param unpushKarmaThreshold The lower unpushing Karma threshold.
-	 * @param stableKarmaThreshold The upper stable Karma threshold.
+	 * @param suggestReboot
+	 *            If a reboot is suggested after this update.
+	 * @param enableKarmaAutomatism
+	 *            If Karma automatism should be enabled.
+	 * @param unpushKarmaThreshold
+	 *            The lower unpushing Karma threshold.
+	 * @param stableKarmaThreshold
+	 *            The upper stable Karma threshold.
+	 * @param closeBugsWhenStable
+	 *            Flag which determines if bugs should get closed when the
+	 *            update hits stable.
 	 * @return The update response.
 	 * @throws BodhiClientException
 	 *             If some error occurred.
@@ -51,7 +64,7 @@ public interface IBodhiClient {
 			String type, String request, String bugs, String notes,
 			String csrf_token, boolean suggestReboot,
 			boolean enableKarmaAutomatism, int stableKarmaThreshold,
-			int unpushKarmaThreshold) throws BodhiClientException;
+			int unpushKarmaThreshold, boolean closeBugsWhenStable) throws BodhiClientException;
 
 	/**
 	 * Log out from Bodhi server.

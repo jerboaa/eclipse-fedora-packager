@@ -22,12 +22,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
-import org.fedoraproject.eclipse.packager.bodhi.api.IBodhiNewDialog;
 
 /**
  * Class implementing Bodhi updates dialog.
  */
-public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
+public class BodhiNewDialog extends Dialog{
 	protected static final String DIALOG_TITLE = BodhiText.BodhiNewDialog_dialogTitle; 
 	protected String buildName;
 	protected String release;
@@ -39,7 +38,6 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getBuildName()
 	 */
-	@Override
 	public String getBuildName() {
 		return buildName;
 	}
@@ -47,7 +45,6 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getRelease()
 	 */
-	@Override
 	public String getRelease() {
 		return release;
 	}
@@ -55,7 +52,6 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getBugs()
 	 */
-	@Override
 	public String getBugs() {
 		return bugs;
 	}
@@ -63,7 +59,6 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getNotes()
 	 */
-	@Override
 	public String getNotes() {
 		return notes;
 	}
@@ -71,7 +66,6 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getType()
 	 */
-	@Override
 	public String getType() {
 		return type;
 	}
@@ -79,7 +73,6 @@ public class BodhiNewDialog extends Dialog implements IBodhiNewDialog {
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IBodhiNewDialog#getRequest()
 	 */
-	@Override
 	public String getRequest() {
 		return request;
 	}

@@ -42,10 +42,9 @@ import org.fedoraproject.eclipse.packager.bodhi.BodhiPlugin;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
 import org.fedoraproject.eclipse.packager.bodhi.api.BodhiClient;
 import org.fedoraproject.eclipse.packager.bodhi.api.IBodhiClient;
-import org.fedoraproject.eclipse.packager.bodhi.api.IBodhiNewDialog;
-import org.fedoraproject.eclipse.packager.bodhi.api.IUserValidationDialog;
 import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientInitException;
 import org.fedoraproject.eclipse.packager.bodhi.internal.ui.BodhiNewDialog;
+import org.fedoraproject.eclipse.packager.bodhi.internal.ui.BodhiNewUpdateDialog;
 import org.fedoraproject.eclipse.packager.bodhi.internal.ui.BodhiUpdateInfoDialog;
 import org.fedoraproject.eclipse.packager.bodhi.internal.ui.UserValidationDialog;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
@@ -57,8 +56,8 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
  */
 public class BodhiNewHandler extends AbstractHandler {
 
-	protected IBodhiNewDialog dialog;
-	protected IUserValidationDialog authDialog;
+	protected BodhiNewUpdateDialog dialog;
+	protected UserValidationDialog authDialog;
 	protected IBodhiClient bodhi;
 	protected Shell shell;
 	
@@ -97,29 +96,31 @@ public class BodhiNewHandler extends AbstractHandler {
 						monitor.subTask(BodhiText.BodhiNewHandler_querySpecFileMsg);
 						// Parsing changelog from spec-file seems to be broken
 						// This always returns "". See #49
-						String clog = "";
-						String bugIDs = findBug(clog);
-						String buildName = getBuildName(fedoraProjectRoot);
+						final String clog = "";
+						final String bugIDs = findBug(clog);
+						final String buildName = getBuildName(fedoraProjectRoot);
 						String release = getReleaseName(fedoraProjectRoot);
 
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
 						// if debugging, want to use stub
-						setDialog(new BodhiNewDialog(shell, buildName,
-									release, bugIDs, clog));
+//						setDialog(new BodhiNewUpdateDialog(shell, new String[] {buildName},
+//									bugIDs, clog));
 						Display.getDefault().syncExec(new Runnable() {
 							@Override
 							public void run() {
-								getDialog().open();
+								new BodhiNewUpdateDialog(shell, new String[] {buildName},
+										bugIDs, clog).open();
 							}
 						});
 
-						if (getDialog().getReturnCode() == Window.OK) {
-							String type = getDialog().getType();
-							String request = getDialog().getRequest();
-							String bugs = getDialog().getBugs();
-							String notes = getDialog().getNotes();
+						//if (getDialog().getReturnCode() == Window.OK) {
+						if (true) {
+							String type = "";//getDialog().getType();
+							String request = ""; //getDialog().getRequest();
+							String bugs = "";//getDialog().getBugs();
+							String notes = "";//getDialog().getNotes();
 
 							String cachedUsername = retrievePreference("username"); //$NON-NLS-1$
 							String cachedPassword = null;
@@ -266,7 +267,7 @@ public class BodhiNewHandler extends AbstractHandler {
 	 * 
 	 * @return The user validation dialog.
 	 */
-	public IUserValidationDialog getAuthDialog() {
+	public UserValidationDialog getAuthDialog() {
 		return authDialog;
 	}
 
@@ -275,7 +276,7 @@ public class BodhiNewHandler extends AbstractHandler {
 	 * 
 	 * @param authDialog
 	 */
-	public void setAuthDialog(IUserValidationDialog authDialog) {
+	public void setAuthDialog(UserValidationDialog authDialog) {
 		this.authDialog = authDialog;
 	}
 
@@ -284,7 +285,7 @@ public class BodhiNewHandler extends AbstractHandler {
 	 *  
 	 * @return The UI dialog.
 	 */
-	public IBodhiNewDialog getDialog() {
+	public BodhiNewUpdateDialog getDialog() {
 		return dialog;
 	}
 
@@ -293,7 +294,7 @@ public class BodhiNewHandler extends AbstractHandler {
 	 * 
 	 * @param dialog
 	 */
-	public void setDialog(IBodhiNewDialog dialog) {
+	public void setDialog(BodhiNewUpdateDialog dialog) {
 		this.dialog = dialog;
 	}
 

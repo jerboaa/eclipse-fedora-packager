@@ -34,6 +34,7 @@ public class BodhiClientStub implements IBodhiClient {
 	public boolean enableAutoKarma;
 	public int stableKarmaThreshold;
 	public int unstableKarmaThreshold;
+	public boolean closeBugsWhenStable;
 	
 	@Override
 	public BodhiLoginResponse login(String username, String password)
@@ -49,7 +50,7 @@ public class BodhiClientStub implements IBodhiClient {
 	public BodhiUpdateResponse createNewUpdate(String[] buildName, String release, String type,
 			String request, String bugs, String notes, String csrfToken, boolean suggestReboot,
 			boolean enableKarmaAutomatism, int stableKarmaThreshold,
-			int unstableKarmaThreshold) throws BodhiClientException {
+			int unstableKarmaThreshold, boolean closeBugsWhenStable) throws BodhiClientException {
 		this.buildName = buildName[0];
 		this.release = release;
 		this.type = type;
@@ -60,6 +61,7 @@ public class BodhiClientStub implements IBodhiClient {
 		this.enableAutoKarma = enableKarmaAutomatism;
 		this.stableKarmaThreshold = stableKarmaThreshold;
 		this.unstableKarmaThreshold = unstableKarmaThreshold;
+		this.closeBugsWhenStable = closeBugsWhenStable;
 //		return new JSONObject("{\"tg_flash\": \"Update created\"," +
 //				"\"update\": \"Update id: 7331\"," +
 //				"\"updates\": [ { \"title\": \"" + buildName + "\", \"something-else\": 12 } ] }");

@@ -11,51 +11,42 @@
 package org.fedoraproject.eclipse.packager.tests.utils;
 
 import org.eclipse.jface.window.Window;
-import org.fedoraproject.eclipse.packager.bodhi.api.IBodhiNewDialog;
 
-public class BodhiNewDialogStub implements IBodhiNewDialog {
+public class BodhiNewDialogStub {
 	
 	public BodhiNewDialogStub() {
 	}
 	
-	@Override
 	public String getBugs() {
 		return "";
 	}
 
-	@Override
 	public String getBuildName() {
 		return "";
 	}
 
-	@Override
 	public String getNotes() {
 		//TODO fix this properly
 		return null;
 	}
 
-	@Override
 	public String getRelease() {
 		//TODO fix this properly
 		return "";
 	}
 
-	@Override
 	public String getRequest() {
 		return "testing";
 	}
 
-	@Override
 	public String getType() {
 		return "bugfix";
 	}
 
-	@Override
 	public int getReturnCode() {
 		return Window.OK;
 	}
 
-	@Override
 	public int open() {
 		return Window.OK;
 	}

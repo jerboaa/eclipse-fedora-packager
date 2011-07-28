@@ -11,9 +11,8 @@
 package org.fedoraproject.eclipse.packager.tests.utils;
 
 import org.eclipse.jface.window.Window;
-import org.fedoraproject.eclipse.packager.bodhi.api.IUserValidationDialog;
 
-public class UserValidationDialogStub implements IUserValidationDialog {
+public class UserValidationDialogStub {
 
 	public boolean getAllowCaching() {
 		return false;

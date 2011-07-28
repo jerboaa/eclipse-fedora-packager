@@ -28,12 +28,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiPlugin;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
-import org.fedoraproject.eclipse.packager.bodhi.api.IUserValidationDialog;
 
 /**
  * A dialog for prompting for a user name and password
  */
-public class UserValidationDialog extends TrayDialog implements IUserValidationDialog {
+public class UserValidationDialog extends TrayDialog {
 	// widgets
 	protected Text usernameField;
 	protected Text passwordField;
@@ -256,7 +255,6 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IUserValidationDialog#getPassword()
 	 */
-	@Override
 	public String getPassword() {
 		return password;
 	}
@@ -264,7 +262,6 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IUserValidationDialog#getUsername()
 	 */
-	@Override
 	public String getUsername() {
 		return username;
 	}
@@ -272,7 +269,6 @@ public class UserValidationDialog extends TrayDialog implements IUserValidationD
 	/* (non-Javadoc)
 	 * @see org.fedoraproject.eclipse.packager.IUserValidationDialog#getAllowCaching()
 	 */
-	@Override
 	public boolean getAllowCaching() {
 		return allowCaching;
 	}
