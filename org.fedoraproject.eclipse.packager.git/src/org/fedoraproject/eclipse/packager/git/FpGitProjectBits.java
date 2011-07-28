@@ -260,7 +260,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	public String getTarget() {
 		String currBranch = getCurrentBranchName();
 		if (currBranch.startsWith("F-") || currBranch.startsWith("FC-")) { //$NON-NLS-1$ //$NON-NLS-2$
-			return "dist-f" + getDistVal() + "-updates-candidate"; //$NON-NLS-1$" //$NON-NLS-2$
+			return "f" + getDistVal() + "-candidate"; //$NON-NLS-1$" //$NON-NLS-2$
 		} else if (currBranch.startsWith("EL-")) { //$NON-NLS-1$
 			return "dist-" + getDistVal() + "E-epel-testing-candidate"; //$NON-NLS-1$ //$NON-NLS-2$
 		} else if (currBranch.startsWith("OLPC-")) {  //$NON-NLS-1$

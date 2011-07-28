@@ -332,7 +332,7 @@ public class FedoraPackagerUtils {
 		String target = splitSRPM[splitSRPM.length - 3];
 		if (target.startsWith("fc")){ //$NON-NLS-1$
 			if (Integer.parseInt(target.substring(2)) < 16){
-				return "dist-f" + target.substring(2) + "-updates-candidate"; //$NON-NLS-1$ //$NON-NLS-2$
+				return "f" + target.substring(2) + "-candidate"; //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
 				return "dist-rawhide"; //$NON-NLS-1$
 			}
