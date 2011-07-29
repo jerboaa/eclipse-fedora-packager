@@ -13,6 +13,9 @@ package org.fedoraproject.eclipse.packager;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -22,9 +25,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.Specfile;
+import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfilePackage;
 import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerExtensionPointException;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
+import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
  * This class is representing a root directory for a Fedora package in a given
@@ -222,5 +227,27 @@ public class FedoraProjectRoot implements IProjectRoot {
 			return ((IFile) resource);
 		}
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getPackageNVRs()
+	 */
+	@Override
+	public String[] getPackageNVRs() {
+		String version = null, release = null;
+		try {
+			version = RPMUtils.rpmQuery(this, "VERSION"); //$NON-NLS-1$
+			release = RPMUtils.rpmQuery(this, "RELEASE"); //$NON-NLS-1$
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		List<String> rawNvrs = new ArrayList<String>();
+		for (SpecfilePackage p: getSpecfileModel().getPackages().getPackages()) {
+			rawNvrs.add(p.getFullPackageName() + "-" + version + "-" + release); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		String[] nvrs = rawNvrs.toArray(new String[]{});
+		Arrays.sort(nvrs);
+		return nvrs;
 	}
 }
