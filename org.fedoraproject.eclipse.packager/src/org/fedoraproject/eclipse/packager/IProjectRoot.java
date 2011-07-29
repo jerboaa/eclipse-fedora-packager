@@ -118,4 +118,13 @@ public interface IProjectRoot {
 	 * @return the list of qualified names this project root supports.
 	 */
 	public QualifiedName[] getSupportedProjectPropertyNames();
+	
+	/**
+	 * Get a list of NVRs this package produces. I.e. the list of NVRs as
+	 * contained in the filename of each binary RPM which gets produced by this
+	 * package (i.e. SRPM).
+	 * 
+	 * @return The list of N-V-Rs sorted in ascending order.
+	 */
+	public String[] getPackageNVRs();
 }
