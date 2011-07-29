@@ -29,7 +29,7 @@ public class FedoraPackagerPreferenceInitializer extends AbstractPreferenceIniti
 	@Override
 	public void initializeDefaultPreferences() {
 		// make sure fields get pre-filled.
-		IEclipsePreferences node = new DefaultScope().getNode(PackagerPlugin.PLUGIN_ID);
+		IEclipsePreferences node = DefaultScope.INSTANCE.getNode(PackagerPlugin.PLUGIN_ID);
 		// General
 		node.putBoolean(FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE, FedoraPackagerPreferencesConstants.DEFAULT_DEBUG_MODE);
 		// Lookaside prefs
