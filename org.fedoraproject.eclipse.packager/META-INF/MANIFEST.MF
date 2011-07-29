@@ -4,9 +4,6 @@ Bundle-Name: %BundleName
 Bundle-SymbolicName: org.fedoraproject.eclipse.packager;singleton:=true
 Bundle-Version: 0.2.0.qualifier
 Bundle-Activator: org.fedoraproject.eclipse.packager.PackagerPlugin
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime;bundle-version="3.3.0",
- org.eclipse.linuxtools.rpm.core
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.apache.commons.codec.digest,
@@ -22,13 +19,35 @@ Import-Package: org.apache.commons.codec.digest,
  org.apache.http.impl.client,
  org.apache.http.params,
  org.apache.http.util,
+ org.eclipse.core.commands,
  org.eclipse.core.resources,
+ org.eclipse.core.runtime;bundle-version="3.3.0",
+ org.eclipse.core.runtime.jobs,
+ org.eclipse.core.runtime.preferences;version="3.3.0",
+ org.eclipse.jface.dialogs,
+ org.eclipse.jface.layout,
+ org.eclipse.jface.preference,
+ org.eclipse.jface.resource,
  org.eclipse.jface.text,
+ org.eclipse.jface.util,
+ org.eclipse.jface.viewers,
+ org.eclipse.jface.window,
+ org.eclipse.linuxtools.rpm.core,
+ org.eclipse.linuxtools.rpm.core.utils,
  org.eclipse.linuxtools.rpm.ui.editor.parser,
+ org.eclipse.osgi.util;version="1.1.0",
+ org.eclipse.swt,
+ org.eclipse.swt.layout,
+ org.eclipse.swt.widgets,
  org.eclipse.ui,
  org.eclipse.ui.console,
  org.eclipse.ui.forms,
- org.eclipse.ui.forms.widgets
+ org.eclipse.ui.forms.widgets,
+ org.eclipse.ui.handlers,
+ org.eclipse.ui.part,
+ org.eclipse.ui.plugin,
+ org.osgi.framework;version="1.6.0",
+ org.osgi.service.prefs
 Bundle-Localization: OSGI-INF/l10n/plugin
 Export-Package: org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.api,
