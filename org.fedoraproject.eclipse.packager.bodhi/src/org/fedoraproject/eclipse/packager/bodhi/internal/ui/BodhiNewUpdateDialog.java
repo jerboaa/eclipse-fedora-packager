@@ -1,23 +1,27 @@
 package org.fedoraproject.eclipse.packager.bodhi.internal.ui;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseTrackListener;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.fedoraproject.eclipse.packager.bodhi.api.PushUpdateCommand;
 import org.fedoraproject.eclipse.packager.bodhi.api.PushUpdateCommand.RequestType;
 import org.fedoraproject.eclipse.packager.bodhi.api.PushUpdateCommand.UpdateType;
@@ -170,7 +174,8 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 	}
 	
 	private void setRequestType() {
-		this.requestTypeData = null;
+		this.requestTypeData = getRequestTypeMap().get(
+				comboRequest.getItem(comboRequest.getSelectionIndex()));
 	}
 	
 	/**
@@ -182,9 +187,33 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 	}
 	
 	private void setUpdateType() {
-		this.updateTypeData = null;
+		this.updateTypeData = getUpdateTypeMap().get(
+				comboType.getItem(comboType.getSelectionIndex()));
 	}
 	
+	/*
+	 * fixed set of update types
+	 */
+	private static Map<String, UpdateType> getUpdateTypeMap() {
+		Map<String, UpdateType> map = new HashMap<String, PushUpdateCommand.UpdateType>();
+		map.put("bugfix", UpdateType.BUGFIX); //$NON-NLS-1$
+		map.put("enhancement", UpdateType.ENHANCEMENT); //$NON-NLS-1$
+		map.put("security", UpdateType.SECURITY); //$NON-NLS-1$
+		map.put("newpackage", UpdateType.NEWPACKAGE); //$NON-NLS-1$
+		return map;
+	}
+	
+	/*
+	 * fixed set of request types
+	 */
+	private static Map<String, RequestType> getRequestTypeMap() {
+		Map<String, RequestType> map = new HashMap<String, PushUpdateCommand.RequestType>();
+		map.put("Stable", RequestType.STABLE); //$NON-NLS-1$
+		map.put("Testing", RequestType.TESTING); //$NON-NLS-1$
+		map.put("None", RequestType.NONE); //$NON-NLS-1$
+		return map;
+	}
+
 	/**
 	 * 
 	 * @return The entered stable karma threshold.
@@ -307,8 +336,34 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 		btnSuggestReboot.setText("Suggest Reboot");
 		
 		txtComment = new Text(valuesComposite, SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		txtComment.setToolTipText("Some details about this update that will appear in the notice. Example: This is an update that fixes problems with **connecting to a share**.The following things *break*:*Browsing with `gnome-app-install`*Emailing");
+		//txtComment.setToolTipText("Some details about this update that will appear in the notice. Example: This is an update that fixes problems with **connecting to a share**.The following things *break*:*Browsing with `gnome-app-install`*Emailing");
 		txtComment.setText(this.commentData);
+		final HtmlTooltip tooltip = new HtmlTooltip(
+				txtComment,
+				"<h3>Advisory Notes</h3>" +
+				"<p>Some details about this update that will appear in the notice.</p>" +
+				"<p><strong>Example:</strong><br/>This is an update that fixes problems with " +
+				"<strong>**connecting to a share**</strong>.</p>" +
+				"<p>The following things <em>*break*</em>:<p>" +
+				"<p>* Browsing with <code>`gnome-app-install`</code><br/>* Emailing</p>",
+				330, 270);
+		txtComment.addMouseTrackListener(new MouseTrackListener() {
+			
+			@Override
+			public void mouseHover(MouseEvent e) {
+				tooltip.show(new Point(e.x + 10, e.y + 10));
+			}
+			
+			@Override
+			public void mouseExit(MouseEvent e) {
+				// nothing
+			}
+			
+			@Override
+			public void mouseEnter(MouseEvent e) {
+				// nothing
+			}
+		});
 		txtComment.setBounds(10, 243, 439, 152);
 		formToolkit.adapt(txtComment, true, true);
 		
@@ -319,13 +374,21 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 		formToolkit.adapt(txtBugs, true, true);
 		
 		comboType = new Combo(valuesComposite, SWT.READ_ONLY);
-		comboType.setItems(new String[] {"bugfix", "enhancement", "security", "newpackage"});
+		String[] items = getUpdateTypeMap().keySet().toArray(new String[]{});
+		comboType.setItems(items);
+		// select bugfix
+		for (int i = 0; i < items.length; i++) {
+			if (items[i].equalsIgnoreCase("bugfix")) {
+				comboType.select(i);
+				break;
+			}
+		}
 		comboType.setBounds(9, 116, 196, 33);
 		formToolkit.adapt(comboType);
 		formToolkit.paintBordersFor(comboType);
 		
 		comboRequest = new Combo(valuesComposite, SWT.READ_ONLY);
-		comboRequest.setItems(new String[] {"Testing", "Stable", "None"});
+		comboRequest.setItems(getRequestTypeMap().keySet().toArray(new String[]{}));
 		comboRequest.setBounds(9, 155, 196, 33);
 		formToolkit.adapt(comboRequest);
 		formToolkit.paintBordersFor(comboRequest);
@@ -493,7 +556,10 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.fedoraproject.eclipse.packager.bodhi.internal.ui.AbstractBodhiDialog#validateForm()
+	 * 
+	 * @see
+	 * org.fedoraproject.eclipse.packager.bodhi.internal.ui.AbstractBodhiDialog
+	 * #validateForm()
 	 */
 	@Override
 	protected boolean validateForm() {
@@ -519,6 +585,16 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 			Integer.parseInt(txtUnstableKarmaThreshold.getText());
 		} catch (NumberFormatException e) {
 			setValidationError("Unstable karma threshold must be a number");
+			return false;
+		}
+		// requestType needs to be set
+		if (comboRequest.getSelectionIndex() < 0) {
+			setValidationError("Request type must be set");
+			return false;
+		}
+		// Update notice must not be empty
+		if (txtComment.getText().trim().equals("")) {
+			setValidationError("Update notes must not be empty");
 			return false;
 		}
 		// values seem to be good, set data fields

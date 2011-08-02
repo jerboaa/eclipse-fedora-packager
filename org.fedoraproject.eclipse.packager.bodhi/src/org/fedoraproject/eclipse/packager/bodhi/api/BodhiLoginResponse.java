@@ -50,5 +50,4 @@ public class BodhiLoginResponse {
 		return user;
 	}
 	
-	
 }

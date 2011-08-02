@@ -10,195 +10,225 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.bodhi.internal.handlers;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.window.Window;
-import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
+import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
+import org.fedoraproject.eclipse.packager.api.TagSourcesListener;
+import org.fedoraproject.eclipse.packager.api.UnpushedChangesListener;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
+import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiPlugin;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
 import org.fedoraproject.eclipse.packager.bodhi.api.BodhiClient;
-import org.fedoraproject.eclipse.packager.bodhi.api.IBodhiClient;
-import org.fedoraproject.eclipse.packager.bodhi.api.errors.BodhiClientInitException;
-import org.fedoraproject.eclipse.packager.bodhi.internal.ui.BodhiNewDialog;
+import org.fedoraproject.eclipse.packager.bodhi.api.PushUpdateCommand;
+import org.fedoraproject.eclipse.packager.bodhi.api.PushUpdateResult;
 import org.fedoraproject.eclipse.packager.bodhi.internal.ui.BodhiNewUpdateDialog;
 import org.fedoraproject.eclipse.packager.bodhi.internal.ui.BodhiUpdateInfoDialog;
 import org.fedoraproject.eclipse.packager.bodhi.internal.ui.UserValidationDialog;
+import org.fedoraproject.eclipse.packager.bodhi.internal.ui.UserValidationResponse;
+import org.fedoraproject.eclipse.packager.bodhi.internal.ui.ValidationJob;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
-import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
  * Handler for pushing Bodhi updates.
  */
-public class BodhiNewHandler extends AbstractHandler {
+public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 
-	protected BodhiNewUpdateDialog dialog;
-	protected UserValidationDialog authDialog;
-	protected IBodhiClient bodhi;
-	protected Shell shell;
+	private static final String BODHI_INSTANCE_URL_PROP = "org.fedoraproject.eclipse.packager.bodhi.instanceUrl";
+	private Shell shell;
+	private URL bodhiUrl;
+	private final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+	private String username;
+	private String password;
 	
 	@Override
-	public Object execute(final ExecutionEvent e) throws ExecutionException {
-		final IProjectRoot fedoraProjectRoot;
-		try {
-			IResource eventResource = FedoraHandlerUtils.getResource(e);
-			fedoraProjectRoot = FedoraPackagerUtils
-					.getProjectRoot(eventResource);
-		} catch (InvalidProjectRootException e1) {
-			// TODO Handle appropriately
-			e1.printStackTrace();
-			return null;
-		}
-		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
+	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		// Need to have shell variable on heap not on a thread's stack.
 		// Hence, the instance variable "shell".
-		shell = getShell(e);
+		shell = getShell(event);
+		// May set the bodhi URL via system property
+		bodhiUrl = getBodhiUrl();
+		final IProjectRoot fedoraProjectRoot;
+		try {
+			IResource eventResource = FedoraHandlerUtils.getResource(event);
+			fedoraProjectRoot = FedoraPackagerUtils
+					.getProjectRoot(eventResource);
+		} catch (InvalidProjectRootException e) {
+			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
+			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
+					FedoraPackagerText.invalidFedoraProjectRootError);
+			return null;
+		}
+		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
+		final PushUpdateCommand update;
+		try {
+			// Get DownloadSourceCommand from Fedora packager registry
+			update = (PushUpdateCommand) fp
+					.getCommandInstance(PushUpdateCommand.ID);
+		} catch (FedoraPackagerCommandNotFoundException e) {
+			logger.logError(e.getMessage(), e);
+			FedoraHandlerUtils.showErrorDialog(shell,
+					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
+			return null;
+		} catch (FedoraPackagerCommandInitializationException e) {
+			logger.logError(e.getMessage(), e);
+			FedoraHandlerUtils.showErrorDialog(shell,
+					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
+			return null;
+		}
+		// require valid credentials
+		UserValidationResponse validationResponse = null;
+		String validationErrorMsg = "";
+		UserValidationDialog userDialog = null;
+		do {
+			userDialog = getAuthDialog(validationErrorMsg);
+			int response = userDialog.open();
+			if (response != Window.OK) {
+				return Status.CANCEL_STATUS;
+			}
+			// validate log-in credentials this may take time so do it as a job
+			ValidationJob validationJob = new ValidationJob(
+					"Validating Bodhi credentials ...",
+					userDialog.getUsername(), userDialog.getPassword(),
+					bodhiUrl);
+			validationJob.setUser(true);
+			validationJob.schedule();
+			try {
+				validationJob.join();
+			} catch (InterruptedException e) {
+				return Status.CANCEL_STATUS;
+			}
+			validationResponse = validationJob.getValidationResponse();
+			if (!validationResponse.isValid()) {
+				validationErrorMsg = "Username/Password combination invalid";
+			}
+		} while (!validationResponse.isValid());
 		
+		username = validationResponse.getUsername();
+		password = validationResponse.getPassword();
+		// username password valid, store credentials if so desired
+		if (userDialog.getAllowCaching()) {
+			storeCredentials(username, password);
+		}
+		
+		// FIXME: Parsing changelog from spec-file seems to be broken
+		// This always returns "". See #49
+		final String clog = "";
+		final String bugIDs = findBug(clog);
+		final String[] builds = fedoraProjectRoot.getPackageNVRs();
+		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
+		
+		// open update dialog
+		final BodhiNewUpdateDialog updateDialog = new BodhiNewUpdateDialog(shell,
+				builds, bugIDs, clog);
+		int response = updateDialog.open();
+		if (response != Window.OK) {
+			return Status.CANCEL_STATUS;
+		}
+		// all data gathered, push update
 		Job job = new Job(BodhiText.BodhiNewHandler_jobName) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(BodhiText.BodhiNewHandler_createUpdateMsg, 
 						IProgressMonitor.UNKNOWN);
-				monitor.subTask(BodhiText.BodhiNewHandler_checkTagMsg);
 				try {
-					String tag = RPMUtils.makeTagName(fedoraProjectRoot);
-					String branchName = projectBits.getCurrentBranchName();
+					UnpushedChangesListener unpushedChangesListener = new UnpushedChangesListener(
+							fedoraProjectRoot, monitor);
+					// check for unpushed changes prior calling command
+					update.addCommandListener(unpushedChangesListener);
+					// tag sources if user wishes; TagSourcesListener takes care of this
+					TagSourcesListener tagSources = new TagSourcesListener(fedoraProjectRoot, monitor, shell);
+					update.addCommandListener(tagSources);
 
-					// ensure branch is tagged properly before proceeding
-					if (!projectBits.needsTag() || projectBits.isVcsTagged(fedoraProjectRoot, tag)) {
-						if (monitor.isCanceled()) {
-							throw new OperationCanceledException();
-						}
-						monitor.subTask(BodhiText.BodhiNewHandler_querySpecFileMsg);
-						// Parsing changelog from spec-file seems to be broken
-						// This always returns "". See #49
-						final String clog = "";
-						final String bugIDs = findBug(clog);
-						final String buildName = getBuildName(fedoraProjectRoot);
-						String release = getReleaseName(fedoraProjectRoot);
-
-						if (monitor.isCanceled()) {
-							throw new OperationCanceledException();
-						}
-						// if debugging, want to use stub
-//						setDialog(new BodhiNewUpdateDialog(shell, new String[] {buildName},
-//									bugIDs, clog));
-						Display.getDefault().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								new BodhiNewUpdateDialog(shell, new String[] {buildName},
-										bugIDs, clog).open();
-							}
-						});
-
-						//if (getDialog().getReturnCode() == Window.OK) {
-						if (true) {
-							String type = "";//getDialog().getType();
-							String request = ""; //getDialog().getRequest();
-							String bugs = "";//getDialog().getBugs();
-							String notes = "";//getDialog().getNotes();
-
-							String cachedUsername = retrievePreference("username"); //$NON-NLS-1$
-							String cachedPassword = null;
-							if (cachedUsername != null) {
-								cachedPassword = retrievePreference("password"); //$NON-NLS-1$
-							}
-							if (cachedPassword == null) {
-								cachedUsername = System.getProperty("user.name"); //$NON-NLS-1$
-								cachedPassword = ""; //$NON-NLS-1$
-							}
-
-							if (monitor.isCanceled()) {
-								throw new OperationCanceledException();
-							}
-							setAuthDialog(new UserValidationDialog(
-										shell, BodhiClient.BODHI_URL, cachedUsername,
-										cachedPassword,
-										BodhiText.BodhiNewHandler_updateLoginMsg,
-								"icons/bodhi-icon-48.png")); //$NON-NLS-1$
-							Display.getDefault().syncExec(new Runnable() {
-								@Override
-								public void run() {
-									getAuthDialog().open();
-								}
-							});
-							if (getAuthDialog().getReturnCode() != Window.OK) {
-								// Canceled
-								return Status.CANCEL_STATUS;
-							}
-
-							String username = getAuthDialog().getUsername();
-							String password = getAuthDialog().getPassword();
-
-							IStatus result = newUpdate(buildName, release,
-									type, request, bugs, notes, username,
-									password, monitor);
-
-
-							String message = result.getMessage();
-							String buildNameCandidate = "N/A";  //$NON-NLS-1$
-							for (IStatus child : result.getChildren()) {
-								// If successful we should have gotten the build name in
-								// response as part of child status messages
-								if (child.getMessage().equals(buildName)) {
-									buildNameCandidate = buildName;
-								} else {
-									message += "\n" + child.getMessage(); //$NON-NLS-1$
-								}
-							}
-							final String successMsg = message;
-							final String bodhiBuildName = buildNameCandidate;
-							// success
-							if (result.isOK()) {
-								// Show info about the update
-								PlatformUI.getWorkbench().getDisplay()
-										.asyncExec(new Runnable() {
-											@Override
-											public void run() {
-												BodhiUpdateInfoDialog infoDialog = new BodhiUpdateInfoDialog(shell, bodhiBuildName, successMsg);
-												infoDialog.open();
-											}
-										});
-
-								if (getAuthDialog().getAllowCaching()) {
-									storeCredentials(username, password);
-								}
-							} else {
-								return FedoraHandlerUtils.errorStatus(BodhiPlugin.PLUGIN_ID, message);
-							}
-							return result;
-						}
-						else {
-							return Status.CANCEL_STATUS;
-						}
+					final String release = projectBits.getCurrentBranchName().replace("-", "");
+					update.usernamePassword(username, password);
+					update.bugs(updateDialog.getBugs());
+					update.builds(updateDialog.getBuilds());
+					update.client(new BodhiClient(bodhiUrl));
+					update.closeBugsWhenStable(updateDialog.isCloseBugs());
+					update.comment(updateDialog.getComment());
+					update.enableAutoKarma(updateDialog.isKarmaAutomatismEnabled());
+					update.release(release);
+					update.requestType(updateDialog.getRequestType());
+					update.updateType(updateDialog.getUpdateType());
+					update.stableKarmaThreshold(updateDialog.getStableKarmaThreshold()).unstableKarmaThreshold(updateDialog.getUnstableKarmaThreshold());
+					PushUpdateResult updateResult = update.call(monitor);
+					if (updateResult.wasSuccessful()) {
+						final String bodhiBuildName = "";
+						final String successMsg = "";
+						PlatformUI.getWorkbench().getDisplay()
+								.asyncExec(new Runnable() {
+									@Override
+									public void run() {
+										BodhiUpdateInfoDialog infoDialog = new BodhiUpdateInfoDialog(
+												shell, bodhiBuildName,
+												successMsg);
+										infoDialog.open();
+									}
+								});
+						return Status.OK_STATUS;
 					} else {
-						return FedoraHandlerUtils.errorStatus(BodhiPlugin.PLUGIN_ID, NLS.bind(BodhiText.BodhiNewHandler_notCorrectTagFail, branchName, tag));
+						// show some error with details
+						return FedoraHandlerUtils.errorStatus(BodhiPlugin.PLUGIN_ID, "update failed");
 					}
-				} catch (CoreException e) {
+				} catch (Exception e) {
+					// TODO: handle exception
+					return null;
+				}
+			}
+		};
+		job.setUser(true);
+		job.schedule();
+		return null; // must be null
+
+
+//							String message = result.getMessage();
+//							String buildNameCandidate = "N/A";  //$NON-NLS-1$
+//							for (IStatus child : result.getChildren()) {
+//								// If successful we should have gotten the build name in
+//								// response as part of child status messages
+//								if (child.getMessage().equals(""/*buildName*/)) {
+//									buildNameCandidate = ""; //buildName;
+//								} else {
+//									message += "\n" + child.getMessage(); //$NON-NLS-1$
+//								}
+//							}
+//							final String successMsg = message;
+//							final String bodhiBuildName = buildNameCandidate;
+//							// success
+//							if (result.isOK()) {
+								// Show info about the update
+
+//								if (getAuthDialog().getAllowCaching()) {
+//									storeCredentials(username, password);
+//								}
+//							} else {
+//								return FedoraHandlerUtils.errorStatus(BodhiPlugin.PLUGIN_ID, message);
+//							}
+				 /*catch (CoreException e) {
 					e.printStackTrace();
 					return FedoraHandlerUtils.errorStatus(BodhiPlugin.PLUGIN_ID, e.getMessage());
 				} catch (IOException e) {
@@ -208,96 +238,58 @@ public class BodhiNewHandler extends AbstractHandler {
 				} catch (BodhiClientInitException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-				return null;
+				}*/
+	}
+
+
+	/*
+	 * Either uses a the system property "org.fedoraproject.eclipse.packager.bodhi.instanceUrl"
+	 * or the Fedora default.
+	 */
+	private URL getBodhiUrl() {
+		String bodhiTestInstanceURL = System.getProperty(BODHI_INSTANCE_URL_PROP);
+		URL url = null;
+		if (bodhiTestInstanceURL == null) {
+			try {
+				url = new URL(BodhiClient.BODHI_URL);
+			} catch (MalformedURLException ignored) {
+				// ignore, should not happen
 			}
-		};
-		job.setUser(true);
-		job.schedule();
-		return null;
-	}
-
-
-	/**
-	 * Get Bodhi release name of the current branch.
-	 * 
-	 * @param projectRoot
-	 * @return The release name.
-	 * @throws CoreException
-	 */
-	public String getReleaseName(IProjectRoot projectRoot) throws CoreException {
-		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(projectRoot);
-		return projectBits.getCurrentBranchName().replaceAll("-", "");
-	}
-
-	/**
-	 * Get Bodhi build name from spec file.
-	 * 
-	 * @param projectRoot
-	 * @return The build name as specified in the spec file.
-	 * @throws IOException
-	 */
-	public String getBuildName(IProjectRoot projectRoot) throws IOException {
-		return RPMUtils.rpmQuery(projectRoot, "NAME") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-		+ RPMUtils.rpmQuery(projectRoot, "VERSION") + "-" //$NON-NLS-1$ //$NON-NLS-2$
-		+ RPMUtils.rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$
-	}
-
-	/**
-	 * Get the Bodhi client.
-	 * 
-	 * @return The real bodhi client or a stubbed client
-	 *         depending if inTestingMode returns true or false.
-	 */
-	public IBodhiClient getBodhi() {
-		return bodhi;
-	}
-
-	/**
-	 * Set Bodhi client instance.
-	 * 
-	 * @param bodhi
-	 */
-	public void setBodhi(IBodhiClient bodhi) {
-		this.bodhi = bodhi;
+			return url;
+		} else {
+			try {
+				url = new URL(bodhiTestInstanceURL);
+			} catch (MalformedURLException e) {
+				logger.logError("Bodhi URL set via system URL invalid", e);
+			}
+		}
+		return url;
 	}
 
 	/**
 	 * Get user validation dialog.
+	 * @param errorMessage 
 	 * 
 	 * @return The user validation dialog.
 	 */
-	public UserValidationDialog getAuthDialog() {
-		return authDialog;
+	private UserValidationDialog getAuthDialog(String errorMessage) {
+		String cachedUsername = retrievePreference("username"); //$NON-NLS-1$
+		String cachedPassword = null;
+		if (cachedUsername != null) {
+			cachedPassword = retrievePreference("password"); //$NON-NLS-1$
+		}
+		if (cachedPassword == null) {
+			cachedUsername = System.getProperty("user.name"); //$NON-NLS-1$
+			cachedPassword = ""; //$NON-NLS-1$
+		}
+		return new UserValidationDialog(shell, bodhiUrl, cachedUsername,
+				cachedPassword, BodhiText.BodhiNewHandler_updateLoginMsg,
+				"icons/bodhi-icon-48.png", errorMessage);
 	}
 
-	/**
-	 * Set user validation dialog.
-	 * 
-	 * @param authDialog
+	/*
+	 * Store credentials is secure storage
 	 */
-	public void setAuthDialog(UserValidationDialog authDialog) {
-		this.authDialog = authDialog;
-	}
-
-	/**
-	 * Get the Bodhi UI dialog for pushing updates.
-	 *  
-	 * @return The UI dialog.
-	 */
-	public BodhiNewUpdateDialog getDialog() {
-		return dialog;
-	}
-
-	/**
-	 * Set the Bodhi UI dialog.
-	 * 
-	 * @param dialog
-	 */
-	public void setDialog(BodhiNewUpdateDialog dialog) {
-		this.dialog = dialog;
-	}
-
 	private void storeCredentials(String username, String password) {
 		ISecurePreferences node = getBodhiNode();
 		if (node != null) {
@@ -327,108 +319,7 @@ public class BodhiNewHandler extends AbstractHandler {
 		return null;
 	}
 
-	/**
-	 * FIXME: Passing things around wrapped in an IStatus seems pretty convoluted.
-	 * There's got to be a better way of doing this.
-	 * 
-	 * @param buildName
-	 * @param release
-	 * @param type
-	 * @param request
-	 * @param bugs
-	 * @param notes
-	 * @param username
-	 * @param password
-	 * @param monitor
-	 * @return
-	 * @throws BodhiClientInitException 
-	 */
-	protected IStatus newUpdate(String buildName, String release, String type,
-			String request, String bugs, String notes, String username,
-			String password, IProgressMonitor monitor) throws BodhiClientInitException {
-		IStatus status = null;
-
-//		try {
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			monitor.subTask(BodhiText.BodhiNewHandler_connectToBodhi);
-			URL defaultBodhiURL = null;
-			try {
-				defaultBodhiURL = new URL(BodhiClient.BODHI_URL);
-			} catch (MalformedURLException e) {
-				// ignore
-			}
-			setBodhi(new BodhiClient(defaultBodhiURL));
-			
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			// Login
-			monitor.subTask(BodhiText.BodhiNewHandler_loginBodhi);
-//			JSONObject result = getBodhi().login(username, password);
-//			if (result.has("message")) { //$NON-NLS-1$
-//				throw new IOException(result.getString("message")); //$NON-NLS-1$
-//			}
-//
-//			if (monitor.isCanceled()) {
-//				throw new OperationCanceledException();
-//			}
-//			// create new update
-//			monitor.subTask(BodhiText.BodhiNewHandler_sendNewUpdate);
-//			result = getBodhi().createNewUpdate(buildName, release, type, request, bugs,
-//					notes, result.getString("_csrf_token"));
-//			// Note bodhi's "tg_flash" appears to be the Turbo Gears flash message
-//			// which shows up in the Web interface indicating something happened
-//			String bodhiRespStatus = "";
-//			if (result.has("tg_flash")) {
-//				bodhiRespStatus = result.getString("tg_flash");
-//			}
-//			status = new MultiStatus(BodhiPlugin.PLUGIN_ID, IStatus.OK,
-//					bodhiRespStatus, null);
-//			/* 
-//			 * Luke Macken <lmacken@redhat.com> as to what the "save" JSON method
-//			 * call returns:
-//			 *  
-//			 * The save method will return a dictionary of updates that were
-//			 * created with the update.  So, you could also grab the update title
-//			 * (which is just a comma-delimeted list of n-v-r's) via 
-//			 * result['updates'][0]['title'], or something of the sort.
-//			 */
-//			// If we've got "updates" in the response we should be OK for extracting
-//			// the update title.
-//			if (result.has("updates")) { //$NON-NLS-1$
-//				JSONArray updates = result.getJSONArray("updates");
-//				if (updates.length() > 0) {
-//					JSONObject update = updates.getJSONObject(0);
-//					if (update.has("title")) {
-//						((MultiStatus) status).add(new Status(IStatus.OK,
-//								BodhiPlugin.PLUGIN_ID, update.getString("title"))); //$NON-NLS-1$
-//					}
-//				}
-//			}
-//			
-//			// Logout
-//			monitor.subTask(BodhiText.BodhiNewHandler_logoutMsg);
-//			getBodhi().logout();
-//		} catch (GeneralSecurityException e) {
-//			e.printStackTrace();
-//			status = FedoraHandlerUtils.handleError(e.getMessage());
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			status = FedoraHandlerUtils.handleError(e.getMessage());
-//		} catch (ParseException e) {
-//			e.printStackTrace();
-//			status = FedoraHandlerUtils.handleError(e.getMessage());
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//			status = FedoraHandlerUtils.handleError(e.getMessage());
-//		}
-
-		return status;
-	}
-
-	/**
+	/*
 	 * Parse bugs listed in a changelog string
 	 * 
 	 * @param clog
@@ -454,15 +345,6 @@ public class BodhiNewHandler extends AbstractHandler {
 		} catch (IllegalArgumentException e) {
 			return null; // invalid path
 		}
-	}
-	
-	/**
-	 * @param event
-	 * @return the shell
-	 * @throws ExecutionException
-	 */
-	private Shell getShell(ExecutionEvent event) throws ExecutionException {
-		return HandlerUtil.getActiveShellChecked(event);
 	}
 
 }

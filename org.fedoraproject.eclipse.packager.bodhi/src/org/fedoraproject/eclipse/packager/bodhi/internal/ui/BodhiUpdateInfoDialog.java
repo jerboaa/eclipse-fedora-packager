@@ -31,8 +31,8 @@ import org.fedoraproject.eclipse.packager.bodhi.BodhiPlugin;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
 
 /**
- * Message dialog showing the link to the koji page showing build info
- *
+ * Message dialog showing the link to the bodhi Web page showing update info
+ * 
  */
 public class BodhiUpdateInfoDialog extends MessageDialog {
 	
