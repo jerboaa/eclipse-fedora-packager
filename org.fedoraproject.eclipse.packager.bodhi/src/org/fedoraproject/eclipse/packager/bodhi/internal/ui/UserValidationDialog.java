@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.bodhi.internal.ui;
 
+import java.net.URL;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TrayDialog;
@@ -17,12 +19,14 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -30,7 +34,7 @@ import org.fedoraproject.eclipse.packager.bodhi.BodhiPlugin;
 import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
 
 /**
- * A dialog for prompting for a user name and password
+ * A dialog for user name and password prompting.
  */
 public class UserValidationDialog extends TrayDialog {
 	// widgets
@@ -38,7 +42,7 @@ public class UserValidationDialog extends TrayDialog {
 	protected Text passwordField;
 	protected Button allowCachingButton;
 
-	protected String domain;
+	protected URL bodhiInstanceUrl;
 	protected String defaultUsername;
 	protected String defaultPassword;
 	protected String password = null;
@@ -51,15 +55,16 @@ public class UserValidationDialog extends TrayDialog {
 	protected String message = null;
 	boolean cachingCheckbox = true;
 	protected String pathToImage;
+	protected String errorMessage;
 
 	/**
 	 * Creates a new UserValidationDialog.
 	 * 
 	 * @param parentShell
 	 *            The parent shell
-	 * @param location
-	 *            The location
-	 * @param defaultName
+	 * @param bodhiInstanceUrl
+	 *            The URL to the bodhi hinstance
+	 * @param defaultUserName
 	 *            The default user name
 	 * @param defaultPassword
 	 *            The default password. 
@@ -67,12 +72,13 @@ public class UserValidationDialog extends TrayDialog {
 	 *            A message to display to the user.
 	 * @param pathToImage 
 	 * 	          Path to image icon.
+	 * @param errorMessage An error message to be shown to the user.
 	 */
-	public UserValidationDialog(Shell parentShell, String location,
-			String defaultName, String defaultPassword, String message,
-			String pathToImage) {
-		this(parentShell, location, defaultName, defaultPassword, message,
-				pathToImage, true);
+	public UserValidationDialog(Shell parentShell, URL bodhiInstanceUrl,
+			String defaultUserName, String defaultPassword, String message,
+			String pathToImage, String errorMessage) {
+		this(parentShell, bodhiInstanceUrl, defaultUserName, defaultPassword, message,
+				pathToImage, errorMessage, true);
 	}
 
 	/**
@@ -80,8 +86,8 @@ public class UserValidationDialog extends TrayDialog {
 	 * 
 	 * @param parentShell
 	 *            the parent shell
-	 * @param location
-	 *            the location
+	 * @param bodhiInstanceURL
+	 *            the URL to the bodhi instance
 	 * @param defaultName
 	 *            the default user name
 	 * @param defaultPassword
@@ -89,21 +95,23 @@ public class UserValidationDialog extends TrayDialog {
 	 *            a message to display to the user
 	 * @param pathToImage
 	 *            Path to the image icon.
+	 * @param errorMessage An error message to be shown to the user.
 	 * @param cachingCheckbox
 	 *            a flag to show the allowCachingButton
 	 */
-	public UserValidationDialog(Shell parentShell, String location,
+	public UserValidationDialog(Shell parentShell, URL bodhiInstanceURL,
 			String defaultName, String defaultPassword, String message,
-			String pathToImage, boolean cachingCheckbox) {
+			String pathToImage, String errorMessage, boolean cachingCheckbox) {
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		setHelpAvailable(false);
 		this.defaultUsername = defaultName;
 		this.defaultPassword = defaultPassword;
-		this.domain = location;
+		this.bodhiInstanceUrl = bodhiInstanceURL;
 		this.message = message;
 		this.cachingCheckbox = cachingCheckbox;
 		this.pathToImage = pathToImage;
+		this.errorMessage = errorMessage;
 	}
 
 	/**
@@ -170,6 +178,14 @@ public class UserValidationDialog extends TrayDialog {
 				| GridData.GRAB_HORIZONTAL);
 		imageLabel.setLayoutData(data);
 
+		Label lblErrorMessage = new Label(main, SWT.WRAP);
+		lblErrorMessage.setText(errorMessage);
+		lblErrorMessage.setForeground(getColor(SWT.COLOR_RED));
+		data = new GridData(GridData.FILL_HORIZONTAL
+				| GridData.GRAB_HORIZONTAL);
+		data.horizontalSpan = 3;
+		data.widthHint = 300;
+		lblErrorMessage.setLayoutData(data);
 		if (message != null) {
 			Label messageLabel = new Label(main, SWT.WRAP);
 			messageLabel.setText(message);
@@ -179,17 +195,13 @@ public class UserValidationDialog extends TrayDialog {
 			data.widthHint = 300;
 			messageLabel.setLayoutData(data);
 		}
-		if (domain != null) {
+		if (bodhiInstanceUrl != null) {
 			Label d = new Label(main, SWT.WRAP);
 			d.setText(BodhiText.userValidationDialog_server);
 			data = new GridData();
 			d.setLayoutData(data);
 			Label label = new Label(main, SWT.WRAP);
-			if (isUsernameMutable) {
-				label.setText(domain);
-			} else {
-				label.setText(domain);
-			}
+			label.setText(bodhiInstanceUrl.toString());
 			data = new GridData(GridData.FILL_HORIZONTAL
 					| GridData.GRAB_HORIZONTAL);
 			data.horizontalSpan = 2;
@@ -199,7 +211,7 @@ public class UserValidationDialog extends TrayDialog {
 		createUsernameFields(main);
 		createPasswordFields(main);
 
-		if (cachingCheckbox && domain != null) {
+		if (cachingCheckbox && bodhiInstanceUrl != null) {
 			allowCachingButton = new Button(main, SWT.CHECK);
 			allowCachingButton
 					.setText(BodhiText.userValidationDialog_savePassword);
@@ -252,22 +264,28 @@ public class UserValidationDialog extends TrayDialog {
 		usernameField.setLayoutData(data);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.fedoraproject.eclipse.packager.IUserValidationDialog#getPassword()
+	/**
+	 * Get the password, which was entered.
+	 * 
+	 * @return The password.
 	 */
 	public String getPassword() {
 		return password;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.fedoraproject.eclipse.packager.IUserValidationDialog#getUsername()
+	/**
+	 * Get the entered username.
+	 * 
+	 * @return The username.
 	 */
 	public String getUsername() {
 		return username;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.fedoraproject.eclipse.packager.IUserValidationDialog#getAllowCaching()
+	/**
+	 * Get the user selection for password caching.
+	 * 
+	 * @return {@code true} if caching is desired. {@code false} otherwise.
 	 */
 	public boolean getAllowCaching() {
 		return allowCaching;
@@ -311,5 +329,10 @@ public class UserValidationDialog extends TrayDialog {
 			keyLockImage.dispose();
 		}
 		return super.close();
+	}
+	
+	protected Color getColor(int systemColorID) {
+		Display display = Display.getCurrent();
+		return display.getSystemColor(systemColorID);
 	}
 }
