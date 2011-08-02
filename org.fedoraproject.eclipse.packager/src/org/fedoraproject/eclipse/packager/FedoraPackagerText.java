@@ -57,7 +57,12 @@ public class FedoraPackagerText extends NLS {
 	// FedoraPackagerUtils
 	/****/ public static String FedoraPackagerUtils_invalidProjectRootError;
 	/****/ public static String FedoraPackagerUtils_projectRootClassNameMsg;
-
+	// UnpushedChangesListener
+	/****/ public static String UnpushedChangesListener_checkUnpushedChangesMsg;
+	/****/ public static String UnpushedChangesListener_unpushedChangesError;
+	// TagSourcesListener
+	/****/ public static String TagSourcesListener_tagBeforeSendingBuild;
+	/****/ public static String TagSourcesListener_tagSourcesMsg;
 	// ChecksumValidListener
 	/****/ public static String ChecksumValidListener_badChecksum;
 	// VCSIgnoreFileUpdater

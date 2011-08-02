@@ -1,6 +1,5 @@
-package org.fedoraproject.eclipse.packager.koji.api.errors;
+package org.fedoraproject.eclipse.packager.api.errors;
 
-import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 
 /**
  * Thrown if a build has been attempted to be pushed to Koji, but there have

@@ -1,6 +1,5 @@
-package org.fedoraproject.eclipse.packager.koji.api.errors;
+package org.fedoraproject.eclipse.packager.api.errors;
 
-import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerAPIException;
 
 /**
  * Thrown if CVS tagging of sources failed.

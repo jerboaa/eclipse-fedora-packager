@@ -42,11 +42,15 @@ import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
+import org.fedoraproject.eclipse.packager.api.TagSourcesListener;
+import org.fedoraproject.eclipse.packager.api.UnpushedChangesListener;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
+import org.fedoraproject.eclipse.packager.api.errors.TagSourcesException;
+import org.fedoraproject.eclipse.packager.api.errors.UnpushedChangesException;
 import org.fedoraproject.eclipse.packager.koji.KojiMessageDialog;
 import org.fedoraproject.eclipse.packager.koji.KojiPlugin;
 import org.fedoraproject.eclipse.packager.koji.KojiText;
@@ -55,13 +59,9 @@ import org.fedoraproject.eclipse.packager.koji.api.BuildResult;
 import org.fedoraproject.eclipse.packager.koji.api.IKojiHubClient;
 import org.fedoraproject.eclipse.packager.koji.api.KojiBuildCommand;
 import org.fedoraproject.eclipse.packager.koji.api.KojiSSLHubClient;
-import org.fedoraproject.eclipse.packager.koji.api.TagSourcesListener;
-import org.fedoraproject.eclipse.packager.koji.api.UnpushedChangesListener;
 import org.fedoraproject.eclipse.packager.koji.api.errors.BuildAlreadyExistsException;
 import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientException;
 import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientLoginException;
-import org.fedoraproject.eclipse.packager.koji.api.errors.TagSourcesException;
-import org.fedoraproject.eclipse.packager.koji.api.errors.UnpushedChangesException;
 
 /**
  * Handler to kick off a remote Koji build.

@@ -1,18 +1,17 @@
-package org.fedoraproject.eclipse.packager.koji.api;
+package org.fedoraproject.eclipse.packager.api;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.api.ICommandListener;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
-import org.fedoraproject.eclipse.packager.koji.KojiText;
-import org.fedoraproject.eclipse.packager.koji.api.errors.UnpushedChangesException;
+import org.fedoraproject.eclipse.packager.api.errors.UnpushedChangesException;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
  * A listener which checks if there have been unpushed changes on the current
- * branch. This is useful to check prior pushing a build to Koji.
+ * branch. This is useful to check prior pushing a build to Koji or an update to Bodhi.
  */
 public class UnpushedChangesListener implements ICommandListener {
 
@@ -23,7 +22,7 @@ public class UnpushedChangesListener implements ICommandListener {
 	private IProgressMonitor mainMonitor;
 	
 	/**
-	 * Create a MD5Sum checker
+	 * Create an unpushed changes checker
 	 * 
 	 * @param root The Fedora project root.
 	 * @param monitor The main monitor to create a submonitor from.
@@ -41,11 +40,11 @@ public class UnpushedChangesListener implements ICommandListener {
 	public void preExecution() throws CommandListenerException {
 		// indicate some progress, by creating a subtask
 		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		logger.logInfo(KojiText.UnpushedChangesListener_checkUnpushedChangesMsg);
-		mainMonitor.subTask(KojiText.UnpushedChangesListener_checkUnpushedChangesMsg);
+		logger.logInfo(FedoraPackagerText.UnpushedChangesListener_checkUnpushedChangesMsg);
+		mainMonitor.subTask(FedoraPackagerText.UnpushedChangesListener_checkUnpushedChangesMsg);
 		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(projectRoot);
 		if (projectBits.hasLocalChanges(projectRoot)) {
-			throw new CommandListenerException(new UnpushedChangesException(KojiText.UnpushedChangesListener_unpushedChangesError));
+			throw new CommandListenerException(new UnpushedChangesException(FedoraPackagerText.UnpushedChangesListener_unpushedChangesError));
 		}
 		mainMonitor.worked(15);
 	}
