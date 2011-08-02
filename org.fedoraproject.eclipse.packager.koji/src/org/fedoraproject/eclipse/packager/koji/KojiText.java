@@ -28,7 +28,6 @@ public class KojiText extends NLS {
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.koji.kojitext"; //$NON-NLS-1$
 	
 	// KojiBuildHandler Strings
-	/****/ public static String KojiBuildHandler_tagBeforeSendingBuild;
 	/****/ public static String KojiBuildHandler_pushBuildToKoji;
 	/****/ public static String KojiBuildHandler_kojiBuild;
 	/****/ public static String KojiBuildHandler_unknownBuildError;
@@ -40,11 +39,6 @@ public class KojiText extends NLS {
 	// KojiMessageDialog Strings
 	/****/ public static String KojiMessageDialog_buildNumberMsg;
 	/****/ public static String KojiMessageDialog_buildResponseMsg;
-	// UnpushedChangesListener
-	/****/ public static String UnpushedChangesListener_checkUnpushedChangesMsg;
-	/****/ public static String UnpushedChangesListener_unpushedChangesError;
-	// TagSourcesListener
-	/****/ public static String TagSourcesListener_tagSourcesMsg;
 	// KojiBuildCommand
 	/****/ public static String KojiBuildCommand_sendBuildCmd;
 	/****/ public static String KojiBuildCommand_kojiLogoutTask;

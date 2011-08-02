@@ -33,8 +33,6 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
-import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
-import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.koji.KojiMessageDialog;
@@ -43,6 +41,8 @@ import org.fedoraproject.eclipse.packager.koji.KojiText;
 import org.fedoraproject.eclipse.packager.koji.KojiUrlUtils;
 import org.fedoraproject.eclipse.packager.koji.api.BuildResult;
 import org.fedoraproject.eclipse.packager.koji.api.KojiBuildJob;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
+import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
  * Handler to kick off a remote Koji build.
