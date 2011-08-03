@@ -44,7 +44,6 @@ import org.fedoraproject.eclipse.packager.bodhi.api.PushUpdateCommand.UpdateType
  */
 public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 
-	protected int result;
 	private final FormToolkit formToolkit = new FormToolkit(Display.getDefault());
 	private Text txtComment;
 	private Text txtBugs;
