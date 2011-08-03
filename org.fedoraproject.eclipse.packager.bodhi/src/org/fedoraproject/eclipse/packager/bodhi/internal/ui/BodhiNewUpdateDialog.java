@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2010-2011 Red Hat Inc. and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat Inc. - initial API and implementation
+ *******************************************************************************/
 package org.fedoraproject.eclipse.packager.bodhi.internal.ui;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +32,7 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
 import org.fedoraproject.eclipse.packager.bodhi.api.PushUpdateCommand;
 import org.fedoraproject.eclipse.packager.bodhi.api.PushUpdateCommand.RequestType;
 import org.fedoraproject.eclipse.packager.bodhi.api.PushUpdateCommand.UpdateType;
@@ -67,7 +78,7 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 	 */
 	public BodhiNewUpdateDialog(Shell parent, String[] builds, String bugs, String comment) {
 		super(parent, SWT.MODELESS);
-		setText("Create New Bodhi Update");
+		setText(BodhiText.BodhiNewUpdateDialog_createNewUpdateTitle);
 		this.buildsData = builds;
 		this.bugsData = bugs;
 		this.commentData = comment;
@@ -250,7 +261,7 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 	private void createContents() {
 		shell = new Shell(getParent(), SWT.DIALOG_TRIM);
 		shell.setSize(686, 655);
-		shell.setText("Create Bew Bodhi Update");
+		shell.setText(BodhiText.BodhiNewUpdateDialog_createNewUpdateTitle);
 		shell.setLayout(null);
 		
 		ScrolledComposite scrolledComposite = new ScrolledComposite(shell, SWT.H_SCROLL | SWT.V_SCROLL);
@@ -277,42 +288,42 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 		lblPackage.setBounds(131, 40, 70, 21);
 		lblPackage.setBackground(getColor(SWT.COLOR_WHITE));
 		formToolkit.adapt(lblPackage, true, true);
-		lblPackage.setText("Package");
+		lblPackage.setText(BodhiText.BodhiNewUpdateDialog_packageLbl);
 		
 		Label lblType = new Label(labelComposite, SWT.RIGHT);
 		lblType.setBounds(131, 122, 70, 21);
 		lblType.setBackground(getColor(SWT.COLOR_WHITE));
 		formToolkit.adapt(lblType, true, true);
-		lblType.setText("Type");
+		lblType.setText(BodhiText.BodhiNewUpdateDialog_typeLbl);
 		
 		Label lblRequest = new Label(labelComposite, SWT.RIGHT);
 		lblRequest.setBounds(131, 159, 70, 21);
 		lblRequest.setBackground(getColor(SWT.COLOR_WHITE));
 		formToolkit.adapt(lblRequest, true, true);
-		lblRequest.setText("Request");
+		lblRequest.setText(BodhiText.BodhiNewUpdateDialog_requestTypeLbl);
 		
 		Label lblBugs = new Label(labelComposite, SWT.RIGHT);
 		lblBugs.setBounds(131, 199, 70, 21);
 		lblBugs.setBackground(getColor(SWT.COLOR_WHITE));
 		formToolkit.adapt(lblBugs, true, true);
-		lblBugs.setText("Bugs");
+		lblBugs.setText(BodhiText.BodhiNewUpdateDialog_bugsLbl);
 		
 		Label lblNotes = new Label(labelComposite, SWT.SHADOW_NONE | SWT.RIGHT);
 		lblNotes.setBounds(131, 243, 70, 21);
 		lblNotes.setBackground(getColor(SWT.COLOR_WHITE));
 		formToolkit.adapt(lblNotes, true, true);
-		lblNotes.setText("Notes");
+		lblNotes.setText(BodhiText.BodhiNewUpdateDialog_notesLbl);
 		
 		Label lblStableKarma = new Label(labelComposite, SWT.WRAP | SWT.RIGHT);
 		lblStableKarma.setBackground(getColor(SWT.COLOR_WHITE));
 		lblStableKarma.setBounds(57, 462, 149, 44);
 		formToolkit.adapt(lblStableKarma, true, true);
-		lblStableKarma.setText("Threshold for pushing to stable");
+		lblStableKarma.setText(BodhiText.BodhiNewUpdateDialog_stableKarmaThresholdLbl);
 		
 		Label lblUnstableKarma = new Label(labelComposite, SWT.WRAP | SWT.RIGHT);
 		lblUnstableKarma.setBounds(113, 513, 93, 41);
 		formToolkit.adapt(lblUnstableKarma, true, true);
-		lblUnstableKarma.setText("Threshold for unpushing");
+		lblUnstableKarma.setText(BodhiText.BodhiNewUpdateDialog_unstableKarmaThresholdLbl);
 		
 		Composite valuesComposite = new Composite(composite, SWT.NONE);
 		valuesComposite.setBackground(getColor(SWT.COLOR_WHITE));
@@ -322,30 +333,24 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 		valuesComposite.setLayout(null);
 		
 		btnEnableKarmaAutomatism = new Button(valuesComposite, SWT.CHECK);
-		btnEnableKarmaAutomatism.setToolTipText("Enable update request automation based on user feedback");
+		btnEnableKarmaAutomatism.setToolTipText(BodhiText.BodhiNewUpdateDialog_enableKarmaAutomatismTooltip);
 		btnEnableKarmaAutomatism.setSelection(PushUpdateCommand.DEFAULT_KARMA_AUTOMATISM);
 		btnEnableKarmaAutomatism.setBounds(7, 432, 196, 25);
 		formToolkit.adapt(btnEnableKarmaAutomatism, true, true);
-		btnEnableKarmaAutomatism.setText("Enable Karma Automatism");
+		btnEnableKarmaAutomatism.setText(BodhiText.BodhiNewUpdateDialog_enableKarmaAutomatismLbl);
 		
 		btnSuggestReboot = new Button(valuesComposite, SWT.CHECK);
-		btnSuggestReboot.setToolTipText("Recommend that the user restarts the machine after installing this update");
+		btnSuggestReboot.setToolTipText(BodhiText.BodhiNewUpdateDialog_suggestRebootTooltip);
 		btnSuggestReboot.setBounds(7, 403, 166, 25);
 		btnSuggestReboot.setSelection(PushUpdateCommand.DEFAULT_SUGGEST_REBOOT);
 		formToolkit.adapt(btnSuggestReboot, true, true);
-		btnSuggestReboot.setText("Suggest Reboot");
+		btnSuggestReboot.setText(BodhiText.BodhiNewUpdateDialog_suggestRebootLbl);
 		
 		txtComment = new Text(valuesComposite, SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
-		//txtComment.setToolTipText("Some details about this update that will appear in the notice. Example: This is an update that fixes problems with **connecting to a share**.The following things *break*:*Browsing with `gnome-app-install`*Emailing");
 		txtComment.setText(this.commentData);
 		final HtmlTooltip tooltip = new HtmlTooltip(
 				txtComment,
-				"<h3>Advisory Notes</h3>" +
-				"<p>Some details about this update that will appear in the notice.</p>" +
-				"<p><strong>Example:</strong><br/>This is an update that fixes problems with " +
-				"<strong>**connecting to a share**</strong>.</p>" +
-				"<p>The following things <em>*break*</em>:<p>" +
-				"<p>* Browsing with <code>`gnome-app-install`</code><br/>* Emailing</p>",
+				BodhiText.BodhiNewUpdateDialog_notesHtmlTooltipTxt,
 				330, 270);
 		txtComment.addMouseTrackListener(new MouseTrackListener() {
 			
@@ -368,7 +373,7 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 		formToolkit.adapt(txtComment, true, true);
 		
 		txtBugs = new Text(valuesComposite, SWT.NONE);
-		txtBugs.setToolTipText("A comma or space separated list of bugs or aliases. For example: #1234, 789 CVE-2008-0001");
+		txtBugs.setToolTipText(BodhiText.BodhiNewUpdateDialog_bugsTooltip);
 		txtBugs.setText(this.bugsData);
 		txtBugs.setBounds(10, 197, 193, 31);
 		formToolkit.adapt(txtBugs, true, true);
@@ -378,7 +383,7 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 		comboType.setItems(items);
 		// select bugfix
 		for (int i = 0; i < items.length; i++) {
-			if (items[i].equalsIgnoreCase("bugfix")) {
+			if (items[i].equalsIgnoreCase("bugfix")) { //$NON-NLS-1$
 				comboType.select(i);
 				break;
 			}
@@ -394,19 +399,19 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 		formToolkit.paintBordersFor(comboRequest);
 		
 		txtStableKarmaThreshold = new Text(valuesComposite, SWT.NONE);
-		txtStableKarmaThreshold.setToolTipText("The threshold for automatically pushing this update to stable");
+		txtStableKarmaThreshold.setToolTipText(BodhiText.BodhiNewUpdateDialog_stableKarmaTooltip);
 		txtStableKarmaThreshold.setText(String.valueOf(PushUpdateCommand.DEFAULT_STABLE_KARMA_THRESHOLD));
 		txtStableKarmaThreshold.setBounds(10, 470, 40, 31);
 		formToolkit.adapt(txtStableKarmaThreshold, true, true);
 		
 		txtUnstableKarmaThreshold = new Text(valuesComposite, SWT.NONE);
-		txtUnstableKarmaThreshold.setToolTipText("The threshold for automatically unpushing an unstable update ");
+		txtUnstableKarmaThreshold.setToolTipText(BodhiText.BodhiNewUpdateDialog_unstableKarmaTooltip);
 		txtUnstableKarmaThreshold.setText(String.valueOf(PushUpdateCommand.DEFAULT_UNSTABLE_KARMA_THRESHOLD));
 		txtUnstableKarmaThreshold.setBounds(10, 522, 40, 31);
 		formToolkit.adapt(txtUnstableKarmaThreshold, true, true);
 		
 		listBuilds = new List(valuesComposite, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
-		listBuilds.setToolTipText("Select the list of builds you'd like to push as an update. Use CTRL+Click to select multiple builds.");
+		listBuilds.setToolTipText(BodhiText.BodhiNewUpdateDialog_buildsTooltip);
 		listBuilds.setItems(this.buildsData);
 		listBuilds.setBounds(10, 40, 439, 70);
 		formToolkit.adapt(listBuilds, true, true);
@@ -449,17 +454,17 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 				// nothing
 			}
 		});
-		btnAddBuild.setToolTipText("Add another build to the list of builds above.");
+		btnAddBuild.setToolTipText(BodhiText.BodhiNewUpdateDialog_addBuildsBtnTooltip);
 		btnAddBuild.setBounds(375, 116, 74, 33);
 		formToolkit.adapt(btnAddBuild, true, true);
-		btnAddBuild.setText("Add Build");
+		btnAddBuild.setText(BodhiText.BodhiNewUpdateDialog_addBuildsBtn);
 		
 		btnCloseBugs = new Button(valuesComposite, SWT.CHECK);
-		btnCloseBugs.setToolTipText("Automatically close bugs when this update is pushed as stable");
+		btnCloseBugs.setToolTipText(BodhiText.BodhiNewUpdateDialog_closeBugsTooltip);
 		btnCloseBugs.setSelection(true);
 		btnCloseBugs.setBounds(209, 200, 242, 25);
 		formToolkit.adapt(btnCloseBugs, true, true);
-		btnCloseBugs.setText("Close bugs when update is stable");
+		btnCloseBugs.setText(BodhiText.BodhiNewUpdateDialog_closeBugsBtn);
 		
 		Button btnSaveUpdate = new Button(valuesComposite, SWT.NONE);
 		btnSaveUpdate.setBounds(9, 568, 94, 33);
@@ -499,7 +504,7 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 			}
 		});
 		formToolkit.adapt(btnSaveUpdate, true, true);
-		btnSaveUpdate.setText("Save Update");
+		btnSaveUpdate.setText(BodhiText.BodhiNewUpdateDialog_saveUpdateBtn);
 		
 		Button btnCancel = new Button(valuesComposite, SWT.NONE);
 		btnCancel.setBounds(109, 568, 64, 33);
@@ -536,7 +541,7 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 			}
 		});
 		formToolkit.adapt(btnCancel, true, true);
-		btnCancel.setText("Cancel");
+		btnCancel.setText(BodhiText.BodhiNewUpdateDialog_cancelUpdateBtn);
 		
 		lblError = new Label(valuesComposite, SWT.NONE);
 		lblError.setForeground(getColor(SWT.COLOR_RED));
@@ -566,35 +571,35 @@ public class BodhiNewUpdateDialog extends AbstractBodhiDialog {
 		String bugs = txtBugs.getText();
 		// need to have at least one build selected
 		if (listBuilds.getSelectionCount() == 0) {
-			setValidationError("At least one build needs to be selected");
+			setValidationError(BodhiText.BodhiNewUpdateDialog_buildsSelectionErrorMsg);
 			return false;
 		}
 		if (!bugs.equals("") && !bugs.matches("[0-9]+(,[0-9]+)*")) { //$NON-NLS-1$ //$NON-NLS-2$
-			setValidationError("Invalid bug list format");
+			setValidationError(BodhiText.BodhiNewUpdateDialog_invalidBugsErrorMsg);
 			return false;
 		}
 		// require stable karma to be a reasonable number
 		try {
 			Integer.parseInt(txtStableKarmaThreshold.getText());
 		} catch (NumberFormatException e) {
-			setValidationError("Stable karma threshold must be a number");
+			setValidationError(BodhiText.BodhiNewUpdateDialog_invalidStableKarmaErrorMsg);
 			return false;
 		}
 		// require unstable karma to be a reasonable number
 		try {
 			Integer.parseInt(txtUnstableKarmaThreshold.getText());
 		} catch (NumberFormatException e) {
-			setValidationError("Unstable karma threshold must be a number");
+			setValidationError(BodhiText.BodhiNewUpdateDialog_invalidUnstableKarmaMsg);
 			return false;
 		}
 		// requestType needs to be set
 		if (comboRequest.getSelectionIndex() < 0) {
-			setValidationError("Request type must be set");
+			setValidationError(BodhiText.BodhiNewUpdateDialog_invalidRequestTypeErrorMsg);
 			return false;
 		}
 		// Update notice must not be empty
-		if (txtComment.getText().trim().equals("")) {
-			setValidationError("Update notes must not be empty");
+		if (txtComment.getText().trim().equals("")) { //$NON-NLS-1$
+			setValidationError(BodhiText.BodhiNewUpdateDialog_invalidNotesErrorMsg);
 			return false;
 		}
 		// values seem to be good, set data fields

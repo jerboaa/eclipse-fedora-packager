@@ -116,6 +116,7 @@ public class PushUpdateCommandTest {
 		assertNotNull(result.getUpdateResponse());
 		assertTrue(result.wasSuccessful());
 		assertEquals("ed", result.getUpdateResponse().getUpdates()[0].getBuilds()[0].getPkg().getName());
+		assertEquals(PACKAGE_UPDATE_NVR, result.getUpdateName());
 	}
 
 }
