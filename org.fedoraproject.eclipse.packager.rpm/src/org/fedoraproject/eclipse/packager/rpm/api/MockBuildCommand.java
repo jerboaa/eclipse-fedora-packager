@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.rpm.api;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,14 +18,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -47,44 +47,48 @@ import org.fedoraproject.eclipse.packager.rpm.api.errors.UserNotInMockGroupExcep
 import org.fedoraproject.eclipse.packager.rpm.internal.core.ConsoleWriter;
 import org.fedoraproject.eclipse.packager.rpm.internal.core.MockBuildCommandSuccessObserver;
 import org.fedoraproject.eclipse.packager.rpm.internal.core.MockBuildStatusObserver;
+import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
- * Command for building a package in a chroot'ed environment
- * using {@code mock}.
- *
+ * Command for building a package in a chroot'ed environment using {@code mock}.
+ * 
  */
 public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 
 	/**
-	 *  The unique ID of this command.
+	 * The unique ID of this command.
 	 */
 	public static final String ID = "MockBuildCommand"; //$NON-NLS-1$
-	
+
 	protected static final String MOCK_GROUP_NAME = "mock"; //$NON-NLS-1$
 	protected static final String MOCK_BINARY = "/usr/bin/mock"; //$NON-NLS-1$
 	protected static final String MOCK_CHROOT_CONFIG_OPTION = "-r"; //$NON-NLS-1$
 	protected static final String MOCK_REBUILD_OPTION = "--rebuild"; //$NON-NLS-1$
 	protected static final String MOCK_RESULT_DIR_OPTION = "--resultdir"; //$NON-NLS-1$
 	protected static final String MOCK_NO_CLEANUP_AFTER_OPTION = "--no-cleanup-after"; //$NON-NLS-1$
-	
+
 	protected String localArchitecture; // set in initialize()
 	protected String mockConfig; // user may set this explicitly
 	// path to SRPM which gets rebuild in the chrooted env.
 	private String srpmAbsPath;
 	protected String resultDir;
+
 	/**
 	 * Set the mock config.
 	 * 
 	 * @param mockConfig
 	 * @return This instance.
-	 * @throws InvalidMockConfigurationException If the config was invalid.
+	 * @throws InvalidMockConfigurationException
+	 *             If the config was invalid.
 	 */
-	public MockBuildCommand mockConfig(String mockConfig) throws InvalidMockConfigurationException {
+	public MockBuildCommand mockConfig(String mockConfig)
+			throws InvalidMockConfigurationException {
 		if (!isSupportedMockConfig(mockConfig)) {
-			throw new InvalidMockConfigurationException(NLS.bind(
-					RpmText.MockBuildCommand_invalidMockConfigError, mockConfig));
+			throw new InvalidMockConfigurationException(
+					NLS.bind(RpmText.MockBuildCommand_invalidMockConfigError,
+							mockConfig));
 		}
 		this.mockConfig = mockConfig;
 		return this;
@@ -150,105 +154,58 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	@Override
 	public MockBuildResult call(IProgressMonitor monitor)
 			throws CommandMisconfiguredException, UserNotInMockGroupException,
-			CommandListenerException, MockBuildCommandException, MockNotInstalledException {
+			CommandListenerException, MockBuildCommandException,
+			MockNotInstalledException {
 		try {
 			callPreExecListeners();
 		} catch (CommandListenerException e) {
 			if (e.getCause() instanceof CommandMisconfiguredException) {
 				// explicitly throw the specific exception
-				throw (CommandMisconfiguredException)e.getCause();
+				throw (CommandMisconfiguredException) e.getCause();
 			}
 			throw e;
 		}
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		
+
 		// Make sure mock config is set
 		setMockConfig();
 		// Set the result dir
 		setResultDir();
-		
+
 		assert this.mockConfig != null && this.srpmAbsPath != null
 				&& this.resultDir != null;
-		
-		monitor.subTask(NLS.bind(
-				RpmText.MockBuildCommand_callMockBuildMsg, this.srpmAbsPath, this.mockConfig));
-		
+
+		monitor.subTask(NLS.bind(RpmText.MockBuildCommand_callMockBuildMsg,
+				this.srpmAbsPath, this.mockConfig));
+
 		// Make sure mock is installed
 		if (!isMockInstalled()) {
 			throw new MockNotInstalledException();
 		}
 		checkMockGroupMembership();
-		
+
 		String[] cmdList = buildMockCLICommand();
-		MockBuildResult result = new MockBuildResult(cmdList, resultDir);
-		// log the mock call
-		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		logger.logInfo(NLS.bind(RpmText.MockBuildCommand_mockCommandLog, convertMockCLICmd(cmdList)));
-		InputStream is;
-		try {
-			is = Utils.runCommandToInputStream(cmdList);
-		} catch (IOException e) {
-			throw new MockBuildCommandException(e.getMessage(), e);
+
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
 		}
-		
-		final MessageConsole console = FedoraPackagerConsole.getConsole();
-		IConsoleManager manager = ConsolePlugin.getDefault()
-				.getConsoleManager();
-		manager.addConsoles(new IConsole[] { console });
-		console.activate();
-
-		final MessageConsoleStream outStream = console.newMessageStream();
-		ConsoleWriter worker = new ConsoleWriter(is, outStream);
-		Thread consoleWriterThread = new Thread(worker);
-		
-		// Observe what is printed on the console and update status in
-		// prog monitor.
-		worker.addObserver(new MockBuildStatusObserver(monitor));
-		// Observe the status for potential errors
-		worker.addObserver(new MockBuildCommandSuccessObserver(result));
-		
-		consoleWriterThread.start();
-		try {
-			while (!monitor.isCanceled()) {
-				try {
-					// Don't waste system resources
-					Thread.sleep(300);
-					break;
-				} catch (IllegalThreadStateException e) {
-					// Do nothing
-				}
-			}
-
+		MockBuildThread mbt = new MockBuildThread(cmdList, resultDir, monitor);
+		mbt.start();
+		while (mbt.getState() != Thread.State.TERMINATED) {
 			if (monitor.isCanceled()) {
-				worker.stop(); // Stop the worker thread
+				mbt.interrupt();
 				throw new OperationCanceledException();
 			}
-
-			// finish reading whatever's left in the buffers
-			consoleWriterThread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
-		
-		// refresh containing folder
-		try {
-			this.projectRoot.getContainer().refreshLocal(IResource.DEPTH_INFINITE,
-					monitor);
-		} catch (CoreException ignored) {
-			// ignore
-		}
-		
 		callPostExecListeners();
 		setCallable(false); // reuse of instance's call() not allowed
-		monitor.done();
-		return result;
+		return mbt.getResult();
 	}
-	
+
 	/**
-	 * Set the result directory as to where the build results/logs will be
-	 * put.
+	 * Set the result directory as to where the build results/logs will be put.
 	 */
 	private void setResultDir() throws MockBuildCommandException {
 		resultDir = new String();
@@ -263,8 +220,8 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	}
 
 	/**
-	 * If mock config wasn't set by the user, get a default mock config and
-	 * set it appropriately.
+	 * If mock config wasn't set by the user, get a default mock config and set
+	 * it appropriately.
 	 */
 	private void setMockConfig() {
 		if (this.mockConfig == null) {
@@ -283,9 +240,10 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		assert this.mockConfig == null;
 		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		logger.logInfo(RpmText.MockBuildCommand_usingDefaultMockConfig);
-		IFpProjectBits projectBits =  FedoraPackagerUtils.getVcsHandler(projectRoot);
-		String distvar = projectBits.getDistVariable(); 
-		String distval = projectBits.getDistVal(); 
+		IFpProjectBits projectBits = FedoraPackagerUtils
+				.getVcsHandler(projectRoot);
+		String distvar = projectBits.getDistVariable();
+		String distval = projectBits.getDistVal();
 		String mockcfg = null;
 		if (distvar.equals("rhel")) { //$NON-NLS-1$
 			mockcfg = "epel-" + distval + "-" + this.localArchitecture; //$NON-NLS-1$ //$NON-NLS-2$
@@ -295,41 +253,48 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 					|| distval.equals("6")) { //$NON-NLS-1$
 				mockcfg += "-core"; //$NON-NLS-1$
 			}
-			
+
 			if (projectBits.getCurrentBranchName().equals("devel")) { //$NON-NLS-1$
 				mockcfg = "fedora-devel-" + this.localArchitecture; //$NON-NLS-1$
 			}
-			
+
 			if (projectBits.getCurrentBranchName().equals("devel")) { //$NON-NLS-1$
 				if (!isSupportedMockConfig(mockcfg)) {
 					// If the mockcfg as determined from above does not exist,
 					// do something reasonable.
-					mockcfg = "fedora-devel-" + this.localArchitecture;  //$NON-NLS-1$
+					mockcfg = "fedora-devel-" + this.localArchitecture; //$NON-NLS-1$
 				}
 			}
 		}
 		return mockcfg;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
-	 * @see org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand#initialize(org.fedoraproject.eclipse.packager.FedoraProjectRoot)
+	 * 
+	 * @see
+	 * org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand#initialize
+	 * (org.fedoraproject.eclipse.packager.FedoraProjectRoot)
 	 */
 	@Override
-	public void initialize(IProjectRoot fp) throws FedoraPackagerCommandInitializationException {
+	public void initialize(IProjectRoot fp)
+			throws FedoraPackagerCommandInitializationException {
 		super.initialize(fp);
 		// set the local architecture
 		EvalResult archResult;
 		try {
 			FedoraPackager packager = new FedoraPackager(this.projectRoot);
-			RpmEvalCommand eval = (RpmEvalCommand) packager.getCommandInstance(RpmEvalCommand.ID);
-			archResult = eval.variable(RpmEvalCommand.ARCH).call(new NullProgressMonitor());
+			RpmEvalCommand eval = (RpmEvalCommand) packager
+					.getCommandInstance(RpmEvalCommand.ID);
+			archResult = eval.variable(RpmEvalCommand.ARCH).call(
+					new NullProgressMonitor());
 		} catch (FedoraPackagerAPIException e) {
-			throw new FedoraPackagerCommandInitializationException(e.getMessage(), e);
+			throw new FedoraPackagerCommandInitializationException(
+					e.getMessage(), e);
 		}
 		this.localArchitecture = archResult.getEvalResult();
 	}
-	
+
 	/**
 	 * Determine if mock program is available
 	 * 
@@ -341,10 +306,10 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		}
 		return false;
 	}
-	
+
 	/**
-	 * Determine if the given mock config is valid. I.e. a config file
-	 * exists in /etc/mock
+	 * Determine if the given mock config is valid. I.e. a config file exists in
+	 * /etc/mock
 	 * 
 	 * @param candidate
 	 * @return {@code true} if the mock config exists on the local system for
@@ -357,14 +322,15 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * User needs to be member of the mock system group in order to be able to
 	 * run a mock build.
 	 * 
 	 * @throws UserNotInMockGroupException
 	 */
-	private void checkMockGroupMembership() throws UserNotInMockGroupException, MockBuildCommandException {
+	private void checkMockGroupMembership() throws UserNotInMockGroupException,
+			MockBuildCommandException {
 		String grpCheckCmd[] = { "groups" }; //$NON-NLS-1$
 		InputStream is = null;
 		try {
@@ -372,7 +338,7 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			String line;
 			StringBuffer groupsOutput = new StringBuffer();
-			while ( (line = br.readLine()) != null ) {
+			while ((line = br.readLine()) != null) {
 				groupsOutput.append(line);
 			}
 			br.close();
@@ -396,8 +362,8 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 
 	/**
 	 * Builds the mock command line command. It either uses mock config as set
-	 * by the user or as determined by {@link MockBuildCommand#getDefaultMockcfg()} if
-	 * it was not set.
+	 * by the user or as determined by
+	 * {@link MockBuildCommand#getDefaultMockcfg()} if it was not set.
 	 * 
 	 * @return The complete mock CLI command.
 	 */
@@ -406,13 +372,14 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		resDirOpt += "="; //$NON-NLS-1$
 		resDirOpt += this.resultDir;
 		String[] mockCmd;
-		//default non-SCM flags
+		// default non-SCM flags
 		assert this.srpmAbsPath != null;
-		mockCmd = new String[] { MOCK_BINARY, MOCK_CHROOT_CONFIG_OPTION, 
-					this.mockConfig, MOCK_NO_CLEANUP_AFTER_OPTION,
-					resDirOpt, MOCK_REBUILD_OPTION, srpmAbsPath };
+		mockCmd = new String[] { MOCK_BINARY, MOCK_CHROOT_CONFIG_OPTION,
+				this.mockConfig, MOCK_NO_CLEANUP_AFTER_OPTION, resDirOpt,
+				MOCK_REBUILD_OPTION, srpmAbsPath };
 		return mockCmd;
 	}
+
 	/**
 	 * Convenience method to convert the command list into a String.
 	 * 
@@ -421,9 +388,80 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	 */
 	private String convertMockCLICmd(String[] cmdList) {
 		String cmd = new String();
-		for (String token: cmdList) {
+		for (String token : cmdList) {
 			cmd += token + " "; //$NON-NLS-1$
 		}
 		return cmd.trim();
+	}
+
+	private class MockBuildThread extends Thread {
+
+		private String[] cmdList;
+		private MockBuildResult result;
+		private String resultDir;
+		private IProgressMonitor monitor;
+
+		public MockBuildThread(String[] cmdList, String resultDir,
+				IProgressMonitor monitor) {
+			super();
+			this.cmdList = cmdList;
+			this.resultDir = resultDir;
+			this.monitor = monitor;
+		}
+
+		@Override
+		public void run() {
+			InputStream is = null;
+			result = new MockBuildResult(cmdList, resultDir);
+			Process child = null;
+			// log the mock call
+			FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+			logger.logInfo(NLS.bind(RpmText.MockBuildCommand_mockCommandLog,
+					convertMockCLICmd(cmdList)));
+			try {
+				ProcessBuilder pBuilder = new ProcessBuilder(cmdList);
+				pBuilder = pBuilder.redirectErrorStream(true);
+				child = pBuilder.start();
+				is = new BufferedInputStream(child.getInputStream());
+			} catch (IOException e) {
+				FedoraHandlerUtils.showErrorDialog(new Shell(),
+						RpmText.RpmBuildCommand_BuildFailure,
+						RpmText.RpmBuildCommand_BuildDidNotStart);
+			}
+
+			final MessageConsole console = FedoraPackagerConsole.getConsole();
+			IConsoleManager manager = ConsolePlugin.getDefault()
+					.getConsoleManager();
+			manager.addConsoles(new IConsole[] { console });
+			console.activate();
+
+			final MessageConsoleStream outStream = console.newMessageStream();
+			ConsoleWriter worker = new ConsoleWriter(is, outStream);
+			Thread consoleWriterThread = new Thread(worker);
+
+			// Observe what is printed on the console and update status in
+			// prog monitor.
+			worker.addObserver(new MockBuildStatusObserver(monitor));
+			// Observe the status for potential errors
+			worker.addObserver(new MockBuildCommandSuccessObserver(result));
+
+			consoleWriterThread.start();
+			try {
+				consoleWriterThread.join();
+				if (child.waitFor() == 0) {
+					result.setSuccess();
+				} else {
+					result.setFailure();
+				}
+			} catch (InterruptedException e) {
+				child.destroy();
+				result.setFailure();
+			}
+		}
+
+		public MockBuildResult getResult() {
+			return result;
+		}
+
 	}
 }

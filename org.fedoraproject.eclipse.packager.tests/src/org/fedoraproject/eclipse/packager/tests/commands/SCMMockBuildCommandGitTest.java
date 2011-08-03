@@ -83,6 +83,8 @@ public class SCMMockBuildCommandGitTest {
 		boolean rpmfound = false;
 		boolean srpmfound = false;
 		File resultPath = new File(resultDirectoryPath);
+		this.testProject.getProject().refreshLocal(IResource.DEPTH_INFINITE,
+				new NullProgressMonitor());
 		IContainer container = (IContainer) this.testProject.getProject()
 				.findMember(new Path(resultPath.getName()));
 		for (IResource file : container.members()) {

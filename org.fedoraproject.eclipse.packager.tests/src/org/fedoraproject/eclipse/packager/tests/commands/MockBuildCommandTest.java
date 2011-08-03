@@ -89,6 +89,8 @@ public class MockBuildCommandTest {
 		assertNotNull(resultDirectoryPath);
 		// should have created RPMs in the result directory
 		boolean found = false;
+		this.testProject.getProject().refreshLocal(IResource.DEPTH_INFINITE,
+				new NullProgressMonitor());
 		File resultPath = new File(resultDirectoryPath);
 		IContainer container = (IContainer) this.testProject.getProject()
 				.findMember(new Path(resultPath.getName()));
