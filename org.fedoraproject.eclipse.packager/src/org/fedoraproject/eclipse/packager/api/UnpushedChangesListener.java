@@ -11,7 +11,9 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
  * A listener which checks if there have been unpushed changes on the current
- * branch. This is useful to check prior pushing a build to Koji or an update to Bodhi.
+ * branch. This is useful to check prior pushing a build to Koji or an update to
+ * Bodhi. FIXME: This should also check for uncommitted changes (i.e. .spec file
+ * is different from what's in the Git index).
  */
 public class UnpushedChangesListener implements ICommandListener {
 
