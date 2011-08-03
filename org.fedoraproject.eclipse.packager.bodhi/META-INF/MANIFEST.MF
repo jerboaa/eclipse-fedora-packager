@@ -36,6 +36,4 @@ Export-Package: org.fedoraproject.eclipse.packager.bodhi,
  org.fedoraproject.eclipse.packager.bodhi.api,
  org.fedoraproject.eclipse.packager.bodhi.api.errors,
  org.fedoraproject.eclipse.packager.bodhi.fas
-Bundle-ClassPath: eclipse-packager-fragment-bodhi.jar,
- .
 Eclipse-ExtensibleAPI: true

@@ -40,6 +40,4 @@ Import-Package: org.apache.commons.httpclient,
  org.fedoraproject.eclipse.packager.rpm,
  org.fedoraproject.eclipse.packager.utils
 Export-Package: org.fedoraproject.eclipse.packager.cvs
-Bundle-ClassPath: eclipse-packager-fragment-cvs.jar,
- .
 Eclipse-ExtensibleAPI: true

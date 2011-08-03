@@ -42,9 +42,11 @@ Import-Package: org.apache.commons.codec.binary,
  org.eclipse.swt.widgets,
  org.eclipse.ui,
  org.eclipse.ui.console,
+ org.eclipse.ui.dialogs,
  org.eclipse.ui.forms,
  org.eclipse.ui.forms.widgets,
  org.eclipse.ui.handlers,
+ org.eclipse.ui.model,
  org.eclipse.ui.part,
  org.eclipse.ui.plugin,
  org.osgi.framework;version="1.6.0",
@@ -55,7 +57,4 @@ Export-Package: org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.api.errors,
  org.fedoraproject.eclipse.packager.utils
 Bundle-Vendor: %BundleVendor
-Bundle-ClassPath: eclipse-packager-fragment.jar,
- eclipse-packager-l10n.jar,
- .
 Eclipse-ExtensibleAPI: true

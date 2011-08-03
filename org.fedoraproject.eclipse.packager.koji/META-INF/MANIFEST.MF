@@ -39,8 +39,5 @@ Bundle-Localization: plugin
 Export-Package: org.fedoraproject.eclipse.packager.koji,
  org.fedoraproject.eclipse.packager.koji.api,
  org.fedoraproject.eclipse.packager.koji.api.errors
-Bundle-ClassPath: eclipse-packager-fragment-koji.jar,
- .
 Eclipse-ExtensibleAPI: true
-Eclipse-BuddyPolicy: parent
 
