@@ -395,14 +395,16 @@ public class PushUpdateCommand extends FedoraPackagerCommand<PushUpdateResult> {
 		monitor.worked(2);
 		monitor.subTask(BodhiText.PushUpdateCommand_pushingUpdate);
 		// push update
-		String csrfToken = "";
+		String csrfToken = ""; //$NON-NLS-1$
 		if (resp.getCsrfToken() != null) {
 			csrfToken = resp.getCsrfToken();
 		}
-		BodhiUpdateResponse updateResponse = this.client.createNewUpdate(builds, release, updateType, requestType,
-				bugs, comment, csrfToken, suggestReboot,
-				enableKarmaAutomatism, stableKarmaThreshold,
-				unpushKarmaThreshold, closeBugsWhenStable);
+		// It looks like release is extracted from the build NVRs. Not sure, why it's there.
+		BodhiUpdateResponse updateResponse = this.client
+				.createNewUpdate(builds, release, updateType, requestType,
+						bugs, comment, csrfToken, suggestReboot,
+						enableKarmaAutomatism, stableKarmaThreshold,
+						unpushKarmaThreshold, closeBugsWhenStable);
 		PushUpdateResult result = new PushUpdateResult(updateResponse);
 		monitor.worked(3);
 		monitor.subTask(BodhiText.PushUpdateCommand_loggingOut);

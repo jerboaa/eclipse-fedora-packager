@@ -120,7 +120,7 @@ public class UserValidationDialog extends TrayDialog {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText(BodhiText.userValidationDialog_passwordRequired);
+		newShell.setText(BodhiText.UserValidationDialog_passwordRequired);
 	}
 
 	/**
@@ -197,7 +197,7 @@ public class UserValidationDialog extends TrayDialog {
 		}
 		if (bodhiInstanceUrl != null) {
 			Label d = new Label(main, SWT.WRAP);
-			d.setText(BodhiText.userValidationDialog_server);
+			d.setText(BodhiText.UserValidationDialog_server);
 			data = new GridData();
 			d.setLayoutData(data);
 			Label label = new Label(main, SWT.WRAP);
@@ -214,7 +214,7 @@ public class UserValidationDialog extends TrayDialog {
 		if (cachingCheckbox && bodhiInstanceUrl != null) {
 			allowCachingButton = new Button(main, SWT.CHECK);
 			allowCachingButton
-					.setText(BodhiText.userValidationDialog_savePassword);
+					.setText(BodhiText.UserValidationDialog_savePassword);
 			data = new GridData(GridData.FILL_HORIZONTAL
 					| GridData.GRAB_HORIZONTAL);
 			data.horizontalSpan = 3;
@@ -239,7 +239,7 @@ public class UserValidationDialog extends TrayDialog {
 	 *            the parent of the widgets
 	 */
 	protected void createPasswordFields(Composite parent) {
-		new Label(parent, SWT.NONE).setText(BodhiText.userValidationDialog_password);
+		new Label(parent, SWT.NONE).setText(BodhiText.UserValidationDialog_password);
 
 		passwordField = new Text(parent, SWT.BORDER | SWT.PASSWORD);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
@@ -255,7 +255,7 @@ public class UserValidationDialog extends TrayDialog {
 	 *            the parent of the widgets
 	 */
 	protected void createUsernameFields(Composite parent) {
-		new Label(parent, SWT.NONE).setText(BodhiText.userValidationDialog_username);
+		new Label(parent, SWT.NONE).setText(BodhiText.UserValidationDialog_username);
 
 		usernameField = new Text(parent, SWT.BORDER);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);

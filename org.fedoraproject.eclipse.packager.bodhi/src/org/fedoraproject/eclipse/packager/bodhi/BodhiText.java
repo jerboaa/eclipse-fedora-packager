@@ -28,64 +28,75 @@ public class BodhiText extends NLS {
 	 */
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.bodhi.bodhitext"; //$NON-NLS-1$
 
-	
+	// AddNewBuildDialog
+	/****/ public static String AddNewBuildDialog_addAnotherBuild;
+	/****/ public static String AddNewBuildDialog_addBtn;
+	/****/ public static String AddNewBuildDialog_buildsFormatErrorMsg;
+	/****/ public static String AddNewBuildDialog_buildsToolTip;
+	/****/ public static String AddNewBuildDialog_cancelBtn;
+	/****/ public static String AddNewBuildDialog_dialogTitle;
+	/****/ public static String AddNewBuildDialog_packageBuildsLbl;
 	// BodhiClient Strings
-	/****/ public static String BodhiClient_serverResponseMsg;
 	/****/ public static String BodhiClient_rawJsonStringMsg;
-	/****/ public static String BodhiClient_httpResponseStringMsg;
 	// PushUpdateCommand
 	/****/ public static String PushUpdateCommand_configErrorNoClient;
 	/****/ public static String PushUpdateCommand_configErrorNoUpdateType;
 	/****/ public static String PushUpdateCommand_configErrorNoFedoraRelease;
 	/****/ public static String PushUpdateCommand_configErrorNoUpdateComment;
 	/****/ public static String PushUpdateCommand_configErrorNoBuilds;
+	/****/ public static String PushUpdateCommand_configErrorUsernamePasswordUnset;
 	/****/ public static String PushUpdateCommand_pushingBodhiUpdateTaskMsg;
 	/****/ public static String PushUpdateCommand_loggingIn;
 	/****/ public static String PushUpdateCommand_pushingUpdate;
 	/****/ public static String PushUpdateCommand_loggingOut;
-	// BodhiNewDialog Strings
-	/****/ public static String BodhiNewDialog_dialogTitle;
-	/****/ public static String BodhiNewDialog_build;
-	/****/ public static String BodhiNewDialog_release;
-	/****/ public static String BodhiNewDialog_type;
-	/****/ public static String BodhiNewDialog_security;
-	/****/ public static String BodhiNewDialog_bugfix;
-	/****/ public static String BodhiNewDialog_enhancement;
-	/****/ public static String BodhiNewDialog_request;
-	/****/ public static String BodhiNewDialog_testing;
-	/****/ public static String BodhiNewDialog_stable;
-	/****/ public static String BodhiNewDialog_bugIds;
-	/****/ public static String BodhiNewDialog_bugIdsMsg;
-	/****/ public static String BodhiNewDialog_notes;
-	/****/ public static String BodhiNewDialog_invalidBugIds;
-	/****/ public static String BodhiNewDialog_invalidBugIdsMsg;
 	// BodhiNewHandler
-	/****/ public static String BodhiNewHandler_jobName;
 	/****/ public static String BodhiNewHandler_createUpdateMsg;
-	/****/ public static String BodhiNewHandler_checkTagMsg;
-	/****/ public static String BodhiNewHandler_querySpecFileMsg;
+	/****/ public static String BodhiNewHandler_unpushedChangesJobMsg;
+	/****/ public static String BodhiNewHandler_unpushedChangesQuestion;
+	/****/ public static String BodhiNewHandler_validationJobName;
+	/****/ public static String BodhiNewHandler_credentialsErrorMsg;
+	/****/ public static String BodhiNewHandler_pushingUpdateFailedMsg;
+	/****/ public static String BodhiNewHandler_systemPropertyUrlInvalid;
 	/****/ public static String BodhiNewHandler_updateLoginMsg;
-	/****/ public static String BodhiNewHandler_notCorrectTagFail;
-	/****/ public static String BodhiNewHandler_connectToBodhi;
-	/****/ public static String BodhiNewHandler_loginBodhi;
-	/****/ public static String BodhiNewHandler_sendNewUpdate;
-	/****/ public static String BodhiNewHandler_logoutMsg;
+	// BodhiNewUpdateDialog
+	/****/ public static String BodhiNewUpdateDialog_addBuildsBtn;
+	/****/ public static String BodhiNewUpdateDialog_addBuildsBtnTooltip;
+	/****/ public static String BodhiNewUpdateDialog_bugsLbl;
+	/****/ public static String BodhiNewUpdateDialog_bugsTooltip;
+	/****/ public static String BodhiNewUpdateDialog_buildsSelectionErrorMsg;
+	/****/ public static String BodhiNewUpdateDialog_buildsTooltip;
+	/****/ public static String BodhiNewUpdateDialog_cancelUpdateBtn;
+	/****/ public static String BodhiNewUpdateDialog_closeBugsBtn;
+	/****/ public static String BodhiNewUpdateDialog_closeBugsTooltip;
+	/****/ public static String BodhiNewUpdateDialog_createNewUpdateTitle;
+	/****/ public static String BodhiNewUpdateDialog_enableKarmaAutomatismLbl;
+	/****/ public static String BodhiNewUpdateDialog_enableKarmaAutomatismTooltip;
+	/****/ public static String BodhiNewUpdateDialog_invalidBugsErrorMsg;
+	/****/ public static String BodhiNewUpdateDialog_invalidNotesErrorMsg;
+	/****/ public static String BodhiNewUpdateDialog_invalidRequestTypeErrorMsg;
+	/****/ public static String BodhiNewUpdateDialog_invalidStableKarmaErrorMsg;
+	/****/ public static String BodhiNewUpdateDialog_invalidUnstableKarmaMsg;
+	/****/ public static String BodhiNewUpdateDialog_notesHtmlTooltipTxt;
+	/****/ public static String BodhiNewUpdateDialog_notesLbl;
+	/****/ public static String BodhiNewUpdateDialog_packageLbl;
+	/****/ public static String BodhiNewUpdateDialog_requestTypeLbl;
+	/****/ public static String BodhiNewUpdateDialog_saveUpdateBtn;
+	/****/ public static String BodhiNewUpdateDialog_stableKarmaThresholdLbl;
+	/****/ public static String BodhiNewUpdateDialog_stableKarmaTooltip;
+	/****/ public static String BodhiNewUpdateDialog_suggestRebootLbl;
+	/****/ public static String BodhiNewUpdateDialog_suggestRebootTooltip;
+	/****/ public static String BodhiNewUpdateDialog_typeLbl;
+	/****/ public static String BodhiNewUpdateDialog_unstableKarmaThresholdLbl;
+	/****/ public static String BodhiNewUpdateDialog_unstableKarmaTooltip;
 	// BodhiUpdateInfoDialog
 	/****/ public static String BodhiUpdateInfoDialog_updateResponseTitle;
 	/****/ public static String BodhiUpdateInfoDialog_updateStatusText;
 	// UserValidationDialog
-	/****/ public static String userValidationDialog_passwordRequired;
-	/****/ public static String userValidationDialog_server;
-	/****/ public static String userValidationDialog_savePassword;
-	/****/ public static String userValidationDialog_password;
-	/****/ public static String userValidationDialog_username;
-
-
-	public static String PushUpdateCommand_configErrorUsernamePasswordUnset;
-
-
-
-
+	/****/ public static String UserValidationDialog_passwordRequired;
+	/****/ public static String UserValidationDialog_server;
+	/****/ public static String UserValidationDialog_savePassword;
+	/****/ public static String UserValidationDialog_password;
+	/****/ public static String UserValidationDialog_username;
 
 	static {
 		// initialize resource bundle

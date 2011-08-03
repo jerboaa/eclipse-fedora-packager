@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2010-2011 Red Hat Inc. and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat Inc. - initial API and implementation
+ *******************************************************************************/
 package org.fedoraproject.eclipse.packager.bodhi.internal.ui;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -15,6 +25,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
 
 
 /**
@@ -24,9 +35,8 @@ import org.eclipse.swt.widgets.Text;
  */
 public class AddNewBuildDialog extends AbstractBodhiDialog {
 	
-	private static final String BUILDS_REGEX = "^(?:([^, ]+)[, ]?)+$";
+	private static final String BUILDS_REGEX = "^(?:([^, ]+)[, ]?)+$"; //$NON-NLS-1$
 
-	protected int result;
 	private Text txtBuilds;
 	private String[] buildsData;
 
@@ -36,7 +46,7 @@ public class AddNewBuildDialog extends AbstractBodhiDialog {
 	 */
 	public AddNewBuildDialog(Shell parent) {
 		super(parent, SWT.MODELESS);
-		setText("Add Additional Build(s)");
+		setText(BodhiText.AddNewBuildDialog_dialogTitle);
 	}
 
 	/**
@@ -62,7 +72,7 @@ public class AddNewBuildDialog extends AbstractBodhiDialog {
 	private void createContents() {
 		shell = new Shell(getParent(), SWT.DIALOG_TRIM);
 		shell.setSize(480, 154);
-		shell.setText("Add Another Build");
+		shell.setText(BodhiText.AddNewBuildDialog_addAnotherBuild);
 		
 		Composite composite = new Composite(shell, SWT.NONE);
 		composite.setBackground(getColor(SWT.COLOR_WHITE));
@@ -103,7 +113,7 @@ public class AddNewBuildDialog extends AbstractBodhiDialog {
 				// nothing, this event does not seem to get triggered
 			}
 		});
-		btnCancel.setText("Cancel");
+		btnCancel.setText(BodhiText.AddNewBuildDialog_cancelBtn);
 		
 		Button btnAddBuilds = new Button(composite, SWT.NONE);
 		btnAddBuilds.setLocation(131, 79);
@@ -139,20 +149,20 @@ public class AddNewBuildDialog extends AbstractBodhiDialog {
 				// nothing, this event does not seem to get triggered
 			}
 		});
-		btnAddBuilds.setText("Add");
+		btnAddBuilds.setText(BodhiText.AddNewBuildDialog_addBtn);
 		
 		txtBuilds = new Text(composite, SWT.BORDER);
 		txtBuilds.setLocation(131, 38);
 		txtBuilds.setSize(338, 31);
-		txtBuilds.setToolTipText("Space or comma separated list of builds to add");
-		txtBuilds.setText("");
+		txtBuilds.setToolTipText(BodhiText.AddNewBuildDialog_buildsToolTip);
+		txtBuilds.setText(""); //$NON-NLS-1$
 		txtBuilds.forceFocus();
 		
 		Label lblBuildsToAdd = new Label(composite, SWT.NONE);
 		lblBuildsToAdd.setBackground(getColor(SWT.COLOR_WHITE));
 		lblBuildsToAdd.setLocation(10, 43);
 		lblBuildsToAdd.setSize(110, 21);
-		lblBuildsToAdd.setText("Package Build(s)");
+		lblBuildsToAdd.setText(BodhiText.AddNewBuildDialog_packageBuildsLbl);
 		
 		lblError = new Label(composite, SWT.NONE);
 		lblError.setBackground(getColor(SWT.COLOR_WHITE));
@@ -170,7 +180,7 @@ public class AddNewBuildDialog extends AbstractBodhiDialog {
 		Pattern pattern = Pattern.compile(BUILDS_REGEX);
 		Matcher matcher = pattern.matcher(txtBuilds.getText());
 		if (!matcher.matches()) {
-			setValidationError("Not a comma OR space separated list of N-V-Rs");
+			setValidationError(BodhiText.AddNewBuildDialog_buildsFormatErrorMsg);
 			return false;
 		}
 		// need to set builds data this way, since we cannot
@@ -185,7 +195,7 @@ public class AddNewBuildDialog extends AbstractBodhiDialog {
 		ArrayList<String> builds = new ArrayList<String>();
 		if (matcher.matches()) {
 			for (int i = 0; i < matcher.groupCount(); i++) {
-				for (String item: matcher.group(i).split("[, ]")) {
+				for (String item: matcher.group(i).split("[, ]")) { //$NON-NLS-1$
 					builds.add(item);
 				}
 			}

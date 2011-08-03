@@ -36,7 +36,7 @@ import org.fedoraproject.eclipse.packager.bodhi.BodhiText;
  */
 public class BodhiUpdateInfoDialog extends MessageDialog {
 	
-	private static final String BODHI_UPDATE_BASE_URL = "http://admin.fedoraproject.org/updates/"; //$NON-NLS-1$
+	private URL bodhiInstanceUrl;
 	private String buildName;
 	
 	/**
@@ -44,17 +44,19 @@ public class BodhiUpdateInfoDialog extends MessageDialog {
 	 * is created by createCustomArea().
 	 * 
 	 * @param parentShell
+	 * @param bodhiInstanceUrl The URL to the bodhi instance.
 	 * @param buildName The name of the update just pushed.
 	 * @param bodhiResponseMsg Placeholder for auxiliary response msg from Bodhi.
 	 */
-	public BodhiUpdateInfoDialog(Shell parentShell, String buildName, String bodhiResponseMsg) {
+	public BodhiUpdateInfoDialog(Shell parentShell, URL bodhiInstanceUrl, String buildName, String bodhiResponseMsg) {
 		super(parentShell, BodhiText.BodhiUpdateInfoDialog_updateResponseTitle,
-				BodhiPlugin.getImageDescriptor("icons/Artwork_DesignService_bodhi-icon-16.png").createImage(),
+				BodhiPlugin.getImageDescriptor("icons/Artwork_DesignService_bodhi-icon-16.png").createImage(), //$NON-NLS-1$
 				bodhiResponseMsg,
 				MessageDialog.NONE,
 				new String[] { IDialogConstants.OK_LABEL },
 				0);
 		this.buildName = buildName;
+		this.bodhiInstanceUrl = bodhiInstanceUrl;
 	}
 
 	@Override
@@ -69,12 +71,7 @@ public class BodhiUpdateInfoDialog extends MessageDialog {
 	@Override
 	protected Control createCustomArea(Composite parent) {
 		FormText taskLink = new FormText(parent, SWT.NONE);
-		final String url;
-		if (buildName.equals("N/A")) { //$NON-NLS-1$
-			url = buildName;
-		} else {
-			url = BODHI_UPDATE_BASE_URL + buildName;
-		}
+		final String url = this.bodhiInstanceUrl.toString() + buildName;
 		taskLink.setText("<form><p>" + //$NON-NLS-1$
 				BodhiText.BodhiUpdateInfoDialog_updateStatusText + "</p><p>"+ url //$NON-NLS-1$ //$NON-NLS-2$
 						+ "</p></form>", true, true); //$NON-NLS-1$
