@@ -22,9 +22,14 @@ import org.osgi.framework.BundleContext;
  */
 public class PackagerPlugin extends AbstractUIPlugin {
 
-	
 	/** The symbolic plugin ID.	 */
 	public static final String PLUGIN_ID = "org.fedoraproject.eclipse.packager"; //$NON-NLS-1$
+
+	/**
+	 * The Fedora Packaging perspective ID
+	 */
+	public static final String FEDORA_PACKAGING_PERSPECTIVE_ID = PLUGIN_ID + ".perspective"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static PackagerPlugin plugin;
 	

@@ -193,4 +193,13 @@
              class="org.fedoraproject.eclipse.packager.FedoraProjectRoot">
        </projectRoot>
     </extension>
+    <extension
+          point="org.eclipse.ui.perspectives">
+       <perspective
+             class="org.fedoraproject.eclipse.packager.internal.perspective.PackagingPerspectiveFactory"
+             icon="icons/fedora16x16.png"
+             id="org.fedoraproject.eclipse.packager.perspective"
+             name="%PerspectiveName">
+       </perspective>
+    </extension>
 </plugin>
