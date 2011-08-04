@@ -37,7 +37,9 @@ import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IImportWizard;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
@@ -192,10 +194,17 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 				PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(newProject, workingSets);
 			}
 
-			// Finally show the Git Repositories view for convenience
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage().showView(
-							"org.eclipse.egit.ui.RepositoriesView"); //$NON-NLS-1$
+			// Finally ask if the Fedora Packaging perspective should be opened
+			// if not already open.
+			IWorkbench workbench = PlatformUI.getWorkbench();
+			IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+			IPerspectiveDescriptor perspective = window.getActivePage().getPerspective();
+			if (!perspective.getId().equals(PackagerPlugin.FEDORA_PACKAGING_PERSPECTIVE_ID)) {
+				if (shouldOpenPerspective()) {
+					// open the perspective
+					workbench.showPerspective(PackagerPlugin.FEDORA_PACKAGING_PERSPECTIVE_ID, window);
+				}
+			}
 			return true;
 		} catch (InterruptedException e) {
 			MessageDialog.openInformation(getShell(), FedoraPackagerGitText.FedoraPackagerGitCloneWizard_cloneFail, 
@@ -268,5 +277,17 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 			return GitUtils.getFullGitURL(GitUtils.getAnonymousGitBaseUrl(),
 					page.getPackageName());
 		}
+	}
+	
+	/**
+	 * Ask if Fedora Packager perspective should be opened.
+	 */
+	private boolean shouldOpenPerspective() {
+		QuestionMessageDialog op = new QuestionMessageDialog(
+				FedoraPackagerGitText.FedoraPackagerGitCloneWizard_switchPerspectiveQuestionTitle,
+				FedoraPackagerGitText.FedoraPackagerGitCloneWizard_switchPerspectiveQuestionMsg,
+				getShell());
+		Display.getDefault().syncExec(op);
+		return op.isOkPressed();
 	}
 }

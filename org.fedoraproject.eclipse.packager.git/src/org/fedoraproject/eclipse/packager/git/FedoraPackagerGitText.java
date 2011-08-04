@@ -31,6 +31,8 @@ public class FedoraPackagerGitText extends NLS {
 	/****/ public static String FedoraPackagerGitCloneWizard_wizardTitle;
 	/****/ public static String FedoraPackagerGitCloneWizard_problem;
 	/****/ public static String FedoraPackagerGitCloneWizard_badURIError;
+	/****/ public static String FedoraPackagerGitCloneWizard_switchPerspectiveQuestionTitle;
+	/****/ public static String FedoraPackagerGitCloneWizard_switchPerspectiveQuestionMsg;
 
 	// SelectModulePage Strings
 	/****/ public static String SelectModulePage_anonymousCheckout;
