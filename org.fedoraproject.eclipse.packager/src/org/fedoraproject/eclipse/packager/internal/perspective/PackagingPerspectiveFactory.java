@@ -23,12 +23,14 @@ public class PackagingPerspectiveFactory implements IPerspectiveFactory {
 		// Add "new wizards".
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file"); //$NON-NLS-1$
-
+		
 		// Add "show views".
 		layout.addShowViewShortcut(IPageLayout.ID_PROJECT_EXPLORER);
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
 		layout.addShowViewShortcut("org.eclipse.ui.console.ConsoleView"); //$NON-NLS-1$
 		layout.addShowViewShortcut("org.eclipse.egit.ui.RepositoriesView"); //$NON-NLS-1$
+		// Show compatibility action set
+		layout.addActionSet("org.fedoraproject.eclipse.packager.compatibility.FedoraPackagerActionSet"); //$NON-NLS-1$
 	}
 
 	/**
