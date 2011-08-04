@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
@@ -155,6 +156,21 @@ public class FedoraPackagerPreferencePage extends FieldEditorPreferencePage impl
 		addField(kojiWebURLEditor);
 		addField(kojiHubURLEditor);
 		updateMargins(kojiGroup);
+	}
+	
+	@Override
+	public boolean performOk() {
+		super.performOk();
+		// reload packager logger config
+		FedoraPackagerLogger.getInstance().refreshConfig();
+		return true;
+	}
+	
+	@Override
+	protected void performApply() {
+		super.performApply();
+		// reload packager logger config
+		FedoraPackagerLogger.getInstance().refreshConfig();
 	}
 
 	private void updateMargins(Group group) {

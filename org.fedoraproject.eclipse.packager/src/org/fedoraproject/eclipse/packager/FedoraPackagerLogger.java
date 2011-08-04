@@ -50,15 +50,7 @@ public class FedoraPackagerLogger {
 
 	private FedoraPackagerLogger() {
 		log = PackagerPlugin.getDefault().getLog();
-		// default to error log level. i.e. show only errors.
-		// Should we use DebugOptionsListener here?
-		IPreferenceStore prefStore = PackagerPlugin.getDefault().getPreferenceStore();
-		boolean debugEnabled = prefStore.getBoolean(FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE);
-		if (PackagerPlugin.inDebugMode() || debugEnabled) {
-			currentLogLevel = LogLevel.DEBUG;
-		} else {
-			currentLogLevel = LogLevel.ERROR;
-		}
+		setConfig();
 	}
 
 	/**
@@ -114,5 +106,28 @@ public class FedoraPackagerLogger {
 			log.log(new Status(IStatus.INFO, PackagerPlugin.PLUGIN_ID,
 					DEBUG_STATUS, message, reason));
 		}
+	}
+	
+	/**
+	 * Refresh the log so that updated debug options are respected.
+	 */
+	public void refreshConfig() {
+		setConfig();
+	}
+
+	private void setConfig() {
+		// default to error log level. i.e. show only errors.
+		// Should we use DebugOptionsListener here?
+		if (isDebugEnabled()) {
+			currentLogLevel = LogLevel.DEBUG;
+		} else {
+			currentLogLevel = LogLevel.ERROR;
+		}
+	}
+	
+	private boolean isDebugEnabled() {
+		IPreferenceStore prefStore = PackagerPlugin.getDefault().getPreferenceStore();
+		boolean debugEnabled = prefStore.getBoolean(FedoraPackagerPreferencesConstants.PREF_DEBUG_MODE);
+		return (PackagerPlugin.inDebugMode() || debugEnabled);
 	}
 }
