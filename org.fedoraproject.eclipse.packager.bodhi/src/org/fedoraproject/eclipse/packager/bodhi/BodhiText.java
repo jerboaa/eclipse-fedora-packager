@@ -58,6 +58,7 @@ public class BodhiText extends NLS {
 	/****/ public static String BodhiNewHandler_pushingUpdateFailedMsg;
 	/****/ public static String BodhiNewHandler_systemPropertyUrlInvalid;
 	/****/ public static String BodhiNewHandler_updateLoginMsg;
+	/****/ public static String BodhiNewHandler_updateCreatedLogMsg;
 	// BodhiNewUpdateDialog
 	/****/ public static String BodhiNewUpdateDialog_addBuildsBtn;
 	/****/ public static String BodhiNewUpdateDialog_addBuildsBtnTooltip;

@@ -21,7 +21,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -70,6 +73,7 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 	private String username;
 	private String password;
 	private IProjectRoot fedoraProjectRoot;
+	private PushUpdateResult updateResult;
 	
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -198,30 +202,8 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 									updateDialog.getUnstableKarmaThreshold());
 					logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
 							PushUpdateCommand.class.getName()));
-					PushUpdateResult updateResult = update.call(monitor);
-					if (updateResult.wasSuccessful()) {
-						final String successMsg = updateResult.getDetails();
-						final String updateName = updateResult.getUpdateName();
-						PlatformUI.getWorkbench().getDisplay()
-								.asyncExec(new Runnable() {
-									@Override
-									public void run() {
-										BodhiUpdateInfoDialog infoDialog = new BodhiUpdateInfoDialog(
-												shell, bodhiUrl, updateName,
-												successMsg);
-										infoDialog.open();
-									}
-								});
-						return Status.OK_STATUS;
-					} else {
-						// show some error with details
-						return FedoraHandlerUtils
-								.errorStatus(
-										BodhiPlugin.PLUGIN_ID,
-										NLS.bind(
-												BodhiText.BodhiNewHandler_pushingUpdateFailedMsg,
-												updateResult.getDetails()));
-					}
+					updateResult = update.call(monitor);
+					return Status.OK_STATUS;
 				} catch (CommandListenerException e) {
 					// no listeners registered, so should not happen
 					logger.logError(e.getMessage(), e);
@@ -243,6 +225,8 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 			}
 
 		};
+		// Listener shows successful update dialog
+		job.addJobChangeListener(getJobChangeListener());
 		job.setUser(true);
 		job.schedule();
 		return null; // must be null
@@ -270,6 +254,54 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 			}
 		}
 		return url;
+	}
+	
+	/**
+	 * Create a job listener for the event {@code done}.
+	 *  
+	 * @return The job change listener.
+	 */
+	protected IJobChangeListener getJobChangeListener() {
+		IJobChangeListener listener = new JobChangeAdapter() {
+			
+			// We are only interested in the done event
+			@Override
+			public void done(IJobChangeEvent event) {
+				IStatus jobStatus = event.getResult();
+				if (jobStatus.isOK() && updateResult.wasSuccessful()) {
+					final String successMsg = updateResult.getDetails();
+					final String updateName = updateResult.getUpdateName();
+					logger.logInfo(NLS.bind(BodhiText.BodhiNewHandler_updateCreatedLogMsg, bodhiUrl.toString() + updateName));
+					PlatformUI.getWorkbench().getDisplay()
+							.asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									BodhiUpdateInfoDialog infoDialog = new BodhiUpdateInfoDialog(
+											shell, bodhiUrl, updateName,
+											successMsg);
+									infoDialog.open();
+								}
+							});
+				} else {
+					final String msg = NLS.bind(
+							BodhiText.BodhiNewHandler_pushingUpdateFailedMsg,
+							updateResult.getDetails());
+					logger.logDebug(msg);
+					PlatformUI.getWorkbench().getDisplay()
+							.asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									// show some error with details
+									FedoraHandlerUtils.showErrorDialog(shell,
+											fedoraProjectRoot
+													.getProductStrings()
+													.getProductName(), msg);
+								}
+							});
+				}
+			}
+		};
+		return listener;
 	}
 
 	/**
