@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
-            targetID="org.eclipse.ui.resourcePerspective">
+            targetID="org.fedoraproject.eclipse.packager.perspective">
          <actionSet
                id="org.fedoraproject.eclipse.packager.compatibility.FedoraPackagerActionSet">
          </actionSet>
