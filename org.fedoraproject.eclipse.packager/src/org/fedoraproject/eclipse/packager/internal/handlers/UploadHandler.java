@@ -116,7 +116,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 					String checksum = SourcesFile.calculateChecksum(newUploadFile);
 					if (checksum.equals(sourceFile.getSources().get(resource.getName()))) {
 						// Candidate file already in sources and up-to-date
-						logger.logInfo(NLS.bind(
+						logger.logDebug(NLS.bind(
 								FedoraPackagerText.UploadHandler_versionOfFileExistsAndUpToDate,
 								resource.getName()));
 						FedoraHandlerUtils.showInformationDialog(shell,
@@ -148,7 +148,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 					uploadCmd.setFedoraSSLEnabled(true);
 					uploadCmd.addCommandListener(sourcesUpdater);
 					uploadCmd.addCommandListener(vcsIgnoreFileUpdater);
-					logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
+					logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
 							UploadSourceCommand.class.getName()));
 					try {
 						result = uploadCmd.call(new SubProgressMonitor(monitor, 1));
@@ -156,7 +156,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 						// File already in lookaside cache. This means we do not
 						// need to upload, but we should still update sources files
 						// and vcs ignore files as required.
-						logger.logInfo(e.getMessage(), e);
+						logger.logDebug(e.getMessage(), e);
 						sourcesUpdater.postExecution();
 						vcsIgnoreFileUpdater.postExecution();
 						// report that there was no upload required.
@@ -189,7 +189,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 					return FedoraHandlerUtils.errorStatus(
 							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
 				} catch (InvalidUploadFileException e) {
-					logger.logInfo(e.getMessage(), e);
+					logger.logDebug(e.getMessage(), e);
 					FedoraHandlerUtils.showInformationDialog(shell,
 							fedoraProjectRoot.getProductStrings().getProductName(),
 							e.getMessage());
@@ -200,7 +200,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 					String message = NLS.bind(
 							FedoraPackagerText.UploadHandler_invalidUrlError,
 							e.getMessage());
-					logger.logInfo(message, e);
+					logger.logDebug(message, e);
 					FedoraHandlerUtils.showInformationDialog(shell,
 							fedoraProjectRoot.getProductStrings().getProductName(), message);
 					return Status.OK_STATUS;
@@ -215,7 +215,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 				if (result != null && !result.wasSuccessful()) {
 					// probably a 404 or some such
 					String message = result.getErrorString();
-					logger.logInfo(message);
+					logger.logDebug(message);
 					return FedoraHandlerUtils.errorStatus(
 							PackagerPlugin.PLUGIN_ID, message);
 				}

@@ -112,7 +112,7 @@ public class DownloadSourceCommand extends
 		}
 		// provide hint which URL is going to be used
 		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		logger.logInfo(NLS.bind(
+		logger.logDebug(NLS.bind(
 				FedoraPackagerText.DownloadSourceCommand_usingDownloadURLMsg,
 				lookasideCache.getDownloadUrl().toString()));
 		

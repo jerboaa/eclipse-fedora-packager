@@ -282,7 +282,7 @@ public class FedoraPackagerUtils {
 					if (property != null) {
 						// match found
 						FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-						logger.logInfo(NLS
+						logger.logDebug(NLS
 								.bind(FedoraPackagerText.FedoraPackagerUtils_projectRootClassNameMsg,
 										root.getClass().getName()));
 						return root;

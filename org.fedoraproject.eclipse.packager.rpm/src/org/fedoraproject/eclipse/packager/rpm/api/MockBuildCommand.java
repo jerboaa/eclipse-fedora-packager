@@ -239,7 +239,7 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	private String getDefaultMockcfg() {
 		assert this.mockConfig == null;
 		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		logger.logInfo(RpmText.MockBuildCommand_usingDefaultMockConfig);
+		logger.logDebug(RpmText.MockBuildCommand_usingDefaultMockConfig);
 		IFpProjectBits projectBits = FedoraPackagerUtils
 				.getVcsHandler(projectRoot);
 		String distvar = projectBits.getDistVariable();
@@ -416,7 +416,7 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 			Process child = null;
 			// log the mock call
 			FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-			logger.logInfo(NLS.bind(RpmText.MockBuildCommand_mockCommandLog,
+			logger.logDebug(NLS.bind(RpmText.MockBuildCommand_mockCommandLog,
 					convertMockCLICmd(cmdList)));
 			try {
 				ProcessBuilder pBuilder = new ProcessBuilder(cmdList);

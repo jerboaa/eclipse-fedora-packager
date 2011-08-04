@@ -50,7 +50,7 @@ public class TagSourcesListener implements ICommandListener {
 			// Do VCS tagging if so requested.
 			if (askIfShouldTag()) {
 				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-				logger.logInfo(KojiText.TagSourcesListener_tagSourcesMsg);
+				logger.logDebug(KojiText.TagSourcesListener_tagSourcesMsg);
 				projectBits.tagVcs(projectRoot, mainMonitor);
 			}
 		}

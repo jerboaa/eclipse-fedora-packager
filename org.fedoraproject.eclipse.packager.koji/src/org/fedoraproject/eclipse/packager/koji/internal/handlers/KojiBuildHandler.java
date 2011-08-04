@@ -122,6 +122,8 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 								if (jobStatus.isOK() && buildResult != null && buildResult.wasSuccessful()) {
 									FedoraPackagerLogger logger = FedoraPackagerLogger
 											.getInstance();
+									// unconditionally log so that users get a second chance to see the
+									// koji-web URL
 									logger.logInfo(NLS
 											.bind(KojiText.KojiMessageDialog_buildResponseMsg,
 													fedoraProjectRoot.getProductStrings().getBuildToolName())

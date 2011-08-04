@@ -81,7 +81,7 @@ public class MockBuildJob extends Job {
 					e.getMessage(),
 					e);
 		}
-		logger.logInfo(NLS.bind(
+		logger.logDebug(NLS.bind(
 				FedoraPackagerText.callingCommand,
 				MockBuildCommand.class.getName()));
 		try {
@@ -119,7 +119,7 @@ public class MockBuildJob extends Job {
 								RPMPlugin.PLUGIN_ID, e.getMessage(), e);
 					} catch (UserNotInMockGroupException e) {
 						// nothing critical, advise the user what to do.
-						logger.logInfo(e.getMessage());
+						logger.logDebug(e.getMessage());
 						FedoraHandlerUtils
 						.showInformationDialog(shell,
 								fpr.getProductStrings().getProductName(), e
@@ -140,7 +140,7 @@ public class MockBuildJob extends Job {
 								e.getCause());
 					} catch (MockNotInstalledException e) {
 						// nothing critical, advise the user what to do.
-						logger.logInfo(e.getMessage());
+						logger.logDebug(e.getMessage());
 						FedoraHandlerUtils
 						.showInformationDialog(shell,
 								fpr.getProductStrings().getProductName(), e
@@ -180,7 +180,7 @@ public class MockBuildJob extends Job {
 					String msg = NLS.bind(
 							RpmText.MockBuildHandler_mockSucceededMsg,
 							result.getResultDirectoryPath());
-					logger.logInfo(msg);
+					logger.logDebug(msg);
 					FedoraHandlerUtils.showInformationDialog(
 							shell,
 							fpr.getProductStrings().getProductName(), msg);
@@ -188,7 +188,7 @@ public class MockBuildJob extends Job {
 					String msg = NLS.bind(
 							RpmText.MockBuildHandler_mockFailedMsg,
 							result.getResultDirectoryPath());
-					logger.logInfo(msg);
+					logger.logDebug(msg);
 					FedoraHandlerUtils.showInformationDialog(
 							shell,
 							fpr.getProductStrings().getProductName(),

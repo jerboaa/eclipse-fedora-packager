@@ -191,9 +191,9 @@ public class KojiBuildCommand extends FedoraPackagerCommand<BuildResult> {
 		monitor.subTask(KojiText.KojiBuildCommand_sendBuildCmd);
 		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		if (this.scratchBuild) {
-			logger.logInfo(KojiText.KojiBuildCommand_scratchBuildLogMsg);
+			logger.logDebug(KojiText.KojiBuildCommand_scratchBuildLogMsg);
 		} else {
-			logger.logInfo(KojiText.KojiBuildCommand_buildLogMsg);
+			logger.logDebug(KojiText.KojiBuildCommand_buildLogMsg);
 		}
 		// attempt to push build
 		int taskId = this.kojiClient.build(buildTarget, location.toString(), nvr, scratchBuild);

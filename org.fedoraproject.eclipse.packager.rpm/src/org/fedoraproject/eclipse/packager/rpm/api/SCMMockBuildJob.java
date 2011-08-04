@@ -103,7 +103,7 @@ public class SCMMockBuildJob extends Job {
 					e.getMessage(),
 					e);
 		}
-		logger.logInfo(NLS.bind(
+		logger.logDebug(NLS.bind(
 				FedoraPackagerText.callingCommand,
 				SCMMockBuildCommand.class.getName()));
 		//sources need to be downloaded
@@ -158,7 +158,7 @@ public class SCMMockBuildJob extends Job {
 								RPMPlugin.PLUGIN_ID, e.getMessage(), e);
 					} catch (UserNotInMockGroupException e) {
 						// nothing critical, advise the user what to do.
-						logger.logInfo(e.getMessage());
+						logger.logDebug(e.getMessage());
 						FedoraHandlerUtils
 						.showInformationDialog(shell,
 								fpr.getProductStrings().getProductName(), e
@@ -179,7 +179,7 @@ public class SCMMockBuildJob extends Job {
 								e.getCause());
 					} catch (MockNotInstalledException e) {
 						// nothing critical, advise the user what to do.
-						logger.logInfo(e.getMessage());
+						logger.logDebug(e.getMessage());
 						FedoraHandlerUtils
 						.showInformationDialog(shell,
 								fpr.getProductStrings().getProductName(), e
@@ -219,7 +219,7 @@ public class SCMMockBuildJob extends Job {
 					String msg = NLS.bind(
 							RpmText.MockBuildHandler_mockSucceededMsg,
 							result.getResultDirectoryPath());
-					logger.logInfo(msg);
+					logger.logDebug(msg);
 					FedoraHandlerUtils.showInformationDialog(
 							shell,
 							fpr.getProductStrings().getProductName(), msg);
@@ -227,7 +227,7 @@ public class SCMMockBuildJob extends Job {
 					String msg = NLS.bind(
 							RpmText.MockBuildHandler_mockFailedMsg,
 							result.getResultDirectoryPath());
-					logger.logInfo(msg);
+					logger.logDebug(msg);
 					FedoraHandlerUtils.showInformationDialog(
 							shell,
 							fpr.getProductStrings().getProductName(),

@@ -86,7 +86,7 @@ public class FedoraPackagerLogger {
 	 * @param message
 	 *            A human readable localized message.
 	 */
-	public void logInfo(String message) {
+	public void logDebug(String message) {
 		if (currentLogLevel == LogLevel.DEBUG) {
 			log.log(new Status(IStatus.INFO, PackagerPlugin.PLUGIN_ID, message));
 		}
@@ -101,12 +101,23 @@ public class FedoraPackagerLogger {
 	 * @param reason
 	 *            The exception indicating what really happened.
 	 */
-	public void logInfo(String message, Throwable reason) {
+	public void logDebug(String message, Throwable reason) {
 		if (currentLogLevel == LogLevel.DEBUG) {
 			log.log(new Status(IStatus.INFO, PackagerPlugin.PLUGIN_ID,
 					DEBUG_STATUS, message, reason));
 		}
 	}
+	
+	/**
+	 * Logs and info message to the error log.
+	 * 
+	 * @param message
+	 *            A human readable localized message.
+	 */
+	public void logInfo(String message) {
+		log.log(new Status(IStatus.INFO, PackagerPlugin.PLUGIN_ID, message));
+	}
+	
 	
 	/**
 	 * Refresh the log so that updated debug options are respected.

@@ -109,7 +109,7 @@ public class KojiBuildJob extends Job {
 		}
 		kojiBuildCmd.buildTarget(projectBits.getTarget()).nvr(nvr)
 		.isScratchBuild(isScratch);
-		logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
+		logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
 				KojiBuildCommand.class.getName()));
 		// Call build command
 		try {
@@ -120,13 +120,13 @@ public class KojiBuildJob extends Job {
 			return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
 					e.getMessage(), e);
 		} catch (BuildAlreadyExistsException e) {
-			logger.logInfo(e.getMessage(), e);
+			logger.logDebug(e.getMessage(), e);
 			FedoraHandlerUtils.showInformationDialog(shell,
 					fedoraProjectRoot.getProductStrings().getProductName(),
 					e.getMessage());
 			return Status.OK_STATUS;
 		} catch (UnpushedChangesException e) {
-			logger.logInfo(e.getMessage(), e);
+			logger.logDebug(e.getMessage(), e);
 			FedoraHandlerUtils.showInformationDialog(shell,
 					fedoraProjectRoot.getProductStrings().getProductName(),
 					e.getMessage());

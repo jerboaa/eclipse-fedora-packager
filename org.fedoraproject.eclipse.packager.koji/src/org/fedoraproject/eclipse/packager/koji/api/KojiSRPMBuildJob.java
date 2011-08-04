@@ -132,7 +132,7 @@ public class KojiSRPMBuildJob extends KojiBuildJob {
 		}
 		kojiBuildCmd.buildTarget(projectBits.getTarget()).nvr(nvr)
 		.isScratchBuild(true);
-		logger.logInfo(NLS.bind("", //$NON-NLS-1$
+		logger.logDebug(NLS.bind("", //$NON-NLS-1$
 				KojiBuildCommand.class.getName()));
 		// Call build command
 		try {
@@ -143,13 +143,13 @@ public class KojiSRPMBuildJob extends KojiBuildJob {
 			return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
 					e.getMessage(), e);
 		} catch (BuildAlreadyExistsException e) {
-			logger.logInfo(e.getMessage(), e);
+			logger.logDebug(e.getMessage(), e);
 			FedoraHandlerUtils.showInformationDialog(shell,
 					fedoraProjectRoot.getProductStrings().getProductName(),
 					e.getMessage());
 			return Status.OK_STATUS;
 		} catch (UnpushedChangesException e) {
-			logger.logInfo(e.getMessage(), e);
+			logger.logDebug(e.getMessage(), e);
 			FedoraHandlerUtils.showInformationDialog(shell,
 					fedoraProjectRoot.getProductStrings().getProductName(),
 					e.getMessage());
@@ -236,7 +236,7 @@ public class KojiSRPMBuildJob extends KojiBuildJob {
 								if (jobStatus.isOK() && buildResult != null && buildResult.wasSuccessful()) {
 									FedoraPackagerLogger logger = FedoraPackagerLogger
 											.getInstance();
-									logger.logInfo(NLS
+									logger.logDebug(NLS
 											.bind(KojiText.KojiMessageDialog_buildResponseMsg,
 													fedoraProjectRoot.getProductStrings().getBuildToolName())
 											+ " " //$NON-NLS-1$

@@ -91,7 +91,7 @@ public class FedoraPackagerCheckoutWizard extends Wizard implements IImportWizar
 			return true;
 		} catch (InterruptedException e) {
 			FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-			logger.logInfo(e.getMessage(), e);
+			logger.logDebug(e.getMessage(), e);
 			FedoraHandlerUtils.showInformationDialog(getShell(), "Cancelled", CVSText.FedoraPackagerCheckoutWizard_cancelled);
 			return false;
 		} catch (Exception e) {

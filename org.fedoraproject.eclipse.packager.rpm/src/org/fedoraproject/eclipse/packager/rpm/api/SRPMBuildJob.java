@@ -72,10 +72,10 @@ public class SRPMBuildJob extends Job {
 					.getVcsHandler(fedoraProjectRoot);
 			List<String> distDefines = RPMUtils.getDistDefines(projectBits);
 			srpmBuild.distDefines(distDefines);
-			logger.logInfo(NLS.bind(RpmText.MockBuildHandler_creatingSrpm,
+			logger.logDebug(NLS.bind(RpmText.MockBuildHandler_creatingSrpm,
 					fedoraProjectRoot.getPackageName()));
 			try {
-				logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
+				logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
 						RpmBuildCommand.class.getName()));
 				srpmBuildResult = srpmBuild.call(monitor);
 			} catch (CommandMisconfiguredException e) {

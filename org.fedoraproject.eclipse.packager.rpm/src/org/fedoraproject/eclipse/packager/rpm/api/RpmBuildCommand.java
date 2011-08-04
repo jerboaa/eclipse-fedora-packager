@@ -273,7 +273,7 @@ public class RpmBuildCommand extends FedoraPackagerCommand<RpmBuildResult> {
 			try {
 				// log the build command, which was issued
 				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-				logger.logInfo(NLS.bind(RpmText.RpmBuildCommand_commandStringMsg, convertCmdList(cmdList)));
+				logger.logDebug(NLS.bind(RpmText.RpmBuildCommand_commandStringMsg, convertCmdList(cmdList)));
 				ProcessBuilder pBuilder = new ProcessBuilder(cmdList);
 				pBuilder = pBuilder.redirectErrorStream(true);
 				child = pBuilder.start();

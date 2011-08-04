@@ -97,11 +97,11 @@ public class DownloadSourcesJob extends Job {
 				// cache falls back to the default URL if not set.
 				download.setDownloadURL(downloadUrlPreference);
 			}
-			logger.logInfo(NLS.bind(FedoraPackagerText.callingCommand,
+			logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
 					DownloadSourceCommand.class.getName()));
 			download.call(monitor);
 		} catch (final SourcesUpToDateException e) {
-			logger.logInfo(e.getMessage(), e);
+			logger.logDebug(e.getMessage(), e);
 			if (!suppressSourcesUpToDateInfo) {
 				FedoraHandlerUtils
 						.showInformationDialog(shell,
