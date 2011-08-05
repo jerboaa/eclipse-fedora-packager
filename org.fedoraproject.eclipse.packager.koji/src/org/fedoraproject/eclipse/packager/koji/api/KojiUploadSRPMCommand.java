@@ -18,6 +18,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.apache.ws.commons.util.Base64;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
@@ -88,6 +89,9 @@ public class KojiUploadSRPMCommand extends FedoraPackagerCommand<BuildResult> {
 					monitor.worked(chunkSize);
 					chunkOffset += chunkSize;
 					chunkSize = Math.min(fis.available(), 1000000);
+					if (monitor.isCanceled()){
+						throw new OperationCanceledException();
+					}
 				}
 			} catch (IOException e1) {
 				throw new CommandMisconfiguredException(NLS.bind(

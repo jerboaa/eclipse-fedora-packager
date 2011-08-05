@@ -31,10 +31,10 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
  * Class that handles KojiBuildCommand in conjunction with KojiUploadSRPMCommand
- *
+ * 
  */
 public class KojiSRPMScratchBuildHandler extends KojiBuildHandler {
-	
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
@@ -44,17 +44,16 @@ public class KojiSRPMScratchBuildHandler extends KojiBuildHandler {
 			fedoraProjectRoot = FedoraPackagerUtils
 					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e) {
-			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, 
-					e);
+			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
 					FedoraPackagerText.invalidFedoraProjectRootError);
 			return null;
 		}
 		IPath srpmPath;
 		try {
-			srpmPath = FedoraHandlerUtils.chooseRootFileOfType(shell, 
+			srpmPath = FedoraHandlerUtils.chooseRootFileOfType(shell,
 					fedoraProjectRoot, ".src.rpm", //$NON-NLS-1$
-					KojiText.KojiSRPMBuildJob_ChooseSRPM); 
+					KojiText.KojiSRPMBuildJob_ChooseSRPM);
 		} catch (OperationCanceledException e) {
 			return null;
 		} catch (CoreException e) {
@@ -62,19 +61,18 @@ public class KojiSRPMScratchBuildHandler extends KojiBuildHandler {
 			return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
 					e.getMessage(), e);
 		}
-		if (srpmPath == null){
-			FileDialogRunable fdr = new FileDialogRunable("*.src.rpm",  //$NON-NLS-1$
+		if (srpmPath == null) {
+			FileDialogRunable fdr = new FileDialogRunable("*.src.rpm", //$NON-NLS-1$
 					KojiText.KojiSRPMScratchBuildHandler_UploadFileDialogTitle);
 			shell.getDisplay().syncExec(fdr);
 			String srpm = fdr.getFile();
-			if (srpm == null){
+			if (srpm == null) {
 				return Status.CANCEL_STATUS;
 			}
 			srpmPath = new Path(srpm);
 		}
-		Job job = new KojiSRPMBuildJob(
-				fedoraProjectRoot.getProductStrings().getProductName(), 
-				getShell(event), fedoraProjectRoot, srpmPath);
+		Job job = new KojiSRPMBuildJob(fedoraProjectRoot.getProductStrings()
+				.getProductName(), getShell(event), fedoraProjectRoot, srpmPath);
 		job.addJobChangeListener(getJobChangeListener());
 		job.setUser(true);
 		job.schedule();
