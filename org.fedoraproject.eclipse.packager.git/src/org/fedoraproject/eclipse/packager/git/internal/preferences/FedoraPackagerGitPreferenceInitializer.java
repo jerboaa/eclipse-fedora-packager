@@ -29,7 +29,7 @@ public class FedoraPackagerGitPreferenceInitializer extends AbstractPreferenceIn
 	@Override
 	public void initializeDefaultPreferences() {
 		// set default preferences for this plug-in
-		IEclipsePreferences node = new DefaultScope().getNode(Activator.PLUGIN_ID);
+		IEclipsePreferences node = DefaultScope.INSTANCE.getNode(Activator.PLUGIN_ID);
 		node.put(GitPreferencesConstants.PREF_CLONE_BASE_URL,
 				GitUtils.getDefaultGitBaseUrl());
 	}

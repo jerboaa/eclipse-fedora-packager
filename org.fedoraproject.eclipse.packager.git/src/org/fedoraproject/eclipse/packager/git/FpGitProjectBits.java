@@ -335,16 +335,6 @@ public class FpGitProjectBits implements IFpProjectBits {
 	}
 	
 	/**
-	 * Pull "sources" and ".gitignore".
-	 * 
-	 * TODO: Clean this up a little
-	 */
-	private IStatus performPull() {
-		//FIXME: NO-OP. Use git.pull() API
-		return null;
-	}
-	
-	/**
 	 * Get the JGit repository.
 	 */
 	private Repository getGitRepository() {
