@@ -46,6 +46,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class KojiScratchWithSRPMTest {
+	
+	private static final String KOJI_TEST_INSTANCE_URL_PROP = "org.fedoraproject.eclipse.packager.tests.koji.testInstanceURL"; //$NON-NLS-1$
 	// project under test
 	private GitTestProject testProject;
 	// Fedora packager root
@@ -84,6 +86,16 @@ public class KojiScratchWithSRPMTest {
 		this.testProject.dispose();
 	}
 	
+	/**
+	 * In order for this test to work, koji test certificates need to be at
+	 * location: ~/.eclipse-fedorapackager/testing/koji-certs
+	 * 
+	 * Also, it is required to set Java System property
+	 * "org.fedoraproject.eclipse.packager.tests.koji.testInstanceURL" to point
+	 * to the koji test instance.
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void canUploadSRPMAndRequestBuild() 
 	throws Exception{
@@ -92,7 +104,7 @@ public class KojiScratchWithSRPMTest {
 			.getCommandInstance(KojiUploadSRPMCommand.ID);
 		final String uploadPath = "cli-build/" + 
 			FedoraPackagerUtils.getUniqueIdentifier();  //$NON-NLS-1$
-		String kojiURL = System.getProperty("testing.koji.url");
+		String kojiURL = System.getProperty(KOJI_TEST_INSTANCE_URL_PROP);
 		if (kojiURL == null){
 			fail("System property testing.koji.url not set.");
 		}
@@ -109,7 +121,6 @@ public class KojiScratchWithSRPMTest {
 							return true;
 						}
 					};
-					//certs in ~/.eclipse-fedorapackager/testing/koji-certs
 					String certDir = System.getProperty("user.home") + 
 						File.separatorChar + ".eclipse-fedorapackager" + 
 						File.separatorChar + "testing" + File.separatorChar + 
