@@ -12,6 +12,8 @@ package org.fedoraproject.eclipse.packager.rpm.api;
 
 import java.io.FileNotFoundException;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -121,6 +123,7 @@ public class MockBuildJob extends Job {
 					}
 					try {
 						result = mockBuild.call(monitor);
+						fpr.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
 					} catch (CommandMisconfiguredException e) {
 						// This shouldn't happen, but report error
 						// anyway
@@ -130,9 +133,8 @@ public class MockBuildJob extends Job {
 					} catch (UserNotInMockGroupException e) {
 						// nothing critical, advise the user what to do.
 						logger.logDebug(e.getMessage());
-						FedoraHandlerUtils
-						.showInformationDialog(shell,
-								fpr.getProductStrings().getProductName(), e
+						FedoraHandlerUtils.showInformationDialog(shell, fpr
+								.getProductStrings().getProductName(), e
 								.getMessage());
 						return Status.OK_STATUS;
 					} catch (CommandListenerException e) {
@@ -151,11 +153,14 @@ public class MockBuildJob extends Job {
 					} catch (MockNotInstalledException e) {
 						// nothing critical, advise the user what to do.
 						logger.logDebug(e.getMessage());
-						FedoraHandlerUtils
-						.showInformationDialog(shell,
-								fpr.getProductStrings().getProductName(), e
+						FedoraHandlerUtils.showInformationDialog(shell, fpr
+								.getProductStrings().getProductName(), e
 								.getMessage());
 						return Status.OK_STATUS;
+					} catch (CoreException e) {
+						logger.logError(e.getMessage(), e);
+						return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+								e.getMessage(), e);
 					}
 				} finally {
 					monitor.done();

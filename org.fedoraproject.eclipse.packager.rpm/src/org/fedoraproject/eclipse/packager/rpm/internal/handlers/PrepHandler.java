@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -124,6 +125,7 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 							try {
 								prepCommand.buildType(BuildType.PREP)
 										.flags(nodeps).call(monitor);
+								fedoraProjectRoot.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
 							} catch (CommandMisconfiguredException e) {
 								// This shouldn't happen, but report error
 								// anyway
@@ -144,6 +146,11 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 										e.getCause());
 							} catch (IllegalArgumentException e) {
 								// nodeps flags can't be null
+							} catch (CoreException e) {
+								logger.logError(e.getMessage(), e.getCause());
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(),
+										e.getCause());
 							}
 						} finally {
 							monitor.done();

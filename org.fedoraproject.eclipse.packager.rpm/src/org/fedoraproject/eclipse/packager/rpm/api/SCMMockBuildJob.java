@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.rpm.api;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -91,7 +93,6 @@ public class SCMMockBuildJob extends Job {
 		try {
 			download = (DownloadSourceCommand) fp
 				.getCommandInstance(DownloadSourceCommand.ID);
-			// get RPM build command in order to produce an SRPM
 			mockBuild = (SCMMockBuildCommand) fp
 				.getCommandInstance(SCMMockBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
@@ -119,8 +120,9 @@ public class SCMMockBuildJob extends Job {
 		//sources need to be downloaded
 		if (!useRepoSource){
 			final String downloadUrlPreference = PackagerPlugin
-			.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
-			Job downloadSourcesJob = new DownloadSourcesJob(RpmText.MockBuildHandler_downloadSourcesForMockBuild,
+					.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+			Job downloadSourcesJob = new DownloadSourcesJob(
+					RpmText.MockBuildHandler_downloadSourcesForMockBuild,
 					download, fpr, shell, downloadUrlPreference, true);
 			downloadSourcesJob.setUser(true);
 			downloadSourcesJob.schedule();
@@ -160,6 +162,7 @@ public class SCMMockBuildJob extends Job {
 					}
 					try {
 						result = mockBuild.call(monitor);
+						fpr.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
 					} catch (CommandMisconfiguredException e) {
 						// This shouldn't happen, but report error
 						// anyway
@@ -169,9 +172,8 @@ public class SCMMockBuildJob extends Job {
 					} catch (UserNotInMockGroupException e) {
 						// nothing critical, advise the user what to do.
 						logger.logDebug(e.getMessage());
-						FedoraHandlerUtils
-						.showInformationDialog(shell,
-								fpr.getProductStrings().getProductName(), e
+						FedoraHandlerUtils.showInformationDialog(shell, fpr
+								.getProductStrings().getProductName(), e
 								.getMessage());
 						return Status.OK_STATUS;
 					} catch (CommandListenerException e) {
@@ -190,11 +192,15 @@ public class SCMMockBuildJob extends Job {
 					} catch (MockNotInstalledException e) {
 						// nothing critical, advise the user what to do.
 						logger.logDebug(e.getMessage());
-						FedoraHandlerUtils
-						.showInformationDialog(shell,
-								fpr.getProductStrings().getProductName(), e
+						FedoraHandlerUtils.showInformationDialog(shell, fpr
+								.getProductStrings().getProductName(), e
 								.getMessage());
 						return Status.OK_STATUS;
+					} catch (CoreException e) {
+						logger.logError(e.getMessage(), e.getCause());
+						return FedoraHandlerUtils.errorStatus(
+								RPMPlugin.PLUGIN_ID, e.getMessage(),
+								e.getCause());
 					}
 				} finally {
 					monitor.done();

@@ -13,6 +13,8 @@ package org.fedoraproject.eclipse.packager.rpm.api;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -78,6 +80,7 @@ public class SRPMBuildJob extends Job {
 				logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
 						RpmBuildCommand.class.getName()));
 				srpmBuildResult = srpmBuild.call(monitor);
+				fedoraProjectRoot.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
 			} catch (CommandMisconfiguredException e) {
 				// This shouldn't happen, but report error anyway
 				logger.logError(e.getMessage(), e);
@@ -93,6 +96,10 @@ public class SRPMBuildJob extends Job {
 				logger.logError(e.getMessage(), e.getCause());
 				return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
 						e.getMessage(), e.getCause());
+			} catch (CoreException e) {
+				logger.logError(e.getMessage(), e);
+				return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+						e.getMessage(), e);
 			}
 		} finally {
 			monitor.done();
