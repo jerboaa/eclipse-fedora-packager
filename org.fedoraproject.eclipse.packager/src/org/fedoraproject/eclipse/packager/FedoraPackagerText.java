@@ -56,6 +56,7 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String FedoraSSL_certificatesMissingError;
 	// FedoraPackagerUtils
 	/****/ public static String FedoraPackagerUtils_invalidProjectRootError;
+	/****/ public static String FedoraPackagerUtils_invalidContainerOrProjectType;
 	/****/ public static String FedoraPackagerUtils_projectRootClassNameMsg;
 	// UnpushedChangesListener
 	/****/ public static String UnpushedChangesListener_checkUnpushedChangesMsg;

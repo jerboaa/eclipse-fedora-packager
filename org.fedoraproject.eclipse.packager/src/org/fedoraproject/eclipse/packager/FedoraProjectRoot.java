@@ -250,4 +250,24 @@ public class FedoraProjectRoot implements IProjectRoot {
 		Arrays.sort(nvrs);
 		return nvrs;
 	}
+
+	/*
+	 * A valid project root contains a .spec file and a "sources"
+	 * file. The RPM spec-file must be of the form package-name.spec.
+     *
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#validate(org.eclipse.core.resources.IContainer)
+	 */
+	@Override
+	public boolean validate(IContainer candidate) {
+		IFile sourceFile = candidate.getFile(new Path("sources")); //$NON-NLS-1$
+		// FIXME: Determine rpm package name from a persistent property. In
+		// future the project name might not be equal to the RPM package name.
+		IFile specFile = candidate.getFile(new Path(candidate.getProject()
+				.getName() + ".spec")); //$NON-NLS-1$
+		if (sourceFile.exists() && specFile.exists()) {
+			return true;
+		}
+		return false;
+	}
 }

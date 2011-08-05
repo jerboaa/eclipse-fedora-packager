@@ -27,7 +27,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.osgi.util.NLS;
@@ -66,25 +65,6 @@ public class FedoraPackagerUtils {
 	}
 
 	/**
-	 * A valid project root contains a {@code .spec} file and a {@code sources}
-	 * file. The RPM spec-file must be of the form {@code package-name.spec}.
-	 * 
-	 * @param resource
-	 * @return True if the project root looks right.
-	 */
-	private static boolean isValidFedoraProjectRoot(IContainer resource) {
-		IFile sourceFile = resource.getFile(new Path("sources")); //$NON-NLS-1$
-		// FIXME: Determine rpm package name from a persistent property. In
-		// future the project name might not be equal to the RPM package name.
-		IFile specFile = resource.getFile(new Path(resource.getProject()
-				.getName() + ".spec")); //$NON-NLS-1$
-		if (sourceFile.exists() && specFile.exists()) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
 	 * Returns a FedoraProjectRoot from the given resource after performing some
 	 * validations.
 	 * 
@@ -106,17 +86,25 @@ public class FedoraPackagerUtils {
 			candidate = resource.getParent();
 		}
 		ProjectType type = getProjectType(candidate);
-		if (candidate != null && isValidFedoraProjectRoot(candidate)
-				&& type != null) {
+		if (candidate != null && type != null) {
 			try {
-				return instantiateProjectRoot(candidate, type);
+				// instantiate, but do not initialize yet
+				IProjectRoot root = instantiateProjectRoot(candidate, type);
+				// Make sure this root passes its own validation
+				if (root.validate(candidate)) {
+					// Do initialization
+					root.initialize(candidate, type);
+					return root; // All good
+				} else {
+					throw new InvalidProjectRootException(FedoraPackagerText.FedoraPackagerUtils_invalidProjectRootError);
+				}
 			} catch (FedoraPackagerExtensionPointException e) {
 				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 				logger.logError(e.getMessage(), e);
 				throw new InvalidProjectRootException(e.getMessage());
 			}
 		} else {
-			throw new InvalidProjectRootException(FedoraPackagerText.FedoraPackagerUtils_invalidProjectRootError);
+			throw new InvalidProjectRootException(FedoraPackagerText.FedoraPackagerUtils_invalidContainerOrProjectType);
 		}
 	}
 	
@@ -253,8 +241,6 @@ public class FedoraPackagerUtils {
 						FedoraPackagerText.extensionNotFoundError,
 						PROJECT_ROOT_EXTENSIONPOINT_NAME));
 			}
-			// Do initialization
-			projectRoot.initialize(container, type);
 			return projectRoot;
 		}
 		throw new FedoraPackagerExtensionPointException(NLS.bind(

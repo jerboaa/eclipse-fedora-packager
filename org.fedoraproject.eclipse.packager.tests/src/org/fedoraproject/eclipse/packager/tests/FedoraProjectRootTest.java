@@ -60,7 +60,7 @@ public class FedoraProjectRootTest {
 		File copySource = new File(dirName);
 		
 		projectResource = TestsUtils.createProjectFromTemplate(copySource);
-		// We should really use FedoraPackagerUtils.getProjectRoot(), but this
+		// Users should really use FedoraPackagerUtils.getProjectRoot(), but this
 		// doesn't work for this case.
 		fpRoot = new FedoraProjectRoot();
 		fpRoot.initialize(projectResource, ProjectType.GIT);

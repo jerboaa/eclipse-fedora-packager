@@ -127,4 +127,12 @@ public interface IProjectRoot {
 	 * @return The list of N-V-Rs sorted in ascending order.
 	 */
 	public String[] getPackageNVRs();
+	
+	/**
+	 * Validates a non-initialized version of the implementing IProjectRoot.
+	 * 
+	 * @param candidate The container which should be validated.
+	 * @return {@code true} if the container is valid. {@code false} otherwise.
+	 */
+	public boolean validate(IContainer candidate);
 }

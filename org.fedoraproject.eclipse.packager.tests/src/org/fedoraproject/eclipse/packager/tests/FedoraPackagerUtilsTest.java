@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.git.FpGitProjectBits;
@@ -57,6 +58,10 @@ public class FedoraPackagerUtilsTest {
 		origSourceDir = new File(dirName);
 				
 		packagerProject = TestsUtils.createProjectFromTemplate(origSourceDir);
+		// we need the property set otherwise instantiation of the project root
+		// fails.
+		packagerProject.setPersistentProperty(PackagerPlugin.PROJECT_PROP,
+				"true" /* unused value */);
 	}
 
 	@After
