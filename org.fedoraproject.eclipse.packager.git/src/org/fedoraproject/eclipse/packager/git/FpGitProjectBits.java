@@ -26,6 +26,7 @@ import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
@@ -499,6 +500,19 @@ public class FpGitProjectBits implements IFpProjectBits {
 		}
 		return true;
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IFpProjectBits#stageChanges(java.lang.String[])
+	 */
+	@Override
+	public void stageChanges(String[] files){
+		try {
+			for (String filePattern : files){ 
+				git.add().addFilepattern(filePattern).call();
+			}
+		} catch (NoFilepatternException e) {
+			// ignore, allow adds with no files
+		}
+	}
 
 }

@@ -72,9 +72,31 @@ public class RpmText extends NLS {
 	/****/ public static String MockNotInstalledException_msg;
 	// RpmEvalCommandException
 	/****/ public static String RpmEvalCommandException_msg;
-	// SRPMBuildHandler_downloadSourcesForSRPMBuild
+	// SRPMBuildHandler
 	/****/ public static String SRPMBuildHandler_downloadSourcesForSRPMBuild;
 	/****/ public static String SRPMBuildHandler_buildingSRPM;
+	// SRPMImportCommand
+	/****/ public static String SRPMImportCommand_IOError;
+	/****/ public static String SRPMImportCommand_NonZeroExit;
+	/****/ public static String SRPMImportCommand_NonZeroQueryExit;
+	/****/ public static String SRPMImportCommand_PathNotSet;
+	/****/ public static String SRPMImportCommand_ProjectNotSet;
+	/****/ public static String SRPMImportCommand_SRPMNotFound;
+	public static String SRPMImportHandler_FileDialogTitle;
+
+
+	//SRPMImportHandler
+	/****/ public static String SRPMImportHandler_ImportingFromSRPM;
+	// SRPMImportJob
+	/****/ public static String SRPMImportJob_CallingCommand;
+	/****/ public static String SRPMImportJob_ExtractFailed;
+
+
+	public static String SRPMImportJob_ExtractingSRPM;
+	/****/ public static String SRPMImportJob_InitialSetup;
+	/****/ public static String SRPMImportJob_MalformedLookasideURL;
+	/****/ public static String SRPMImportJob_StagingChanges;
+	/****/ public static String SRPMImportJob_UploadingSources;
 
 	static {
 		// initialize resource bundle

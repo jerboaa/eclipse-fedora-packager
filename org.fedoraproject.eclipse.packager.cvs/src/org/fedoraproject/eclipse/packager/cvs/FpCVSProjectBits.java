@@ -579,4 +579,13 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		//TODO implement
 		return false;
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IFpProjectBits#stageChanges(java.lang.String[])
+	 */
+	@Override
+	public void stageChanges(String[] files){
+		//TODO implement
+	}
 }

@@ -143,4 +143,10 @@ public interface IFpProjectBits {
 	 * @return Whether there are local changes or not.
 	 */
 	public boolean hasLocalChanges(IProjectRoot fedoraProjectRoot);
+	
+	/**
+	 * Stage changes to an array of files.
+	 * @param files The files to add the changes to the repository.
+	 */
+	public void stageChanges(String[] files);
 }

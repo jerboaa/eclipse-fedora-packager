@@ -131,6 +131,29 @@
                   </or>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.fedoraproject.eclipse.packager.ImportCommand"
+                  label="%command.label.12"
+                  mnemonic="%command.mnemonic.12"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <with
+                           variable="activeMenuSelection">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.project">
+                        </reference>
+                     </with>
+                     <with
+                           variable="activeMenuEditorInput">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.project">
+                        </reference>
+                     </with>
+                  </or>
+               </visibleWhen>
+            </command>
          </menuContribution>
             
       </extension>
@@ -161,6 +184,11 @@
             defaultHandler="org.fedoraproject.eclipse.packager.rpm.internal.handlers.SCMMockBuildHandler"
             id="org.fedoraproject.eclipse.packager.SCMMockCommand"
             name="%command.name.6">
+      </command>
+      <command
+            defaultHandler="org.fedoraproject.eclipse.packager.rpm.internal.handlers.SRPMImportHandler"
+            id="org.fedoraproject.eclipse.packager.ImportCommand"
+            name="SRPM Import">
       </command>
    </extension>
    <extension
@@ -212,6 +240,12 @@
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+F M">
+      </key>
+      <key
+            commandId="org.fedoraproject.eclipse.packager.ImportCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+M3+F O">
       </key>
     </extension>
 </plugin>

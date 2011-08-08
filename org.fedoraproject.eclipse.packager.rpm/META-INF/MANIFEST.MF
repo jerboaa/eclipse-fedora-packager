@@ -16,6 +16,7 @@ Export-Package: org.fedoraproject.eclipse.packager.rpm,
  org.fedoraproject.eclipse.packager.rpm.api.errors,
  org.fedoraproject.eclipse.packager.rpm.internal.handlers;x-friends:="org.fedoraproject.eclipse.packager.local"
 Import-Package: org.eclipse.core.resources,
+ org.eclipse.linuxtools.rpm.ui,
  org.eclipse.linuxtools.rpm.ui.editor.parser,
  org.eclipse.ui.console,
  org.fedoraproject.eclipse.packager,
