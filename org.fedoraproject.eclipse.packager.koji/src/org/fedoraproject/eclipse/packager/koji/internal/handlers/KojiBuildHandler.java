@@ -54,7 +54,6 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 	 * Shell for message dialogs, etc.
 	 */
 	protected Shell shell;
-	protected BuildResult buildResult;
 	protected URL kojiWebUrl;
 	protected IProjectRoot fedoraProjectRoot;
 	
@@ -113,6 +112,9 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 			// We are only interested in the done event
 			@Override
 			public void done(IJobChangeEvent event) {
+				// get the BuildResult from the underlying job
+				KojiBuildJob job = (KojiBuildJob)event.getJob();
+				final BuildResult buildResult = job.getBuildResult();
 				final IStatus jobStatus = event.getResult();
 				PlatformUI.getWorkbench().getDisplay().asyncExec(
 						new Runnable() {
@@ -141,6 +143,7 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 		};
 		return listener;
 	}
+	
 	/**
 	 * Create KojiMessageDialog based on taskId and kojiWebUrl.
 	 * 

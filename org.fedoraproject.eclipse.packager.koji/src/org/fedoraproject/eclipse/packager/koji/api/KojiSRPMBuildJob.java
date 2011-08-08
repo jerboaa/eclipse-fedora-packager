@@ -12,42 +12,31 @@ package org.fedoraproject.eclipse.packager.koji.api;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
-import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
-import org.fedoraproject.eclipse.packager.koji.KojiMessageDialog;
+import org.fedoraproject.eclipse.packager.api.errors.TagSourcesException;
+import org.fedoraproject.eclipse.packager.api.errors.UnpushedChangesException;
 import org.fedoraproject.eclipse.packager.koji.KojiPlugin;
 import org.fedoraproject.eclipse.packager.koji.KojiText;
-import org.fedoraproject.eclipse.packager.koji.KojiUrlUtils;
 import org.fedoraproject.eclipse.packager.koji.api.errors.BuildAlreadyExistsException;
 import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientException;
 import org.fedoraproject.eclipse.packager.koji.api.errors.KojiHubClientLoginException;
-import org.fedoraproject.eclipse.packager.api.errors.TagSourcesException;
-import org.fedoraproject.eclipse.packager.api.errors.UnpushedChangesException;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
@@ -60,8 +49,6 @@ public class KojiSRPMBuildJob extends KojiBuildJob {
 
 	private Shell shell;
 	private IProjectRoot fedoraProjectRoot;
-	private BuildResult buildResult;
-	private URL kojiWebUrl;
 	private IPath srpmPath;
 
 	/**
@@ -141,11 +128,13 @@ public class KojiSRPMBuildJob extends KojiBuildJob {
 					KojiText.KojiBuildHandler_errorGettingNVR, e);
 		}
 		kojiBuildCmd.buildTarget(projectBits.getTarget()).nvr(nvr)
-		.isScratchBuild(true);
-		logger.logDebug(NLS.bind("", //$NON-NLS-1$
+				.isScratchBuild(true);
+		logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
 				KojiBuildCommand.class.getName()));
-		// Call build command
 		try {
+			// Call build command.
+			// Make sure to set the buildResult variable, since it is used
+			// by getBuildResult() which is in turn called from the handler
 			buildResult = kojiBuildCmd.call(monitor);
 		} catch (CommandMisconfiguredException e) {
 			// This shouldn't happen, but report error anyway
@@ -206,88 +195,5 @@ public class KojiSRPMBuildJob extends KojiBuildJob {
 		}
 		// success
 		return Status.OK_STATUS;
-	}			
-	
-	/**
-	 * Create a job listener for the event {@code done}.
-	 *  
-	 * @return The job change listener.
-	 */
-	protected IJobChangeListener getJobChangeListener() {
-		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		String webUrl = PackagerPlugin.getStringPreference(FedoraPackagerPreferencesConstants.PREF_KOJI_WEB_URL);
-		if (webUrl == null) {
-			// use default
-			webUrl = FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL; 
-		}
-		try {
-			kojiWebUrl = new URL(webUrl);
-		} catch (MalformedURLException e) {
-			// nothing critical, use default koji URL instead and log the bogus
-			// Web url set in preferences.
-			logger.logError(NLS.bind(
-					KojiText.KojiBuildHandler_invalidKojiWebUrl,
-					fedoraProjectRoot.getProductStrings().getBuildToolName(), webUrl), e);
-			try {
-				kojiWebUrl = new URL(FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
-			} catch (MalformedURLException ignored) {};
-		}
-		IJobChangeListener listener = new JobChangeAdapter() {
-			
-			// We are only interested in the done event
-			@Override
-			public void done(IJobChangeEvent event) {
-				final IStatus jobStatus = event.getResult();
-				PlatformUI.getWorkbench().getDisplay().asyncExec(
-						new Runnable() {
-							@Override
-							public void run() {
-								// Only show response message dialog on success
-								if (jobStatus.isOK() && buildResult != null && buildResult.wasSuccessful()) {
-									FedoraPackagerLogger logger = FedoraPackagerLogger
-											.getInstance();
-									logger.logDebug(NLS
-											.bind(KojiText.KojiMessageDialog_buildResponseMsg,
-													fedoraProjectRoot.getProductStrings().getBuildToolName())
-											+ " " //$NON-NLS-1$
-											+ KojiUrlUtils.constructTaskUrl(
-													buildResult.getTaskId(),
-													kojiWebUrl));
-									// open dialog
-									getKojiMsgDialog(buildResult.getTaskId(),
-											kojiWebUrl).open();
-								}
-							}
-						});
-			}
-		};
-		return listener;
-	}
-	
-	/**
-	 * Create KojiMessageDialog based on taskId and kojiWebUrl.
-	 * 
-	 * @param taskId
-	 *            The task ID to use for the message.
-	 * @param kojiWebUrl
-	 *            The url to Koji Web without any parameters.
-	 * @return A new KojiMessageDialog for the given Web Url and task Id.
-	 */
-	public KojiMessageDialog getKojiMsgDialog(int taskId, URL kojiWebUrl) {
-		ImageDescriptor descriptor = KojiPlugin
-				.getImageDescriptor("icons/Artwork_DesignService_koji-icon-16.png"); //$NON-NLS-1$
-		Image titleImage = descriptor.createImage();
-		Image msgContentImage = KojiPlugin.getImageDescriptor("icons/koji.png") //$NON-NLS-1$
-				.createImage();
-		KojiMessageDialog msgDialog = new KojiMessageDialog(shell, NLS.bind(
-				KojiText.KojiBuildHandler_kojiBuild,
-				fedoraProjectRoot.getProductStrings().getBuildToolName()), titleImage,
-				MessageDialog.NONE, new String[] { IDialogConstants.OK_LABEL },
-				0, kojiWebUrl, taskId, NLS.bind(
-						KojiText.KojiMessageDialog_buildResponseMsg,
-						fedoraProjectRoot.getProductStrings().getBuildToolName()),
-				msgContentImage,
-				fedoraProjectRoot.getProductStrings().getBuildToolName());
-		return msgDialog;
 	}
 }

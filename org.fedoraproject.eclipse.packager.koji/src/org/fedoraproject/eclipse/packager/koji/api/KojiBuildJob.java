@@ -51,6 +51,8 @@ public class KojiBuildJob extends Job {
 	private IProjectRoot fedoraProjectRoot;
 	private boolean isScratch; 
 	private Shell shell;
+	protected BuildResult buildResult;
+	
 	/**
 	 * @param name The name of the job.
 	 * @param shell The shell the job is run in.
@@ -120,12 +122,14 @@ public class KojiBuildJob extends Job {
 					KojiText.KojiBuildHandler_errorGettingNVR, e);
 		}
 		kojiBuildCmd.buildTarget(projectBits.getTarget()).nvr(nvr)
-		.isScratchBuild(isScratch);
+				.isScratchBuild(isScratch);
 		logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
 				KojiBuildCommand.class.getName()));
-		// Call build command
 		try {
-			kojiBuildCmd.call(monitor);
+			// Call build command.
+			// Make sure to set the buildResult variable, since it is used
+			// by getBuildResult() which is in turn called from the handler
+			buildResult = kojiBuildCmd.call(monitor);
 		} catch (CommandMisconfiguredException e) {
 			// This shouldn't happen, but report error anyway
 			logger.logError(e.getMessage(), e);
@@ -186,6 +190,7 @@ public class KojiBuildJob extends Job {
 		// success
 		return Status.OK_STATUS;
 	}
+	
 	/**
 	 * Create a hub client based on set preferences.
 	 * 
@@ -200,4 +205,15 @@ public class KojiBuildJob extends Job {
 		}
 		return new KojiSSLHubClient(kojiHubUrl);
 	}
+
+	/**
+	 * Get the underlying result of the call to {@link KojiBuildCommand}. This
+	 * method should only be called after the job has been executed.
+	 * 
+	 * @return The result of the build.
+	 */
+	public BuildResult getBuildResult() {
+		return this.buildResult;
+	}
+	
 }
