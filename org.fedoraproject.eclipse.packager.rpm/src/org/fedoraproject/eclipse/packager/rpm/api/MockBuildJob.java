@@ -52,6 +52,7 @@ public class MockBuildJob extends Job {
 	private MockBuildResult result;
 	private MockBuildCommand mockBuild;
 	private IPath srpmPath;
+	
 	/** 
 	 * @param name The name of the job.
 	 * @param shell The shell the job is run in.
@@ -161,6 +162,9 @@ public class MockBuildJob extends Job {
 						logger.logError(e.getMessage(), e);
 						return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
 								e.getMessage(), e);
+					} catch (OperationCanceledException e) {
+						// mock was cancelled
+						return Status.CANCEL_STATUS; 
 					}
 				} finally {
 					monitor.done();
@@ -179,6 +183,7 @@ public class MockBuildJob extends Job {
 		}
 		return mockJob.getResult();
 	}
+	
 	/**
 	 * 
 	 * @return A job listener for the {@code done} event.
@@ -189,25 +194,32 @@ public class MockBuildJob extends Job {
 			// We are only interested in the done event
 			@Override
 			public void done(IJobChangeEvent event) {
-				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+				FedoraPackagerLogger logger = FedoraPackagerLogger
+						.getInstance();
+				IStatus jobStatus = event.getResult();
+				if (jobStatus.getSeverity() == IStatus.CANCEL) {
+					// cancelled log this in any case
+					logger.logInfo(RpmText.MockBuildHandler_mockCancelledMsg);
+					FedoraHandlerUtils.showInformationDialog(shell, fpr
+							.getProductStrings().getProductName(),
+							RpmText.MockBuildHandler_mockCancelledMsg);
+					return;
+				}
 				if (result.wasSuccessful()) {
 					// TODO: Make this a link to the directory
 					String msg = NLS.bind(
 							RpmText.MockBuildHandler_mockSucceededMsg,
 							result.getResultDirectoryPath());
 					logger.logDebug(msg);
-					FedoraHandlerUtils.showInformationDialog(
-							shell,
-							fpr.getProductStrings().getProductName(), msg);
+					FedoraHandlerUtils.showInformationDialog(shell, fpr
+							.getProductStrings().getProductName(), msg);
 				} else {
 					String msg = NLS.bind(
 							RpmText.MockBuildHandler_mockFailedMsg,
 							result.getResultDirectoryPath());
 					logger.logDebug(msg);
-					FedoraHandlerUtils.showInformationDialog(
-							shell,
-							fpr.getProductStrings().getProductName(),
-							msg);
+					FedoraHandlerUtils.showInformationDialog(shell, fpr
+							.getProductStrings().getProductName(), msg);
 				}
 			}
 		};
