@@ -136,7 +136,8 @@ public class KojiBuildJob extends Job {
 			return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
 					e.getMessage(), e);
 		} catch (BuildAlreadyExistsException e) {
-			logger.logDebug(e.getMessage(), e);
+			// log in any case
+			logger.logInfo(e.getMessage());
 			FedoraHandlerUtils.showInformationDialog(shell,
 					fedoraProjectRoot.getProductStrings().getProductName(),
 					e.getMessage());
