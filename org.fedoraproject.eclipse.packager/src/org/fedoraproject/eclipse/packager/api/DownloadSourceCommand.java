@@ -13,12 +13,13 @@ package org.fedoraproject.eclipse.packager.api;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -155,6 +156,15 @@ public class DownloadSourceCommand extends
 			SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1);
 			try {
 				download(subMonitor, file, sourceUrl);
+			} catch (FileNotFoundException e) {
+				// clean-up and bail.
+				try {
+					sources.deleteSource(source);
+				} catch (CoreException coreEx) { /* ignore */ }
+				throw new DownloadFailedException(
+						NLS.bind(
+								FedoraPackagerText.DownloadSourceCommand_downloadFileErrorNotInLookaside,
+						file.getName()), e);
 			} catch (IOException e) {
 				// clean-up and bail.
 				try {
@@ -196,11 +206,15 @@ public class DownloadSourceCommand extends
 	 *             If download failed.
 	 * @throws CoreException
 	 *             Something else failed, unrecoverable error.
+	 * @throws DownloadFailedException
+	 *             If getting the URL of fileToDownload returned a 404.
 	 */
 	private void download(IProgressMonitor subMonitor, IFile fileToDownload,
-			URL fileURL) throws IOException, CoreException {
-		URLConnection fileConnection = fileURL.openConnection();
-		fileConnection = fileURL.openConnection();
+			URL fileURL) throws IOException, CoreException, DownloadFailedException {
+		HttpURLConnection fileConnection = (HttpURLConnection)fileURL.openConnection();
+		if (fileConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+			throw new FileNotFoundException();
+		}
 		subMonitor.beginTask(
 				NLS.bind(FedoraPackagerText.DownloadSourceCommand_downloadFile,
 						fileToDownload.getName()), fileConnection.getContentLength());

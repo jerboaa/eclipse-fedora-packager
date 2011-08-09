@@ -48,6 +48,7 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String DownloadSourceCommand_downloadFileError;
 	/****/ public static String DownloadSourceCommand_invalidURL;
 	/****/ public static String DownloadSourceCommand_downloadingFileXofY;
+	/****/ public static String DownloadSourceCommand_downloadFileErrorNotInLookaside;
 	/****/ public static String DownloadSourceCommand_usingDownloadURLMsg;
 	// SourcesFile
 	/****/ public static String SourcesFile_saveFailedMsg;
