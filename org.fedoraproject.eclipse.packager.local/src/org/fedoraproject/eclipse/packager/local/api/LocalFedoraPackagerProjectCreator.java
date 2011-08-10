@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.egit.core.RepositoryUtil;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
@@ -160,6 +161,11 @@ public class LocalFedoraPackagerProjectCreator {
 
 		ConnectProviderOperation connect = new ConnectProviderOperation(project);
 		connect.execute(null);
+		
+		// Add created repository to the list of Git repositories so that it
+		// shows up in the Git repositories view.
+		final RepositoryUtil config = org.eclipse.egit.core.Activator.getDefault().getRepositoryUtil();
+		config.addConfiguredRepository(repository.getDirectory());
 	}
 
 	/**

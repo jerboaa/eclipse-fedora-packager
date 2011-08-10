@@ -21,14 +21,14 @@
                      type="org.eclipse.core.resources.IProject">
                   <test
                         args="org.fedoraproject.eclipse.packager.local.localproject"
-                        property="org.eclipse.core.resources.persistentProperty">
+                        property="org.eclipse.core.resources.projectPersistentProperty">
                   </test>
                </adapt>
                <adapt
                      type="org.eclipse.core.resources.IResource">
                   <test
                         args="org.fedoraproject.eclipse.packager.local.localproject"
-                        property="org.eclipse.core.resources.persistentProperty">
+                        property="org.eclipse.core.resources.projectPersistentProperty">
                   </test>
                </adapt>
            </or>
