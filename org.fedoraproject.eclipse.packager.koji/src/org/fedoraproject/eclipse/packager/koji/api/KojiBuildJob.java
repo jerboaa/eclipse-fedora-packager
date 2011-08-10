@@ -162,20 +162,31 @@ public class KojiBuildJob extends Job {
 			e.printStackTrace();
 			// Check if certs were missing
 			if (e.isCertificateMissing()) {
-				String msg = NLS
-				.bind(KojiText.KojiBuildHandler_missingCertificatesMsg,
-						fedoraProjectRoot.getProductStrings().getDistributionName());
+				String msg = NLS.bind(
+						KojiText.KojiBuildHandler_missingCertificatesMsg,
+						fedoraProjectRoot.getProductStrings()
+								.getDistributionName());
 				logger.logError(msg, e);
-				return FedoraHandlerUtils.errorStatus(
-						KojiPlugin.PLUGIN_ID, msg, e);
+				return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
+						msg, e);
 			}
 			if (e.isCertificateExpired()) {
-				String msg = NLS
-				.bind(KojiText.KojiBuildHandler_certificateExpriredMsg,
-						fedoraProjectRoot.getProductStrings().getDistributionName());
+				String msg = NLS.bind(
+						KojiText.KojiBuildHandler_certificateExpriredMsg,
+						fedoraProjectRoot.getProductStrings()
+								.getDistributionName());
 				logger.logError(msg, e);
-				return FedoraHandlerUtils.errorStatus(
-						KojiPlugin.PLUGIN_ID, msg, e);
+				return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
+						msg, e);
+			}
+			if (e.isCertificateRevoked()) {
+				String msg = NLS.bind(
+						KojiText.KojiBuildHandler_certificateRevokedMsg,
+						fedoraProjectRoot.getProductStrings()
+								.getDistributionName());
+				logger.logError(msg, e);
+				return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
+						msg, e);
 			}
 			// return some generic error
 			logger.logError(e.getMessage(), e);

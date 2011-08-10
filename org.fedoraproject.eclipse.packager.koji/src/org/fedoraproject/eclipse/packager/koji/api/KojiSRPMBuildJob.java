@@ -145,6 +145,15 @@ public class KojiSRPMBuildJob extends KojiBuildJob {
 				return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
 						msg, e);
 			}
+			if (e.isCertificateRevoked()) {
+				String msg = NLS.bind(
+						KojiText.KojiBuildHandler_certificateRevokedMsg,
+						fedoraProjectRoot.getProductStrings()
+								.getDistributionName());
+				logger.logError(msg, e);
+				return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
+						msg, e);
+			}
 			// return some generic error
 			logger.logError(e.getMessage(), e);
 			return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
