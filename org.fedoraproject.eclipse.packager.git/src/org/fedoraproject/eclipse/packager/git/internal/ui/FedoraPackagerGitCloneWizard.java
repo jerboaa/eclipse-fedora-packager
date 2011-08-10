@@ -61,6 +61,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 
 	private SelectModulePage page;
 	private IStructuredSelection selection;
+	private String fasUserName;
 
 	/**
 	 * Creates the wizards and sets that it needs progress monitor.
@@ -71,12 +72,14 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 		setWindowTitle(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_wizardTitle);
 		// required to show progress info of clone job
 		setNeedsProgressMonitor(true);
+		// retrieve FAS username
+		this.fasUserName = FedoraSSLFactory.getInstance().getUsernameFromCert();
 	}
 
 	@Override
 	public void addPages() {
 		// get Fedora username from cert
-		page = new SelectModulePage();
+		page = new SelectModulePage(fasUserName);
 		addPage(page);
 		page.init(selection);
 	}
@@ -264,8 +267,6 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 	private String getGitCloneURL() {
 		String gitBaseURL = Activator
 				.getStringPreference(GitPreferencesConstants.PREF_CLONE_BASE_URL);
-		String fasUserName = FedoraSSLFactory.getInstance()
-				.getUsernameFromCert();
 		if (gitBaseURL != null && !page.getCloneAnonymousButtonChecked()) {
 			return GitUtils.getFullGitURL(gitBaseURL, page.getPackageName());
 		} else if (!fasUserName.equals(FedoraSSL.UNKNOWN_USER) && !page.getCloneAnonymousButtonChecked()) {

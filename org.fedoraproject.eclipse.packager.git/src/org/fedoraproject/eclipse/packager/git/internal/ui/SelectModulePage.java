@@ -14,11 +14,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -32,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.dialogs.WorkingSetConfigurationBlock;
+import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.git.Activator;
 import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitText;
 
@@ -42,13 +46,18 @@ import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitText;
 public class SelectModulePage extends WizardPage {
 
 	private Text projectText;
-	private Button anonButton;
+	private Button anonymousCloneBtn;
+	private String fasUser;
 
 	private final WorkingSetGroup workingSetGroup;
 
 	private static final IWorkingSet[] EMPTY_WORKING_SET_ARRAY = new IWorkingSet[0];
+	private static final int GROUP_SPAN = 2;
 
-	protected SelectModulePage() {
+	/**
+	 * @param fasUser Either FedoraSSL.UNKNOWN_USER or the extracted FAS user name
+	 */
+	protected SelectModulePage(String fasUser) {
 		super(FedoraPackagerGitText.SelectModulePage_packageSelection);
 		setTitle(FedoraPackagerGitText.SelectModulePage_packageSelection);
 		setDescription(FedoraPackagerGitText.SelectModulePage_choosePackage); 
@@ -59,6 +68,7 @@ public class SelectModulePage extends WizardPage {
 		setWorkingSets(EMPTY_WORKING_SET_ARRAY);
 		setPageComplete(false);
 		setErrorMessage(FedoraPackagerGitText.SelectModulePage_badPackageName);
+		this.fasUser = fasUser;
 	}
 
 	/**
@@ -98,12 +108,34 @@ public class SelectModulePage extends WizardPage {
 			}
 		});
 
+		boolean isUnknownUser = fasUser.equals(FedoraSSL.UNKNOWN_USER);
+		
+		// Options group
+		Group optionsGroup = new Group(composite, SWT.SHADOW_ETCHED_IN);
+		optionsGroup.setText(FedoraPackagerGitText.SelectModulePage_optionsGroup);
+		optionsGroup.setLayout(new GridLayout());
+		// Clone anonymously button
+		anonymousCloneBtn = new Button(optionsGroup, SWT.CHECK);
+		anonymousCloneBtn.setText(FedoraPackagerGitText.SelectModulePage_anonymousCheckout);
+		anonymousCloneBtn.setSelection(isUnknownUser);
+		// disable checkbox if there is no choice of cloning non-anonymously
+		anonymousCloneBtn.setEnabled(!isUnknownUser);
+		GridDataFactory.fillDefaults().grab(true, false).span(GROUP_SPAN, 1)
+		.applyTo(optionsGroup);
+		updateMargins(optionsGroup);
+
 		// Working set controls
 		Control workingSetControl = workingSetGroup.createControl(composite);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
 		
-		anonButton = new Button(composite, SWT.CHECK);
-		anonButton.setText(FedoraPackagerGitText.SelectModulePage_anonymousCheckout);
+		// Set info message indicating which kind of clone we are about
+		// to perform
+		if (isUnknownUser) {
+			setMessage(FedoraPackagerGitText.SelectModulePage_anonymousCloneInfoMsg, IMessageProvider.INFORMATION);
+		} else {
+			setMessage(NLS.bind(FedoraPackagerGitText.SelectModulePage_sshCloneInfoMsg, fasUser), IMessageProvider.INFORMATION);
+		}
 		
 		setControl(composite);
 	}
@@ -113,7 +145,7 @@ public class SelectModulePage extends WizardPage {
 	 * @return {code true} if the user chose an anonymous clone, {code false} otherwise.
 	 */
 	public boolean getCloneAnonymousButtonChecked() {
-		return anonButton.getSelection();
+		return anonymousCloneBtn.getSelection();
 		
 	}
 
@@ -189,6 +221,14 @@ public class SelectModulePage extends WizardPage {
 		} else {
 			return EMPTY_WORKING_SET_ARRAY;
 		}
+	}
+
+	private void updateMargins(Group group) {
+		// make sure there is some room between the group border
+		// and the controls in the group
+		GridLayout layout = (GridLayout) group.getLayout();
+		layout.marginWidth = 5;
+		layout.marginHeight = 5;
 	}
 
 	/**
