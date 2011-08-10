@@ -168,4 +168,18 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="org.fedoraproject.eclipse.packager.compatibility"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.fedoraproject.eclipse.packager.local"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
