@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat Inc. and others.
+ * Copyright (c) 2010-2011 Red Hat Inc. and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,6 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
-import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
@@ -48,10 +47,15 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
  * to make it work with Local Fedora Packager Project since in the local version
  * downloading source from lookaside cache is not applicable
  */
-public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
+public class LocalBuildHandler extends LocalHandlerDispatcher {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		// Perhaps need to dispatch to non-local handler
+		if(checkDispatch(event, new org.fedoraproject.eclipse.packager.rpm.internal.handlers.LocalBuildHandler())) {
+			// dispatched, so return
+			return null;
+		}
 		final Shell shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		final IProjectRoot localFedoraProjectRoot;

@@ -57,4 +57,5 @@ Import-Package: org.eclipse.core.commands,
  org.fedoraproject.eclipse.packager.rpm.api,
  org.fedoraproject.eclipse.packager.rpm.api.errors,
  org.fedoraproject.eclipse.packager.utils,
+ org.fedoraproject.eclipse.packager.rpm.internal.handlers,
  org.osgi.framework;version="1.6.0"

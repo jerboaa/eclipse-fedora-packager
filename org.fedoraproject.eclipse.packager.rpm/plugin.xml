@@ -17,7 +17,7 @@
          <menuContribution
                locationURI="popup:org.eclipse.fedoraproject.packager.main?after=org.fedoraproject.eclipse.packager.cvssep">
                <command
-                  commandId="org.fedoraproject.eclipse.packager.PrepCommand"
+                  commandId="org.fedoraproject.eclipse.packager.local.prepCommand"
                   label="%command.label.7"
                   mnemonic="%command.mnemonic.7"
                   style="push">
@@ -40,7 +40,7 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.fedoraproject.eclipse.packager.SRPMCommand"
+                  commandId="org.fedoraproject.eclipse.packager.local.srpmCommand"
                   label="%command.label.8"
                   mnemonic="%command.mnemonic.8"
                   style="push">
@@ -63,7 +63,7 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.fedoraproject.eclipse.packager.LocalCommand"
+                  commandId="org.fedoraproject.eclipse.packager.local.BuildCommand"
                   label="%command.label.9"
                   mnemonic="%command.mnemonic.9"
                   style="push">
@@ -184,13 +184,13 @@
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="org.fedoraproject.eclipse.packager.PrepCommand"
+            commandId="org.fedoraproject.eclipse.packager.local.prepCommand"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+F P">
       </key>
       <key
-            commandId="org.fedoraproject.eclipse.packager.LocalCommand"
+            commandId="org.fedoraproject.eclipse.packager.local.BuildCommand"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+F L">
@@ -202,7 +202,7 @@
             sequence="M1+M3+F R">
       </key>
       <key
-            commandId="org.fedoraproject.eclipse.packager.SRPMCommand"
+            commandId="org.fedoraproject.eclipse.packager.local.srpmCommand"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+F S">

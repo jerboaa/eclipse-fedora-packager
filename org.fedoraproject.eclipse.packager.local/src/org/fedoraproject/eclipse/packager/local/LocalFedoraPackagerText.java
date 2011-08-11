@@ -58,6 +58,9 @@ public class LocalFedoraPackagerText extends NLS {
 	//Local Fedora Packager Project-perspective message
 	/****/ public static String LocalFedoraPackager_switchPerspectiveQuestionTitle;
 	/****/ public static String LocalFedoraPackager_switchPerspectiveQuestionMsg;
+	
+	// LocalHandlerDispatcher
+	/****/ public static String LocalHandlerDispatcher_dispatchToHandlerMsg;
 
 	static {
 		// initialize resource bundle
