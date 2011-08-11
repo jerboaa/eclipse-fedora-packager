@@ -6,3 +6,4 @@ Bundle-Version: 0.2.0.qualifier
 Require-Bundle: org.eclipse.help
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: Fedoraproject.org
