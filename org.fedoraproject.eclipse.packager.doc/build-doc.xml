@@ -34,8 +34,7 @@
 		Target 'fix' is used to:
 		1- Enable the use of internal help contents.
 		2- Remove the 'installation on eclipse' part
-		2- To remove some unparsed tags in the generated .html files, e.g.
-		  {{admon/caution|NOTE!| Do not add upstream sources!}}	-->
+		2- To remove some unparsed tags in the generated .html files -->
 	<target name="fix" depends="generate-help" description="fixes uri to internal help system" >
 	    <replaceregexp byline="true"
 	      match="First, install fedora packager for eclipse:"
@@ -48,15 +47,7 @@
 	        replace=""
 	        file="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide/Fedora-Packager-For-Eclipse-User-Guide.html">
 	      </replaceregexp>
-		
-		<replaceregexp byline="true"
-			match="&lt;ul>\s*&lt;li>.*\s*&lt;/ul>\s*&lt;pre>.+\s*&lt;/pre>"
-			replace="">
-		  <fileset dir="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide">
-		    <include name="*.html"/>
-		  </fileset>
-		</replaceregexp>
-		
+
 		<replaceregexp byline="true"
 			match="http://wiki.eclipse.org/EGit/User_Guide#Rebasing"
 			replace="../../../org.eclipse.egit.doc/help/EGit/User_Guide/Tasks.html?path=9_0_2_8#Rebasing">
@@ -97,13 +88,28 @@
 		  </fileset>
 		</replaceregexp>
 
+		<!--This part will remove unparsed NOTE tags in the generated .html files, e.g.
+			{{admon/caution|NOTE!| Do not add upstream sources!}}	-->
 		<replaceregexp byline="true"
-			match="\{\{(.+)\}\}"
+			match="\{\{admon\/caution\|NOTE!\|(.+)\}\}"
 			replace="&lt;Blockquote>&lt;b>Note!\$1&lt;\/b>&lt;\/Blockquote>">
 		  <fileset dir="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide">
 		    <include name="*.html"/>
 		  </fileset>
-		</replaceregexp>		
+		</replaceregexp>
+		
+		<!--This part will remove unparsed Warning tags in the generated .html files, e.g.
+			{{admon/warning|Note| }}	-->
+		<!-- Since this tag has mulitple lines, for now we just remove the '{{admon/warning|Note| }}'
+			manually and replace it with '<Blockquote><b>Note!...</Blockquote></b>.
+			Later this should be fixed and done through script
+		<replaceregexp byline="true"
+			match="\{\{admon\/warning\|Note\|(.+)\}\}"
+			replace="&lt;Blockquote>&lt;b>Note!\$1&lt;\/b>&lt;\/Blockquote>">
+			<fileset dir="${basedir}/${outputFolder}/Fedora_Packager_For_Eclipse_User_Guide">
+				<include name="*.html"/>
+			</fileset>
+		</replaceregexp>	-->
 	</target>
 
 	<target name="generate-help" depends="init" description="Create a user guide for maintainers of fedora packages">
@@ -145,7 +151,7 @@ https://fedoraproject.org/wiki/Fedora_Packager_For_Eclipse_User_Guide
 		link you should be:
 		[[#Creating Review Request | Creating Review Request]]
 		as opposed to:
-		[[#Creating_Review_Request | Creating Review Request]]
+		[[Fedora_Packager_For_Eclipse_User_Guide#Creating_Review_Request | Creating Review Request]]
 	
 	NOTE FOR FIX!
 		The main wiki page for this user guide contains a template for enabling use of other languages. 
@@ -156,7 +162,11 @@ https://fedoraproject.org/wiki/Fedora_Packager_For_Eclipse_User_Guide
 		up to correspondant tag:
 		   }}}</p> 
 	    should be removed.
+	    
+	    In Using-Fedora-Packager-for-Eclipse.html, there is a table for short-cuts that needs a border
+	    	<table border="1">
 	-->
+	
 	<target name="test" depends="init" description="verify that all of the HTML files are well-formed XML">
 		<echo level="info">
 Validating help content XML and HTML files: The Eclipse help system expects well-formed XML

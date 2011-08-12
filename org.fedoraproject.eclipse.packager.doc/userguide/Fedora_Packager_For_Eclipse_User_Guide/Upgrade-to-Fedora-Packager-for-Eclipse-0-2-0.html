@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>Fedora Packager For Eclipse User Guide - Upgrade to Fedora Packager for Eclipse 0.2.0</title>
+		<link type="text/css" rel="stylesheet" href="../book.css"/>
+	</head>
+	<body>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<th style="width: 100%" align="center" colspan="3">Upgrade to Fedora Packager for Eclipse 0.2.0</th>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Fedora-Packager-For-Eclipse-User-Guide.html" title="Fedora Packager For Eclipse User Guide">
+						<img alt="Previous" border="0" src="../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right">
+					<a href="Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html" title="Getting Started as Maintainer for a New Fedora Package">
+						<img alt="Next" border="0" src="../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Fedora Packager For Eclipse User Guide</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Getting Started as Maintainer for a New Fedora Package</td>
+			</tr>
+		</table><hr/>
+		<h1 id="Upgrade_to_Fedora_Packager_for_Eclipse_0.2.0">Upgrade to Fedora Packager for Eclipse 0.2.0</h1>
+		<p>Old Fedora Packager for Eclipse (0.1.12 and below) did not filter context menu visibility as rigorously as Fedora Packager for Eclipse 0.2 does. In order to do proper filtering of its context menu, version 0.2.0 and above set some persistent state when projects are imported from Fedora Git. This has the effect that the context menu is not shown for projects which have been imported via Fedora Packager for Eclipse 0.1.12 and below. Note that our updated version comes with a tool which makes upgrading those projects simple. Steps required include:</p>
+		<dl>
+			<dd>1. Open the Fedora Packaging perspective 
+				<b>Window</b> =&gt; 
+				<b>Open Perspective</b> =&gt; 
+				<b>Other</b>.
+			</dd>
+		</dl>
+		<p>
+			<img border="0" src="images/OpenFedoraPackagingPerspective.png"/>
+		</p>
+		<dl>
+			<dd>2. Click the icon of the conversion tool (as indicated in the screenshot below)</dd>
+		</dl>
+		<p>
+			<img title=" Conversion Tool Icon as Shown in the Fedora Packaging Perspective" alt=" Conversion Tool Icon as Shown in the Fedora Packaging Perspective" border="0" src="images/ConversionToolIcon.png"/>
+		</p>
+		<dl>
+			<dd>3. Select projects in your workspace which should get upgraded</dd>
+		</dl>
+		<p>
+			<img border="0" src="images/SelectProjectsToConvert.png"/>
+		</p>
+		<dl>
+			<dd>4. Click 
+				<b>OK</b> and selected projects should get converted.
+			</dd>
+		</dl>
+		<p>After the above steps, the Fedora Packager for Eclipse context menu should show up as usual.</p>
+		<p>Feel free to 
+			<a href="Using-Fedora-Packager-for-Eclipse.html#Using_Fedora_Packager_for_Eclipse">skip to the "Using Fedora Packager" section</a> if you are an existing maintainer and know how to package new software for Fedora.
+		</p><hr/>
+		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
+			<tr>
+				<td style="width: 20%" align="left">
+					<a href="Fedora-Packager-For-Eclipse-User-Guide.html" title="Fedora Packager For Eclipse User Guide">
+						<img alt="Previous" border="0" src="../images/prev.gif"/>
+					</a>
+				</td>
+				<td style="width: 60%" align="center">
+					<a href="Fedora-Packager-For-Eclipse-User-Guide.html" title="Fedora Packager For Eclipse User Guide">
+						<img alt="Fedora Packager For Eclipse User Guide" border="0" src="../images/home.gif"/>
+					</a>
+				</td>
+				<td style="width: 20%" align="right">
+					<a href="Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html" title="Getting Started as Maintainer for a New Fedora Package">
+						<img alt="Next" border="0" src="../images/next.gif"/>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 20%" align="left" valign="top">Fedora Packager For Eclipse User Guide</td>
+				<td style="width: 60%" align="center"></td>
+				<td style="width: 20%" align="right" valign="top">Getting Started as Maintainer for a New Fedora Package</td>
+			</tr>
+		</table>
+	</body>
+</html>

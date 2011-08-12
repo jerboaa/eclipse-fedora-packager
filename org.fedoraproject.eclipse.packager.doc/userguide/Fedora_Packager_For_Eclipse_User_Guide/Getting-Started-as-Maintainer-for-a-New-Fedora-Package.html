@@ -12,7 +12,7 @@
 			</tr>
 			<tr>
 				<td style="width: 20%" align="left">
-					<a href="Fedora-Packager-For-Eclipse-User-Guide.html" title="Fedora Packager For Eclipse User Guide">
+					<a href="Upgrade-to-Fedora-Packager-for-Eclipse-0-2-0.html" title="Upgrade to Fedora Packager for Eclipse 0.2.0">
 						<img alt="Previous" border="0" src="../images/prev.gif"/>
 					</a>
 				</td>
@@ -24,7 +24,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td style="width: 20%" align="left" valign="top">Fedora Packager For Eclipse User Guide</td>
+				<td style="width: 20%" align="left" valign="top">Upgrade to Fedora Packager for Eclipse 0.2.0</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right" valign="top">Using Fedora Packager for Eclipse</td>
 			</tr>
@@ -105,49 +105,25 @@
 			</li>
 		</ul>
 		<h3 id="Creating_an_RPM_package:">Creating an RPM package:</h3>
-		<p>Perform the following steps to create an RPM package: </p>
-		<ol>
-			<li>Select 
-				<b>File</b> &gt; 
-				<b>New</b> &gt; 
-				<b>Other...</b> from the main menu. Choose 
-				<b>RPM</b> &gt; 
-				<b>RPM Project</b>, click 
-				<b>Next</b>.
-				<br/>
-			</li>
-			<li>Type the 
-				<b>Project name</b>. Click 
-				<b>Finish</b>.
-				<br/>
-			</li>
-			<li>Right click on SPECS, select 
-				<b>New</b> &gt; 
-				<b>Other...</b>, choose 
-				<b>RPM</b> &gt; 
-				<b>Specfile Based on a Template</b>, click 
-				<b>Next</b>.
-				<br/>
-			</li>
-			<li>Fill out the template or accept the default values and customize it based your package specifications. You may use specific templates (e.g. for Perl or Java packages) to create a .spec file stub.</li>
-			<li>When your package is ready to submit for review, select 
-				<b>File</b> &gt; 
-				<b>Export</b> from the main munu, choose 
-				<b>RPM</b> &gt; 
-				<b>Source/Binary RPM</b>, click 
-				<b>Next</b>.
-				<br/>
-			</li>
-			<li>Based on your requirements, select one or both options, click 
-				<b>Finish</b>.
-				<br/>
-			</li>
-		</ol>
-		<ul>
-			<li>For more information have a look at the 
-				<a href="Using-Fedora-Packager-for-Eclipse.html#Using_the_Specfile_Editor">Specfile Editor User Guide</a>.
-			</li>
-		</ul>
+		<p>To start with creating an RPM package using Eclipse, perform the steps in 
+			<a href="Using-Fedora-Packager-for-Eclipse.html#Creating_a_Local_Fedora_RPM_Project">creating Local Fedora Packager Project of the user guide</a>.
+			Note that you can populate your project using one of these three options:
+		</p>
+		<dl>
+			<dd>1. 
+				<a href="Using-Fedora-Packager-for-Eclipse.html#4.a._Create_project_using_Rpm_Stubby">Using RPM Stubby</a> on <code>feature.xml</code> or <code>pom.xml</code>.
+			</dd>
+			<dd>2. 
+				<a href="Using-Fedora-Packager-for-Eclipse.html#4.b._Use_existing_.spec_file_and_sources_by_importing_SRPM_file">Extract .spec file and resources</a> by importing an existing SRPM file to the project.
+			</dd>
+			<dd>3. 
+				<a href="Using-Fedora-Packager-for-Eclipse.html#4.c._Start_a_plain_project">Start a plain project</a> using .spec file template or an existing .spec file.
+			</dd>
+		</dl>
+		<p>After you created the project, you can use rpm build commands available through the 
+			<a href="Using-Fedora-Packager-for-Eclipse.html#Local_Menu">local context menu</a> to build the package and create SRPM file. 
+			In next step you need to submit your .spec file and your SRPM file for review.
+		</p>
 		<h2 id="Submiting_For_Review">Submiting For Review</h2>
 		<h3 id="Introduce_Yourself_Using_Fedora_Mailing_Lists">Introduce Yourself Using Fedora Mailing Lists</h3>
 		<p>When a new package maintainer joins the Fedora Project, we request that he/she 
@@ -233,14 +209,14 @@
 		<p>
 			<img title="Package SCM Request" alt="Package SCM Request" border="0" src="images/PackageSCMRequest.png"/>
 		</p>
-		<h3 id="Checking_Out_the_Empty_Module_from_SCM">Checking Out the Empty Module from SCM</h3>
-		<p>Once you have the git module, clone your module from git.</p>
+		<h3 id="Fedora_Packager_Import_Wizard">Fedora Packager Import Wizard</h3>
+		<p>Once the Fedora Git repository has been created for you, you can import it in Eclipse.</p>
 		<ul>
 			<li> Go to 
 				<b>File</b> &gt; 
 				<b>Import</b> &gt; 
 				<b>Git</b> &gt; 
-				<b>Projects from Fedora Git</b> and enter your package name when prompted. This will clone the desired Git repository. Refer to this user guide on 
+				<b>Projects from Fedora Git</b> (Alternatively use keyboard short-cut <code>CTRL+ALT+F I</code> and enter your package name when prompted. This will clone the desired Git repository. Refer to this user guide on 
 				<a href="https://fedoraproject.org/wiki/Using_Fedora_GIT">Using Fedora Git</a> for more information. 
 			</li>
 			<li>For convenience, the 
@@ -291,9 +267,9 @@
 				<a href="https://fedoraproject.org/wiki/Package_Source_Control#Lookaside_Cache">this document</a>.
 			</dd>
 		</dl>
-		<p><Blockquote><b>Note!admon/caution|NOTE!| Do not add upstream sources (tar balls, zip files, etc.) to the Fedora Git repository. Use the lookaside cache instead!</b></Blockquote></p>
+		<p><Blockquote><b>Note! Do not add upstream sources (tar balls, zip files, etc.) to the Fedora Git repository. Use the lookaside cache instead!</b></Blockquote></p>
 		<dl>
-			<dd>4. Repeat steps 1-2 for your .spec file in SPECS folder.</dd>
+			<dd>4. Repeat steps <b>1-2</b> for your .spec file in SPECS folder.</dd>
 			<dd>5. To commit the package contents to the git repository, select the 
 				<b>source</b> file and the 
 				<b>.spec</b> file to commit (alternatively select the Fedora Git project and select desired 
@@ -305,6 +281,7 @@
 		<ul>
 			<li>Use this message for your initial commit: "<code>Initial import (#nnnnnn)</code>" (where nnnnnn is your Bugzilla package review bug number).</li>
 		</ul>
+		<p><Blockquote><b>Note! Fedora Packager for Eclipse won't let you to upload your .spec file or any other patches except your sources (tar balls, zip files, etc.) to the Fedora Git repository!</b></Blockquote></p>
 		<h3 id="Building_the_Package">Building the Package</h3>
 		<ul>
 			<li>Now you can 
@@ -351,7 +328,7 @@
 		<table class="navigation" style="width: 100%;" border="0" summary="navigation">
 			<tr>
 				<td style="width: 20%" align="left">
-					<a href="Fedora-Packager-For-Eclipse-User-Guide.html" title="Fedora Packager For Eclipse User Guide">
+					<a href="Upgrade-to-Fedora-Packager-for-Eclipse-0-2-0.html" title="Upgrade to Fedora Packager for Eclipse 0.2.0">
 						<img alt="Previous" border="0" src="../images/prev.gif"/>
 					</a>
 				</td>
@@ -367,7 +344,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td style="width: 20%" align="left" valign="top">Fedora Packager For Eclipse User Guide</td>
+				<td style="width: 20%" align="left" valign="top">Upgrade to Fedora Packager for Eclipse 0.2.0</td>
 				<td style="width: 60%" align="center"></td>
 				<td style="width: 20%" align="right" valign="top">Using Fedora Packager for Eclipse</td>
 			</tr>
