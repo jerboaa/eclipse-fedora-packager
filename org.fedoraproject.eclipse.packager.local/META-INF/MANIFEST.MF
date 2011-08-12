@@ -58,4 +58,7 @@ Import-Package: org.eclipse.core.commands,
  org.fedoraproject.eclipse.packager.rpm.api.errors,
  org.fedoraproject.eclipse.packager.utils,
  org.fedoraproject.eclipse.packager.rpm.internal.handlers,
+ org.junit;version="4.8.2",
+ org.junit.runner;version="4.8.2",
+ org.junit.runners;version="4.8.2",
  org.osgi.framework;version="1.6.0"

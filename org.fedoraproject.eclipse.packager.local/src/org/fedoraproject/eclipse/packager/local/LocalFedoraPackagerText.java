@@ -38,11 +38,13 @@ public class LocalFedoraPackagerText extends NLS {
 	/****/ public static String LocalFedoraPackagerPageThree_grpSpec;
 	/****/ public static String LocalFedoraPackagerPageThree_btnCheckStubby;
 	/****/ public static String LocalFedoraPackagerPageThree_lblStubby;
-	/****/ public static String LocalFedoraPackagerPageThree_btnStubbyBrowse;
+	/****/ public static String LocalFedoraPackagerPageThree_btnBrowse;
 	/****/ public static String LocalFedoraPackagerPageThree_btnCheckSrpm;
 	/****/ public static String LocalFedoraPackagerPageThree_lblSrpm;
-	/****/ public static String LocalFedoraPackagerPageThree_btnSrpmBrowse;
+	/****/ public static String LocalFedoraPackagerPageThree_lblSpecPlain;
+	/****/ public static String LocalFedoraPackagerPageThree_lblSourcePlain;
 	/****/ public static String LocalFedoraPackagerPageThree_btnCheckPlain;
+	/****/ public static String LocalFedoraPackagerPageThree_btnTemplateSpec;
 	/****/ public static String LocalFedoraPackagerPageThree_SRpm;
 	/****/ public static String LocalFedoraPackagerPageThree_Stubby;
 	/****/ public static String LocalFedoraPackagerPageThree_Plain;
