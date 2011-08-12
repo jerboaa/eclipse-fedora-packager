@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.compatibility;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -42,10 +42,20 @@ public class TrackExistingAction implements IWorkbenchWindowActionDelegate {
 		String message = FedoraPackagerCompatibilityText.TrackExistingAction_ListHeader;
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		IProject[] wsProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		Set<String> nameSet = new HashSet<String>();
+		List<IProject> projectsSet = new ArrayList<IProject>();
 		for (IProject project : wsProjects){
-			nameSet.add(project.getName());
+			// add only unconverted projects to the selection
+			String property = null;
+			try {
+				property = project.getPersistentProperty(PackagerPlugin.PROJECT_PROP);
+			} catch (CoreException e) {
+				// ignore
+			}
+			if (property == null) {
+				projectsSet.add(project);
+			}
 		}
+		wsProjects = projectsSet.toArray(new IProject[] {});
 		lsd = new ListSelectionDialog(
 				shell, wsProjects, new ArrayContentProvider(), 
 				new WorkbenchLabelProvider(), 
