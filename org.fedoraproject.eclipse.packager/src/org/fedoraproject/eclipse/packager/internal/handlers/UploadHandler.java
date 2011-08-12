@@ -185,6 +185,29 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 					return FedoraHandlerUtils.errorStatus(
 							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
 				} catch (UploadFailedException e) {
+					// Check if cert has expired, give some more 
+					// meaningful error in that case
+					if (e.isCertificateExpired()) {
+						String msg = NLS
+								.bind(FedoraPackagerText.UploadHandler_expiredCertificateError,
+										fedoraProjectRoot.getProductStrings()
+												.getDistributionName());
+						logger.logError(msg, e);
+						return FedoraHandlerUtils.errorStatus(
+								PackagerPlugin.PLUGIN_ID, msg, e);
+					}
+					// Check if cert has been revoked, give some more 
+					// meaningful error in that case
+					if (e.isCertificateRevoked()) {
+						String msg = NLS
+								.bind(FedoraPackagerText.UploadHandler_revokedCertificateError,
+										fedoraProjectRoot.getProductStrings()
+												.getDistributionName());
+						logger.logError(msg, e);
+						return FedoraHandlerUtils.errorStatus(
+								PackagerPlugin.PLUGIN_ID, msg, e);
+					}
+					// something else failed
 					logger.logError(e.getMessage(), e);
 					return FedoraHandlerUtils.errorStatus(
 							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);

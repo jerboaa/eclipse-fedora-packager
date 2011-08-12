@@ -32,6 +32,8 @@ public class FedoraPackagerText extends NLS {
 	// DownloadHandler Strings
 	/****/ public static String DownloadHandler_downloadSourceTask;
 	// UploadHandler Strings
+	/****/ public static String UploadHandler_expiredCertificateError;
+	/****/ public static String UploadHandler_revokedCertificateError;
 	/****/ public static String UploadHandler_taskName;
 	/****/ public static String UploadHandler_versionOfFileExistsAndUpToDate;
 	/****/ public static String UploadHandler_invalidUrlError;

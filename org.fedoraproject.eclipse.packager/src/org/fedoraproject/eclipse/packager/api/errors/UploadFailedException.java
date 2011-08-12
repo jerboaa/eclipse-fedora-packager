@@ -11,6 +11,7 @@
 package org.fedoraproject.eclipse.packager.api.errors;
 
 import org.apache.http.HttpResponse;
+import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
 
 
 /**
@@ -51,6 +52,39 @@ public class UploadFailedException extends FedoraPackagerAPIException {
 	public UploadFailedException(String message) {
 		super(message);
 		this.response = null;
+	}
+	
+	/**
+	 * Do some analysis and determine if certificate (~/.fedora.cert) expired.
+	 * 
+	 * @return {@code true} If and only if we can say for sure that the
+	 *         certificate expired.
+	 */
+	public boolean isCertificateExpired() {
+		if (!FedoraSSLFactory.getInstance().isFedoraCertValid()) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Do some analysis and determine if certificate (~/.fedora.cert) has been
+	 * revoked.
+	 * 
+	 * @return {@code true} If it's very likely that the certificate has been
+	 *         revoked.
+	 */
+	public boolean isCertificateRevoked() {
+		// If cert is not expired, but we still get a SSLPeerUnverifiedException,
+		// this likely means  ~/.fedora.cert was revoked.
+		if (!isCertificateExpired()
+				&& this.getCause() instanceof javax.net.ssl.SSLPeerUnverifiedException
+				&& this.getCause().getMessage()
+						.contains("peer not authenticated")) { //$NON-NLS-1$
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	/**
