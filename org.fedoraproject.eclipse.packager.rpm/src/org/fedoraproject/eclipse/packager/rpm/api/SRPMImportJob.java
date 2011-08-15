@@ -32,6 +32,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
@@ -94,7 +95,7 @@ public class SRPMImportJob extends Job {
 		try {
 			Set<String> stageSet = new HashSet<String>();
 			Set<String> uploadedFiles = new HashSet<String>();
-			logger.logInfo(NLS.bind(RpmText.SRPMImportJob_CallingCommand,
+			logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
 					SRPMImportCommand.class.getName()));
 			srpmImport = new SRPMImportCommand(srpmPath,
 					fprContainer.getProject());
@@ -106,34 +107,37 @@ public class SRPMImportJob extends Job {
 				return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
 						RpmText.SRPMImportJob_ExtractFailed);
 			}
-			//move imported files to packager root
-			if (fprContainer.getProject().getFullPath().toOSString() != fprContainer
-					.getFullPath().toOSString()) {
-				for (String file : srpmImport.getUploadFiles()) {
-					String source = fprContainer.getProject().getLocation().addTrailingSeparator().append(file).toOSString();
-					if (file.endsWith(".spec")){ //$NON-NLS-1$
-						file = fprContainer.getProject().getName().concat(".spec"); //$NON-NLS-1$
-					}
-					String result = fprContainer.getLocation().addTrailingSeparator().append(file).toOSString();
-					String[] cmdList = new String[] {
-							"mv", "-f", source, result  }; //$NON-NLS-1$ //$NON-NLS-2$
-					ProcessBuilder pBuilder = new ProcessBuilder(cmdList);
-					try {
-						pBuilder.start().waitFor();
-					} catch (InterruptedException e) {
-						//ignore, should not occur
-					}
+			// Rename .spec file if it does not have the name we require for a
+			// valid
+			// project root.
+			for (IResource resource : fprContainer.members()) {
+				if (resource.getName().endsWith(".spec") && !resource.getName().equals(fprContainer.getProject().getName().concat(".spec"))) { //$NON-NLS-1$ //$NON-NLS-2$
+					resource.move(new Path(fprContainer.getProject().getName()
+							.concat(".spec")), true, new NullProgressMonitor()); //$NON-NLS-1$
 				}
 			}
+
 			monitor.setTaskName(RpmText.SRPMImportJob_UploadingSources);
-			//create sources file if one does not exist
+			// create sources file if one does not exist
 			fprContainer
 					.getFile(new Path("sources")).getLocation().toFile().createNewFile(); //$NON-NLS-1$
 			fprContainer.getProject().refreshLocal(IResource.DEPTH_INFINITE,
 					monitor);
 
-			IProjectRoot fpr;
-			fpr = FedoraPackagerUtils.getProjectRoot(fprContainer);
+			// Should now have a valid project root, so get it.
+			IProjectRoot fpr = FedoraPackagerUtils.getProjectRoot(fprContainer);
+
+			// Make sure if the imported SRPM makes sense
+			if (!fpr.getSpecfileModel().getName()
+					.equals(fprContainer.getProject().getName())) {
+				String errorMsg = NLS.bind(
+						RpmText.SRPMImportJob_PackageNameSpecNameMismatchError,
+						fprContainer.getProject().getName(), fpr
+								.getSpecfileModel().getName());
+				logger.logError(errorMsg);
+				return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,
+						errorMsg);
+			}
 
 			FedoraPackager fp = new FedoraPackager(fpr);
 			// get upload source command
@@ -141,10 +145,13 @@ public class SRPMImportJob extends Job {
 					.getCommandInstance(UploadSourceCommand.ID);
 
 			for (String file : srpmImport.getUploadFiles()) {
-				if (FedoraPackagerUtils.isValidUploadFile(fprContainer
-						.getFile(new Path(file)).getLocation().toFile())) {
-					File newUploadFile = fprContainer.getFile(new Path(file))
-							.getLocation().toFile();
+				// This won't find the .spec file since it has been removed above.
+				// We don't care, since it shouldn't get uploaded anyway.
+				IResource candidate = fprContainer.findMember(new Path(file));
+				if (candidate != null
+						&& FedoraPackagerUtils.isValidUploadFile(candidate
+								.getLocation().toFile())) {
+					File newUploadFile = candidate.getLocation().toFile();
 					SourcesFileUpdater sourcesUpdater = new SourcesFileUpdater(
 							fpr, newUploadFile);
 					// Note that ignore file may not exist, yet
@@ -161,8 +168,7 @@ public class SRPMImportJob extends Job {
 					upload.setFedoraSSLEnabled(true);
 					upload.addCommandListener(sourcesUpdater);
 					upload.addCommandListener(vcsIgnoreFileUpdater);
-					logger.logInfo(NLS.bind(
-							RpmText.SRPMImportJob_CallingCommand,
+					logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
 							UploadSourceCommand.class.getName()));
 					try {
 						upload.call(new NullProgressMonitor());
