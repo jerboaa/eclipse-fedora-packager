@@ -78,6 +78,16 @@ public class FedoraPackagerLogger {
 		log.log(new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID,
 				ERROR_STATUS, message, throwable));
 	}
+	
+	/**
+	 * Logs errors.
+	 * 
+	 * @param message
+	 *            A human readable localized message.
+	 */
+	public void logError(String message) {
+		log.log(new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID, message));
+	}
 
 	/**
 	 * Logs informative debug messages. Messages are only logged if debugging
