@@ -40,7 +40,6 @@ import org.eclipse.linuxtools.rpmstubby.Generator;
 import org.eclipse.linuxtools.rpmstubby.InputType;
 import org.fedoraproject.eclipse.packager.local.LocalFedoraPackagerPlugin;
 import org.fedoraproject.eclipse.packager.local.LocalFedoraPackagerText;
-import org.fedoraproject.eclipse.packager.local.internal.ui.LocalFedoraPackagerPageFour;
 import org.fedoraproject.eclipse.packager.local.LocalProjectType;
 
 /**
@@ -70,19 +69,18 @@ public class LocalFedoraPackagerProjectCreator {
 	}
 	
 	/**
-	 * Starts a plain project using uploaded source files 
-	 * and the specfile template
+	 * Starts a plain project using the specfile template
 	 *
-	 * @param LocalFedoraPackagerPageFour
-	 *            instance of this class to get the contents         
+	 * @param String contents of the spec template         
 	 * @throws CoreException 
 	 *
 	 */
-	public void create(LocalFedoraPackagerPageFour pageFour) throws CoreException{
+	public void create(String content) throws CoreException{
 		final String projectName = project.getName();
 		final String fileName = projectName + ".spec"; //$NON-NLS-1$
-		final InputStream contentInputStream = new ByteArrayInputStream(
-				pageFour.getContent().getBytes());
+		
+		final InputStream contentInputStream = 
+				new ByteArrayInputStream(content.getBytes());
 		final IFile specfile = project.getFile(new Path(fileName));
 		try {
 			InputStream stream = contentInputStream;
@@ -94,7 +92,7 @@ public class LocalFedoraPackagerProjectCreator {
 			stream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}		
 	}
 	
 	/**
