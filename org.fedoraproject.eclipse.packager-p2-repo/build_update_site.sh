@@ -97,22 +97,27 @@ popd > /dev/null && rm -rf eclipse-fedorapackager
 tar -xJf $TAR_NAME
 pushd "eclipse-fedorapackager-$REV" > /dev/null
 
+rm -rf *"test"*
+
 # Link orbit deps
 mkdir orbit
 pushd orbit > /dev/null 
 ln -s /usr/share/java/xmlrpc3-client.jar
 ln -s /usr/share/java/xmlrpc3-common.jar
-ln -s /usr/share/java/json.jar org.json.jar
+ln -s /usr/share/java/google-gson.jar
+for i in /usr/share/java/httpcomponents/*{core,client,mime}*.jar; do
+  ln -s $i
+done
 ln -s /usr/share/java/ws-commons-util.jar
-ln -s /usr/share/java/not-yet-commons-ssl.jar commons-ssl.jar
+ln -s /usr/share/java/not-yet-commons-ssl.jar
 popd > /dev/null 
 
 PDE_BUILD="$ECLIPSE_BASE/buildscripts/pdebuild"
 
 # Build Eclipse Fedora Packager
 $PDE_BUILD -f org.fedoraproject.eclipse.packager \
-           -o `pwd`/orbit \
-           -d "rpm-editor changelog egit jgit" > build.log 2>&1
+           -o `pwd`/orbit -D \
+           -d "rpm-editor rpmstubby changelog egit jgit" > build.log 2>&1
 
 # Of course ant, returns a status code of 127 no matter if it
 # fails or succeeds. :) Well, work around it that way.
