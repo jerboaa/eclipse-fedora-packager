@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.fedoraproject.eclipse.packager"
+      label="Eclipse Fedora Packager Tools"
+      version="0.1.12.qualifier"
+      provider-name="FedoraProject.org"
+      os="linux">
+
+   <description url="http://fedorahosted.org/eclipse-fedorapackager">
+      Eclipse Fedora Packager is an Eclipse plugin helping 
+      Fedora contributors interacting with Fedora infrastructure
+      such as Koji, Bodhi and Fedora Git.
+   </description>
+
+   <copyright url="epl-v10.html">
+      %copyright
+   </copyright>
+
+   <license url="license.html">
+      %license
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime" version="3.3.0" match="greaterOrEqual"/>
+      <import plugin="org.apache.commons.codec"/>
+      <import plugin="org.apache.commons.httpclient"/>
+      <import plugin="org.apache.commons.ssl"/>
+      <import plugin="org.apache.ws.commons.util"/>
+      <import plugin="org.apache.xmlrpc"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.equinox.security"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.linuxtools.rpm.core"/>
+      <import plugin="org.eclipse.linuxtools.rpm.ui.editor"/>
+      <import plugin="org.eclipse.team.core"/>
+      <import plugin="org.eclipse.team.cvs.core"/>
+      <import plugin="org.eclipse.team.cvs.ui"/>
+      <import plugin="org.eclipse.team.ui"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.ui.forms"/>
+      <import plugin="org.json"/>
+      <import plugin="org.eclipse.core.commands"/>
+      <import plugin="org.eclipse.core.jobs"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.ui.browser"/>
+      <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.eclipse.jgit"/>
+      <import plugin="org.eclipse.egit.core"/>
+   </requires>
+
+   <plugin
+         id="org.fedoraproject.eclipse.packager"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.fedoraproject.eclipse.packager.bodhi"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.fedoraproject.eclipse.packager.cvs"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.fedoraproject.eclipse.packager.koji"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.fedoraproject.eclipse.packager.rpm"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.fedoraproject.eclipse.packager.git"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.fedoraproject.eclipse.packager.doc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
