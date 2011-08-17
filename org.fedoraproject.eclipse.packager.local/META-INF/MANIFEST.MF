@@ -62,3 +62,5 @@ Import-Package: org.eclipse.core.commands,
  org.junit.runner;version="4.8.2",
  org.junit.runners;version="4.8.2",
  org.osgi.framework;version="1.6.0"
+Export-Package: org.fedoraproject.eclipse.packager.local,
+ org.fedoraproject.eclipse.packager.local.api
