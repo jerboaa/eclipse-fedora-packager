@@ -14,7 +14,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Scanner;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -36,6 +38,9 @@ import org.junit.Test;
 import org.osgi.framework.FrameworkUtil;
 
 public class WizardStubbyProjectTest {
+	private static final String PROJECT = "eclipse-packager";
+	private static final String FEATURE = "feature.xml";
+
 	static IWorkspace workspace;
 	static IWorkspaceRoot root;
 	static NullProgressMonitor monitor;
@@ -47,7 +52,7 @@ public class WizardStubbyProjectTest {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		// Create a base project for the test
-		baseProject = ResourcesPlugin.getWorkspace().getRoot().getProject("eclipse-packager");
+		baseProject = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT);
 		baseProject.create(null);
 		baseProject.open(null);
 
@@ -57,11 +62,11 @@ public class WizardStubbyProjectTest {
 		// Find the test feature.xml file and install it
 		URL url = FileLocator.find(FrameworkUtil
 				.getBundle(WizardStubbyProjectTest.class), new Path(
-				"resources" + IPath.SEPARATOR + "eclipse-packager" + IPath.SEPARATOR + //$NON-NLS-1$ //$NON-NLS-2$
-						"feature.xml"), null);
+				"resources" + IPath.SEPARATOR + PROJECT + IPath.SEPARATOR + //$NON-NLS-1$
+						FEATURE), null);
 		if (url == null) {
-			fail("Unable to find resource" + IPath.SEPARATOR + "eclipse-packager" + IPath.SEPARATOR
-					+ "feature.xml");
+			fail("Unable to find resource" + IPath.SEPARATOR + PROJECT + IPath.SEPARATOR
+					+ FEATURE);
 		}
 		externalFile = new File(FileLocator.toFileURL(url).getPath());
 	}
@@ -71,16 +76,31 @@ public class WizardStubbyProjectTest {
 		// poulate project using imported feature.xml
 		testMainProject.create(InputType.ECLIPSE_FEATURE, externalFile);
 
-
 		// Make sure the original feature.xml got copied into the workspace
-		IFile featureFile = baseProject.getFile(new Path("feature.xml"));
+		IFile featureFile = baseProject.getFile(new Path(FEATURE));
 		assertTrue(featureFile.exists());
 
 		// Make sure the proper .spec file is generated
-		IFile spec = baseProject.getFile(new Path("eclipse-packager.spec"));
+		IFile specFile = baseProject.getFile(new Path("eclipse-packager.spec")); //$NON-NLS-1$
 		IDE.openEditor(Activator.getDefault()
-				.getWorkbench().getActiveWorkbenchWindow().getActivePage(),	spec);
-		assertTrue(spec.exists());
+				.getWorkbench().getActiveWorkbenchWindow().getActivePage(),	specFile);
+		assertTrue(specFile.exists());
+
+		// Check if the generated .spec file contains the correct information
+		boolean packageNameOK = false;
+		if (specFile.exists()) {
+			InputStream is = specFile.getContents();
+			String line = null;
+			Scanner scan = new Scanner(is);
+			while(scan.hasNext() && !packageNameOK) {
+				line = scan.nextLine();
+				if (line.contains("Name:           eclipse-packager")) { //$NON-NLS-1$
+					packageNameOK = true;
+				}
+			}
+			scan.close();
+		}
+		assertTrue(packageNameOK);
 	}
 
 	@After

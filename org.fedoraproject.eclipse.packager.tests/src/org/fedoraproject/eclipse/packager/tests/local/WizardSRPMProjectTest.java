@@ -14,7 +14,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Scanner;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -37,6 +39,9 @@ import org.junit.Test;
 import org.osgi.framework.FrameworkUtil;
 
 public class WizardSRPMProjectTest {
+	private static final String PROJECT = "helloworld";
+	private static final String SRPM = "helloworld-2-2.src.rpm";
+
 	static IWorkspace workspace;
 	static IWorkspaceRoot root;
 	static NullProgressMonitor monitor;
@@ -47,22 +52,22 @@ public class WizardSRPMProjectTest {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		// Create a base project for the test 
+		// Create a base project for the test
 		baseProject = ResourcesPlugin.getWorkspace().getRoot().getProject("helloworld");
 		baseProject.create(null);
-		baseProject.open(null);		
-		
+		baseProject.open(null);
+
 		testMainProject = new
 				LocalFedoraPackagerProjectCreator(baseProject, null);
-		
+
 		// Find the test SRPM and install it
 		URL url = FileLocator.find(FrameworkUtil
 				.getBundle(WizardSRPMProjectTest.class), new Path(
-				"resources" + IPath.SEPARATOR + "helloworld" + IPath.SEPARATOR + //$NON-NLS-1$ //$NON-NLS-2$
-						"helloworld-2-2.src.rpm"), null);
+				"resources" + IPath.SEPARATOR + PROJECT + IPath.SEPARATOR + //$NON-NLS-1$
+						SRPM), null);
 		if (url == null) {
-			fail("Unable to find resource" + IPath.SEPARATOR + "helloworld" + IPath.SEPARATOR
-					+ "helloworld-2-2.src.rpm");
+			fail("Unable to find resource" + IPath.SEPARATOR + PROJECT + IPath.SEPARATOR
+					+ SRPM);
 		}
 		externalFile = new File(FileLocator.toFileURL(url).getPath());
 	}
@@ -77,18 +82,35 @@ public class WizardSRPMProjectTest {
 		testMainProject.createProjectStructure();
 
 		// Make sure the original SRPM got copied into the workspace
-		IResource resource = ResourcesPlugin.getWorkspace().getRoot().getProject("helloworld");
+		IResource resource = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT);
 		ProjectType projectType = FedoraPackagerUtils.getProjectType(resource);
 		assertTrue(projectType.equals(ProjectType.GIT));
 
 		// Make sure the original SRPM got copied into the workspace
-		IFile srpm = baseProject.getFile(new Path("helloworld-2-2.src.rpm"));
+		IFile srpm = baseProject.getFile(new Path(SRPM));
 		assertTrue(srpm.exists());
 
 		// Make sure everything got installed properly
-		IFile spec = baseProject.getFile(new Path("helloworld.spec"));
-		assertTrue(spec.exists());
-		IFile sourceBall = baseProject.getFile(new Path("helloworld-2.tar.bz2"));
+		IFile specFile = baseProject.getFile(new Path("helloworld.spec")); //$NON-NLS-1$
+		assertTrue(specFile.exists());
+
+		// Check if the generated .spec file contains the correct information
+		boolean packageNameOK = false;
+		if (specFile.exists()) {
+			InputStream is = specFile.getContents();
+			String line = null;
+			Scanner scan = new Scanner(is);
+			while(scan.hasNext() && !packageNameOK) {
+				line = scan.nextLine();
+				if (line.contains("Name: helloworld")) { //$NON-NLS-1$
+					packageNameOK = true;
+				}
+			}
+			scan.close();
+		}
+		assertTrue(packageNameOK);
+
+		IFile sourceBall = baseProject.getFile(new Path("helloworld-2.tar.bz2")); //$NON-NLS-1$
 		assertTrue(sourceBall.exists());
 	}
 

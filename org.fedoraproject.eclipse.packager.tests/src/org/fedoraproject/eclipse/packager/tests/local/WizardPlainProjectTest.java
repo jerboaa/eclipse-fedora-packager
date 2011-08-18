@@ -34,6 +34,9 @@ import org.junit.Test;
 import org.osgi.framework.FrameworkUtil;
 
 public class WizardPlainProjectTest {
+	private static final String PROJECT = "helloworld";
+	private static final String SPEC = "helloworld.spec";
+
 	static IWorkspace workspace;
 	static IWorkspaceRoot root;
 	static NullProgressMonitor monitor;
@@ -44,22 +47,22 @@ public class WizardPlainProjectTest {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		// Create a base project for the test 
-		baseProject = ResourcesPlugin.getWorkspace().getRoot().getProject("eclipse-packager");
+		// Create a base project for the test
+		baseProject = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT);
 		baseProject.create(null);
-		baseProject.open(null);		
-		
+		baseProject.open(null);
+
 		testMainProject = new
 				LocalFedoraPackagerProjectCreator(baseProject, null);
-		
+
 		// Find the test .spec file and install it
 		URL url = FileLocator.find(FrameworkUtil
 				.getBundle(WizardPlainProjectTest.class), new Path(
-				"resources" + IPath.SEPARATOR + "helloworld" + IPath.SEPARATOR + //$NON-NLS-1$ //$NON-NLS-2$
-						"helloworld.spec"), null);
+				"resources" + IPath.SEPARATOR + PROJECT + IPath.SEPARATOR + //$NON-NLS-1$
+						SPEC), null);
 		if (url == null) {
-			fail("Unable to find resource" + IPath.SEPARATOR + "helloworld" + IPath.SEPARATOR
-					+ "helloworld.spec");
+			fail("Unable to find resource" + IPath.SEPARATOR + PROJECT + IPath.SEPARATOR
+					+ SPEC);
 		}
 		externalFile = new File(FileLocator.toFileURL(url).getPath());
 	}
@@ -70,8 +73,9 @@ public class WizardPlainProjectTest {
 		testMainProject.create(externalFile, LocalProjectType.PLAIN);
 
 		// Make sure the original .spec file got copied into the workspace
-		IFile featureFile = baseProject.getFile(new Path("helloworld.spec"));
-		assertTrue(featureFile.exists());
+		IFile specFile = baseProject.getFile(new Path(SPEC));
+		assertTrue(specFile.exists());
+
 	}
 
 	@After
