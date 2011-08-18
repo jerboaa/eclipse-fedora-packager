@@ -18,18 +18,15 @@ import java.net.URL;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.local.LocalProjectType;
 import org.fedoraproject.eclipse.packager.local.api.LocalFedoraPackagerProjectCreator;
 import org.junit.After;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.FrameworkUtil;
 
@@ -37,16 +34,12 @@ public class WizardPlainProjectTest {
 	private static final String PROJECT = "helloworld";
 	private static final String SPEC = "helloworld.spec";
 
-	static IWorkspace workspace;
-	static IWorkspaceRoot root;
-	static NullProgressMonitor monitor;
-	static IProject baseProject;
-	static LocalFedoraPackagerProjectCreator testMainProject;
-	private static File externalFile;
-	String pluginRoot;
+	private IProject baseProject;
+	private LocalFedoraPackagerProjectCreator testMainProject;
+	private File externalFile;
 
-	@BeforeClass
-	public static void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		// Create a base project for the test
 		baseProject = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT);
 		baseProject.create(null);
@@ -75,7 +68,6 @@ public class WizardPlainProjectTest {
 		// Make sure the original .spec file got copied into the workspace
 		IFile specFile = baseProject.getFile(new Path(SPEC));
 		assertTrue(specFile.exists());
-
 	}
 
 	@After

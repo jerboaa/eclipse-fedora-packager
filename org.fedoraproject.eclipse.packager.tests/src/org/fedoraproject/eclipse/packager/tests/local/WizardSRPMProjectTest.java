@@ -14,44 +14,38 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URL;
-import java.util.Scanner;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.local.LocalProjectType;
 import org.fedoraproject.eclipse.packager.local.api.LocalFedoraPackagerProjectCreator;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
+import org.fedoraproject.eclipse.packager.tests.utils.LocalSearchString;
 import org.junit.After;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.FrameworkUtil;
 
 public class WizardSRPMProjectTest {
 	private static final String PROJECT = "helloworld";
 	private static final String SRPM = "helloworld-2-2.src.rpm";
+	private static final String SPEC = "helloworld.spec";
+	private static final String SOURCE = "helloworld-2.tar.bz2";
 
-	static IWorkspace workspace;
-	static IWorkspaceRoot root;
-	static NullProgressMonitor monitor;
-	static IProject baseProject;
-	static LocalFedoraPackagerProjectCreator testMainProject;
-	private static File externalFile;
-	String pluginRoot;
+	private IProject baseProject;
+	private LocalFedoraPackagerProjectCreator testMainProject;
+	private File externalFile;
 
-	@BeforeClass
-	public static void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		// Create a base project for the test
 		baseProject = ResourcesPlugin.getWorkspace().getRoot().getProject("helloworld");
 		baseProject.create(null);
@@ -91,26 +85,14 @@ public class WizardSRPMProjectTest {
 		assertTrue(srpm.exists());
 
 		// Make sure everything got installed properly
-		IFile specFile = baseProject.getFile(new Path("helloworld.spec")); //$NON-NLS-1$
+		IFile specFile = baseProject.getFile(new Path(SPEC));
 		assertTrue(specFile.exists());
 
 		// Check if the generated .spec file contains the correct information
-		boolean packageNameOK = false;
-		if (specFile.exists()) {
-			InputStream is = specFile.getContents();
-			String line = null;
-			Scanner scan = new Scanner(is);
-			while(scan.hasNext() && !packageNameOK) {
-				line = scan.nextLine();
-				if (line.contains("Name: helloworld")) { //$NON-NLS-1$
-					packageNameOK = true;
-				}
-			}
-			scan.close();
-		}
-		assertTrue(packageNameOK);
+		LocalSearchString localSearch = new LocalSearchString();
+		assertTrue(localSearch.searchString("Name: helloworld", specFile)); //$NON-NLS-1$	
 
-		IFile sourceBall = baseProject.getFile(new Path("helloworld-2.tar.bz2")); //$NON-NLS-1$
+		IFile sourceBall = baseProject.getFile(new Path(SOURCE)); //$NON-NLS-1$
 		assertTrue(sourceBall.exists());
 	}
 
