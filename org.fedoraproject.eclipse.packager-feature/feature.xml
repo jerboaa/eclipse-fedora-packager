@@ -62,8 +62,8 @@
       <import plugin="org.eclipse.core.databinding.observable"/>
       <import plugin="org.eclipse.jface.databinding"/>
       <import plugin="org.eclipse.linuxtools.rpmstubby"/>
-      <import feature="org.eclipse.egit" version="1.0.0.qualifier" match="greaterOrEqual"/>
       <import plugin="org.eclipse.egit.core" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.egit.ui" version="1.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
@@ -144,34 +144,6 @@
          unpack="false"/>
 
    <plugin
-         id="com.google.gson"
-         download-size="0"
-         install-size="0"
-         version="1.7.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.xmlrpc.common"
-         download-size="0"
-         install-size="0"
-         version="3.0.0.qualifier"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.ws.commons.util"
-         download-size="0"
-         install-size="0"
-         version="1.0.0.qualifier"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.ssl"
-         download-size="0"
-         install-size="0"
-         version="0.3.10.qualifier"
-         unpack="false"/>
-
-   <plugin
          id="org.fedoraproject.eclipse.packager.compatibility"
          download-size="0"
          install-size="0"
@@ -186,7 +158,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.xmlrpc"
+         id="com.google.gson"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -194,6 +166,34 @@
 
    <plugin
          id="org.apache.commons.codec"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.ws.commons.util"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.xmlrpc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.xmlrpc.common"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.ssl"
          download-size="0"
          install-size="0"
          version="0.0.0"
