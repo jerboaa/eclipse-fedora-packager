@@ -8,6 +8,7 @@
  <children size='3'>
     <child location='efp'/>
     <child location='http://download.eclipse.org/egit/updates'/>
-    <child location='http://download.eclipse.org/technology/linuxtools/update'/>
+    <!--<child location='http://download.eclipse.org/technology/linuxtools/update'/>-->
+    <child location='http://download.eclipse.org/technology/linuxtools/updates-nightly'/>
   </children>
 </repository>
