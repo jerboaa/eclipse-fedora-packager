@@ -7,6 +7,8 @@ Bundle-Activator: org.fedoraproject.eclipse.packager.bodhi.BodhiPlugin
 Bundle-Vendor: %Bundle-Vendor.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.ui.browser,
+ org.eclipse.core.runtime
 Import-Package: com.google.gson,
  com.google.gson.annotations,
  com.google.gson.reflect,
