@@ -47,8 +47,9 @@
     <swtbot-site>http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site</swtbot-site>
     <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/S20110124210048/repository</orbit-site>
     <egit-site>http://download.eclipse.org/egit/updates</egit-site>
-    <!-- this is a locally generated repo we need to use for deps such as not-yet-commons-ssl and httpcomponents-client -->
-    <jerboaa-fedora-site>http://fedorapeople.org/~jerboaa/eclipse-fedorapackager-0.2-bootstrap-repo</jerboaa-fedora-site>
+    <!-- <jerboaa-fedora-site>http://fedorapeople.org/~jerboaa/eclipse-fedorapackager-0.2-bootstrap-repo</jerboaa-fedora-site> -->
+    <!-- We need this for our dependencies and old versions -->
+    <packager-site>https://fedorahosted.org/released/eclipse-fedorapackager/p2-repo/</packager-site>
     <linuxtools-nightly-site>http://download.eclipse.org/technology/linuxtools/updates-nightly</linuxtools-nightly-site>
   </properties>
 
@@ -131,7 +132,7 @@
     <repository>
       <id>packager-deps</id>
       <layout>p2</layout>
-      <url>${jerboaa-fedora-site}</url>
+      <url>${packager-site}</url>
     </repository>
     <repository>
       <id>linuxtools</id>
