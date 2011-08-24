@@ -19,10 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
@@ -44,12 +41,9 @@ import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
  * Job for doing a standard Mock build.
  *
  */
-public class MockBuildJob extends Job {
+public class MockBuildJob extends AbstractMockJob {
 
-	private Shell shell;
 	private final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-	private IProjectRoot fpr;
-	private MockBuildResult result;
 	private MockBuildCommand mockBuild;
 	private IPath srpmPath;
 	
@@ -60,9 +54,7 @@ public class MockBuildJob extends Job {
 	 * @param srpmPath The path to the built SRPM/
 	 */
 	public MockBuildJob(String name, Shell shell, IProjectRoot fpRoot, IPath srpmPath) {
-		super(name);
-		this.shell = shell;
-		fpr = fpRoot;
+		super(name, shell, fpRoot);
 		this.srpmPath = srpmPath;
 	}
 	/*
@@ -182,47 +174,5 @@ public class MockBuildJob extends Job {
 			throw new OperationCanceledException();
 		}
 		return mockJob.getResult();
-	}
-	
-	/**
-	 * 
-	 * @return A job listener for the {@code done} event.
-	 */
-	protected IJobChangeListener getMockJobFinishedJobListener() {
-		IJobChangeListener listener = new JobChangeAdapter() {
-
-			// We are only interested in the done event
-			@Override
-			public void done(IJobChangeEvent event) {
-				FedoraPackagerLogger logger = FedoraPackagerLogger
-						.getInstance();
-				IStatus jobStatus = event.getResult();
-				if (jobStatus.getSeverity() == IStatus.CANCEL) {
-					// cancelled log this in any case
-					logger.logInfo(RpmText.MockBuildHandler_mockCancelledMsg);
-					FedoraHandlerUtils.showInformationDialog(shell, fpr
-							.getProductStrings().getProductName(),
-							RpmText.MockBuildHandler_mockCancelledMsg);
-					return;
-				}
-				if (result.wasSuccessful()) {
-					// TODO: Make this a link to the directory
-					String msg = NLS.bind(
-							RpmText.MockBuildHandler_mockSucceededMsg,
-							result.getResultDirectoryPath());
-					logger.logDebug(msg);
-					FedoraHandlerUtils.showInformationDialog(shell, fpr
-							.getProductStrings().getProductName(), msg);
-				} else {
-					String msg = NLS.bind(
-							RpmText.MockBuildHandler_mockFailedMsg,
-							result.getResultDirectoryPath());
-					logger.logDebug(msg);
-					FedoraHandlerUtils.showInformationDialog(shell, fpr
-							.getProductStrings().getProductName(), msg);
-				}
-			}
-		};
-		return listener;
 	}
 }
