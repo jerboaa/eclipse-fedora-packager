@@ -3,9 +3,9 @@
    <feature url="features/org.fedoraproject.eclipse.packager_0.2.0.qualifier.jar" id="org.fedoraproject.eclipse.packager" version="0.2.0.qualifier">
       <category name="fedora-packager"/>
    </feature>
-   <feature url="features/org.fedoraproject.eclipse.packager_0.1.12.qualifier.jar" id="org.fedoraproject.eclipse.packager" version="0.1.12.qualifier">
+   <!--<feature url="features/org.fedoraproject.eclipse.packager_0.1.12.qualifier.jar" id="org.fedoraproject.eclipse.packager" version="0.1.12.qualifier">
       <category name="fedora-packager"/>
-   </feature>
+   </feature>-->
    <category-def name="fedora-packager" label="Fedora Packager for Eclipse">
       <description>
          Fedora Packager for Eclipse and related plug-ins.
