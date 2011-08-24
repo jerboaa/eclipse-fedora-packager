@@ -8,9 +8,8 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.local.internal.handlers;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers.local;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -24,6 +23,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
+import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
@@ -31,7 +32,6 @@ import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredExcepti
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
-import org.fedoraproject.eclipse.packager.local.LocalFedoraPackagerText;
 import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand;
@@ -39,42 +39,41 @@ import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand.BuildType;
 import org.fedoraproject.eclipse.packager.rpm.api.errors.RpmBuildCommandException;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
-
+import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
- * Handler for preparing local sources for local build (prior building it). This is useful for testing
- * if patches apply properly.
- * This is the modified version of org.fedoraproject.eclipse.packager.rpm.internal.handlers.PrepHandler.java
+ * Handler for building locally.
+ * This is the modified version of org.fedoraproject.eclipse.packager.rpm.internal.handlers.LocalBuildHandler.java
  * to make it work with Local Fedora Packager Project since in the local version
  * downloading source from lookaside cache is not applicable
  */
-public class PrepHandler extends LocalHandlerDispatcher {
+public class LocalBuildHandler extends LocalHandlerDispatcher {
 
 	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
+	public Object execute(ExecutionEvent event) throws ExecutionException {
 		// Perhaps need to dispatch to non-local handler
-		if (checkDispatch(event, new org.fedoraproject.eclipse.packager.rpm.internal.handlers.PrepHandler())) {
+		if(checkDispatch(event, new org.fedoraproject.eclipse.packager.rpm.internal.handlers.LocalBuildHandler())) {
 			// dispatched, so return
 			return null;
 		}
 		final Shell shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		final IProjectRoot localFedoraProjectRoot;
-
-		IResource eventResource = FedoraHandlerUtils.getResource(event);
 		try {
-			localFedoraProjectRoot = FedoraPackagerUtils.getProjectRoot(eventResource);
+			IResource eventResource = FedoraHandlerUtils.getResource(event);
+			localFedoraProjectRoot = FedoraPackagerUtils
+					.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e) {
-			logger.logError(LocalFedoraPackagerText.invalidLocalFedoraProjectRootError, e);
+			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
-					LocalFedoraPackagerText.invalidLocalFedoraProjectRootError);
+					FedoraPackagerText.invalidFedoraProjectRootError);
 			return null;
 		}
 		FedoraPackager fp = new FedoraPackager(localFedoraProjectRoot);
-		final RpmBuildCommand prepCommand;
+		final RpmBuildCommand rpmBuild;
 		try {
 			// get RPM build command in order to produce an SRPM
-			prepCommand = (RpmBuildCommand) fp
+			rpmBuild = (RpmBuildCommand) fp
 					.getCommandInstance(RpmBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
@@ -87,71 +86,83 @@ public class PrepHandler extends LocalHandlerDispatcher {
 					localFedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
-
-		// Need to nest jobs into this job for it to show up properly in the UI
-		// in terms of progress
 		Job job = new Job(localFedoraProjectRoot.getProductStrings().getProductName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				// Do the prep job
-				Job prepJob = new Job(localFedoraProjectRoot.getProductStrings().getProductName()) {
+
+				// Do the local build
+				Job rpmBuildjob = new Job(localFedoraProjectRoot.getProductStrings().getProductName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
 							monitor.beginTask(
-									RpmText.PrepHandler_prepareSourcesForBuildMsg,
+									RpmText.LocalBuildHandler_buildForLocalArch,
 									IProgressMonitor.UNKNOWN);
-							List<String> nodeps = new ArrayList<String>(1);
-							nodeps.add(RpmBuildCommand.NO_DEPS);
-								prepCommand.buildType(BuildType.PREP)
-										.flags(nodeps).call(monitor);
+							IFpProjectBits projectBits = FedoraPackagerUtils
+									.getVcsHandler(localFedoraProjectRoot);
+							List<String> distDefines = RPMUtils
+									.getDistDefines(projectBits);
+							try {
+								rpmBuild.buildType(BuildType.BINARY)
+										.distDefines(distDefines).call(monitor);
 								localFedoraProjectRoot.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
-						} catch (CommandMisconfiguredException e) {
-							// This shouldn't happen, but report error
-							// anyway
-							logger.logError(e.getMessage(), e);
-							return FedoraHandlerUtils.errorStatus(
-									RPMPlugin.PLUGIN_ID, e.getMessage(), e);
-						} catch (CommandListenerException e) {
-							// There are no command listeners registered, so
-							// shouldn't
-							// happen. Do something reasonable anyway.
-							logger.logError(e.getMessage(), e);
-							return FedoraHandlerUtils.errorStatus(
-									RPMPlugin.PLUGIN_ID, e.getMessage(), e);
-						} catch (RpmBuildCommandException e) {
-							logger.logError(e.getMessage(), e.getCause());
-							return FedoraHandlerUtils.errorStatus(
-									RPMPlugin.PLUGIN_ID, e.getMessage(),
-									e.getCause());
-						} catch (IllegalArgumentException e) {
-							// nodeps flags can't be null
-						} catch (CoreException e) {
-							// should not occur
-							logger.logError(e.getMessage(), e.getCause());
-							return FedoraHandlerUtils.errorStatus(
-									RPMPlugin.PLUGIN_ID, e.getMessage(),
-									e.getCause());
+							} catch (CommandMisconfiguredException e) {
+								// This shouldn't happen, but report error
+								// anyway
+								logger.logError(e.getMessage(), e);
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							} catch (CommandListenerException e) {
+								// There are no command listeners registered, so
+								// shouldn't
+								// happen. Do something reasonable anyway.
+								logger.logError(e.getMessage(), e);
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							} catch (RpmBuildCommandException e) {
+								logger.logError(e.getMessage(), e.getCause());
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(),
+										e.getCause());
+							} catch (IllegalArgumentException e) {
+								// setting distDefines failed
+								logger.logError(e.getMessage(), e);
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(), e);
+							} catch (CoreException e) {
+								// should not occur
+								logger.logError(e.getMessage(), e.getCause());
+								return FedoraHandlerUtils.errorStatus(
+										RPMPlugin.PLUGIN_ID, e.getMessage(),
+										e.getCause());
+							} catch (OperationCanceledException e){
+								FedoraHandlerUtils
+										.showErrorDialog(
+												shell,
+												RpmText.LocalBuildHandler_buildCanceled,
+												RpmText.LocalBuildHandler_buildCancelationResponse);
+							}
 						} finally {
 							monitor.done();
 						}
 						return Status.OK_STATUS;
 					}
 				};
-				prepJob.setUser(true);
-				prepJob.schedule();
+				rpmBuildjob.setUser(true);
+				rpmBuildjob.schedule();
 				try {
 					// wait for job to finish
-					prepJob.join();
+					rpmBuildjob.join();
 				} catch (InterruptedException e1) {
 					throw new OperationCanceledException();
 				}
-				return prepJob.getResult();
+				return rpmBuildjob.getResult();
 			}
-
+			
 		};
-		job.setSystem(true); // suppress UI. That's done in encapsulated jobs.
+		// Suppress UI progress reporting. This is done by sub-jobs within.
+		job.setSystem(true);
 		job.schedule();
 		return null;
 	}

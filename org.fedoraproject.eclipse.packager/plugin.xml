@@ -48,6 +48,37 @@
            </or>
          </iterate>
       </definition>
+      <definition
+            id="org.fedoraproject.eclipse.packager.localproject">
+          <or>
+              <!-- Filter on persistent property only . -->
+              <reference
+                  definitionId="org.fedoraproject.eclipse.packager.localPersistentProperty">
+              </reference>
+          </or>
+      </definition>
+      <definition
+            id="org.fedoraproject.eclipse.packager.localPersistentProperty">
+          <iterate
+               ifEmpty="false">
+            <or>
+               <adapt
+                     type="org.eclipse.core.resources.IProject">
+                  <test
+                        args="org.fedoraproject.eclipse.packager.localproject"
+                        property="org.eclipse.core.resources.projectPersistentProperty">
+                  </test>
+               </adapt>
+               <adapt
+                     type="org.eclipse.core.resources.IResource">
+                  <test
+                        args="org.fedoraproject.eclipse.packager.localproject"
+                        property="org.eclipse.core.resources.projectPersistentProperty">
+                  </test>
+               </adapt>
+           </or>
+         </iterate>
+      </definition>
    </extension>
 
    <extension point="org.eclipse.ui.menus">
@@ -194,6 +225,13 @@
        </projectRoot>
     </extension>
     <extension
+       point="org.fedoraproject.eclipse.packager.projectRootProvider">
+	    <projectRoot
+	          class="org.fedoraproject.eclipse.packager.LocalFedoraPackagerProjectRoot">
+	    </projectRoot>
+	</extension>
+	
+    <extension
           point="org.eclipse.ui.perspectives">
        <perspective
              class="org.fedoraproject.eclipse.packager.internal.perspective.PackagingPerspectiveFactory"
@@ -202,4 +240,19 @@
              name="%PerspectiveName">
        </perspective>
     </extension>
+    
+    <extension
+         point="org.eclipse.ui.newWizards">
+		<category 
+			id="org.fedoraproject.eclipse.packager.category.localwizards" 
+			name="%LocalFedoraPackagerWizardName">
+		</category>
+		<wizard
+        category="org.fedoraproject.eclipse.packager.category.localwizards"
+        class="org.fedoraproject.eclipse.packager.internal.ui.LocalFedoraPackagerProjectWizard"
+        icon="icons/fedora16x16.png"
+        id="org.fedoraproject.eclipse.packager.newlocalprojectwizard"
+        name="%FedoraGitWizardCommandName">
+		</wizard>
+	</extension>
 </plugin>

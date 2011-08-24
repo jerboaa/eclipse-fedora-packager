@@ -18,15 +18,10 @@ public class ProductStringsNonTranslatable implements IProductStrings {
 	@SuppressWarnings("unused")
 	private IProjectRoot root;
 	
-	/**
-	 * @param root
-	 * needed to be public to enable LocalFedoraPackager to use it
-	 */
 	// NOTE:
 	// This has been implemented this way for a reason. If you think this must
 	// absolutely change, please ask first.
-	
-	public ProductStringsNonTranslatable(IProjectRoot root) {
+	ProductStringsNonTranslatable(IProjectRoot root) {
 		this.root = root;
 	}
 	

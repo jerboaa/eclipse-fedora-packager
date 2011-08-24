@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.local.api;
+package org.fedoraproject.eclipse.packager.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -38,9 +38,9 @@ import org.eclipse.linuxtools.rpm.core.RPMProject;
 import org.eclipse.linuxtools.rpm.core.RPMProjectLayout;
 import org.eclipse.linuxtools.rpmstubby.Generator;
 import org.eclipse.linuxtools.rpmstubby.InputType;
-import org.fedoraproject.eclipse.packager.local.LocalFedoraPackagerPlugin;
-import org.fedoraproject.eclipse.packager.local.LocalFedoraPackagerText;
-import org.fedoraproject.eclipse.packager.local.LocalProjectType;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
+import org.fedoraproject.eclipse.packager.LocalProjectType;
 
 /**
  * Utility class to create to enable existing and 
@@ -57,9 +57,9 @@ public class LocalFedoraPackagerProjectCreator {
 	/**
 	 * Construct the local fedora packager project 
 	 *   based on the created project in main wizard
-	 * @param IProject
+	 * @param project 
 	 *            the base of the project
-	 * @param IProgressMonitor
+	 * @param monitor
 	 *            Progress monitor to report back status
 	 *
 	 */
@@ -71,7 +71,8 @@ public class LocalFedoraPackagerProjectCreator {
 	/**
 	 * Starts a plain project using the specfile template
 	 *
-	 * @param String contents of the spec template         
+	 * @param content
+	 * 		contents of the spec template         
 	 * @throws CoreException 
 	 *
 	 */
@@ -98,8 +99,9 @@ public class LocalFedoraPackagerProjectCreator {
 	/**
 	 * Populate the project based on the imported SRPM or .spec file
 	 *
-	 * @param File
-	 *            the external xml file uploaded from file system     
+	 * @param externalFile
+	 *            the xml file uploaded from file system     
+	 * @param projectType 
 	 * @throws CoreException
 	 * @throws FileNotFoundException 
 	 */
@@ -120,11 +122,10 @@ public class LocalFedoraPackagerProjectCreator {
 	/**
 	 * Populate the project using rpmstubby based on the 
 	 *  eclipse-feature or maven-pom choice of user
-	 *
-	 * @param InputType
-	 *            type of the stubby project
-	 * @param File
-	 *            the external xml file uploaded from file system
+	 * @param inputType
+	 *		type of the stubby project
+	 * @param stubby
+	 * 		the external xml file uploaded from file system
 	 * @throws CoreException 
 	 * @throws FileNotFoundException 
 	 * 
@@ -161,7 +162,7 @@ public class LocalFedoraPackagerProjectCreator {
 
 		// Set persistent property so that we know when to show the context
 		// menu item.
-		project.setPersistentProperty(LocalFedoraPackagerPlugin.PROJECT_PROP,
+		project.setPersistentProperty(PackagerPlugin.PROJECT_LOCAL_PROP,
 				"true" /* unused value */); //$NON-NLS-1$
 
 		ConnectProviderOperation connect = new ConnectProviderOperation(project);
@@ -220,13 +221,13 @@ public class LocalFedoraPackagerProjectCreator {
 				git.add().addFilepattern(name).call();
 			}
 
-			if (name.equals(".gitignore") || name.equals(".project")) { //$NON-NLS-1$
+			if (name.equals(".gitignore")) { //$NON-NLS-1$
 				git.add().addFilepattern(name).call();
 			}
 		}
 
 		// do the first commit
-		git.commit().setMessage(LocalFedoraPackagerText.LocalFedoraPackagerProjectCreator_FirstCommit)
+		git.commit().setMessage(FedoraPackagerText.LocalFedoraPackagerProjectCreator_FirstCommit)
 				.call();
 	}
 

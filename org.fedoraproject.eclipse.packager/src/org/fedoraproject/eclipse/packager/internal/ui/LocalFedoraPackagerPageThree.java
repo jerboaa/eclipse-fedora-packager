@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.local.internal.ui;
+package org.fedoraproject.eclipse.packager.internal.ui;
 
 import java.io.File;
 
@@ -28,10 +28,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.fedoraproject.eclipse.packager.local.LocalFedoraPackagerText;
-import org.fedoraproject.eclipse.packager.local.LocalProjectType;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
+import org.fedoraproject.eclipse.packager.LocalProjectType;
 import org.fedoraproject.eclipse.packager.api.FileDialogRunable;
 
+/**
+ * Adding functions to enable user to chose a way to populate the project
+ * 
+ */
 public class LocalFedoraPackagerPageThree extends WizardPage {
 
 	private Button btnCheckStubby;
@@ -53,21 +57,22 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 	private File externalFile = null;
 	private boolean pageCanFinish;
 
-
 	/**
 	 * Create the wizard.
+	 * 
+	 * @param pageName
 	 */
 	public LocalFedoraPackagerPageThree(String pageName) {
 		super(pageName);
-		setTitle(LocalFedoraPackagerText.LocalFedoraPackagerWizardPage_title);
-		setDescription(LocalFedoraPackagerText.LocalFedoraPackagerWizardPage_description);
+		setTitle(FedoraPackagerText.LocalFedoraPackagerWizardPage_title);
+		setDescription(FedoraPackagerText.LocalFedoraPackagerWizardPage_description);
 		setImageDescriptor(ImageDescriptor.createFromFile(getClass(),
-				LocalFedoraPackagerText.LocalFedoraPackagerWizardPage_image));
+				FedoraPackagerText.LocalFedoraPackagerWizardPage_image));
 	}
 
 	/**
 	 * Create contents of the wizard.
-	 *
+	 * 
 	 * @param parent
 	 */
 	@Override
@@ -83,10 +88,10 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 		grpSpec.setLayout(new GridLayout(3, false));
 		GridData layoutData = new GridData(GridData.FILL_HORIZONTAL);
 		grpSpec.setLayoutData(layoutData);
-		grpSpec.setText(LocalFedoraPackagerText.LocalFedoraPackagerPageThree_grpSpec);
+		grpSpec.setText(FedoraPackagerText.LocalFedoraPackagerPageThree_grpSpec);
 
-		btnCheckStubby = createRadioButton
-				(grpSpec, LocalFedoraPackagerText.LocalFedoraPackagerPageThree_btnCheckStubby);
+		btnCheckStubby = createRadioButton(grpSpec,
+				FedoraPackagerText.LocalFedoraPackagerPageThree_btnCheckStubby);
 		btnCheckStubby.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -105,15 +110,16 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 		comboStubby.getCombo().setLayoutData(layoutData);
 
 		textStubby = createText(grpSpec);
-		btnStubbyBrowse = createPushButton
-				(grpSpec, LocalFedoraPackagerText.LocalFedoraPackagerPageThree_btnBrowse);
+		btnStubbyBrowse = createPushButton(grpSpec,
+				FedoraPackagerText.LocalFedoraPackagerPageThree_btnBrowse);
 		btnStubbyBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				int comboIndex = comboStubby.getCombo().getSelectionIndex();
-				inputType = InputType.valueOf(comboStubby.getCombo().getItem(comboIndex));
+				inputType = InputType.valueOf(comboStubby.getCombo().getItem(
+						comboIndex));
 				String filter = null;
-				switch(inputType) {
+				switch (inputType) {
 				case ECLIPSE_FEATURE:
 					filter = InputType.ECLIPSE_FEATURE.getFileNamePattern();
 					break;
@@ -131,9 +137,8 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 			}
 		});
 
-
-		btnCheckSrpm = createRadioButton
-				(grpSpec, LocalFedoraPackagerText.LocalFedoraPackagerPageThree_btnCheckSrpm);
+		btnCheckSrpm = createRadioButton(grpSpec,
+				FedoraPackagerText.LocalFedoraPackagerPageThree_btnCheckSrpm);
 		btnCheckSrpm.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -142,11 +147,11 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 			}
 		});
 
-		lblSrpm = createLabel
-				(grpSpec, LocalFedoraPackagerText.LocalFedoraPackagerPageThree_lblSrpm);
+		lblSrpm = createLabel(grpSpec,
+				FedoraPackagerText.LocalFedoraPackagerPageThree_lblSrpm);
 		textSrpm = createText(grpSpec);
-		btnSrpmBrowse = createPushButton
-				(grpSpec, LocalFedoraPackagerText.LocalFedoraPackagerPageThree_btnBrowse);
+		btnSrpmBrowse = createPushButton(grpSpec,
+				FedoraPackagerText.LocalFedoraPackagerPageThree_btnBrowse);
 		btnSrpmBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -157,9 +162,8 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 			}
 		});
 
-
-		btnCheckPlain = createRadioButton
-				(grpSpec, LocalFedoraPackagerText.LocalFedoraPackagerPageThree_btnCheckPlain);
+		btnCheckPlain = createRadioButton(grpSpec,
+				FedoraPackagerText.LocalFedoraPackagerPageThree_btnCheckPlain);
 		btnCheckPlain.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -171,7 +175,8 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 		});
 
 		btnSpecTemplate = new Button(grpSpec, SWT.CHECK);
-		btnSpecTemplate.setText(LocalFedoraPackagerText.LocalFedoraPackagerPageThree_btnTemplateSpec);
+		btnSpecTemplate
+				.setText(FedoraPackagerText.LocalFedoraPackagerPageThree_btnTemplateSpec);
 		layoutData = new GridData();
 		layoutData.horizontalSpan = 3;
 		layoutData.horizontalIndent = 25;
@@ -189,11 +194,11 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 			}
 		});
 
-		lblSpecPlain = createLabel
-				(grpSpec, LocalFedoraPackagerText.LocalFedoraPackagerPageThree_lblSpecPlain);
-		textSpecPlain = createText(grpSpec);		
-		btnSpecPlainBrowse = createPushButton
-				(grpSpec, LocalFedoraPackagerText.LocalFedoraPackagerPageThree_btnBrowse);
+		lblSpecPlain = createLabel(grpSpec,
+				FedoraPackagerText.LocalFedoraPackagerPageThree_lblSpecPlain);
+		textSpecPlain = createText(grpSpec);
+		btnSpecPlainBrowse = createPushButton(grpSpec,
+				FedoraPackagerText.LocalFedoraPackagerPageThree_btnBrowse);
 		btnSpecPlainBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -211,7 +216,7 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 
 	/**
 	 * Return created Text widget
-	 *
+	 * 
 	 * @param Group
 	 * @return Text
 	 */
@@ -224,9 +229,10 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 
 	/**
 	 * Return the created Label widget
-	 *
+	 * 
 	 * @param Group
-	 * @param String label's text
+	 * @param String
+	 *            label's text
 	 * @return Button
 	 */
 	private Label createLabel(Group grp, String text) {
@@ -240,9 +246,10 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 
 	/**
 	 * Return the created push button widget
-	 *
+	 * 
 	 * @param Group
-	 * @param String push button's text
+	 * @param String
+	 *            push button's text
 	 * @return Button
 	 */
 	private Button createPushButton(Group grp, String text) {
@@ -253,9 +260,10 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 
 	/**
 	 * Return the created radio button widget
-	 *
+	 * 
 	 * @param Group
-	 * @param String radio button's text
+	 * @param String
+	 *            radio button's text
 	 * @return Button
 	 */
 	private Button createRadioButton(Group grp, String text) {
@@ -270,7 +278,7 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 	/**
 	 * Runs the filaDialog and sets the project type and externalFile to be
 	 * passed to project creator
-	 *
+	 * 
 	 * @param String
 	 *            filter for the fileDialog
 	 * @param Text
@@ -279,8 +287,9 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 	 *            type of the project that user selected
 	 */
 	private void fileDialog(String filter, Text text) {
-		FileDialogRunable fdr = new FileDialogRunable(filter,
-				NLS.bind(LocalFedoraPackagerText.LocalFedoraPackagerPageThree_fileDialog, filter));
+		FileDialogRunable fdr = new FileDialogRunable(filter, NLS.bind(
+				FedoraPackagerText.LocalFedoraPackagerPageThree_fileDialog,
+				filter));
 		getShell().getDisplay().syncExec(fdr);
 		String filePath = fdr.getFile();
 		if (filePath != null) {
@@ -291,7 +300,7 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 
 	/**
 	 * Return the external file to the user's selected file
-	 *
+	 * 
 	 * @return File
 	 */
 	public File getExternalFile() {
@@ -299,9 +308,8 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 	}
 
 	/**
-	 * Return the type of the populated project
-	 * based on the user's selection
-	 *
+	 * Return the type of the populated project based on the user's selection
+	 * 
 	 * @return LocalProjectType
 	 */
 	public LocalProjectType getProjectType() {
@@ -310,33 +318,34 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 
 	/**
 	 * Returns the input type of the stubby_project
-	 *
+	 * 
 	 * @return InputType
 	 */
 	public InputType getInputType() {
 		return inputType;
 	}
-	
+
 	/**
 	 * Returns the button for later reference in main wizard
-	 *
+	 * 
 	 * @return Button
 	 */
 	public Button btnSpecTemplate() {
 		return btnSpecTemplate;
 	}
+
 	/**
 	 * If Finish button can be enabled, return true
-	 *
+	 * 
 	 * @return pageCanFinish
 	 */
 	public boolean pageCanFinish() {
 		return pageCanFinish;
 	}
-	
+
 	/**
 	 * Sets the status of page
-	 *
+	 * 
 	 * @param pageIsComplete
 	 *            next or finish can be enabled
 	 * @param pageCanFinish
@@ -362,7 +371,7 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 			setStubbyControl(false);
 			setSrpmControl(true);
 			setPlainControl(false);
-		} else if (btnCheckPlain.getSelection()){
+		} else if (btnCheckPlain.getSelection()) {
 			btnSpecTemplate.setEnabled(true);
 			setStubbyControl(false);
 			setSrpmControl(false);
@@ -384,14 +393,14 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 		lblSrpm.setEnabled(bool);
 		textSrpm.setEnabled(bool);
 		btnSrpmBrowse.setEnabled(bool);
-		textStubby.setText("");
-		textSrpm.setText("");
+		textStubby.setText(""); //$NON-NLS-1$
+		textSrpm.setText(""); //$NON-NLS-1$
 	}
 
 	private void setPlainControl(boolean bool) {
 		lblSpecPlain.setEnabled(bool);
 		textSpecPlain.setEnabled(bool);
 		btnSpecPlainBrowse.setEnabled(bool);
-		textSpecPlain.setText("");
+		textSpecPlain.setText(""); //$NON-NLS-1$
 	}
 }

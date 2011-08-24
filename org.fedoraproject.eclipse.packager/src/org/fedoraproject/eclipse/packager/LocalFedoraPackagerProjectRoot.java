@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.local;
+package org.fedoraproject.eclipse.packager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,13 +45,8 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 public class LocalFedoraPackagerProjectRoot implements IProjectRoot {
 	
 	private IContainer rootContainer;
-	@SuppressWarnings("unused")
-	private SourcesFile sourcesFile;
 	private ProjectType type;
 	private IProductStrings productStrings;
-	@SuppressWarnings("unused")
-	private ILookasideCache lookAsideCache; // The lookaside cache abstraction
-
 
 	/**
 	 * Default no-arg constructor. Required for instance creation via
@@ -70,9 +65,6 @@ public class LocalFedoraPackagerProjectRoot implements IProjectRoot {
 	public void initialize(IContainer container, ProjectType type) throws FedoraPackagerExtensionPointException {
 		this.rootContainer = container;
 		assert type != null;
-		// For the local project we don't need lookaside cache and sources file
-		this.sourcesFile = null;
-		this.lookAsideCache = null;
 		this.type = type;
 		this.productStrings = new ProductStringsNonTranslatable(this);
 	}
@@ -220,7 +212,7 @@ public class LocalFedoraPackagerProjectRoot implements IProjectRoot {
 	 */
 	@Override
 	public QualifiedName[] getSupportedProjectPropertyNames() {
-		return new QualifiedName[] { LocalFedoraPackagerPlugin.PROJECT_PROP };
+		return new QualifiedName[] { PackagerPlugin.PROJECT_LOCAL_PROP };
 	}
 
 	/**

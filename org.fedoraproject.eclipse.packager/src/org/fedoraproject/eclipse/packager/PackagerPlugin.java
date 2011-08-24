@@ -41,6 +41,10 @@ public class PackagerPlugin extends AbstractUIPlugin {
 	/** Qualified name for the type property */
 	public static final QualifiedName PROJECT_PROP = new QualifiedName(PLUGIN_ID, PROJECT_KEY);
 
+	/** Local type for persistent property types */
+	public static final String PROJECT_LOCAL_KEY = "localproject"; //$NON-NLS-1$
+	/** Qualified name for the type property */
+	public static final QualifiedName PROJECT_LOCAL_PROP = new QualifiedName(PLUGIN_ID, PROJECT_LOCAL_KEY);
 	/**
 	 * The constructor
 	 */

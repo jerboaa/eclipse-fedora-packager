@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.local;
+package org.fedoraproject.eclipse.packager;
 
 /**
  * Type of the populated Local Fedora project based on the selected type by

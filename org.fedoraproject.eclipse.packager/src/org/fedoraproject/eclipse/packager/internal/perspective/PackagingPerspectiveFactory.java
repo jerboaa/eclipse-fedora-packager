@@ -31,7 +31,7 @@ public class PackagingPerspectiveFactory implements IPerspectiveFactory {
 	 */
 	public void defineActions(IPageLayout layout) {
 		// Add "new wizards".
-		layout.addNewWizardShortcut("org.fedoraproject.eclipse.packager.local.newprojectwizard"); //$NON-NLS-1$
+		layout.addNewWizardShortcut("org.fedoraproject.eclipse.packager.newlocalprojectwizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file"); //$NON-NLS-1$
 		

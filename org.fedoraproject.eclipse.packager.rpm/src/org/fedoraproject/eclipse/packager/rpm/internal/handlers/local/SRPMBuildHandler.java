@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.local.internal.handlers;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers.local;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -19,12 +19,12 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
-import org.fedoraproject.eclipse.packager.local.LocalFedoraPackagerText;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand;
 import org.fedoraproject.eclipse.packager.rpm.api.SRPMBuildJob;
@@ -54,9 +54,9 @@ public class SRPMBuildHandler extends LocalHandlerDispatcher {
 		try {
 			localFedoraProjectRoot = FedoraPackagerUtils.getProjectRoot(eventResource);
 		} catch (InvalidProjectRootException e) {
-			logger.logError(LocalFedoraPackagerText.invalidLocalFedoraProjectRootError, e);
+			logger.logError(FedoraPackagerText.invalidLocalFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
-					LocalFedoraPackagerText.invalidLocalFedoraProjectRootError);
+					FedoraPackagerText.invalidLocalFedoraProjectRootError);
 			return null;
 		}
 		FedoraPackager fp = new FedoraPackager(localFedoraProjectRoot);

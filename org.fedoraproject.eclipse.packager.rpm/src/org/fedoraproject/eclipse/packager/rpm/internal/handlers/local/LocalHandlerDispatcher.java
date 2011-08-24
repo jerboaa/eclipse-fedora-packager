@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.local.internal.handlers;
+package org.fedoraproject.eclipse.packager.rpm.internal.handlers.local;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -16,9 +16,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.osgi.util.NLS;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
-import org.fedoraproject.eclipse.packager.local.LocalFedoraPackagerText;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 
 /**
@@ -53,7 +53,7 @@ public abstract class LocalHandlerDispatcher extends
 		}
 		if (nonLocalProperty != null) {
 			// dispatch to non-local handler
-			logger.logDebug(NLS.bind(LocalFedoraPackagerText.LocalHandlerDispatcher_dispatchToHandlerMsg, handler.getClass().getName()));
+			logger.logDebug(NLS.bind(FedoraPackagerText.LocalHandlerDispatcher_dispatchToHandlerMsg, handler.getClass().getName()));
 			// must always return null, so discard return value
 			handler.execute(event);
 			return true;

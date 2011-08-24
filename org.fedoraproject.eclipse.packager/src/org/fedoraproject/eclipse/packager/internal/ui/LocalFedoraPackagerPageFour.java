@@ -8,17 +8,21 @@
  * Contributors:
  *     Red Hat Inc. - initial API and implementation
  *******************************************************************************/
-package org.fedoraproject.eclipse.packager.local.internal.ui;
+package org.fedoraproject.eclipse.packager.internal.ui;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.linuxtools.rpm.ui.editor.wizards.Messages;
 import org.eclipse.linuxtools.rpm.ui.editor.wizards.SpecfileNewWizardPage;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
-import org.fedoraproject.eclipse.packager.local.LocalFedoraPackagerPlugin;
-import org.fedoraproject.eclipse.packager.local.LocalFedoraPackagerText;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
+import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 
+/**
+ * Template for SpecFile
+ */
 public class LocalFedoraPackagerPageFour extends SpecfileNewWizardPage {
 	private String projectName;
 
@@ -33,17 +37,20 @@ public class LocalFedoraPackagerPageFour extends SpecfileNewWizardPage {
 
 	/**
 	 * Create the wizard.
+	 * 
+	 * @param pageName
+	 * @param projectName
 	 */
 	public LocalFedoraPackagerPageFour(String pageName, String projectName) {
 		super(null);
-		LocalFedoraPackagerPlugin
-				.getImageDescriptor(LocalFedoraPackagerText.LocalFedoraPackagerWizardPage_image);
+		PackagerPlugin
+				.getImageDescriptor(FedoraPackagerText.LocalFedoraPackagerWizardPage_image);
 		this.projectName = projectName;
 	}
 
 	/**
 	 * Create contents of the wizard.
-	 *
+	 * 
 	 * @param parent
 	 */
 	@Override
@@ -51,7 +58,7 @@ public class LocalFedoraPackagerPageFour extends SpecfileNewWizardPage {
 		super.createControl(parent);
 
 		// Gets the Text widgets from super to change
-		//   the default values and add listeners
+		// the default values and add listeners
 		packageNameText = getNameText();
 		packageNameText.setEnabled(false);
 
@@ -79,6 +86,7 @@ public class LocalFedoraPackagerPageFour extends SpecfileNewWizardPage {
 
 	private void addListener(Text text) {
 		text.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				dialogChanged();
 			}
@@ -87,23 +95,22 @@ public class LocalFedoraPackagerPageFour extends SpecfileNewWizardPage {
 
 	/**
 	 * Set default value of package name and project name
-	 *
+	 * 
 	 * @see org.eclipse.linuxtools.rpm.ui.editor.wizards.SpecfileNewWizardPage#setDefaultValues()
-	 *
+	 * 
 	 */
 	private void setDefaultValues() {
 		packageNameText.setText(projectName);
-		projectText.setText("/" + projectName);
+		projectText.setText(IPath.SEPARATOR + projectName);
 	}
 
 	/**
-	 * In Local Fedora Packager at this point,
-	 * project is not created. To avoid getting error
-	 * in the specfile wizard and let the user to finish the project
-	 * we set the project name to the project name retrieved from
-	 * LocalFedoraPackagerPageOne and also
-	 * we set the already created error messages to null
-	 *
+	 * In Local Fedora Packager at this point, project is not created. To avoid
+	 * getting error in the specfile wizard and let the user to finish the
+	 * project we set the project name to the project name retrieved from
+	 * LocalFedoraPackagerPageOne and also we set the already created error
+	 * messages to null
+	 * 
 	 * @see org.eclipse.linuxtools.rpm.ui.editor.wizards.SpecfileNewWizardPage#dialogChanged()
 	 */
 	private void dialogChanged() {
