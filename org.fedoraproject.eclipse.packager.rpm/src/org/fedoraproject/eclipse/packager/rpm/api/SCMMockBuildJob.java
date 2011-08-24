@@ -16,10 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
@@ -47,12 +44,10 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  * Job that configures and calls SCMMockBuildCommand.
  *
  */
-public class SCMMockBuildJob extends Job {
+public class SCMMockBuildJob extends AbstractMockJob {
+	
 	private boolean useRepoSource = false;
-	private Shell shell;
 	private final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-	private IProjectRoot fpr;
-	private MockBuildResult result;
 	private SCMMockBuildCommand mockBuild;
 	private DownloadSourceCommand download;
 	private RepoType repo;
@@ -65,9 +60,7 @@ public class SCMMockBuildJob extends Job {
 	 * @param repoType The type of repo containing the specfile
 	 */
 	public SCMMockBuildJob(String name, Shell shell, IProjectRoot fpRoot, RepoType repoType){
-		super(name);
-		this.shell = shell;
-		fpr = fpRoot;
+		super(name, shell, fpRoot);
 		repo = repoType;
 	}
 	
@@ -80,9 +73,7 @@ public class SCMMockBuildJob extends Job {
 	 * @param localSource true to force the use of local source
 	 */
 	public SCMMockBuildJob(String name, Shell shell, IProjectRoot fpRoot, RepoType repoType, boolean localSource){
-		super(name);
-		this.shell = shell;
-		fpr = fpRoot;
+		super(name, shell, fpRoot);
 		repo = repoType;
 		useRepoSource = localSource;
 	}
@@ -218,39 +209,5 @@ public class SCMMockBuildJob extends Job {
 			throw new OperationCanceledException();
 		}
 		return mockJob.getResult();
-	}
-	/**
-	 * 
-	 * @return A job listener for the {@code done} event.
-	 */
-	protected IJobChangeListener getMockJobFinishedJobListener() {
-		IJobChangeListener listener = new JobChangeAdapter() {
-
-			// We are only interested in the done event
-			@Override
-			public void done(IJobChangeEvent event) {
-				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-				if (result.wasSuccessful()) {
-					// TODO: Make this a link to the directory
-					String msg = NLS.bind(
-							RpmText.MockBuildHandler_mockSucceededMsg,
-							result.getResultDirectoryPath());
-					logger.logDebug(msg);
-					FedoraHandlerUtils.showInformationDialog(
-							shell,
-							fpr.getProductStrings().getProductName(), msg);
-				} else {
-					String msg = NLS.bind(
-							RpmText.MockBuildHandler_mockFailedMsg,
-							result.getResultDirectoryPath());
-					logger.logDebug(msg);
-					FedoraHandlerUtils.showInformationDialog(
-							shell,
-							fpr.getProductStrings().getProductName(),
-							msg);
-				}
-			}
-		};
-		return listener;
 	}
 }
