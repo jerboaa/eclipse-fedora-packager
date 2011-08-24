@@ -90,7 +90,6 @@
     <module>org.fedoraproject.eclipse.packager.doc</module>
     <module>org.fedoraproject.eclipse.packager.git</module>
     <module>org.fedoraproject.eclipse.packager.koji</module>
-    <module>org.fedoraproject.eclipse.packager.local</module>
     <module>org.fedoraproject.eclipse.packager.rpm</module>
     <module>org.fedoraproject.eclipse.packager.cvs</module>
     <module>org.fedoraproject.eclipse.packager-p2-repo</module>
