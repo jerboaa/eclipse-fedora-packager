@@ -2,7 +2,7 @@
 <feature
       id="org.fedoraproject.eclipse.packager"
       label="Fedora Packager for Eclipse"
-      version="0.2.0.qualifier"
+      version="0.2.1.qualifier"
       provider-name="Fedoraproject.org">
 
    <description url="http://fedorahosted.org/eclipse-fedorapackager">
