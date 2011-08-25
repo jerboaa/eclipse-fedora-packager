@@ -47,13 +47,12 @@
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.eclipse.ui.browser"/>
       <import plugin="org.eclipse.egit.core" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.egit.ui" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jgit" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="javax.servlet"/>
-      <import plugin="avalon-framework-impl-4.3"/>
       <import plugin="org.apache.commons.logging"/>
-      <import plugin="avalon-logkit-2.1"/>
    </requires>
 
    <plugin
