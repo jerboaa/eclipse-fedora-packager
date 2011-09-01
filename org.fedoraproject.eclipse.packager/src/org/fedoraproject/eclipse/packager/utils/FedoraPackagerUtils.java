@@ -144,7 +144,7 @@ public class FedoraPackagerUtils {
 		IResource project = fedoraprojectRoot.getProject();
 		ProjectType type = getProjectType(project);
 		IExtensionPoint vcsExtensions = Platform.getExtensionRegistry()
-				.getExtensionPoint(PackagerPlugin.PLUGIN_ID, "vcsContribution"); //$NON-NLS-1$
+				.getExtensionPoint(fedoraprojectRoot.getPluginID(), "vcsContribution"); //$NON-NLS-1$
 		if (vcsExtensions != null) {
 			IConfigurationElement[] elements = vcsExtensions
 					.getConfigurationElements();
@@ -164,7 +164,6 @@ public class FedoraPackagerUtils {
 					} catch (CoreException e) {
 						e.printStackTrace();
 					}
-
 				}
 			}
 		}

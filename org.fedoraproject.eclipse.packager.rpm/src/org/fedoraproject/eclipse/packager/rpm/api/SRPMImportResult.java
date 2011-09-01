@@ -12,16 +12,18 @@ package org.fedoraproject.eclipse.packager.rpm.api;
 
 /**
  * Implementation of Result for SRPMImport
- *
+ * 
  */
 public class SRPMImportResult extends Result {
 
 	private boolean success;
 	private String[] uploaded;
 	private String[] addedToGit;
-	
+	private String[] skipped;
+
 	/**
-	 * @param cmdList The command called for the file query.
+	 * @param cmdList
+	 *            The command called for the file query.
 	 */
 	public SRPMImportResult(String[] cmdList) {
 		super(cmdList);
@@ -31,42 +33,64 @@ public class SRPMImportResult extends Result {
 	public boolean wasSuccessful() {
 		return success;
 	}
-	
+
 	/**
-	 * @param success the success to set
+	 * @param success
+	 *            the success to set
 	 */
 	public void setSuccess(boolean success) {
 		this.success = success;
 	}
-	
+
 	/**
 	 * Set the files successfully uploaded to lookaside cache.
-	 * @param files The names of the files uploaded.
+	 * 
+	 * @param files
+	 *            The names of the files uploaded.
 	 */
-	public void setUploaded(String[] files){
+	public void setUploaded(String[] files) {
 		uploaded = files;
 	}
-	
+
 	/**
 	 * Set the files added to the project's git.
-	 * @param files The files uploaded.
+	 * 
+	 * @param files
+	 *            The files uploaded.
 	 */
-	public void setAddedToGit(String[] files){
+	public void setAddedToGit(String[] files) {
 		addedToGit = files;
 	}
-	
+
 	/**
 	 * @return The names of the successfully uploaded files.
 	 */
-	public String[] getUploaded(){
+	public String[] getUploaded() {
 		return uploaded;
 	}
-	
+
 	/**
 	 * @return The names of the files added to the project's git.
 	 */
-	public String[] getAddedToGit(){
+	public String[] getAddedToGit() {
 		return addedToGit;
+	}
+
+	/**
+	 * @return The names of the source files that weren't uploaded.
+	 */
+	public String[] getSkipped() {
+		return skipped;
+	}
+
+	/**
+	 * Set the source files that weren't uploaded.
+	 * 
+	 * @param skipped
+	 *            The names of the files that weren't uploaded.
+	 */
+	public void setSkipped(String[] skipped) {
+		this.skipped = skipped;
 	}
 
 }

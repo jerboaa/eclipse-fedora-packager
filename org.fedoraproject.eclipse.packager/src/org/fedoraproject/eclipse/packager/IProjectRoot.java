@@ -135,4 +135,9 @@ public interface IProjectRoot {
 	 * @return {@code true} if the container is valid. {@code false} otherwise.
 	 */
 	public boolean validate(IContainer candidate);
+	/**
+	 * 
+	 * @return the plugin associated with this project
+	 */
+	public String getPluginID();
 }
