@@ -276,4 +276,9 @@ public class LocalFedoraPackagerProjectRoot implements IProjectRoot {
 		return false;
 	}
 
+	@Override
+	public String getPluginID() {
+		return PackagerPlugin.PLUGIN_ID;
+	}
+
 }

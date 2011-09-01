@@ -270,4 +270,12 @@ public class FedoraProjectRoot implements IProjectRoot {
 		}
 		return false;
 	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getPluginID()
+	 */
+	@Override
+	public String getPluginID() {
+		return PackagerPlugin.PLUGIN_ID;
+	}
 }

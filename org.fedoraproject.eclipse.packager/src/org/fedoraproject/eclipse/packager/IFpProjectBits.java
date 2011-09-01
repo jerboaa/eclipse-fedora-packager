@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 
 /**
  * Interface for VCS specific bits of an FpProject. Implementations should
@@ -141,12 +142,14 @@ public interface IFpProjectBits {
 	 * @param fedoraProjectRoot The project root to check for local changes.
 	 * 
 	 * @return Whether there are local changes or not.
+	 * @throws CommandListenerException 
 	 */
-	public boolean hasLocalChanges(IProjectRoot fedoraProjectRoot);
+	public boolean hasLocalChanges(IProjectRoot fedoraProjectRoot) throws CommandListenerException;
 	
 	/**
 	 * Stage changes to an array of files.
 	 * @param files The files to add the changes to the repository.
+	 * @throws CommandListenerException 
 	 */
-	public void stageChanges(String[] files);
+	public void stageChanges(String[] files) throws CommandListenerException;
 }

@@ -77,21 +77,23 @@ public class RpmText extends NLS {
 	/****/ public static String SRPMBuildHandler_buildingSRPM;
 	// SRPMImportCommand
 	/****/ public static String SRPMImportCommand_IOError;
+	/****/ public static String SRPMImportCommand_OverwriteError;
+	/****/ public static String SRPMImportCommand_MoveError;
 	/****/ public static String SRPMImportCommand_NonZeroExit;
 	/****/ public static String SRPMImportCommand_NonZeroQueryExit;
 	/****/ public static String SRPMImportCommand_PathNotSet;
 	/****/ public static String SRPMImportCommand_ProjectNotSet;
 	/****/ public static String SRPMImportCommand_SRPMNotFound;
+	// SRPMImportHandler
 	/****/ public static String SRPMImportHandler_FileDialogTitle;
-	//SRPMImportHandler
 	/****/ public static String SRPMImportHandler_ImportingFromSRPM;
 	// SRPMImportJob
-	/****/ public static String SRPMImportJob_PackageNameSpecNameMismatchError;
+	/****/ public static String SRPMImportCommand_PackageNameSpecNameMismatchError;
 	/****/ public static String SRPMImportJob_ExtractFailed;
 	/****/ public static String SRPMImportJob_ExtractingSRPM;
 	/****/ public static String SRPMImportJob_InitialSetup;
 	/****/ public static String SRPMImportJob_MalformedLookasideURL;
-	/****/ public static String SRPMImportJob_StagingChanges;
+	/****/ public static String SRPMImportCommand_StagingChanges;
 	/****/ public static String SRPMImportJob_UploadingSources;
 
 	static {

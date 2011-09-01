@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
@@ -51,12 +52,12 @@ import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
+import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
  * CVS specific FpProject bits. Implementation of
- * org.fedoraproject.eclipse.packager.vcsContribution
- * extension point.
+ * org.fedoraproject.eclipse.packager.vcsContribution extension point.
  * 
  * @author Red Hat Inc.
  * 
@@ -64,11 +65,12 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 @SuppressWarnings("restriction")
 public class FpCVSProjectBits implements IFpProjectBits {
 
-	private IProjectRoot fedoraprojectRoot; // The underlying project root
+	protected IProjectRoot fedoraprojectRoot; // The underlying project root
 	private IResource container; 				 // The underlying container
 	private HashMap<String, HashMap<String, String>> branches; // All branches
-	private boolean initialized = false; 		 // keep track if instance is initialized
-	
+	private boolean initialized = false; // keep track if instance is
+											// initialized
+
 	/**
 	 * See {@link IFpProjectBits#getCurrentBranchName()}
 	 */
@@ -79,7 +81,8 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		}
 		// retrieve current branch name from branch file.
 		// Current implementation is incorrect.
-		IFile branchesFile = this.fedoraprojectRoot.getContainer().getFile(new Path("branch"));
+		IFile branchesFile = this.fedoraprojectRoot.getContainer().getFile(
+				new Path("branch"));
 		if (branchesFile.exists()) {
 			InputStream is;
 			try {
@@ -102,11 +105,12 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		// default to devel
 		return "devel"; //$NON-NLS-1$
 	}
+
 	/**
 	 * See {@link IFpProjectBits#getRawCurrentBranchName()}
 	 */
 	@Override
-	public String getRawCurrentBranchName(){
+	public String getRawCurrentBranchName() {
 		return getCurrentBranchName();
 	}
 
@@ -135,17 +139,18 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	 * Parse branches from "common/branches" file.
 	 * 
 	 * @return A map of branch names and according properties required for
-	 * 		   building.
+	 *         building.
 	 */
 	// TODO: We need to be smarter than this. Won't work for messed up branches
-	//		 file. Probably we should walk the project and look for folders which
-	//       contain "sources" and ".spec" files. We can never be 100% accurate
-	//       so we should make sure that we do proper error checking.
+	// file. Probably we should walk the project and look for folders which
+	// contain "sources" and ".spec" files. We can never be 100% accurate
+	// so we should make sure that we do proper error checking.
 	private HashMap<String, HashMap<String, String>> getBranches() {
 		HashMap<String, HashMap<String, String>> ret = new HashMap<String, HashMap<String, String>>();
 
-		IFile branchesFile = this.fedoraprojectRoot.getProject().getFolder("common").getFile( //$NON-NLS-1$
-				"branches"); //$NON-NLS-1$
+		IFile branchesFile = this.fedoraprojectRoot.getProject()
+				.getFolder("common").getFile( //$NON-NLS-1$
+						"branches"); //$NON-NLS-1$
 		InputStream is;
 		try {
 			is = branchesFile.getContents();
@@ -155,7 +160,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 			String line;
 			while ((line = bufReader.readLine()) != null) {
 				// skip commented lines
-				if (! line.startsWith("#")) {
+				if (!line.startsWith("#")) {
 					branches.add(line);
 				}
 			}
@@ -227,7 +232,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		// FIXME: Make this less hard-coded!
 		return folder.getFile(this.container.getProject().getName() + ".spec") != null;
 	}
-	
+
 	/**
 	 * Determine if instance has been properly initialized
 	 */
@@ -273,15 +278,14 @@ public class FpCVSProjectBits implements IFpProjectBits {
 
 		return ret;
 	}
-	
+
 	/**
 	 * Do CVS update to get updated "sources" and ".cvsignore" file.
 	 * 
 	 * See {@link IFpProjectBits#updateVCS(IProjectRoot, IProgressMonitor)}
 	 */
 	@Override
-	public IStatus updateVCS(IProjectRoot projectRoot,
-			IProgressMonitor monitor) {
+	public IStatus updateVCS(IProjectRoot projectRoot, IProgressMonitor monitor) {
 		IStatus status = Status.OK_STATUS;
 		IFile specfile = projectRoot.getSpecFile();
 		File ignoreFile = projectRoot.getIgnoreFile().getLocation().toFile();
@@ -331,26 +335,27 @@ public class FpCVSProjectBits implements IFpProjectBits {
 								monitor);
 					}
 				} else {
-					status = new Status(IStatus.ERROR ,
+					status = new Status(IStatus.ERROR,
 							PackagerPlugin.PLUGIN_ID, "Can't find sources file"); //$NON-NLS-1$
 				}
 			} else {
-				status =  new Status(IStatus.ERROR ,
-						PackagerPlugin.PLUGIN_ID, "Can't find sources file"); //$NON-NLS-1$
+				status = new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID,
+						"Can't find sources file"); //$NON-NLS-1$
 			}
 
 		} catch (CVSException e) {
 			e.printStackTrace();
-			status = new Status(IStatus.ERROR ,
-					PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
+			status = new Status(IStatus.ERROR, PackagerPlugin.PLUGIN_ID,
+					e.getMessage(), e);
 		}
 		return status;
 	}
-	
+
 	/**
 	 * Do proper initialization of this instance.
 	 * 
-	 * @param fedoraProjectRoot The underlying project.
+	 * @param fedoraProjectRoot
+	 *            The underlying project.
 	 */
 	@Override
 	public void initialize(IProjectRoot fedoraProjectRoot) {
@@ -393,7 +398,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	public String getTarget() {
 		return this.branches.get(getCurrentBranchName()).get("target"); //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * See {@link IFpProjectBits#ignoreResource(IResource)}
 	 */
@@ -402,28 +407,28 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	/**
 	 * Do CVS tag.
 	 * 
 	 * See {@link IFpProjectBits#tagVcs(IProjectRoot, IProgressMonitor)}
 	 */
 	@Override
-	public IStatus tagVcs(IProjectRoot projectRoot,
-			IProgressMonitor monitor) {
-//		monitor.subTask("Generating Tag Name from Specfile");
+	public IStatus tagVcs(IProjectRoot projectRoot, IProgressMonitor monitor) {
+		// monitor.subTask("Generating Tag Name from Specfile");
 		final String tagName;
 		try {
 			tagName = RPMUtils.makeTagName(projectRoot);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return new Status(IStatus.ERROR, CVSPlugin.PLUGIN_ID, e.getMessage());
+			return new Status(IStatus.ERROR, CVSPlugin.PLUGIN_ID,
+					e.getMessage());
 		}
 
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-//		monitor.subTask("Tagging as " + tagName);
+		// monitor.subTask("Tagging as " + tagName);
 		IStatus result = createCVSTag(tagName, false, monitor, projectRoot);
 		String errExists = "Tag " + tagName + " has been already created";
 		if (!result.isOK()) {
@@ -441,17 +446,16 @@ public class FpCVSProjectBits implements IFpProjectBits {
 			if (tagExists) {
 				// prompt to force tag
 				// FIXME: move this to the appropriate place
-				/*if (promptForceTag(tagName)) {
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-					result = createCVSTag(tagName, true, monitor);
-				}*/
+				/*
+				 * if (promptForceTag(tagName)) { if (monitor.isCanceled()) {
+				 * throw new OperationCanceledException(); } result =
+				 * createCVSTag(tagName, true, monitor); }
+				 */
 			}
 		}
 		return result;
 	}
-	
+
 	private IStatus createCVSTag(String tagName, boolean forceTag,
 			IProgressMonitor monitor, IProjectRoot projectRoot) {
 		IStatus result;
@@ -495,8 +499,9 @@ public class FpCVSProjectBits implements IFpProjectBits {
 
 			session.close();
 			if (!status.isOK()) {
-				MultiStatus temp = new MultiStatus(status.getPlugin(), status
-						.getCode(), status.getMessage(), status.getException());
+				MultiStatus temp = new MultiStatus(status.getPlugin(),
+						status.getCode(), status.getMessage(),
+						status.getException());
 				for (IStatus error : session.getErrors()) {
 					temp.add(error);
 				}
@@ -505,12 +510,13 @@ public class FpCVSProjectBits implements IFpProjectBits {
 				result = status;
 			}
 		} catch (CVSException e) {
-			result = new Status(IStatus.ERROR, CVSPlugin.PLUGIN_ID, e.getMessage());
+			result = new Status(IStatus.ERROR, CVSPlugin.PLUGIN_ID,
+					e.getMessage());
 		}
 
 		return result;
 	}
-	
+
 	/**
 	 * Determine if CVS tag exists.
 	 * 
@@ -555,6 +561,13 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		return true;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.fedoraproject.eclipse.packager.IFpProjectBits#getScmUrlForKoji(org
+	 * .fedoraproject.eclipse.packager.IProjectRoot)
+	 */
 	@Override
 	public String getScmUrlForKoji(IProjectRoot projectRoot) {
 		try {
@@ -565,27 +578,64 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		}
 		return "";
 	}
-	
+
 	/**
 	 * Getter for internal use.
+	 * 
 	 * @return The FedoraProjectRoot for this branch
 	 */
 	protected IProjectRoot getFedoraProjectRoot() {
 		return this.fedoraprojectRoot;
 	}
 
-	@Override
-	public boolean hasLocalChanges(IProjectRoot fedoraProjectRoot) {
-		//TODO implement
-		return false;
-	}
-	
 	/*
 	 * (non-Javadoc)
-	 * @see org.fedoraproject.eclipse.packager.IFpProjectBits#stageChanges(java.lang.String[])
+	 * 
+	 * @see
+	 * org.fedoraproject.eclipse.packager.IFpProjectBits#hasLocalChanges(org
+	 * .fedoraproject.eclipse.packager.IProjectRoot)
 	 */
 	@Override
-	public void stageChanges(String[] files){
-		//TODO implement
+	public boolean hasLocalChanges(IProjectRoot fedoraProjectRoot)
+			throws CommandListenerException {
+		ICVSFolder folder = CVSWorkspaceRoot.getCVSFolderFor(fedoraProjectRoot
+				.getContainer());
+		try {
+			return folder.isModified(new NullProgressMonitor());
+		} catch (CVSException e) {
+			throw new CommandListenerException(e);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.fedoraproject.eclipse.packager.IFpProjectBits#stageChanges(java.lang
+	 * .String[])
+	 */
+	@Override
+	public void stageChanges(String[] files) throws CommandListenerException {
+		CVSTeamProvider provider = (CVSTeamProvider) RepositoryProvider
+				.getProvider(fedoraprojectRoot.getProject(),
+						CVSProviderPlugin.getTypeId());
+		try {
+			ICVSRepositoryLocation location = provider.getRemoteLocation();
+			// get CVSROOT
+			CVSWorkspaceRoot cvsRoot = provider.getCVSWorkspaceRoot();
+			ICVSFolder rootFolder = cvsRoot.getLocalRoot();
+			// get Branch
+			ICVSFolder branchFolder = rootFolder.getFolder(fedoraprojectRoot
+					.getContainer().getName());
+			// Make new CVS Session
+			Session session = new Session(location, branchFolder, true);
+			session.open(new NullProgressMonitor());
+			Command.ADD.execute(session, Command.NO_GLOBAL_OPTIONS,
+					Command.NO_LOCAL_OPTIONS, files, null,
+					new NullProgressMonitor());
+			session.close();
+		} catch (CVSException e) {
+			throw new CommandListenerException(e);
+		}
 	}
 }
