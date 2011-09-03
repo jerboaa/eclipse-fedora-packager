@@ -38,96 +38,96 @@
 		<p>If you are a new package maintainer:</p>
 		<h3 id="Creating_a_new_account_in_Fedora_Account_System">Creating a new account in Fedora Account System</h3>
 		<ul>
-			<li>First step is to create account in 
+			<li>First step is to create account in
 				<a href="https://admin.fedoraproject.org/accounts">Fedora Account System (FAS)</a>.
 			</li>
-			<li>Click 
+			<li>Click
 				<b>New account</b> and fill in the blanks.
 			</li>
-			<li>After you create your account, please be sure to sign the CLA (if you click on the 
+			<li>After you create your account, please be sure to sign the CLA (if you click on the
 				<b>My Account</b> link in the top right, you should see <code>CLA: CLA Done</code>).
 			</li>
 			<li>Also you need to upload a public <code>RSA SSH key</code>. You need to use the matching private key to access Fedora machines via SSH.
 				<ul>
-					<li>Here is information on 
+					<li>Here is information on
 						<a href="http://www.openbsd.org/cgi-bin/man.cgi?query=ssh-keygen">creating SSH key</a>.
 					</li>
 				</ul>
 			</li>
 		</ul>
 		<h3 id="Creating_a_Bugzilla_Account">Creating a Bugzilla Account</h3>
-		<p>Create an account in 
+		<p>Create an account in
 			<a href="https://bugzilla.redhat.com/createaccount.cgi">Red Hat bugzilla</a>.
 		</p>
 		<ul>
-			<li>The email address that you use for your bugzilla account should be the same email address as you use in the 
+			<li>The email address that you use for your bugzilla account should be the same email address as you use in the
 				<i>Fedora Account System</i> for all things related to fedora packaging.
 			</li>
-			<li>To make you work and your bug tracking easier, there is a task management plug-in for eclipse called 
-				<b>Mylyn</b>. You can follow  these instructions on 
+			<li>To make you work and your bug tracking easier, there is a task management plug-in for eclipse called
+				<b>Mylyn</b>. You can follow  these instructions on
 				<a href="https://fedoraproject.org/wiki/Eclipse_How_to_Maintain_Fedora_Package_User_Guide/mylyn_bugzilla">how to integrate your bugizlla account with your mylyn plug-in in eclipse</a>.
 			</li>
 		</ul>
 		<h3 id="Initial_Setup">Initial Setup</h3>
-		<p>This step is only required to be completed once for a new Fedora packager or if using a new machine that does not have the required FAS certificates set up. When it is certain this is correct it is safe to skip this step. The following explains how to set up those certificates for an 
+		<p>This step is only required to be completed once for a new Fedora packager or if using a new machine that does not have the required FAS certificates set up. When it is certain this is correct it is safe to skip this step. The following explains how to set up those certificates for an
 			<a href="https://admin.fedoraproject.org/accounts/">FAS account</a>.
 			<br/>
 		</p>
 		<ul>
 			<li>First, install the <code>fedora-packager</code> RPM package:</li>
 		</ul>
-		<pre>   yum install fedora-packager 
+		<pre>   yum install fedora-packager
 </pre>
 		<ul>
 			<li>Then run the following command and follow the instructions provided:</li>
 		</ul>
-		<pre>   fedora-packager-setup 
+		<pre>   fedora-packager-setup
 </pre>
-		<p>Feel free to 
+		<p>Feel free to
 			<a href="Using-Fedora-Packager-for-Eclipse.html#Using_Fedora_Packager_for_Eclipse">skip the next section</a> if you are an existing maintainer and also know how to create a new software for Fedora.
 		</p>
 		<h2 id="Making_a_Package">Making a Package</h2>
 		<h3 id="Packaging_Guidlines">Packaging Guidlines</h3>
 		<ul>
-			<li>If you don't know how to create an RPM package, refer to the tutorial at 
-				<a href="http://fedoraproject.org/wiki/A_Short_RPM_Tutorial">A Short RPM Tutorial</a> or the more advanced and much more detailed 
+			<li>If you don't know how to create an RPM package, refer to the tutorial at
+				<a href="http://fedoraproject.org/wiki/A_Short_RPM_Tutorial">A Short RPM Tutorial</a> or the more advanced and much more detailed
 				<a href="http://fedoraproject.org/wiki/How_to_create_an_RPM_package">how to create an RPM package</a>.
 			</li>
-			<li>Make sure it is a new package. Check this 
+			<li>Make sure it is a new package. Check this
 				<a href="https://admin.fedoraproject.org/pkgdb/acls/list/">list of existing packages</a>.
 			</li>
-			<li>Make sure it is a suitable package. Read 
-				<a href="http://fedoraproject.org/wiki/Packaging:Guidelines">Packaging Guidelines</a> and 
+			<li>Make sure it is a suitable package. Read
+				<a href="http://fedoraproject.org/wiki/Packaging:Guidelines">Packaging Guidelines</a> and
 				<a href="http://fedoraproject.org/wiki/Packaging:NamingGuidelines">Packaging Naming Guidelines</a>.
 			</li>
-			<li>Read some other package submissions to learn about packaging and gain familiarity with the process and requirements. One way of doing this is to join the 
+			<li>Read some other package submissions to learn about packaging and gain familiarity with the process and requirements. One way of doing this is to join the
 				<a href="https://admin.fedoraproject.org/mailman/listinfo/package-review">package-review@lists.fedoraproject.org</a> mailing list.
 			</li>
 		</ul>
 		<h3 id="Creating_an_RPM_package:">Creating an RPM package:</h3>
-		<p>To start with creating an RPM package using Eclipse, perform the steps in 
+		<p>To start with creating an RPM package using Eclipse, perform the steps in
 			<a href="Using-Fedora-Packager-for-Eclipse.html#Creating_a_Local_Fedora_RPM_Project">creating Local Fedora Packager Project of the user guide</a>.
 			Note that you can populate your project using one of these three options:
 		</p>
 		<dl>
-			<dd>1. 
-				<a href="Using-Fedora-Packager-for-Eclipse.html#4.a._Create_project_using_Rpm_Stubby">Using RPM Stubby</a> on <code>feature.xml</code> or <code>pom.xml</code>.
+			<dd>1.
+				<a href="Using-Fedora-Packager-for-Eclipse.html#4.a._Start_a_plain_project">Start a plain project</a> using .spec file template or an existing .spec file.
 			</dd>
-			<dd>2. 
+			<dd>2.
 				<a href="Using-Fedora-Packager-for-Eclipse.html#4.b._Use_existing_.spec_file_and_sources_by_importing_SRPM_file">Extract .spec file and resources</a> by importing an existing SRPM file to the project.
 			</dd>
-			<dd>3. 
-				<a href="Using-Fedora-Packager-for-Eclipse.html#4.c._Start_a_plain_project">Start a plain project</a> using .spec file template or an existing .spec file.
+			<dd>3.
+				<a href="Using-Fedora-Packager-for-Eclipse.html#4.c._Create_project_using_Rpm_Stubby">Using RPM Stubby</a> on <code>feature.xml</code> or <code>pom.xml</code>.
 			</dd>
 		</dl>
-		<p>After you created the project, you can use rpm build commands available through the 
-			<a href="Using-Fedora-Packager-for-Eclipse.html#Local_Menu">local context menu</a> to build the package and create SRPM file. 
+		<p>After you created the project, you can use rpm build commands available through the
+			<a href="Using-Fedora-Packager-for-Eclipse.html#Local_Menu">local context menu</a> to build the package and create SRPM file.
 			In next step you need to submit your .spec file and your SRPM file for review.
 		</p>
 		<h2 id="Submiting_For_Review">Submiting For Review</h2>
 		<h3 id="Introduce_Yourself_Using_Fedora_Mailing_Lists">Introduce Yourself Using Fedora Mailing Lists</h3>
-		<p>When a new package maintainer joins the Fedora Project, we request that he/she 
-			<a href="https://fedoraproject.org/wiki/Staying_close_to_upstream_projects">stays close to upstream</a>. Inform the developers that you are packaging the software by introducing yourself on the 
+		<p>When a new package maintainer joins the Fedora Project, we request that he/she
+			<a href="https://fedoraproject.org/wiki/Staying_close_to_upstream_projects">stays close to upstream</a>. Inform the developers that you are packaging the software by introducing yourself on the
 			<a href="https://admin.fedoraproject.org/mailman/listinfo/devel">devel@lists.fedoraproject.org</a>.
 			<br/>
 			To sign up for the list, visit the devel list signup page.
@@ -138,8 +138,8 @@
 				<i>Subject:</i> Self Introduction
 				<i>Body:</i> Add any information you believe is applicable including past experience, a link to the review request you have filed and a brief description of yourself. You can also post your GPG key information if you want to.
 			</li>
-			<li>Here is the information of 
-				<a href="http://fedoraproject.org/wiki/Join_the_package_collection_maintainers#Join_the_important_Mailing_Lists">possible mailing lists</a> for you to join. And there is also a list of 
+			<li>Here is the information of
+				<a href="http://fedoraproject.org/wiki/Join_the_package_collection_maintainers#Join_the_important_Mailing_Lists">possible mailing lists</a> for you to join. And there is also a list of
 				<a href="http://fedoraproject.org/wiki/Category:Packaging_SIGs">special interest groups for Fedora Packaging</a>.
 			</li>
 		</ul>
@@ -150,7 +150,7 @@
 			<li>If you have already got a Fedora Account then you can use your storage at <code>&lt;user-name&gt;.fedorapeople.org</code> for this.</li>
 		</ul>
 		<p>Example:</p>
-		<pre>   scp path/to/file.spec path/to/rpm-file.src.rpm &lt;user-name&gt;.fedorapeople.org:public_html 
+		<pre>   scp path/to/file.spec path/to/rpm-file.src.rpm &lt;user-name&gt;.fedorapeople.org:public_html
 </pre>
 		<p><code>file.spec</code> and <code>rpm-file.src.rpm</code> will then be available via the following URLs:</p>
 		<pre>   http://&lt;user-name&gt;.fedorapeople.org/file.spec
@@ -159,23 +159,23 @@
 		<h3 id="Creating_Review_Request">Creating Review Request</h3>
 		<p>Before submitting your request, be sure there is not a previous request for the same package.
 			<br/>
-			Fill out this form in 
+			Fill out this form in
 			<a href="https://bugzilla.redhat.com/bugzilla/enter_bug.cgi?product=Fedora&amp;format=fedora-review">bugzilla</a>.
 		</p>
 		<dl>
-			<dd>1. Make sure that you put the name of the package (excluding version and release numbers) in the 
+			<dd>1. Make sure that you put the name of the package (excluding version and release numbers) in the
 				<i>Review Summary</i> field, along with a very brief summary of what the package is.
 			</dd>
-			<dd>2. Put a description of your package (usually, this can be the same thing as what you put in the spec <code>%description</code>) in the 
-				<i>Review Description</i> field. 
+			<dd>2. Put a description of your package (usually, this can be the same thing as what you put in the spec <code>%description</code>) in the
+				<i>Review Description</i> field.
 			</dd>
-			<dd>3- Obtain member sponsorship: If this is your first package, or you are a new maintainer who is updating a package, explain it and say that you need a sponsor (you will need sponsorship to check in and build your package).To be able to get sponsored, you should enter 
-				<b>FE-NEEDSPONSOR</b> into the 
+			<dd>3- Obtain member sponsorship: If this is your first package, or you are a new maintainer who is updating a package, explain it and say that you need a sponsor (you will need sponsorship to check in and build your package).To be able to get sponsored, you should enter
+				<b>FE-NEEDSPONSOR</b> into the
 				<i>Blocks</i> field.
 				<dl>
 					<dd>Sponsorship is not automatic and may require that you further participate in other ways in order to demonstrate your understanding of the packaging guidelines.</dd>
 					<dd>Key to becoming sponsored is to convince an existing sponsor-level member that you understand and follow the project's guidelines and processes.</dd>
-					<dd>For more information check this 
+					<dd>For more information check this
 						<a href="https://fedoraproject.org/wiki/How_to_get_sponsored_into_the_packager_group">How to get sponsored</a> user guide.
 					</dd>
 				</dl>
@@ -197,12 +197,12 @@
 		<h2 id="Ready_to_Ship">Ready to Ship</h2>
 		<p>Follow these steps after your package is approved by reviewers.</p>
 		<h3 id="Requesting_a_new_package_SCM">Requesting a new package SCM</h3>
-		<p>When the package is approved by the reviewer, request a git module and branches with the info on 
+		<p>When the package is approved by the reviewer, request a git module and branches with the info on
 			<a href="http://fedoraproject.org/wiki/Package_SCM_admin_requests">Source Code Management(SCM) admin requests</a>.
 		</p>
 		<ul>
-			<li>Requests that require package administrators approval may be requested through the fedora-cvs flag in Bugzilla tickets. Changing the fedora-cvs flag to 
-				<b>"?"</b> in a Bugzilla report means admin attention is needed. 
+			<li>Requests that require package administrators approval may be requested through the fedora-cvs flag in Bugzilla tickets. Changing the fedora-cvs flag to
+				<b>"?"</b> in a Bugzilla report means admin attention is needed.
 			</li>
 			<li>Mention the name of the branches you need your package to be included in.</li>
 		</ul>
@@ -212,15 +212,15 @@
 		<h3 id="Fedora_Packager_Import_Wizard">Fedora Packager Import Wizard</h3>
 		<p>Once the Fedora Git repository has been created for you, you can import it in Eclipse.</p>
 		<ul>
-			<li> Go to 
-				<b>File</b> &gt; 
-				<b>Import</b> &gt; 
-				<b>Git</b> &gt; 
-				<b>Projects from Fedora Git</b> (Alternatively use keyboard short-cut <code>CTRL+ALT+F I</code> and enter your package name when prompted. This will clone the desired Git repository. Refer to this user guide on 
-				<a href="https://fedoraproject.org/wiki/Using_Fedora_GIT">Using Fedora Git</a> for more information. 
+			<li> Go to
+				<b>File</b> &gt;
+				<b>Import</b> &gt;
+				<b>Git</b> &gt;
+				<b>Projects from Fedora Git</b> (Alternatively use keyboard short-cut <code>CTRL+ALT+F I</code> and enter your package name when prompted. This will clone the desired Git repository. Refer to this user guide on
+				<a href="https://fedoraproject.org/wiki/Using_Fedora_GIT">Using Fedora Git</a> for more information.
 			</li>
-			<li>For convenience, the 
-				<i>Git Repositories view</i> will also open once the clone process has finished. 
+			<li>For convenience, the
+				<i>Git Repositories view</i> will also open once the clone process has finished.
 				<br/>
 				<br/>
 			</li>
@@ -242,7 +242,7 @@
 			<br/>
 		</p>
 		<ul>
-			<li>Since you are cloning your new empty git repository, you will just see the 
+			<li>Since you are cloning your new empty git repository, you will just see the
 				<b>sources</b> file in your cloned package directory.
 			</li>
 		</ul>
@@ -250,31 +250,31 @@
 		<h3 id="Importing_and_Committing_the_Package_Contents">Importing and Committing the Package Contents</h3>
 		<p>After you have checked out your empty git module, you need to import and commit your package contents into the master branch. </p>
 		<dl>
-			<dd>1. Right-click on your source files in the SOURCES folder of your local RPM project in Eclipse and click 
+			<dd>1. Right-click on your source files in the SOURCES folder of your local RPM project in Eclipse and click
 				<b>Copy</b>.
 			</dd>
-			<dd>2. Right-click on your cloned project from Fedora Git and click 
-				<b>Paste</b>. 
+			<dd>2. Right-click on your cloned project from Fedora Git and click
+				<b>Paste</b>.
 			</dd>
-			<dd>3. To upload these upstream source files to the lookaside cache, right-click on them, select 
-				<b>Fedora Packager</b> &gt; 
-				<b>Upload this File</b> &gt; 
-				<b>Add to Existing Sources</b>. This adds the files to the list of source files required to build the package. Use 
-				<b>Fedora Packager</b> &gt; 
-				<b>Upload this File</b> &gt; 
-				<b>Replace Sources</b> in order to replace the current content of the 
-				<b>sources</b> file to contain a single line with the MD5 sum of the file selected. More information about the lookaside cache can be found in 
+			<dd>3. To upload these upstream source files to the lookaside cache, right-click on them, select
+				<b>Fedora Packager</b> &gt;
+				<b>Upload this File</b> &gt;
+				<b>Add to Existing Sources</b>. This adds the files to the list of source files required to build the package. Use
+				<b>Fedora Packager</b> &gt;
+				<b>Upload this File</b> &gt;
+				<b>Replace Sources</b> in order to replace the current content of the
+				<b>sources</b> file to contain a single line with the MD5 sum of the file selected. More information about the lookaside cache can be found in
 				<a href="https://fedoraproject.org/wiki/Package_Source_Control#Lookaside_Cache">this document</a>.
 			</dd>
 		</dl>
 		<p><Blockquote><b>Note! Do not add upstream sources (tar balls, zip files, etc.) to the Fedora Git repository. Use the lookaside cache instead!</b></Blockquote></p>
 		<dl>
 			<dd>4. Repeat steps <b>1-2</b> for your .spec file in SPECS folder.</dd>
-			<dd>5. To commit the package contents to the git repository, select the 
-				<b>source</b> file and the 
-				<b>.spec</b> file to commit (alternatively select the Fedora Git project and select desired 
-				<i>unstaged</i> files when the commit dialog is shown), right-click, 
-				<b>Team</b> &gt; 
+			<dd>5. To commit the package contents to the git repository, select the
+				<b>source</b> file and the
+				<b>.spec</b> file to commit (alternatively select the Fedora Git project and select desired
+				<i>unstaged</i> files when the commit dialog is shown), right-click,
+				<b>Team</b> &gt;
 				<b>Commit...</b>
 			</dd>
 		</dl>
@@ -284,13 +284,13 @@
 		<p><Blockquote><b>Note! Fedora Packager for Eclipse won't let you to upload your .spec file or any other patches except your sources (tar balls, zip files, etc.) to the Fedora Git repository!</b></Blockquote></p>
 		<h3 id="Building_the_Package">Building the Package</h3>
 		<ul>
-			<li>Now you can 
+			<li>Now you can
 				<a href="Using-Fedora-Packager-for-Eclipse.html#Building_the_Package_Locally">build your package locally</a> using Fedora Packager's features.
 			</li>
 		</ul>
 		<h3 id="Closing_the_Bugzilla_Ticket">Closing the Bugzilla Ticket</h3>
 		<ul>
-			<li>If your package was built successfully, you should close it as 
+			<li>If your package was built successfully, you should close it as
 				<b>NEXTRELEASE</b>.
 			</li>
 		</ul>
@@ -308,20 +308,20 @@
 			</dd>
 		</dl>
 		<ul>
-			<li>To be able to include your builds in all releases, make sure to read 
+			<li>To be able to include your builds in all releases, make sure to read
 				<a href="Using-Fedora-Packager-for-Eclipse.html#Fedora_Packaging_Work">these instructions</a>.
 			</li>
 		</ul>
-		<p>Continue with 
+		<p>Continue with
 			<a href="Using-Fedora-Packager-for-Eclipse.html#Using_Fedora_Packager_for_Eclipse">next steps in this user-guide</a> to be able to use all available features of Fedora Packager plug-in.
 		</p>
 		<h3 id="Enabling_Upstream_Release_Monitoring">Enabling Upstream Release Monitoring</h3>
 		<p>Fedora has infrastructure available for monitoring new upstream releases of the software you are packaging. </p>
 		<ul>
-			<li>Refer to 
+			<li>Refer to
 				<a href="http://fedoraproject.org/wiki/Upstream_Release_Monitoring">Upstream Release Monitoring</a> for more details.
 			</li>
-			<li>Learn to handle updates by reading the 
+			<li>Learn to handle updates by reading the
 				<a href="http://fedoraproject.org/wiki/Package_update_HOWTO">Package update HOWTO</a>.
 			</li>
 		</ul><hr/>

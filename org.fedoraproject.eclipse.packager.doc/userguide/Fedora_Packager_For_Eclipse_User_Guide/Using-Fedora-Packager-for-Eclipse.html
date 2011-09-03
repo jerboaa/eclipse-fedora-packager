@@ -31,14 +31,14 @@
 		</table><hr/>
 		<h1 id="Using_Fedora_Packager_for_Eclipse">Using Fedora Packager for Eclipse</h1>
 		<p>
-			<b>Before continuing with this part, make sure you have read our</b> 
+			<b>Before continuing with this part, make sure you have read our</b>
 			<b>
 				<a href="Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Initial_Setup">initial setup</a> instructions
-			</b>. Moreover, please make sure your 
+			</b>. Moreover, please make sure your
 			<a href="Using-Fedora-Packager-for-Eclipse.html#Configure_SSH_in_Eclipse">FAS SSH keys are properly configured</a> in Eclipse.
 		</p>
-		<p>Most of the features of Fedora Packager for Eclipse are accessible via its context menu or keyboard short-cuts. The richest context menu is available if you 
-			<a href="Using-Fedora-Packager-for-Eclipse.html#Importing_a_Fedora_Git_Project">imported a Fedora Git package</a>. A subset of this functionality is also available for 
+		<p>Most of the features of Fedora Packager for Eclipse are accessible via its context menu or keyboard short-cuts. The richest context menu is available if you
+			<a href="Using-Fedora-Packager-for-Eclipse.html#Importing_a_Fedora_Git_Project">imported a Fedora Git package</a>. A subset of this functionality is also available for
 			<a href="Using-Fedora-Packager-for-Eclipse.html#Creating_a_Local_Fedora_RPM_Project">Fedora RPM projects</a>. The former is intended for Fedora package maintainers and the latter is useful for creating a new Fedora package, which is not yet part of the Fedora distribution.
 		</p>
 		<p>
@@ -46,12 +46,12 @@
 		</p>
 		<p>The Fedora Packager context menu should be available if you:</p>
 		<dl>
-			<dd>1. Right-click on a project which got imported via the 
-				<a href="Using-Fedora-Packager-for-Eclipse.html#Importing_a_Fedora_Git_Project">Import from Fedora Git</a> wizard or a smaller subset for projects created with the 
+			<dd>1. Right-click on a project which got imported via the
+				<a href="Using-Fedora-Packager-for-Eclipse.html#Importing_a_Fedora_Git_Project">Import from Fedora Git</a> wizard or a smaller subset for projects created with the
 				<a href="Using-Fedora-Packager-for-Eclipse.html#Creating_a_Local_Fedora_RPM_Project">Fedora RPM Project</a> wizard.
 			</dd>
 			<dd>2. Right-click on a .spec file which is contained in a Fedora Packager project (e.g. in the Project Explorer).</dd>
-			<dd>3. Right-click 
+			<dd>3. Right-click
 				<b>in</b> the .spec file itself, while editing it.
 			</dd>
 		</dl>
@@ -122,7 +122,7 @@
 				<td>Prepare Sources for Build</td>
 				<td>Prep Sources</td>
 				<td><code>CTRL+ALT+F P</code></td>
-				<td>Execute the %prep section in the .spec file. This will download sources from the lookaside cache if sources are not yet in the containing folder. Note that this behaviour is slightly different for a 
+				<td>Execute the %prep section in the .spec file. This will download sources from the lookaside cache if sources are not yet in the containing folder. Note that this behaviour is slightly different for a
 					<a href="Using-Fedora-Packager-for-Eclipse.html#Creating_a_Local_Fedora_RPM_Project">Fedora RPM project</a>, since downloading from the lookaside cache is not applicable in this case.
 				</td>
 			</tr>
@@ -130,7 +130,7 @@
 				<td>Create SRPM</td>
 				<td>SRPM Build</td>
 				<td><code>CTRL+ALT+F S</code></td>
-				<td>Create an SRPM based on the current snapshot of the .spec file and the current Git branch one is on. This will download sources from the lookaside cache if sources are not yet in the containing folder. Note that this behaviour is slightly different for a 
+				<td>Create an SRPM based on the current snapshot of the .spec file and the current Git branch one is on. This will download sources from the lookaside cache if sources are not yet in the containing folder. Note that this behaviour is slightly different for a
 					<a href="Using-Fedora-Packager-for-Eclipse.html#Creating_a_Local_Fedora_RPM_Project">Fedora RPM project</a>, since downloading from the lookaside cache is not applicable in this case.
 				</td>
 			</tr>
@@ -138,7 +138,7 @@
 				<td>Build for Local Architecture</td>
 				<td>Local Build</td>
 				<td><code>CTRL+ALT+F L</code></td>
-				<td>Build binary RPMs based on the current snapshot of the .spec file and the current Git branch one is on. This will download sources from the lookaside cache if sources are not yet in the containing folder. Note that this behaviour is slightly different for a 
+				<td>Build binary RPMs based on the current snapshot of the .spec file and the current Git branch one is on. This will download sources from the lookaside cache if sources are not yet in the containing folder. Note that this behaviour is slightly different for a
 					<a href="Using-Fedora-Packager-for-Eclipse.html#Creating_a_Local_Fedora_RPM_Project">Fedora RPM project</a>, since downloading from the lookaside cache is not applicable in this case.
 				</td>
 			</tr>
@@ -168,18 +168,18 @@
 		</dl>
 		<p>First, we'll describe how Fedora Packager for Eclipse can be used for creating a new Fedora package. This is handy if you decided to become a new package maintainer (never packaged something for Fedora before) and would like to submit a package for review. It is also useful for existing package maintainers who would like to introduce a new Fedora package. If you'd like to become a new package maintainer, the Fedora RPM Project option of Fedora Packager for Eclipse 0.2, will help you walking you through the process and will make some parts of it easier for you. For existing packager this will help expediting SRPM creation and submitting it for review.</p>
 		<h2 id="Creating_a_Local_Fedora_RPM_Project">Creating a Local Fedora RPM Project</h2>
-		<Blockquote><b>Note! This option should only be used if the software you'd like to package is 
-			<b>not yet part of the Fedora distribution</b>. If it is already part of Fedora, follow instructions 
+		<Blockquote><b>Note! This option should only be used if the software you'd like to package is
+			<b>not yet part of the Fedora distribution</b>. If it is already part of Fedora, follow instructions
 			<a href="Using-Fedora-Packager-for-Eclipse.html#Importing_a_Fedora_Git_Project">here</a>.</b></Blockquote>
 		<dl>
-			<dd>1. Select 
-				<b>New</b> &gt; 
-				<b>Fedora</b> &gt; 
-				<b>Fedora RPM Project</b> and click 
+			<dd>1. Select
+				<b>New</b> &gt;
+				<b>Fedora</b> &gt;
+				<b>Fedora RPM Project</b> and click
 				<b>Next</b>.
 			</dd>
-			<dd>2. Type the name of your desired package name in 
-				<b>Project name</b> and click 
+			<dd>2. Type the name of your desired package name in
+				<b>Project name</b> and click
 				<b>Next</b>.
 			</dd>
 		</dl>
@@ -189,14 +189,14 @@
 		<dl>
 			<dd>3. Select the option that matches you:
 				<dl>
-					<dd>If you are an 
-						<b>Existing maintainer</b>, select this option and click 
+					<dd>If you are an
+						<b>Existing maintainer</b>, select this option and click
 						<b>Next</b>.
 					</dd>
-					<dd>If you are a 
-						<i>New maintainer</i>', make sure you follow all the mentioned steps to complete your account setting. Once you are finished you can type in your 
-						<b>FAS Account ID</b> and click 
-						<b>Next</b>. 
+					<dd>If you are a
+						<i>New maintainer</i>', make sure you follow all the mentioned steps to complete your account setting. Once you are finished you can type in your
+						<b>FAS Account ID</b> and click
+						<b>Next</b>.
 					</dd>
 				</dl>
 			</dd>
@@ -207,74 +207,26 @@
 		<dl>
 			<dd>4. You can start the project in three different ways:</dd>
 		</dl>
-		<h5 id="4.a._Create_project_using_Rpm_Stubby">4.a. Create project using Rpm Stubby</h5>
+		<h5 id="4.a._Start_a_plain_project">4.c. Start a plain project</h5>
 		<dl>
-			<dd>If you have an Eclipse-feature or Maven-Pom, you can select first option to start your project using 
-				<a href="http://www.eclipse.org/linuxtools/projectPages/rpmstubby/">RPM Stubby</a>. From the drop down list:
-				<dl>
-					<dd>Select 
-						<b>ECLIPSE_FEATURE</b> to upload an existing 
-						<i>feature.xml</i> file to your project.
-					</dd>
-					<dd>Or select 
-						<b>MAVEN_POM</b> to upload an existing 
-						<i>pom.xml</i> file to your project.
-					</dd>
-				</dl>
-			</dd>
-		</dl>
-		<p>
-			<img title="Stubby Project" alt="Stubby Project" border="0" src="images/LocalStubbyProject.png"/>
-		</p>
-		<dl>
-			<dd>Select your file and click 
-				<b>Finish</b>. 
-			</dd>
-			<dd>Your project content and your generated Specfile should look like this:</dd>
-		</dl>
-		<p>
-			<img title="Stubby populate" alt="Stubby populate" border="0" src="images/LocalStubbyPopulate.png"/>
-			<br/>
-			<br/>
-		</p>
-		<h5 id="4.b._Use_existing_.spec_file_and_sources_by_importing_SRPM_file">4.b. Use existing .spec file and sources by importing SRPM file</h5>
-		<dl>
-			<dd>If you have already an SRPM, you can upload it to your workspace and the Specfile and sources will be extracted from SRPM. </dd>
-		</dl>
-		<p>
-			<img title="Srpm Project" alt="Srpm Project" border="0" src="images/LocalSrpmProject.png"/>
-		</p>
-		<dl>
-			<dd>Select your SRPM file and click 
-				<b>Finish</b>. 
-			</dd>
-			<dd>Your project content and your generated specfile should look like this:</dd>
-		</dl>
-		<p>
-			<img title="Srpm Populated Project" alt="Srpm Populated Project" border="0" src="images/LocalSrpmPopulate.png"/>
-			<br/>
-			<br/>
-		</p>
-		<h5 id="4.c._Start_a_plain_project">4.c. Start a plain project</h5>
-		<dl>
-			<dd>If you want to upload an existing .spec file, un-check the 
-				<b>Generate a .spec file from template</b> option and click 
+			<dd>If you want to upload an existing .spec file, un-check the
+				<b>Generate a .spec file from template</b> option and click
 				<b>Browse</b> to upload your file.
 			</dd>
-			<dd>Select your .spec file and click 
-				<b>Finish</b>. 
+			<dd>Select your .spec file and click
+				<b>Finish</b>.
 			</dd>
 		</dl>
 		<p>
-			<img title="Plain Spec Project" alt="Plain Spec Project" border="0" src="images/LocalPlainSpecProject.png"/>
+			<img title="Plain Spec Project" alt="Plain Spec Project" border="0" src="images/FedoraPackagerWizardPlain.png"/>
 		</p>
 		<dl>
-			<dd>If you this project does not have any .spec file yet, leave the 
-				<b>Generate a .spec file from template</b> checked and Click 
-				<b>Next</b>. 
+			<dd>If you this project does not have any .spec file yet, leave the
+				<b>Generate a .spec file from template</b> checked and Click
+				<b>Next</b>.
 			</dd>
-			<dd>Apply any necessary changes and click 
-				<b>Finish</b>. 
+			<dd>Apply any necessary changes and click
+				<b>Finish</b>.
 			</dd>
 			<dd>Your project content and your generated specfile should look like this:</dd>
 		</dl>
@@ -284,18 +236,66 @@
 			<br/>
 		</p>
 		<dl>
-			<dd>5. At the end of creating the project, you will be asked to open the project in the 
+		<h5 id="4.b._Use_existing_.spec_file_and_sources_by_importing_SRPM_file">4.b. Use existing .spec file and sources by importing SRPM file</h5>
+		<dl>
+			<dd>If you have already an SRPM, you can upload it to your workspace and the Specfile and sources will be extracted from SRPM. </dd>
+		</dl>
+		<p>
+			<img title="Srpm Project" alt="Srpm Project" border="0" src="images/FedoraPackagerWizardSrpm.png"/>
+		</p>
+		<dl>
+			<dd>Select your SRPM file and click
+				<b>Finish</b>.
+			</dd>
+			<dd>Your project content and your generated specfile should look like this:</dd>
+		</dl>
+		<p>
+			<img title="Srpm Populated Project" alt="Srpm Populated Project" border="0" src="images/LocalSrpmPopulate.png"/>
+			<br/>
+			<br/>
+		</p>
+		<h5 id="4.c._Create_project_using_Rpm_Stubby">4.a. Create project using Rpm Stubby</h5>
+		<dl>
+			<dd>If you have an Eclipse-feature or Maven-Pom, you can select first option to start your project using
+				<a href="http://www.eclipse.org/linuxtools/projectPages/rpmstubby/">RPM Stubby</a>. From the drop down list:
+				<dl>
+					<dd>Select
+						<b>ECLIPSE_FEATURE</b> to upload an existing
+						<i>feature.xml</i> file to your project.
+					</dd>
+					<dd>Or select
+						<b>MAVEN_POM</b> to upload an existing
+						<i>pom.xml</i> file to your project.
+					</dd>
+				</dl>
+			</dd>
+		</dl>
+		<p>
+			<img title="Stubby Project" alt="Stubby Project" border="0" src="images/FedoraPackagerWizardStubby.png"/>
+		</p>
+		<dl>
+			<dd>Select your file and click
+				<b>Finish</b>.
+			</dd>
+			<dd>Your project content and your generated Specfile should look like this:</dd>
+		</dl>
+		<p>
+			<img title="Stubby populate" alt="Stubby populate" border="0" src="images/LocalStubbyPopulate.png"/>
+			<br/>
+			<br/>
+		</p>
+			<dd>5. At the end of creating the project, you will be asked to open the project in the
 				<b>Fedora Packager Perspective</b>.
 			</dd>
 		</dl>
-		<p>Your project will be a local Git repository which has been initialized with the Specfile. The new repository will be automatically opened in the 
+		<p>Your project will be a local Git repository which has been initialized with the Specfile. The new repository will be automatically opened in the
 			<b>Git Repository View</b> as part of the Fedora Packager Perspective.
 		</p>
 		<h5 id="Local_Menu">Local Menu</h5>
-		<p>Now, you can use Fedora Packager's 
+		<p>Now, you can use Fedora Packager's
 			<b>
 				<a href="Using-Fedora-Packager-for-Eclipse.html#Using_Fedora_Packager_for_Eclipse">context menu</a>
-			</b> From the main Context Menu. Few commands as is shown in this screen-shot are available to the local project to enable you to 
+			</b> From the main Context Menu. Few commands as is shown in this screen-shot are available to the local project to enable you to
 			<a href="Using-Fedora-Packager-for-Eclipse.html#Building_the_Package_Locally">locally build your package</a>:
 		</p>
 		<p>
@@ -304,28 +304,28 @@
 			<br/>
 		</p>
 		<h2 id="Importing_a_Fedora_Git_Project">Importing a Fedora Git Project</h2>
-		<p>Once you are a sponsored Fedora packager you can import Fedora Git packages as follows. Before doing so make sure you've run <code>fedora-packager-setup</code> and configured your FAS 
+		<p>Once you are a sponsored Fedora packager you can import Fedora Git packages as follows. Before doing so make sure you've run <code>fedora-packager-setup</code> and configured your FAS
 			<a href="Using-Fedora-Packager-for-Eclipse.html#Configure_SSH_in_Eclipse">SSH keys in Eclipse</a>.
 		</p>
 		<dl>
-			<dd>1. Select 
-				<b>Import</b> &gt; 
-				<b>Git</b> &gt; 
-				<b>Projects from Fedora Git</b> and click 
+			<dd>1. Select
+				<b>Import</b> &gt;
+				<b>Git</b> &gt;
+				<b>Projects from Fedora Git</b> and click
 				<b>Next</b>. Alternatively, you can use the keyboard short-cut <code>CTRL+ALT+F I</code>
 			</dd>
-			<dd>2. Type the name of the package in 
+			<dd>2. Type the name of the package in
 				<b>Package name</b>.
 				<dl>
-					<dd>You can find screenshots of these steps in 
+					<dd>You can find screenshots of these steps in
 						<a href="Getting-Started-as-Maintainer-for-a-New-Fedora-Package.html#Fedora_Packager_Import_Wizard">Fedora Packager Import Wizard</a> section of this user guide.
 					</dd>
 				</dl>
 			</dd>
-			<dd>3. Once the new project has been created something akin to the following is seen. 
+			<dd>3. Once the new project has been created something akin to the following is seen.
 				<dl>
-					<dd>In this case, 
-						<i>eclipse-fedorapackager</i> refers to the Git repository name and 
+					<dd>In this case,
+						<i>eclipse-fedorapackager</i> refers to the Git repository name and
 						<i>master</i> to the currently checked out branch.
 						<br/>
 						<br/>
@@ -337,24 +337,24 @@
 			<img title="Git Branch View" alt="Git Branch View" border="0" src="images/GitProjectBranchesView.png"/>
 		</p>
 		<h2 id="Fedora_Packaging_Work">Fedora Packaging Work</h2>
-		<p>After a Fedora Git project has been created, all files required for packaging the desired release can be found in the created Eclipse project directly. For example, files for release Fedora 13 correspond to files present in the Eclipse project, once switched to branch 
-			<b>f13</b>. Files in branch 
-			<b>master</b> correspond to 
-			<b>Fedora rawhide</b>, the current development release of Fedora. All the development should be done in this branch and once it's done you can 
-			<a href="Using-Fedora-Packager-for-Eclipse.html#Switching_Branches_.28Git_Checkout.29">checkout</a> to another desired branch and 
-			<a href="../../../org.eclipse.egit.doc/help/EGit/User_Guide/Tasks.html?path=9_0_2_8#Rebasing">rebase</a> that branches on top of 
+		<p>After a Fedora Git project has been created, all files required for packaging the desired release can be found in the created Eclipse project directly. For example, files for release Fedora 13 correspond to files present in the Eclipse project, once switched to branch
+			<b>f13</b>. Files in branch
+			<b>master</b> correspond to
+			<b>Fedora rawhide</b>, the current development release of Fedora. All the development should be done in this branch and once it's done you can
+			<a href="Using-Fedora-Packager-for-Eclipse.html#Switching_Branches_.28Git_Checkout.29">checkout</a> to another desired branch and
+			<a href="../../../org.eclipse.egit.doc/help/EGit/User_Guide/Tasks.html?path=9_0_2_8#Rebasing">rebase</a> that branches on top of
 			<b>master</b>. Then push them together to the upstream.
-			<br/> 
-			The following is a brief description of things to consider doing while packaging up some software. 
+			<br/>
+			The following is a brief description of things to consider doing while packaging up some software.
 		</p>
 		<h3 id="Uploading_Source_Files_Required_for_a_Package">Uploading Source Files Required for a Package</h3>
 		<ul>
-			<li>In order to upload new sources in Fedora Packager for Eclipse, first download upstream sources and place the downloaded sources in the same folder as the Eclipse project. If this is done outside of Eclipse, don't forget to refresh the project afterwards (F5) so that the file actually shows up. A slick way to download sources is to use 
-				<a href="Using-Fedora-Packager-for-Eclipse.html#Using_the_Specfile_Editor">Specfile Editor</a> functionality directly. 
+			<li>In order to upload new sources in Fedora Packager for Eclipse, first download upstream sources and place the downloaded sources in the same folder as the Eclipse project. If this is done outside of Eclipse, don't forget to refresh the project afterwards (F5) so that the file actually shows up. A slick way to download sources is to use
+				<a href="Using-Fedora-Packager-for-Eclipse.html#Using_the_Specfile_Editor">Specfile Editor</a> functionality directly.
 			</li>
-			<li>Once the new source file is available in the project, it can be uploaded to the lookaside cache by right-clicking on your file, 
-				<b>Fedora Packager</b> &gt; 
-				<b>Upload This File</b> &gt; 
+			<li>Once the new source file is available in the project, it can be uploaded to the lookaside cache by right-clicking on your file,
+				<b>Fedora Packager</b> &gt;
+				<b>Upload This File</b> &gt;
 				<b>Replace/Add Existing Sources</b>. This either adds the file to the sources required to build the package or replaces the current content of the <code>sources</code> file to contain a single line with the MD5 sum of the file selected.
 			</li>
 			<li>A valid certificate is required to upload to the lookaside cache. If it has expired, a new one can be created by issuing the following command in a terminal:</li>
@@ -364,35 +364,35 @@
 		<h3 id="Downloading_Source_Files_Required_for_a_Package">Downloading Source Files Required for a Package</h3>
 		<p>To download the required source files for an existing package in order to build it:</p>
 		<ul>
-			<li>Right-click on the .spec file and select 
-				<b>Fedora Packager</b> &gt; 
+			<li>Right-click on the .spec file and select
+				<b>Fedora Packager</b> &gt;
 				<b>Download Sources</b>. This downloads all sources listed in the file <code>sources</code>.
 			</li>
 		</ul>
 		<h3 id="Using_the_Specfile_Editor">Using the Specfile Editor</h3>
-		<p>Fedora Packager for Eclipse uses the RPM Specfile Editor and ChangeLog plug-in from the 
+		<p>Fedora Packager for Eclipse uses the RPM Specfile Editor and ChangeLog plug-in from the
 			<a href="http://www.eclipse.org/linuxtools">Eclipse Linux Tools project</a>.
-			<br/> 
-			For instance, a new ChangeLog Entry can easily be created in the .spec file by using the <code>Ctrl+Alt+c</code> keyboard shortcut or by clicking 
-			<b>Edit</b> &gt; 
-			<b>ChangeLog Entry</b> (though a good idea is to set appropriate 
+			<br/>
+			For instance, a new ChangeLog Entry can easily be created in the .spec file by using the <code>Ctrl+Alt+c</code> keyboard shortcut or by clicking
+			<b>Edit</b> &gt;
+			<b>ChangeLog Entry</b> (though a good idea is to set appropriate
 			<b>
 				<a href="../../../org.eclipse.linuxtools.changelog.doc/userguide/ChangeLog Reference.html">ChangeLog Preferences</a>
-			</b> first). Also, rpmlint can be run by right-clicking on the .spec file and selecting 
-			<b>Run Rpmlint</b>. 
+			</b> first). Also, rpmlint can be run by right-clicking on the .spec file and selecting
+			<b>Run Rpmlint</b>.
 			<br/>
-			For more information have a look at the 
-			<a href="http://www.eclipse.org/downloads/download.php?file=/technology/linuxtools/videos/specfile-demo.ogg">.spec file editor screen-cast</a>,  or at the 
+			For more information have a look at the
+			<a href="http://www.eclipse.org/downloads/download.php?file=/technology/linuxtools/videos/specfile-demo.ogg">.spec file editor screen-cast</a>,  or at the
 			<a href="../../../org.eclipse.linuxtools.rpm.ui.editor.doc/userguide/SpecfileEditorReference.html">Specfile Editor User Guide</a>.
 		</p>
 		<h3 id="Committing_Changes_to_the_Local_Git_Repository">Committing Changes to the Local Git Repository</h3>
 		<p>After the .spec file, patches, etc. have been added/changed, commit those changes to the repository. This is done by:</p>
 		<ol>
-			<li>Selecting the files to commit (alternatively select the Fedora Git project and select desired 
+			<li>Selecting the files to commit (alternatively select the Fedora Git project and select desired
 				<i>unstaged</i> files when the commit dialog is shown)
 			</li>
-			<li>Right-click, 
-				<b>Team</b> &gt; 
+			<li>Right-click,
+				<b>Team</b> &gt;
 				<b>Commit...</b>
 				<br/>
 				<br/>
@@ -406,8 +406,8 @@
 		<ul>
 			<li>The currently checked-out branch is indicated to the left of the project name. </li>
 			<li>Make sure to commit, revert, or stash changes before switching to a different branch. </li>
-			<li>Refer to the 
-				<a href="http://www.kernel.org/pub/software/scm/git/docs/">Git</a> and 
+			<li>Refer to the
+				<a href="http://www.kernel.org/pub/software/scm/git/docs/">Git</a> and
 				<a href="../../../org.eclipse.egit.doc/help/EGit/User_Guide/User-Guide.html">EGit</a> documentation for more information on this.
 			</li>
 		</ul>
@@ -415,8 +415,8 @@
 		<h4 id="Preparing_Sources_for_Build">Preparing Sources for Build</h4>
 		<p>Fedora Packager for Eclipse will download and prepare sources for building a package.</p>
 		<ul>
-			<li>Select your .spec file, right-click, 
-				<b>Fedora Packager</b> &gt; 
+			<li>Select your .spec file, right-click,
+				<b>Fedora Packager</b> &gt;
 				<b>Prepare Sources for Build</b>.
 			</li>
 		</ul>
@@ -426,34 +426,34 @@
 		<h4 id="Building_RPM_for_a_Local_Architecture">Building RPM for a Local Architecture</h4>
 		<p>This is a great way to test if the .spec file actually builds at all. Once the RPM has been successfully built locally, it is recommended further testing be carried out on the .spec file by completing a build in a chroot environment using mock. Both ways are supported by Fedora Packager for Eclipse.</p>
 		<ul>
-			<li>To build the RPM locally right-click on the .spec file and select 
-				<b>Fedora Packager</b> &gt; 
+			<li>To build the RPM locally right-click on the .spec file and select
+				<b>Fedora Packager</b> &gt;
 				<b>Build for Local Architecture</b>. Output of the RPM build process will appear in the Eclipse Console view.
 			</li>
 		</ul>
 		<p>Using mock to build your package is a great way to verify that you have the correct <code>BuildRequires</code> in a .spec file. </p>
 		<ul>
-			<li>To build the RPM locally using mock, right-click on the .spec file and select 
-				<b>Fedora Packager</b> &gt; 
-				<b>Local Build Using Mock</b>. Be aware that this may take a long time and requires the mock package to be installed. Use Eclipse's 
+			<li>To build the RPM locally using mock, right-click on the .spec file and select
+				<b>Fedora Packager</b> &gt;
+				<b>Local Build Using Mock</b>. Be aware that this may take a long time and requires the mock package to be installed. Use Eclipse's
 				<i>Run in Background</i> functionality for convenience.
 			</li>
 		</ul>
 		<h3 id="Make_Locally_Committed_Changes_Public_.28Git_Push.29">Make Locally Committed Changes Public (Git Push)</h3>
-		<p>When you are satisfied with your locally-committed changes, you are ready to publish them publicly. Remember, if you made any mistake in your commits, Git allows history to be rewritten before changes are made public. See the 
-			<a href="http://www.kernel.org/pub/software/scm/git/docs/">Git</a> and 
+		<p>When you are satisfied with your locally-committed changes, you are ready to publish them publicly. Remember, if you made any mistake in your commits, Git allows history to be rewritten before changes are made public. See the
+			<a href="http://www.kernel.org/pub/software/scm/git/docs/">Git</a> and
 			<a href="../../../org.eclipse.egit.doc/help/EGit/User_Guide/User-Guide.html">EGit</a> documentation for more information.
 			<br/>
-			To bring the local repository in sync with the remote repository (which is by default called 
+			To bring the local repository in sync with the remote repository (which is by default called
 			<a href="../../../org.eclipse.egit.doc/help/EGit/User_Guide/Tasks.html?path=9_0_2_2_0#Cloning_Remote_Repositories">origin</a>):
 		</p>
 		<dl>
-			<dd>1. Right-click on the Fedora Git project, click 
-				<b>Team</b> &gt; 
-				<b>Remote</b> &gt; 
+			<dd>1. Right-click on the Fedora Git project, click
+				<b>Team</b> &gt;
+				<b>Remote</b> &gt;
 				<b>Push...</b>
 			</dd>
-			<dd>2. Select the Git repository to which you would like to push (usually this is kept unchanged), click 
+			<dd>2. Select the Git repository to which you would like to push (usually this is kept unchanged), click
 				<b>Next</b>.
 				<br/>
 				<br/>
@@ -465,13 +465,13 @@
 			<br/>
 		</p>
 		<dl>
-			<dd>5. Select the Git references to push. 
+			<dd>5. Select the Git references to push.
 				<dl>
-					<dd>In this example, branches 
-						<i>master</i> and 
+					<dd>In this example, branches
+						<i>master</i> and
 						<i>f14/master</i> will get pushed. Keep in mind that source and destination references are the same for Fedora Packager for Eclipse.
 					</dd>
-					<dd>Clicking the 
+					<dd>Clicking the
 						<b>Add all branches spec</b> button is a convenience way that pushes all commits to all local branches.
 						<br/>
 						<br/>
@@ -514,7 +514,7 @@
 		<p>Also note that there will be a log entry in the Eclipse Error Log view detailing the Koji-Web URL of the pushed task as well. If you click on the provided URL, a browser tab will open in Eclipse showing you the status of the pushed build. Refresh it in order to follow build progress. As of yet, Fedora Packager for Eclipse does not support chain builds.</p>
 		<h3 id="Pushing_a_Bodhi_Update">Pushing a Bodhi Update</h3>
 		<p>Fedora Packager for Eclipse can be used to push Bodhi updates as well. For example you can use keyboard short-cut <code>CTRL+ALT+F B</code> or the context menu to trigger this action (
-			<b>Fedora Packager</b> &gt; 
+			<b>Fedora Packager</b> &gt;
 			<b>Create New Bodhi Update</b>). Before you push a Bodhi update, make sure that all relevant builds have been pushed to Koji. If you attempt to push an update for a build which does not exist, the Bodhi update will fail. The recommended steps prior pushing a Bodhi update are:
 		</p>
 		<dl>
@@ -538,13 +538,13 @@
 		<p>
 			<img title="Bodhi Update Dialog" alt="Bodhi Update Dialog" border="0" src="images/FedoraPackagerBodhiUpdateDialog.png"/>
 		</p>
-		<p>Arbitrary additional builds may be added to the list of builds via the 
+		<p>Arbitrary additional builds may be added to the list of builds via the
 			<b>Add Builds</b> button.
 		</p>
 		<p>
 			<img title="Bodhi Add Builds Dialog" alt="Bodhi Add Builds Dialog" border="0" src="images/FedoraPackagerBodhiAddBuildsDialog.png"/>
 		</p>
-		<p>In order to push the update select relevant builds in the dialog (use <code>CTRL+Click</code> to select multiple builds) you'd like to push an update for, choose the update type, provide the request type, add an advisory comment for the update and click 
+		<p>In order to push the update select relevant builds in the dialog (use <code>CTRL+Click</code> to select multiple builds) you'd like to push an update for, choose the update type, provide the request type, add an advisory comment for the update and click
 			<b>Save Update</b>. If the Bodhi update was successfully pushed, Fedora Packager for Eclipse will show you a message dialog with a link to an URL where the progress of the update can be tracked.
 		</p>
 		<p>
