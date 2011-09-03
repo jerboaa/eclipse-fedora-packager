@@ -17,7 +17,7 @@ import org.eclipse.osgi.util.NLS;
  *
  */
 public class FedoraPackagerGitText extends NLS {
-	
+
 	private static final String BUNDLE_NAME = "org.fedoraproject.eclipse.packager.git.fedorapackagergittext"; //$NON-NLS-1$
 	// FedoraCheckoutWizard Strings
 	/****/ public static String FedoraPackagerGitCloneWizard_authFail;
@@ -31,8 +31,6 @@ public class FedoraPackagerGitText extends NLS {
 	/****/ public static String FedoraPackagerGitCloneWizard_wizardTitle;
 	/****/ public static String FedoraPackagerGitCloneWizard_problem;
 	/****/ public static String FedoraPackagerGitCloneWizard_badURIError;
-	/****/ public static String FedoraPackagerGitCloneWizard_switchPerspectiveQuestionTitle;
-	/****/ public static String FedoraPackagerGitCloneWizard_switchPerspectiveQuestionMsg;
 
 	// SelectModulePage Strings
 	/****/ public static String SelectModulePage_anonymousCheckout;
@@ -51,7 +49,7 @@ public class FedoraPackagerGitText extends NLS {
 	/****/ public static String FedoraPackagerGitPreferencePage_cloneBaseURLLabel;
 	/****/ public static String FedoraPackagerGitPreferencePage_gitGroupName;
 	/****/ public static String FedoraPackagerGitPreferencePage_invalidBaseURLMsg;
-	
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, FedoraPackagerGitText.class);

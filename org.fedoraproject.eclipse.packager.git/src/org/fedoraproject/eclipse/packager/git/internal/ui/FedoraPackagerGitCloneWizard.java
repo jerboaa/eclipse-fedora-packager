@@ -37,9 +37,7 @@ import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IImportWizard;
-import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
@@ -51,6 +49,7 @@ import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitCloneOperation;
 import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitText;
 import org.fedoraproject.eclipse.packager.git.GitPreferencesConstants;
 import org.fedoraproject.eclipse.packager.git.GitUtils;
+import org.fedoraproject.eclipse.packager.utils.UiUtils;
 
 
 /**
@@ -83,7 +82,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 		addPage(page);
 		page.init(selection);
 	}
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -93,7 +92,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.selection = selection;
 	}
-	
+
 	@Override
 	public boolean performFinish() {
 		try {
@@ -156,7 +155,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 				});
 			} catch (InvocationTargetException e) {
 				// if repo wasn't found make this apparent
-				if (e.getTargetException().getCause() instanceof NoRemoteRepositoryException || 
+				if (e.getTargetException().getCause() instanceof NoRemoteRepositoryException ||
 						e.getTargetException().getCause() instanceof InvalidRemoteException) {
 					// Refuse to clone, give user a chance to correct
 					final String errorMessage = NLS
@@ -164,12 +163,12 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 									page.getPackageName());
 					cloneFailChecked(errorMessage);
 					return false; // let user correct
-				} else if (e.getTargetException().getCause().getCause() != null && 
+				} else if (e.getTargetException().getCause().getCause() != null &&
 							e.getTargetException().getCause().getCause().getMessage() == "Auth fail"){ //$NON-NLS-1$
 					cloneFailChecked(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_authFail);
 					return false;
 				// Caused by: org.eclipse.jgit.errors.NotSupportedException: URI not supported: ssh:///jeraal@alkldal.test.comeclipse-callgraph.git
-				} else if (e.getTargetException().getCause() instanceof NotSupportedException || 
+				} else if (e.getTargetException().getCause() instanceof NotSupportedException ||
 							e.getTargetException().getCause() instanceof TransportException) {
 					final String errorMessage = NLS
 					.bind(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_badURIError,
@@ -199,18 +198,10 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 
 			// Finally ask if the Fedora Packaging perspective should be opened
 			// if not already open.
-			IWorkbench workbench = PlatformUI.getWorkbench();
-			IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-			IPerspectiveDescriptor perspective = window.getActivePage().getPerspective();
-			if (!perspective.getId().equals(PackagerPlugin.FEDORA_PACKAGING_PERSPECTIVE_ID)) {
-				if (shouldOpenPerspective()) {
-					// open the perspective
-					workbench.showPerspective(PackagerPlugin.FEDORA_PACKAGING_PERSPECTIVE_ID, window);
-				}
-			}
+			UiUtils.openPerspective(getShell());
 			return true;
 		} catch (InterruptedException e) {
-			MessageDialog.openInformation(getShell(), FedoraPackagerGitText.FedoraPackagerGitCloneWizard_cloneFail, 
+			MessageDialog.openInformation(getShell(), FedoraPackagerGitText.FedoraPackagerGitCloneWizard_cloneFail,
 					FedoraPackagerGitText.FedoraPackagerGitCloneWizard_cloneCancel);
 			return false;
 		} catch (Exception e) {
@@ -219,11 +210,11 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Prompt for confirmation if a resource exists, either the project already exists,
 	 * or a folder exists in the workspace and would conflict with the newly created project.
-	 * 
+	 *
 	 * @param errorMessage
 	 * @return {@code true} if the user confirmed, {@code false} otherwise.
 	 */
@@ -237,7 +228,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 
 	/**
 	 * Opens error dialog with provided reason in error message.
-	 * 
+	 *
 	 * @param errorMsg The error message to use.
 	 */
 	private void cloneFailChecked(String errorMsg) {
@@ -261,7 +252,7 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 	 * <li>If all else fails, or anonymous checkout is specified,
 	 * construct an anonymous clone URL</li>
 	 * </ol>
-	 * 
+	 *
 	 * @return The full clone URL based on the package name.
 	 */
 	private String getGitCloneURL() {
@@ -278,17 +269,5 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 			return GitUtils.getFullGitURL(GitUtils.getAnonymousGitBaseUrl(),
 					page.getPackageName());
 		}
-	}
-	
-	/**
-	 * Ask if Fedora Packager perspective should be opened.
-	 */
-	private boolean shouldOpenPerspective() {
-		QuestionMessageDialog op = new QuestionMessageDialog(
-				FedoraPackagerGitText.FedoraPackagerGitCloneWizard_switchPerspectiveQuestionTitle,
-				FedoraPackagerGitText.FedoraPackagerGitCloneWizard_switchPerspectiveQuestionMsg,
-				getShell());
-		Display.getDefault().syncExec(op);
-		return op.isOkPressed();
 	}
 }

@@ -30,22 +30,16 @@ import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.NoMessageException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.INewWizard;
-import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
-import org.fedoraproject.eclipse.packager.QuestionMessageDialog;
-import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.LocalProjectType;
 import org.fedoraproject.eclipse.packager.api.LocalFedoraPackagerProjectCreator;
+import org.fedoraproject.eclipse.packager.utils.UiUtils;
 
 /**
  * wizard to ease the process of creating fedora packages
- * 
+ *
  */
 public class LocalFedoraPackagerProjectWizard extends Wizard implements
 		INewWizard {
@@ -73,7 +67,7 @@ public class LocalFedoraPackagerProjectWizard extends Wizard implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.Wizard#addPages()
 	 */
 	@Override
@@ -89,7 +83,7 @@ public class LocalFedoraPackagerProjectWizard extends Wizard implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
 	 */
 	@Override
@@ -133,7 +127,7 @@ public class LocalFedoraPackagerProjectWizard extends Wizard implements
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.wizard.wizard#canFinish()
 	 */
 	@Override
@@ -161,7 +155,7 @@ public class LocalFedoraPackagerProjectWizard extends Wizard implements
 
 	/**
 	 * Creates the base of the project.
-	 * 
+	 *
 	 * @param IProgressMonitor
 	 *            Progress monitor to report back status
 	 */
@@ -183,7 +177,7 @@ public class LocalFedoraPackagerProjectWizard extends Wizard implements
 
 	/**
 	 * Creates a new instance of the FedoraRPM project.
-	 * 
+	 *
 	 * @param IProgressMonitor
 	 *            Progress monitor to report back status
 	 * @throws WrongRepositoryStateException
@@ -226,34 +220,6 @@ public class LocalFedoraPackagerProjectWizard extends Wizard implements
 
 		// Finally ask if the Fedora Packaging perspective should be opened
 		// if not already open.
-		// Uses main Fedora Packager perspective
-		IWorkbench workbench = PlatformUI.getWorkbench();
-		IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-		IPerspectiveDescriptor perspective = window.getActivePage()
-				.getPerspective();
-		if (!perspective.getId().equals(
-				PackagerPlugin.FEDORA_PACKAGING_PERSPECTIVE_ID)) {
-			if (shouldOpenPerspective()) {
-				// open the perspective
-				workbench.showPerspective(
-						PackagerPlugin.FEDORA_PACKAGING_PERSPECTIVE_ID, window);
-			}
-		}
+		UiUtils.openPerspective(getShell());
 	}
-
-	/**
-	 * Ask if Fedora Packager perspective should be opened.
-	 * 
-	 * @see org.fedoraproject.eclipse.packager.git.internal.ui.FedoraPackagerGitCloneWizard
-	 *      #shouldOpenPerspective()
-	 */
-	private boolean shouldOpenPerspective() {
-		QuestionMessageDialog op = new QuestionMessageDialog(
-				FedoraPackagerText.LocalFedoraPackager_switchPerspectiveQuestionTitle,
-				FedoraPackagerText.LocalFedoraPackager_switchPerspectiveQuestionMsg,
-				getShell());
-		Display.getDefault().syncExec(op);
-		return op.isOkPressed();
-	}
-
 }
