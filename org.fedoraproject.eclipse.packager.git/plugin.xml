@@ -6,7 +6,7 @@
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
     http://www.eclipse.org/legal/epl-v10.html
-   
+
     Contributors:
         Red Hat Inc. - initial API and implementation
  -->
@@ -64,5 +64,46 @@
              id="org.fedoraproject.eclipse.packager.git.ImportFromFedoraGit"
              name="%FedoraGitWizardCommandName">
        </command>
+       <command
+            defaultHandler="org.fedoraproject.eclipse.packager.git.internal.handlers.ConvertLocalToRemoteHandler"
+            id="org.fedoraproject.eclipse.packager.ConvertLocalToRemoteCommand"
+            name="ConvertLocalToRemote">
+      </command>
+    </extension>
+    <!-- Core plug-in contributes convert local to remote command  -->
+    <extension
+          point="org.fedoraproject.eclipse.packager.packagerCommandContribution">
+       <command id="ConvertLocalToRemoteCommand"
+                class="org.fedoraproject.eclipse.packager.git.api.ConvertLocalToRemoteCommand">
+       </command>
+    </extension>
+    <extension point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.fedoraproject.packager.main?before=org.fedoraproject.eclipse.packager.cvssep">
+         <command
+                  commandId="org.fedoraproject.eclipse.packager.ConvertLocalToRemoteCommand"
+                  label="%LabelConvertLocalToRemote"
+                  mnemonic="%MnemonicConvertLocalToRemote"
+
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <with
+                           variable="activeMenuSelection">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.localproject">
+                        </reference>
+                     </with>
+                     <with
+                           variable="activeMenuEditorInput">
+                        <reference
+                              definitionId="org.fedoraproject.eclipse.packager.localproject">
+                        </reference>
+                     </with>
+                  </or>
+               </visibleWhen>
+         </command>
+       </menuContribution>
     </extension>
 </plugin>
