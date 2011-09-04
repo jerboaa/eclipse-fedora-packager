@@ -19,6 +19,9 @@ import org.fedoraproject.eclipse.packager.api.ICommandResult;
  */
 public class ConvertLocalResult implements ICommandResult {
 	private boolean successful = false;
+	private boolean addRemote = false;
+	private boolean addBranch = false;
+	private boolean hadFetched = false;
 	private Git git;
 
 	/**
@@ -30,10 +33,17 @@ public class ConvertLocalResult implements ICommandResult {
 
 	/**
 	 * @param git
+	 * @param addBranch
+	 * @param addRemote
+	 * @param hadFetched
 	 */
-	public ConvertLocalResult(Git git) {
+	public ConvertLocalResult(Git git, boolean addRemote, boolean addBranch,
+			boolean hadFetched) {
 		super();
 		this.git = git;
+		this.addRemote = addRemote;
+		this.addBranch = addBranch;
+		this.hadFetched = hadFetched;
 	}
 
 	/**
@@ -43,11 +53,32 @@ public class ConvertLocalResult implements ICommandResult {
 	public boolean wasSuccessful() {
 		return successful;
 	}
-	
+
 	/**
 	 * @return Git
 	 */
 	public Git getGit() {
 		return this.git;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public boolean getAddRemote() {
+		return this.addRemote;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public boolean getAddBranch() {
+		return this.addBranch;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public boolean getHadFetched() {
+		return this.hadFetched;
 	}
 }

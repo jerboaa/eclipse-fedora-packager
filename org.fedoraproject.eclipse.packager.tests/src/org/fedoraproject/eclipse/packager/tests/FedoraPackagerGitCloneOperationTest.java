@@ -29,7 +29,6 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitCloneOperation;
 import org.fedoraproject.eclipse.packager.git.GitUtils;
-import org.fedoraproject.eclipse.packager.git.api.errors.RemoteAlreadyExistsException;
 import org.junit.Test;
 
 public class FedoraPackagerGitCloneOperationTest {
@@ -81,8 +80,6 @@ public class FedoraPackagerGitCloneOperationTest {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				} catch (RemoteAlreadyExistsException e) {
 					e.printStackTrace();
 				}
 				return null;

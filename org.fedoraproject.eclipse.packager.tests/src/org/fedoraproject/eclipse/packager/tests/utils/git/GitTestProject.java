@@ -36,7 +36,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitCloneOperation;
 import org.fedoraproject.eclipse.packager.git.GitUtils;
-import org.fedoraproject.eclipse.packager.git.api.errors.RemoteAlreadyExistsException;
 
 /**
  * Fixture for Git based projects.
@@ -70,8 +69,6 @@ public class GitTestProject {
 				} catch (CoreException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (RemoteAlreadyExistsException e) {
 					e.printStackTrace();
 				}
 				return Status.OK_STATUS;

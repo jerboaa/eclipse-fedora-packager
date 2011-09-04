@@ -27,7 +27,6 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.fedoraproject.eclipse.packager.FedoraSSL;
 import org.fedoraproject.eclipse.packager.FedoraSSLFactory;
-import org.fedoraproject.eclipse.packager.git.api.errors.RemoteAlreadyExistsException;
 
 
 /**
@@ -85,10 +84,9 @@ public class GitUtils {
 	 * @param git
 	 * @param monitor
 	 * @throws CoreException
-	 * @throws RemoteAlreadyExistsException
 	 */
 	public static void createLocalBranches(Git git, IProgressMonitor monitor)
-			throws CoreException, RemoteAlreadyExistsException {
+			throws CoreException {
 		monitor.beginTask(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_createLocalBranchesJob,
 				IProgressMonitor.UNKNOWN);
 		try {
@@ -123,7 +121,7 @@ public class GitUtils {
 		} catch (JGitInternalException e) {
 			e.printStackTrace();
 		} catch (RefAlreadyExistsException e) {
-			throw new RemoteAlreadyExistsException(e.getMessage(), e);
+			e.printStackTrace();
 		} catch (RefNotFoundException e) {
 			e.printStackTrace();
 		} catch (InvalidRefNameException e) {
