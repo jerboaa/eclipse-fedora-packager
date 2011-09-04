@@ -71,10 +71,6 @@ public class WizardSRPMProjectTest {
 		// poulate project using imported SRPM
 		testMainProject.create(externalFile, LocalProjectType.SRPM);
 
-		// create the local git repository inside the project
-		// add the contents and do the initial commit
-		testMainProject.createProjectStructure();
-
 		// Make sure the original SRPM got copied into the workspace
 		IResource resource = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT);
 		ProjectType projectType = FedoraPackagerUtils.getProjectType(resource);
@@ -90,7 +86,7 @@ public class WizardSRPMProjectTest {
 
 		// Check if the generated .spec file contains the correct information
 		LocalSearchString localSearch = new LocalSearchString();
-		assertTrue(localSearch.searchString("Name: helloworld", specFile)); //$NON-NLS-1$	
+		assertTrue(localSearch.searchString("Name: helloworld", specFile)); //$NON-NLS-1$
 
 		IFile sourceBall = baseProject.getFile(new Path(SOURCE)); //$NON-NLS-1$
 		assertTrue(sourceBall.exists());

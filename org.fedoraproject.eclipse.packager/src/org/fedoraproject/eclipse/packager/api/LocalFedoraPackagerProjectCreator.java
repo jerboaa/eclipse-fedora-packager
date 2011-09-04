@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.egit.core.RepositoryUtil;
-import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
 import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
@@ -38,14 +37,13 @@ import org.eclipse.linuxtools.rpm.core.RPMProject;
 import org.eclipse.linuxtools.rpm.core.RPMProjectLayout;
 import org.eclipse.linuxtools.rpmstubby.Generator;
 import org.eclipse.linuxtools.rpmstubby.InputType;
-import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.LocalProjectType;
 
 /**
- * Utility class to create to enable existing and 
+ * Utility class to create to enable existing and
  *   new maintainers work with fedora packages locally
- * 
+ *
  */
 public class LocalFedoraPackagerProjectCreator {
 
@@ -55,9 +53,9 @@ public class LocalFedoraPackagerProjectCreator {
 	private Git git;
 
 	/**
-	 * Construct the local fedora packager project 
+	 * Construct the local fedora packager project
 	 *   based on the created project in main wizard
-	 * @param project 
+	 * @param project
 	 *            the base of the project
 	 * @param monitor
 	 *            Progress monitor to report back status
@@ -67,20 +65,30 @@ public class LocalFedoraPackagerProjectCreator {
 		this.project = project;
 		this.monitor = monitor;
 	}
-	
+
 	/**
 	 * Starts a plain project using the specfile template
 	 *
 	 * @param content
-	 * 		contents of the spec template         
-	 * @throws CoreException 
+	 * 		contents of the spec template
+	 * @throws CoreException
+	 * @throws IOException
+	 * @throws WrongRepositoryStateException
+	 * @throws JGitInternalException
+	 * @throws ConcurrentRefUpdateException
+	 * @throws NoMessageException
+	 * @throws NoHeadException
+	 * @throws NoFilepatternException
 	 *
 	 */
-	public void create(String content) throws CoreException{
+	public void create(String content) throws CoreException,
+			NoFilepatternException, NoHeadException, NoMessageException,
+			ConcurrentRefUpdateException, JGitInternalException,
+			WrongRepositoryStateException, IOException {
 		final String projectName = project.getName();
 		final String fileName = projectName + ".spec"; //$NON-NLS-1$
-		
-		final InputStream contentInputStream = 
+
+		final InputStream contentInputStream =
 				new ByteArrayInputStream(content.getBytes());
 		final IFile specfile = project.getFile(new Path(fileName));
 		try {
@@ -93,20 +101,31 @@ public class LocalFedoraPackagerProjectCreator {
 			stream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}		
+		}
+
+		createProjectStructure();
 	}
-	
+
 	/**
 	 * Populate the project based on the imported SRPM or .spec file
 	 *
 	 * @param externalFile
-	 *            the xml file uploaded from file system     
-	 * @param projectType 
+	 *            the xml file uploaded from file system
+	 * @param projectType
 	 * @throws CoreException
-	 * @throws FileNotFoundException 
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws WrongRepositoryStateException
+	 * @throws JGitInternalException
+	 * @throws ConcurrentRefUpdateException
+	 * @throws NoMessageException
+	 * @throws NoHeadException
+	 * @throws NoFilepatternException
 	 */
-	public void create(File externalFile, LocalProjectType projectType) 
-			throws CoreException, FileNotFoundException {
+	public void create(File externalFile, LocalProjectType projectType)
+			throws CoreException, NoFilepatternException, NoHeadException,
+			NoMessageException, ConcurrentRefUpdateException,
+			JGitInternalException, WrongRepositoryStateException, IOException {
 		switch(projectType) {
 		case PLAIN:
 			IFile specFile = project.getFile(externalFile.getName());
@@ -117,26 +136,39 @@ public class LocalFedoraPackagerProjectCreator {
 			rpmProject.importSourceRPM(externalFile);
 			break;
 		}
+
+		createProjectStructure();
 	}
 
 	/**
-	 * Populate the project using rpmstubby based on the 
+	 * Populate the project using rpmstubby based on the
 	 *  eclipse-feature or maven-pom choice of user
 	 * @param inputType
 	 *		type of the stubby project
 	 * @param stubby
 	 * 		the external xml file uploaded from file system
-	 * @throws CoreException 
-	 * @throws FileNotFoundException 
-	 * 
+	 * @throws CoreException
+	 * @throws FileNotFoundException
+	 * @throws WrongRepositoryStateException
+	 * @throws JGitInternalException
+	 * @throws ConcurrentRefUpdateException
+	 * @throws NoMessageException
+	 * @throws NoHeadException
+	 * @throws NoFilepatternException
+	 * @throws IOException
+	 *
 	 */
-	public void create(InputType inputType, File stubby) 
-			throws FileNotFoundException, CoreException {
+	public void create(InputType inputType, File stubby) throws CoreException,
+			NoFilepatternException, NoHeadException, NoMessageException,
+			ConcurrentRefUpdateException, JGitInternalException,
+			WrongRepositoryStateException, IOException {
 			IFile stubbyFile = project.getFile(stubby.getName());
 			stubbyFile.create(new FileInputStream(stubby), false, monitor);
 
 			Generator specfilegGenerator = new Generator(inputType);
 			specfilegGenerator.generate(stubbyFile);
+
+			createProjectStructure();
 	}
 
 	/**
@@ -156,31 +188,7 @@ public class LocalFedoraPackagerProjectCreator {
 			NoHeadException, NoMessageException, ConcurrentRefUpdateException,
 			JGitInternalException, WrongRepositoryStateException, IOException,
 			CoreException {
-		File directory = createLocalGitRepo();
 
-		addContentToGitRepo(directory);
-
-		// Set persistent property so that we know when to show the context
-		// menu item.
-		project.setPersistentProperty(PackagerPlugin.PROJECT_LOCAL_PROP,
-				"true" /* unused value */); //$NON-NLS-1$
-
-		ConnectProviderOperation connect = new ConnectProviderOperation(project);
-		connect.execute(null);
-		
-		// Add created repository to the list of Git repositories so that it
-		// shows up in the Git repositories view.
-		final RepositoryUtil config = org.eclipse.egit.core.Activator.getDefault().getRepositoryUtil();
-		config.addConfiguredRepository(repository.getDirectory());
-	}
-
-	/**
-	 * Initialize a local git repository in project location
-	 *
-	 * @throws IOException
-	 * @return File directory of the git repository
-	 */
-	private File createLocalGitRepo() throws IOException {
 		File directory = new File(project.getLocation().toString());
 		FileUtils.mkdirs(directory, true);
 		directory.getCanonicalFile();
@@ -191,28 +199,6 @@ public class LocalFedoraPackagerProjectCreator {
 		repository = command.call().getRepository();
 
 		git = new Git(repository);
-		return directory;
-	}
-
-	/**
-	 * Add the contents to the Git repository and 
-	 * does the first commit
-	 *
-	 * @param File
-	 *            directory of the git repository
-	 * @throws NoFilepatternException
-	 * @throws IOException
-	 * @throws WrongRepositoryStateException
-	 * @throws JGitInternalException
-	 * @throws ConcurrentRefUpdateException
-	 * @throws NoMessageException
-	 * @throws NoHeadException
-	 * @throws CoreException
-	 */
-	private void addContentToGitRepo(File directory) throws IOException,
-			NoFilepatternException, NoHeadException, NoMessageException,
-			ConcurrentRefUpdateException, JGitInternalException,
-			WrongRepositoryStateException, CoreException {
 
 		for (File file : directory.listFiles()) {
 			String name = file.getName();
@@ -229,6 +215,10 @@ public class LocalFedoraPackagerProjectCreator {
 		// do the first commit
 		git.commit().setMessage(FedoraPackagerText.LocalFedoraPackagerProjectCreator_FirstCommit)
 				.call();
-	}
 
+		// Add created repository to the list of Git repositories so that it
+		// shows up in the Git repositories view.
+		final RepositoryUtil config = org.eclipse.egit.core.Activator.getDefault().getRepositoryUtil();
+		config.addConfiguredRepository(repository.getDirectory());
+	}
 }

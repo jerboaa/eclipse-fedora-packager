@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -34,6 +35,7 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.fedoraproject.eclipse.packager.LocalProjectType;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.LocalFedoraPackagerProjectCreator;
 import org.fedoraproject.eclipse.packager.utils.UiUtils;
 
@@ -97,6 +99,18 @@ public class LocalFedoraPackagerProjectWizard extends Wizard implements
 								: new NullProgressMonitor());
 						createMainProject(monitor != null ? monitor
 								: new NullProgressMonitor());
+
+						// Set persistent property so that we know when to show the context
+						// menu item.
+						project.setPersistentProperty(PackagerPlugin.PROJECT_LOCAL_PROP, "true" /* unused value */); //$NON-NLS-1$
+
+						ConnectProviderOperation connect = new ConnectProviderOperation(project);
+						connect.execute(null);
+
+						// Finally ask if the Fedora Packaging perspective should be opened
+						// if not already open.
+						UiUtils.openPerspective(getShell());
+
 					} catch (NoHeadException e) {
 						e.printStackTrace();
 					} catch (NoMessageException e) {
@@ -216,10 +230,5 @@ public class LocalFedoraPackagerProjectWizard extends Wizard implements
 					pageThree.getExternalFile());
 			break;
 		}
-		fedoraRPMProjectCreator.createProjectStructure();
-
-		// Finally ask if the Fedora Packaging perspective should be opened
-		// if not already open.
-		UiUtils.openPerspective(getShell());
 	}
 }
