@@ -23,7 +23,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	RpmBuildCommandTest.class,
 	RpmEvalCommandTest.class,
 	SCMMockBuildCommandGitTest.class,
-	MockBuildCommandTest.class
+	MockBuildCommandTest.class,
+	ConvertLocalToRemoteCommandTest.class
 })
 
 public class AllCommandsTests {

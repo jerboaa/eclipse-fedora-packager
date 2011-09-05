@@ -19,4 +19,5 @@ Import-Package: org.fedoraproject.eclipse.packager,
  org.fedoraproject.eclipse.packager.api.errors,
  org.fedoraproject.eclipse.packager.utils
 Export-Package: org.fedoraproject.eclipse.packager.git,
+ org.fedoraproject.eclipse.packager.git.api,
  org.fedoraproject.eclipse.packager.git.api.errors
