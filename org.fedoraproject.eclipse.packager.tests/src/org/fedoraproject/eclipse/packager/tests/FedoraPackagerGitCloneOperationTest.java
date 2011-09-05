@@ -29,12 +29,13 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitCloneOperation;
 import org.fedoraproject.eclipse.packager.git.GitUtils;
+import org.fedoraproject.eclipse.packager.git.api.errors.RemoteAlreadyExistsException;
 import org.junit.Test;
 
 public class FedoraPackagerGitCloneOperationTest {
 
 	private Git git;
-	
+
 	@Test
 	public void shouldThrowExceptionWhenURIInvalid() {
 		FedoraPackagerGitCloneOperation cloneOp = new FedoraPackagerGitCloneOperation();
@@ -45,16 +46,16 @@ public class FedoraPackagerGitCloneOperationTest {
 			// pass
 		}
 	}
-	
+
 	@Test(expected=IllegalStateException.class)
 	public void shouldThrowExceptionWhenIllConfigured() throws Exception {
 		FedoraPackagerGitCloneOperation cloneOp = new FedoraPackagerGitCloneOperation();
 		cloneOp.run(null);
 	}
-	
+
 	/**
 	 * Fedora Git clones create local branches. Test for that.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -62,7 +63,7 @@ public class FedoraPackagerGitCloneOperationTest {
 		final FedoraPackagerGitCloneOperation cloneOp = new FedoraPackagerGitCloneOperation();
 		final String fedoraPackager = "eclipse-fedorapackager";
 		Job cloneJob = new Job("Clone Me!") {
-			
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
@@ -81,6 +82,8 @@ public class FedoraPackagerGitCloneOperationTest {
 					e.printStackTrace();
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
+				} catch (RemoteAlreadyExistsException e) {
+					e.printStackTrace();
 				}
 				return null;
 			}
@@ -91,7 +94,7 @@ public class FedoraPackagerGitCloneOperationTest {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
+
 		assertNotNull(git);
 		ListBranchCommand ls = git.branchList();
 		// should have created a local branch called "f14"

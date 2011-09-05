@@ -49,6 +49,7 @@ import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitCloneOperation;
 import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitText;
 import org.fedoraproject.eclipse.packager.git.GitPreferencesConstants;
 import org.fedoraproject.eclipse.packager.git.GitUtils;
+import org.fedoraproject.eclipse.packager.git.api.errors.RemoteAlreadyExistsException;
 import org.fedoraproject.eclipse.packager.utils.UiUtils;
 
 
@@ -148,6 +149,8 @@ public class FedoraPackagerGitCloneWizard extends Wizard implements IImportWizar
 							throw new InvocationTargetException(e);
 						} catch (CoreException e) {
 							throw new InvocationTargetException(e);
+						} catch (RemoteAlreadyExistsException e) {
+							e.printStackTrace();
 						}
 						if (monitor.isCanceled())
 							throw new InterruptedException();

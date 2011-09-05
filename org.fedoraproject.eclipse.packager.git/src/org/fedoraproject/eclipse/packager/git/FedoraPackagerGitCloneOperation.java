@@ -13,7 +13,6 @@ package org.fedoraproject.eclipse.packager.git;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -21,19 +20,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.egit.core.RepositoryUtil;
 import org.eclipse.egit.core.op.CloneOperation;
-import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ListBranchCommand;
-import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
-import org.eclipse.jgit.api.ListBranchCommand.ListMode;
-import org.eclipse.jgit.api.errors.InvalidRefNameException;
-import org.eclipse.jgit.api.errors.JGitInternalException;
-import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
-import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.osgi.util.NLS;
+import org.fedoraproject.eclipse.packager.git.api.errors.RemoteAlreadyExistsException;
 
 /**
  * Convenience class for Fedora Git clones. All relevant Fedora specific things
@@ -41,7 +32,7 @@ import org.eclipse.osgi.util.NLS;
  * FedoraPackagerCommand sense. Hence, the "Operation" postfix.
  */
 public class FedoraPackagerGitCloneOperation {
-	
+
 	private URIish uri;
 	private String packageName;
 	private boolean runnable = false;
@@ -49,7 +40,7 @@ public class FedoraPackagerGitCloneOperation {
 
 	/**
 	 * Set the URI to use for the clone.
-	 * 
+	 *
 	 * @param cloneUri
 	 * @return This instance.
 	 * @throws URISyntaxException
@@ -63,11 +54,11 @@ public class FedoraPackagerGitCloneOperation {
 		}
 		return this;
 	}
-	
+
 
 	/**
 	 * Set the package name to use for cloning.
-	 * 
+	 *
 	 * @param packageName
 	 * @return This instance.
 	 */
@@ -78,10 +69,10 @@ public class FedoraPackagerGitCloneOperation {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Execute the clone including local branch name creation.
-	 * 
+	 *
 	 * @param monitor
 	 * @throws IllegalStateException
 	 * @throws InvocationTargetException
@@ -89,17 +80,18 @@ public class FedoraPackagerGitCloneOperation {
 	 * @throws CoreException
 	 * @throws IOException
 	 * @return A Git API instance.
+	 * @throws RemoteAlreadyExistsException
 	 */
 	public Git run(IProgressMonitor monitor) throws IllegalStateException,
 			InvocationTargetException, InterruptedException, CoreException,
-			IOException {
+			IOException, RemoteAlreadyExistsException {
 		if (!runnable || hasRun) {
 			throw new IllegalStateException(
 					NLS.bind(
 							FedoraPackagerGitText.FedoraPackagerGitCloneOperation_operationMisconfiguredError,
 							this.getClass().getName()));
 		}
-		
+
 		final CloneOperation clone = new CloneOperation(uri, true, null,
 				ResourcesPlugin.getWorkspace().getRoot().getLocation()
 						.append(packageName).toFile(), Constants.R_HEADS
@@ -108,70 +100,21 @@ public class FedoraPackagerGitCloneOperation {
 		if (monitor.isCanceled()) {
 			throw new InterruptedException();
 		}
-		
+
 		// Find repo we've just created and set gitRepo
 		RepositoryCache repoCache = org.eclipse.egit.core.Activator
 		.getDefault().getRepositoryCache();
 		Git git = new Git(repoCache.lookupRepository(clone.getGitDir()));
-		
-		createLocalBranches(git, monitor);
-		
+
+		GitUtils.createLocalBranches(git, monitor);
+
 		// Add cloned repository to the list of Git repositories so that it
 		// shows up in the Git repositories view.
 		final RepositoryUtil config = org.eclipse.egit.core.Activator.getDefault().getRepositoryUtil();
 		config.addConfiguredRepository(clone.getGitDir());
-		
-		this.hasRun = true; // disallow two runs of the same instance
-		
-		return git;
-	}
-	
-	/**
-	 * Create local branches based on existing remotes (uses the JGit API).
-	 * 
-	 * @param monitor
-	 * @throws CoreException
-	 */
-	private void createLocalBranches(Git git, IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask(FedoraPackagerGitText.FedoraPackagerGitCloneWizard_createLocalBranchesJob,
-				IProgressMonitor.UNKNOWN);
 
-		try {
-			// get a list of remote branches
-			ListBranchCommand branchList = git.branchList();
-			branchList.setListMode(ListMode.REMOTE); // want all remote branches
-			List<Ref> remoteRefs = branchList.call();
-			for (Ref remoteRef: remoteRefs) {
-				String name = remoteRef.getName();
-				int index = (Constants.R_REMOTES + "origin/").length(); //$NON-NLS-1$
-				// Remove "refs/remotes/origin/" part in branch name
-				name = name.substring(index);
-				// Use "f14"-like branch naming
-				if (name.endsWith("/" + Constants.MASTER)) { //$NON-NLS-1$
-					index = name.indexOf("/" + Constants.MASTER); //$NON-NLS-1$
-					name = name.substring(0, index);
-				}
-				// Create all remote branches, except "master"
-				if (!name.equals(Constants.MASTER)) {
-					CreateBranchCommand branchCreateCmd = git.branchCreate();
-					branchCreateCmd.setName(name);
-					// Need to set starting point this way in order for tracking
-					// to work properly. See: https://bugs.eclipse.org/bugs/show_bug.cgi?id=333899
-					branchCreateCmd.setStartPoint(remoteRef.getName());
-					// Add remote tracking config in order to not confuse
-					// fedpkg
-					branchCreateCmd.setUpstreamMode(SetupUpstreamMode.TRACK);
-					branchCreateCmd.call();
-				}
-			}
-		} catch (JGitInternalException e) {
-			e.printStackTrace();
-		} catch (RefAlreadyExistsException e) {
-			e.printStackTrace();
-		} catch (RefNotFoundException e) {
-			e.printStackTrace();
-		} catch (InvalidRefNameException e) {
-			e.printStackTrace();
-		}
+		this.hasRun = true; // disallow two runs of the same instance
+
+		return git;
 	}
 }

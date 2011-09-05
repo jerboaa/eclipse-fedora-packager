@@ -36,17 +36,18 @@ import org.eclipse.jgit.lib.Repository;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitCloneOperation;
 import org.fedoraproject.eclipse.packager.git.GitUtils;
+import org.fedoraproject.eclipse.packager.git.api.errors.RemoteAlreadyExistsException;
 
 /**
  * Fixture for Git based projects.
  */
-public class GitTestProject {	
+public class GitTestProject {
 	private IProject project;
 	private Git git;
-	
+
 	public GitTestProject(final String packageName) throws InterruptedException {
 		Job cloneProjectJob = new Job(packageName) {
-			
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				FedoraPackagerGitCloneOperation cloneOp = new FedoraPackagerGitCloneOperation();
@@ -70,6 +71,8 @@ public class GitTestProject {
 					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
+				} catch (RemoteAlreadyExistsException e) {
+					e.printStackTrace();
 				}
 				return Status.OK_STATUS;
 			}
@@ -77,7 +80,7 @@ public class GitTestProject {
 		cloneProjectJob.schedule();
 		// wait for it to finish
 		cloneProjectJob.join();
-		
+
 		project = ResourcesPlugin.getWorkspace().getRoot()
 		.getProject(packageName);
 		try {
@@ -114,38 +117,38 @@ public class GitTestProject {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void dispose() throws Exception {
 		project.delete(true, true, null);
 		project.refreshLocal(IResource.DEPTH_INFINITE, null);
 	}
-	
+
 	/**
 	 * Get underlying IProject
-	 * 
+	 *
 	 * @return
 	 */
 	public IProject getProject() {
 		return this.project;
 	}
-	
+
 	/**
 	 * @return the gitRepo
 	 */
 	public Git getGitRepo() {
 		return this.git;
 	}
-	
+
 	/**
 	 * Checkouts branch
 	 *
 	 * @param refName
 	 *            full name of branch
 	 * @throws CoreException
-	 * @throws InvalidRefNameException 
-	 * @throws RefNotFoundException 
-	 * @throws RefAlreadyExistsException 
-	 * @throws JGitInternalException 
+	 * @throws InvalidRefNameException
+	 * @throws RefNotFoundException
+	 * @throws RefAlreadyExistsException
+	 * @throws JGitInternalException
 	 */
 	public void checkoutBranch(String branchName) throws JGitInternalException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CoreException {
 		boolean branchExists = false;
