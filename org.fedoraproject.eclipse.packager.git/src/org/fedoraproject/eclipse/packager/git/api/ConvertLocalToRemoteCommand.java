@@ -148,10 +148,13 @@ public class ConvertLocalToRemoteCommand extends
 			projectRoot.getProject().setPersistentProperty(
 					PackagerPlugin.PROJECT_LOCAL_PROP, null);
 
-		} catch (RemoteAlreadyExistsException e) {
-			throw new RemoteAlreadyExistsException(e.getMessage(), e);
 		} catch (Exception e) {
-			throw new LocalProjectConversionFailedException(e.getMessage(), e);
+			if (e instanceof RemoteAlreadyExistsException) {
+				throw ((RemoteAlreadyExistsException) e);
+			} else {
+				throw new LocalProjectConversionFailedException
+					(e.getMessage(), e);
+			}
 		}
 
 		ConvertLocalResult result = new ConvertLocalResult(git, addRemote,

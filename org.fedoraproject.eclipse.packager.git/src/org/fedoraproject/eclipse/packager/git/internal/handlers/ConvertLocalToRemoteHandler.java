@@ -113,9 +113,8 @@ public class ConvertLocalToRemoteHandler extends FedoraPackagerAbstractHandler {
 					logger.logError(e.getMessage(), e);
 					return FedoraHandlerUtils.errorStatus(
 							PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
-
 				} catch (RemoteAlreadyExistsException e) {
-					logger.logError(e.getCause().getMessage(), e);
+					logger.logError(e.getMessage(), e);
 					return FedoraHandlerUtils
 							.errorStatus(
 									PackagerPlugin.PLUGIN_ID,
@@ -123,7 +122,7 @@ public class ConvertLocalToRemoteHandler extends FedoraPackagerAbstractHandler {
 											FedoraPackagerGitText.ConvertLocalToRemoteHandler_failToConvert,
 											localfedoraProjectRoot
 													.getPackageName(), e
-													.getCause().getMessage()));
+													.getMessage()));
 				} catch (LocalProjectConversionFailedException e) {
 					logger.logError(e.getCause().getMessage(), e);
 					return FedoraHandlerUtils
