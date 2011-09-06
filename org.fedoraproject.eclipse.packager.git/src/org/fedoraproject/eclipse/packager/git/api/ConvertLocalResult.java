@@ -12,6 +12,7 @@ package org.fedoraproject.eclipse.packager.git.api;
 
 import org.eclipse.jgit.api.Git;
 import org.fedoraproject.eclipse.packager.api.ICommandResult;
+import org.fedoraproject.eclipse.packager.git.FedoraPackagerGitText;
 
 /**
  * Represents the result of a {@code ConvertLocalToRemoteCommand}.
@@ -81,4 +82,33 @@ public class ConvertLocalResult implements ICommandResult {
 	public boolean getHadFetched() {
 		return this.hadFetched;
 	}
+
+	/**
+	 * @param message
+	 *            the initial message
+	 * @return String the message to be shown to the user
+	 */
+	public String getHumanReadableMessage(String message) {
+		if (addRemote && hadFetched) {
+			message = message
+					.concat(FedoraPackagerGitText.ConvertLocalToRemoteHandler_remoteCreatedNotifier);
+		} else if (addRemote && !hadFetched) {
+			message = message
+					.concat(FedoraPackagerGitText.ConvertLocalToRemoteHandler_remoteAndFetchCreatedNotifier);
+		} else {
+			message = message
+					.concat(FedoraPackagerGitText.ConvertLocalToRemoteHandler_remoteNotCreatedNotifier);
+		}
+
+		if (addBranch) {
+			message = message
+					.concat(FedoraPackagerGitText.ConvertLocalToRemoteHandler_branchCreatedNotifier);
+		} else {
+			message = message
+					.concat(FedoraPackagerGitText.ConvertLocalToRemoteHandler_branchNotCreatedNotifier);
+		}
+
+		return message;
+	}
 }
+

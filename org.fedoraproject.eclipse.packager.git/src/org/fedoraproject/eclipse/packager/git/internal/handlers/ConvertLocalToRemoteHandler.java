@@ -97,29 +97,12 @@ public class ConvertLocalToRemoteHandler extends FedoraPackagerAbstractHandler {
 					message = NLS
 							.bind(FedoraPackagerGitText.ConvertLocalToRemoteHandler_information,
 									localfedoraProjectRoot.getPackageName());
-					if (result.getAddRemote() && result.getHadFetched()) {
-						message = message
-								.concat(FedoraPackagerGitText.ConvertLocalToRemoteHandler_remoteCreatedNotifier);
-					} else if (result.getAddRemote() && !result.getHadFetched()) {
-						message = message
-								.concat(FedoraPackagerGitText.ConvertLocalToRemoteHandler_remoteAndFetchCreatedNotifier);
-					} else {
-						message = message
-								.concat(FedoraPackagerGitText.ConvertLocalToRemoteHandler_remoteNotCreatedNotifier);
-					}
-
-					if (result.getAddBranch()) {
-						message = message
-								.concat(FedoraPackagerGitText.ConvertLocalToRemoteHandler_branchCreatedNotifier);
-					} else {
-						message = message
-								.concat(FedoraPackagerGitText.ConvertLocalToRemoteHandler_branchNotCreatedNotifier);
-					}
+					String finalMessage = result.getHumanReadableMessage(message);
 					FedoraHandlerUtils
 							.showInformationDialog(
 									shell,
 									FedoraPackagerGitText.ConvertLocalToRemoteHandler_notificationTitle,
-									message);
+									finalMessage);
 					return Status.OK_STATUS;
 
 				} catch (CommandMisconfiguredException e) {
