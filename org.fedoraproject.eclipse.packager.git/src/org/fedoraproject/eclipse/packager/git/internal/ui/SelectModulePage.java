@@ -25,6 +25,8 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -98,7 +100,10 @@ public class SelectModulePage extends WizardPage {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (projectText.getText() == null || projectText.getText().trim().equals("")){ //$NON-NLS-1$
+				if (projectText.getText() == null){ 
+					setPageComplete(false);
+					setErrorMessage(null);
+				} else if (projectText.getText().trim().equals("")){ //$NON-NLS-1$
 					setPageComplete(false);
 					setErrorMessage(FedoraPackagerGitText.SelectModulePage_badPackageName);
 				} else {
@@ -108,7 +113,7 @@ public class SelectModulePage extends WizardPage {
 			}
 		});
 
-		boolean isUnknownUser = fasUser.equals(FedoraSSL.UNKNOWN_USER);
+		final boolean isUnknownUser = fasUser.equals(FedoraSSL.UNKNOWN_USER);
 		
 		// Options group
 		Group optionsGroup = new Group(composite, SWT.SHADOW_ETCHED_IN);
@@ -120,6 +125,31 @@ public class SelectModulePage extends WizardPage {
 		anonymousCloneBtn.setSelection(isUnknownUser);
 		// disable checkbox if there is no choice of cloning non-anonymously
 		anonymousCloneBtn.setEnabled(!isUnknownUser);
+		anonymousCloneBtn.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (anonymousCloneBtn.getSelection() && !isUnknownUser) {
+					setMessage(
+							FedoraPackagerGitText.SelectModulePage_userSelectedAnonymousCloneInfoMsg,
+							IMessageProvider.INFORMATION);
+				} else if (isUnknownUser) {
+					setMessage(
+							FedoraPackagerGitText.SelectModulePage_anonymousCloneInfoMsg,
+							IMessageProvider.INFORMATION);
+				} else {
+					setMessage(
+							NLS.bind(
+									FedoraPackagerGitText.SelectModulePage_sshCloneInfoMsg,
+									fasUser), IMessageProvider.INFORMATION);
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+		});
 		GridDataFactory.fillDefaults().grab(true, false).span(GROUP_SPAN, 1)
 		.applyTo(optionsGroup);
 		updateMargins(optionsGroup);

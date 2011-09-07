@@ -42,6 +42,7 @@ public class FedoraPackagerGitText extends NLS {
 	/****/ public static String SelectModulePage_optionsGroup;
 	/****/ public static String SelectModulePage_anonymousCloneInfoMsg;
 	/****/ public static String SelectModulePage_sshCloneInfoMsg;
+	/****/ public static String SelectModulePage_userSelectedAnonymousCloneInfoMsg;
 	// FedoraPackagerGitCloneOperation
 	/****/ public static String FedoraPackagerGitCloneOperation_operationMisconfiguredError;
 	// FedoraPackagerGitPreferencesPage
