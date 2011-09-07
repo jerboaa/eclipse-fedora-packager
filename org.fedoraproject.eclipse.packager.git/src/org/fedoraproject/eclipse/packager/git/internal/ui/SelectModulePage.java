@@ -69,7 +69,6 @@ public class SelectModulePage extends WizardPage {
 		workingSetGroup= new WorkingSetGroup();
 		setWorkingSets(EMPTY_WORKING_SET_ARRAY);
 		setPageComplete(false);
-		setErrorMessage(FedoraPackagerGitText.SelectModulePage_badPackageName);
 		this.fasUser = fasUser;
 	}
 
@@ -100,7 +99,7 @@ public class SelectModulePage extends WizardPage {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (projectText.getText() == null){ 
+				if (projectText.getText() == null || projectText.getText().equals("")){ //$NON-NLS-1$
 					setPageComplete(false);
 					setErrorMessage(null);
 				} else if (projectText.getText().trim().equals("")){ //$NON-NLS-1$
