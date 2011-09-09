@@ -24,7 +24,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.fedoraproject.eclipse.packager.LocalProjectType;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.LocalFedoraPackagerProjectCreator;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils.ProjectType;
@@ -70,6 +72,19 @@ public class WizardSRPMProjectTest {
 	public void testPopulateSrpm() throws Exception {
 		// poulate project using imported SRPM
 		testMainProject.create(externalFile, LocalProjectType.SRPM);
+
+		// Set persistent property so that we know when to show the context
+		// menu item.
+		baseProject.setPersistentProperty(PackagerPlugin.PROJECT_LOCAL_PROP, "true" /* unused value */); //$NON-NLS-1$
+
+		ConnectProviderOperation connect = new ConnectProviderOperation(baseProject);
+		connect.execute(null);
+
+		try {
+			baseProject.refreshLocal(IResource.DEPTH_INFINITE, null);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 
 		// Make sure the original SRPM got copied into the workspace
 		IResource resource = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT);
