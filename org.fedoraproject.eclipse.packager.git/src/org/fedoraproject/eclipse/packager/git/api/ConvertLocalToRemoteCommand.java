@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.egit.core.RepositoryCache;
 import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
@@ -137,19 +138,25 @@ public class ConvertLocalToRemoteCommand extends
 			if (addRemote) {
 				addRemoteRepository(uri, monitor);
 			}
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
 			if (addBranch) {
 				GitUtils.createLocalBranches(git, monitor);
 			}
 			mergeLocalRemoteBranches(monitor);
-
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
 			// set the project property to main fedora packager's property
 			projectRoot.getProject().setPersistentProperty(
 					PackagerPlugin.PROJECT_PROP, "true"); //$NON-NLS-1$
 			projectRoot.getProject().setPersistentProperty(
 					PackagerPlugin.PROJECT_LOCAL_PROP, null);
-
 		} catch (Exception e) {
-			if (e instanceof RemoteAlreadyExistsException) {
+			if (e instanceof OperationCanceledException) {
+				throw ((OperationCanceledException) e);
+			} else if (e instanceof RemoteAlreadyExistsException) {
 				throw ((RemoteAlreadyExistsException) e);
 			} else {
 				throw new LocalProjectConversionFailedException
@@ -167,6 +174,12 @@ public class ConvertLocalToRemoteCommand extends
 		return result;
 	}
 
+	/**
+	 * Find the added remote uri, if it exists
+	 *
+	 * @param uri
+	 * @return boolean
+	 */
 	private boolean checkExistingRemoteRepository(String uri) {
 		existingRemote = git
 				.getRepository()
@@ -208,6 +221,9 @@ public class ConvertLocalToRemoteCommand extends
 			fetch.setRemote("origin"); //$NON-NLS-1$
 			fetch.setTimeout(0);
 			fetch.setRefSpecs(refSpec);
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
 			fetch.call();
 
 		} catch (Exception e) {
@@ -229,6 +245,9 @@ public class ConvertLocalToRemoteCommand extends
 		try {
 			merge.include(git.getRepository().getRef(
 					Constants.R_REMOTES + "origin/" + Constants.MASTER)); //$NON-NLS-1$
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
 			merge.call();
 		} catch (Exception e) {
 			throw new LocalProjectConversionFailedException(e.getCause()

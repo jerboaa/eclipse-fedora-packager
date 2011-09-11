@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
@@ -115,6 +116,9 @@ public class GitUtils {
 					// Add remote tracking config in order to not confuse
 					// fedpkg
 					branchCreateCmd.setUpstreamMode(SetupUpstreamMode.TRACK);
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
 					branchCreateCmd.call();
 				}
 			}
