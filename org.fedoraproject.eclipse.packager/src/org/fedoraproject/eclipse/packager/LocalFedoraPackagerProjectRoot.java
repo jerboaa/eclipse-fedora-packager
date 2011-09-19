@@ -235,11 +235,11 @@ public class LocalFedoraPackagerProjectRoot implements IProjectRoot {
 	 * @see org.fedoraproject.eclipse.packager.IProjectRoot#getPackageNVRs()
 	 */
 	@Override
-	public String[] getPackageNVRs() {
+	public String[] getPackageNVRs(BranchConfigInstance bci) {
 		String version = null, release = null;
 		try {
-			version = RPMUtils.rpmQuery(this, "VERSION"); //$NON-NLS-1$
-			release = RPMUtils.rpmQuery(this, "RELEASE"); //$NON-NLS-1$
+			version = RPMUtils.rpmQuery(this, "VERSION", bci); //$NON-NLS-1$
+			release = RPMUtils.rpmQuery(this, "RELEASE", bci); //$NON-NLS-1$
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

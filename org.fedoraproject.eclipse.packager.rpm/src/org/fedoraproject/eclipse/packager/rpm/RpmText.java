@@ -52,12 +52,16 @@ public class RpmText extends NLS {
 	/****/ public static String RpmBuildCommand_distDefinesNullError;
 	/****/ public static String RpmBuildCommand_flagsNullError;
 	/****/ public static String RpmBuildCommand_commandStringMsg;
+	/****/ public static String RpmBuildCommand_branchConfigNullError;
 	/****/ public static String RpmBuildCommand_buildTypeRequired;
 	/****/ public static String RpmBuildCommand_callRpmBuildMsg;
 	/****/ public static String RpmBuildCommand_BuildDidNotStart;
 	/****/ public static String RpmBuildCommand_BuildFailure;
+	/****/ public static String RpmBuildCommand_NoBranchConfig;
 	// RpmEvalCommand
 	/****/ public static String RpmEvalCommand_variableMustBeSet;
+
+
 	// MockBuildCommand
 	/****/ public static String MockBuildCommand_srpmNullError;
 	/****/ public static String MockBuildCommand_invalidMockConfigError;
@@ -66,6 +70,7 @@ public class RpmText extends NLS {
 	/****/ public static String MockBuildCommand_mockCommandLog;
 	/****/ public static String MockBuildCommand_callMockBuildMsg;
 	/****/ public static String MockBuildCommand_usingDefaultMockConfig;
+	/****/ public static String MockBuildCommand_branchConfigNullError;
 	// SCMMockBuildCommand
 	/****/ public static String SCMMockBuildCommand_invalidRepoType;
 	// MockNotInstalledException

@@ -13,6 +13,7 @@ package org.fedoraproject.eclipse.packager.api;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
@@ -32,35 +33,48 @@ public class TagSourcesListener implements ICommandListener {
 	private IProjectRoot projectRoot;
 	private IProgressMonitor mainMonitor;
 	private Shell shell;
-	
+	private BranchConfigInstance bci;
+
 	/**
 	 * Create tag SCM listener.
 	 * 
-	 * @param root The Fedora project root.
-	 * @param monitor The main monitor to create a submonitor from.
-	 * @param shell The shell to be used for message dialog prompting
+	 * @param root
+	 *            The Fedora project root.
+	 * @param monitor
+	 *            The main monitor to create a submonitor from.
+	 * @param shell
+	 *            The shell to be used for message dialog prompting
+	 * @param bci
+	 *            The configuration for the branch the listened command.
 	 */
-	public TagSourcesListener(IProjectRoot root, IProgressMonitor monitor, Shell shell) {
+	public TagSourcesListener(IProjectRoot root, IProgressMonitor monitor,
+			Shell shell, BranchConfigInstance bci) {
 		this.projectRoot = root;
 		this.mainMonitor = monitor;
 		this.shell = shell;
+		this.bci = bci;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
-	 * @see org.fedoraproject.eclipse.packager.api.ICommandListener#preExecution()
+	 * 
+	 * @see
+	 * org.fedoraproject.eclipse.packager.api.ICommandListener#preExecution()
 	 */
 	@Override
 	public void preExecution() throws CommandListenerException {
 		// indicate some progress, by creating a subtask
-		mainMonitor.subTask(FedoraPackagerText.TagSourcesListener_tagSourcesMsg);
-		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(projectRoot);
+		mainMonitor
+				.subTask(FedoraPackagerText.TagSourcesListener_tagSourcesMsg);
+		IFpProjectBits projectBits = FedoraPackagerUtils
+				.getVcsHandler(projectRoot);
 		if (projectBits.needsTag()) {
 			// Do VCS tagging if so requested.
 			if (askIfShouldTag()) {
-				FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
+				FedoraPackagerLogger logger = FedoraPackagerLogger
+						.getInstance();
 				logger.logDebug(FedoraPackagerText.TagSourcesListener_tagSourcesMsg);
-				projectBits.tagVcs(projectRoot, mainMonitor);
+				projectBits.tagVcs(projectRoot, mainMonitor, bci);
 			}
 		}
 		mainMonitor.worked(20);
@@ -68,13 +82,15 @@ public class TagSourcesListener implements ICommandListener {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.fedoraproject.eclipse.packager.api.ICommandListener#postExecution()
+	 * 
+	 * @see
+	 * org.fedoraproject.eclipse.packager.api.ICommandListener#postExecution()
 	 */
 	@Override
 	public void postExecution() throws CommandListenerException {
 		// nothing
 	}
-	
+
 	/**
 	 * Ask for tagging of sources. This is only necessary for CVS based source
 	 * control.
@@ -83,7 +99,8 @@ public class TagSourcesListener implements ICommandListener {
 	 */
 	private boolean askIfShouldTag() {
 		QuestionMessageDialog op = new QuestionMessageDialog(
-				FedoraPackagerText.TagSourcesListener_tagBeforeSendingBuild, shell, this.projectRoot);
+				FedoraPackagerText.TagSourcesListener_tagBeforeSendingBuild,
+				shell, this.projectRoot);
 		Display.getDefault().syncExec(op);
 		return op.isOkPressed();
 	}

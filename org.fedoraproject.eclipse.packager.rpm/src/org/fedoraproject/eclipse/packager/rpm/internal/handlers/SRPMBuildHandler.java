@@ -38,7 +38,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 
 /**
  * Handler for the creating an SRPM
- *
+ * 
  */
 public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
 
@@ -69,27 +69,29 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
 					.getCommandInstance(RpmBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showErrorDialog(shell,
-					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
+			FedoraHandlerUtils.showErrorDialog(shell, fedoraProjectRoot
+					.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showErrorDialog(shell,
-					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
+			FedoraHandlerUtils.showErrorDialog(shell, fedoraProjectRoot
+					.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
 		// Need to nest jobs into this job for it to show up properly in the
 		// UI
-		Job job = new Job(fedoraProjectRoot.getProductStrings().getProductName()) {
+		Job job = new Job(fedoraProjectRoot.getProductStrings()
+				.getProductName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// Make sure we have sources locally
 				final String downloadUrlPreference = PackagerPlugin
-				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+						.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
 				Job downloadSourcesJob = new DownloadSourcesJob(
 						RpmText.SRPMBuildHandler_downloadSourcesForSRPMBuild,
-						download, fedoraProjectRoot, shell, downloadUrlPreference, true);
+						download, fedoraProjectRoot, shell,
+						downloadUrlPreference, true);
 				downloadSourcesJob.setUser(true);
 				downloadSourcesJob.schedule();
 				try {
@@ -105,7 +107,8 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
 				// Kick off the SRPM job
 				SRPMBuildJob srpmBuildJob = new SRPMBuildJob(
 						RpmText.SRPMBuildHandler_buildingSRPM, srpmBuild,
-						fedoraProjectRoot);
+						fedoraProjectRoot, FedoraPackagerUtils.getVcsHandler(
+								fedoraProjectRoot).getBranchConfig());
 				srpmBuildJob.setUser(true);
 				srpmBuildJob.schedule();
 				try {

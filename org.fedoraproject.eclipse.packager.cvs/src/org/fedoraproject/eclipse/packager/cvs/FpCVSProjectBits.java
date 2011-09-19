@@ -48,6 +48,7 @@ import org.eclipse.team.internal.ccvs.core.client.Tag;
 import org.eclipse.team.internal.ccvs.core.client.listeners.TagListener;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
 import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
+import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
@@ -66,7 +67,7 @@ import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 public class FpCVSProjectBits implements IFpProjectBits {
 
 	protected IProjectRoot fedoraprojectRoot; // The underlying project root
-	private IResource container; 				 // The underlying container
+	private IResource container; // The underlying container
 	private HashMap<String, HashMap<String, String>> branches; // All branches
 	private boolean initialized = false; // keep track if instance is
 											// initialized
@@ -366,40 +367,6 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	}
 
 	/**
-	 * Get distribution String.
-	 * 
-	 * See {@link IFpProjectBits#getDist()}
-	 */
-	@Override
-	public String getDist() {
-		return this.branches.get(getCurrentBranchName()).get("dist");//$NON-NLS-1$
-	}
-
-	/**
-	 * See {@link IFpProjectBits#getDistVal()}
-	 */
-	@Override
-	public String getDistVal() {
-		return this.branches.get(getCurrentBranchName()).get("distval"); //$NON-NLS-1$
-	}
-
-	/**
-	 * See {@link IFpProjectBits#getDistVariable()}
-	 */
-	@Override
-	public String getDistVariable() {
-		return this.branches.get(getCurrentBranchName()).get("distvar"); //$NON-NLS-1$
-	}
-
-	/**
-	 * See {@link IFpProjectBits#getTarget()}
-	 */
-	@Override
-	public String getTarget() {
-		return this.branches.get(getCurrentBranchName()).get("target"); //$NON-NLS-1$
-	}
-
-	/**
 	 * See {@link IFpProjectBits#ignoreResource(IResource)}
 	 */
 	@Override
@@ -411,14 +378,16 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	/**
 	 * Do CVS tag.
 	 * 
-	 * See {@link IFpProjectBits#tagVcs(IProjectRoot, IProgressMonitor)}
+	 * See
+	 * {@link IFpProjectBits#tagVcs(IProjectRoot, IProgressMonitor, BranchConfigInstance)}
 	 */
 	@Override
-	public IStatus tagVcs(IProjectRoot projectRoot, IProgressMonitor monitor) {
+	public IStatus tagVcs(IProjectRoot projectRoot, IProgressMonitor monitor,
+			BranchConfigInstance bci) {
 		// monitor.subTask("Generating Tag Name from Specfile");
 		final String tagName;
 		try {
-			tagName = RPMUtils.makeTagName(projectRoot);
+			tagName = RPMUtils.makeTagName(projectRoot, bci);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return new Status(IStatus.ERROR, CVSPlugin.PLUGIN_ID,
@@ -520,10 +489,12 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	/**
 	 * Determine if CVS tag exists.
 	 * 
-	 * See {@link IFpProjectBits#isVcsTagged(IProjectRoot, String)}
+	 * See
+	 * {@link IFpProjectBits#isVcsTagged(IProjectRoot, String, BranchConfigInstance)}
 	 */
 	@Override
-	public boolean isVcsTagged(IProjectRoot fedoraProjectRoot, String tagName) {
+	public boolean isVcsTagged(IProjectRoot fedoraProjectRoot, String tagName,
+			BranchConfigInstance bci) {
 		if (!isInitialized()) {
 			return false; // can't do this without being initialized
 		}
@@ -542,7 +513,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		}
 		String createdTag = null;
 		try {
-			createdTag = RPMUtils.makeTagName(fedoraProjectRoot);
+			createdTag = RPMUtils.makeTagName(fedoraProjectRoot, bci);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -569,9 +540,10 @@ public class FpCVSProjectBits implements IFpProjectBits {
 	 * .fedoraproject.eclipse.packager.IProjectRoot)
 	 */
 	@Override
-	public String getScmUrlForKoji(IProjectRoot projectRoot) {
+	public String getScmUrlForKoji(IProjectRoot projectRoot,
+			BranchConfigInstance bci) {
 		try {
-			return getScmUrl() + "#" + RPMUtils.makeTagName(projectRoot);
+			return getScmUrl() + "#" + RPMUtils.makeTagName(projectRoot, bci);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -637,5 +609,14 @@ public class FpCVSProjectBits implements IFpProjectBits {
 		} catch (CVSException e) {
 			throw new CommandListenerException(e);
 		}
+	}
+
+	@Override
+	public BranchConfigInstance getBranchConfig() {
+		return new BranchConfigInstance(this.branches.get(
+				getCurrentBranchName()).get("dist"), this.branches.get(
+				getCurrentBranchName()).get("distval"), this.branches.get(
+				getCurrentBranchName()).get("distvar"), this.branches.get(
+				getCurrentBranchName()).get("target"), getCurrentBranchName());
 	}
 }

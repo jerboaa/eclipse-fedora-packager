@@ -22,7 +22,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
@@ -33,7 +33,6 @@ import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildCommand.BuildType;
 import org.fedoraproject.eclipse.packager.rpm.api.RpmBuildResult;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
-import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,10 +50,14 @@ public class MockBuildCommandTest {
 	private IProjectRoot fpRoot;
 	// Path to SRPM
 	private String srpmPath;
+	private BranchConfigInstance bci;
 	
 	@Before
 	public void setUp() throws Exception {
 		this.testProject = new GitTestProject("eclipse-fedorapackager");
+		// switch to F15
+		testProject.checkoutBranch("f15");
+		testProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		this.fpRoot = FedoraPackagerUtils.getProjectRoot((this.testProject
 				.getProject()));
 		this.packager = new FedoraPackager(fpRoot);
@@ -62,8 +65,7 @@ public class MockBuildCommandTest {
 		DownloadSourceCommand download = (DownloadSourceCommand) packager
 				.getCommandInstance(DownloadSourceCommand.ID);
 		download.call(new NullProgressMonitor());
-		// switch to F15
-		testProject.checkoutBranch("f15");
+		this.bci = FedoraPackagerUtils.getVcsHandler(fpRoot).getBranchConfig();
 		// build fresh SRPM
 		RpmBuildResult srpmBuildResult = createSRPM();
 		this.srpmPath = srpmBuildResult.getAbsoluteSRPMFilePath();
@@ -83,7 +85,8 @@ public class MockBuildCommandTest {
 	public void canCreateF15MockBuild() throws Exception {
 		MockBuildCommand mockBuild = (MockBuildCommand) packager
 				.getCommandInstance(MockBuildCommand.ID);
-		MockBuildResult result = mockBuild.pathToSRPM(srpmPath).call(new NullProgressMonitor());
+		MockBuildResult result = mockBuild.pathToSRPM(srpmPath)
+				.branchConfig(bci).call(new NullProgressMonitor());
 		assertTrue(result.wasSuccessful());
 		String resultDirectoryPath = result.getResultDirectoryPath();
 		assertNotNull(resultDirectoryPath);
@@ -119,11 +122,8 @@ public class MockBuildCommandTest {
 				.getCommandInstance(RpmBuildCommand.ID);
 		// want SRPM build
 		srpmBuild.buildType(BuildType.SOURCE).flags(nodeps);
-		// set dist-defines
-		IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(packager
-				.getFedoraProjectRoot());
-		List<String> distDefines = RPMUtils.getDistDefines(projectBits);
-		srpmBuild.distDefines(distDefines);
+		// set branch config
+		srpmBuild.branchConfig(bci);
 		return srpmBuild.call(new NullProgressMonitor());
 	}
 }

@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
+import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
@@ -58,9 +59,10 @@ public class SCMMockBuildJob extends AbstractMockJob {
 	 * @param shell The shell the Job is in
 	 * @param fpRoot The root of the project the Job is run in
 	 * @param repoType The type of repo containing the specfile
+	 * @param bci The configuration of the branch at time of build
 	 */
-	public SCMMockBuildJob(String name, Shell shell, IProjectRoot fpRoot, RepoType repoType){
-		super(name, shell, fpRoot);
+	public SCMMockBuildJob(String name, Shell shell, IProjectRoot fpRoot, RepoType repoType, BranchConfigInstance bci){
+		super(name, shell, fpRoot, bci);
 		repo = repoType;
 	}
 	
@@ -71,9 +73,10 @@ public class SCMMockBuildJob extends AbstractMockJob {
 	 * @param fpRoot The root of the project the Job is run in
 	 * @param repoType The type of repo containing the specfile
 	 * @param localSource true to force the use of local source
+	 * @param bci The configuration of the branch at time of build
 	 */
-	public SCMMockBuildJob(String name, Shell shell, IProjectRoot fpRoot, RepoType repoType, boolean localSource){
-		super(name, shell, fpRoot);
+	public SCMMockBuildJob(String name, Shell shell, IProjectRoot fpRoot, RepoType repoType, boolean localSource, BranchConfigInstance bci){
+		super(name, shell, fpRoot, bci);
 		repo = repoType;
 		useRepoSource = localSource;
 	}
@@ -130,6 +133,7 @@ public class SCMMockBuildJob extends AbstractMockJob {
 			mockBuild.useDownloadedSourceDirectory(download.getDownloadFolderPath());
 			mockBuild.useSpec(fpr.getSpecFile().getName());
 		}
+		mockBuild.branchConfig(bci);
 		//set repo type
 		mockBuild.useRepoType(repo);
 		if (repo == RepoType.GIT){
