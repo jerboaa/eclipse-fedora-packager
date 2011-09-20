@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.SourcesFileUpdater;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
@@ -51,6 +52,10 @@ public class SourcesFileUpdaterTest {
 		File copySource = new File(dirName);
 		
 		testProject = TestsUtils.createProjectFromTemplate(copySource);
+		// we need the property set otherwise instantiation of the project root
+		// fails.
+		testProject.setPersistentProperty(PackagerPlugin.PROJECT_PROP,
+				"true" /* unused value */);
 		fpRoot = FedoraPackagerUtils.getProjectRoot(testProject);
 		assertNotNull(fpRoot);
 		
