@@ -136,7 +136,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 			return null;
 		}
 		String packageName = this.project.getProject().getName();
-		return "git://pkgs.fedoraproject.org/" + packageName + ".git?#" + getCommitHash(); //$NON-NLS-1$ //$NON-NLS-2$
+		return "git://pkgs.fedoraproject.org/" + packageName + "?#" + getCommitHash(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**
