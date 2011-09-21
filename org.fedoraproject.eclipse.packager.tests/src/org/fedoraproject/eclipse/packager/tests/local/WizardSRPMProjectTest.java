@@ -72,7 +72,6 @@ public class WizardSRPMProjectTest {
 	public void testPopulateSrpm() throws Exception {
 		// poulate project using imported SRPM
 		testMainProject.create(externalFile, LocalProjectType.SRPM);
-
 		// Set persistent property so that we know when to show the context
 		// menu item.
 		baseProject.setPersistentProperty(PackagerPlugin.PROJECT_LOCAL_PROP, "true" /* unused value */); //$NON-NLS-1$
