@@ -30,6 +30,7 @@ import org.eclipse.linuxtools.rpm.ui.editor.parser.SpecfileParser;
 import org.fedoraproject.eclipse.packager.ILookasideCache;
 import org.fedoraproject.eclipse.packager.IProductStrings;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.ProductStringsNonTranslatable;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerExtensionPointException;
