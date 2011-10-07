@@ -19,6 +19,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.linuxtools.rpmstubby.InputType;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -122,21 +124,27 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 			}
 		});
 
+		// Project type = PLAIN
 		lblSpecPlain = createLabel(grpSpec,
 				FedoraPackagerText.LocalFedoraPackagerPageThree_lblSpecPlain);
 		textSpecPlain = createText(grpSpec);
+		textSpecPlain.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				setPageStatus(false, false);
+				setExternalFile(textSpecPlain.getText());
+			}
+		});
 		btnSpecPlainBrowse = createPushButton(grpSpec,
 				FedoraPackagerText.LocalFedoraPackagerPageThree_btnBrowse);
 		btnSpecPlainBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fileDialog("*.spec", textSpecPlain); //$NON-NLS-1$
-				if (textSpecPlain.getText().length() != 0) {
-					setPageStatus(true, true);
-				}
 			}
 		});
 
+		// Project type = SRPM
 		btnCheckSrpm = createRadioButton(grpSpec,
 				FedoraPackagerText.LocalFedoraPackagerPageThree_btnCheckSrpm);
 		btnCheckSrpm.addSelectionListener(new SelectionAdapter() {
@@ -146,23 +154,27 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 				selectControl();
 			}
 		});
-
 		lblSrpm = createLabel(grpSpec,
 				FedoraPackagerText.LocalFedoraPackagerPageThree_lblSrpm);
 		textSrpm = createText(grpSpec);
+		textSrpm.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				setPageStatus(false, false);
+				setExternalFile(textSrpm.getText());
+			}
+		});
 		btnSrpmBrowse = createPushButton(grpSpec,
 				FedoraPackagerText.LocalFedoraPackagerPageThree_btnBrowse);
 		btnSrpmBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fileDialog("*.src.rpm", textSrpm); //$NON-NLS-1$
-				if (textSrpm.getText().length() != 0) {
-					setPageStatus(true, true);
-				}
 			}
 		});
 
 
+		// Project Type = STUBBY
 		btnCheckStubby = createRadioButton(grpSpec,
 				FedoraPackagerText.LocalFedoraPackagerPageThree_btnCheckStubby);
 		btnCheckStubby.addSelectionListener(new SelectionAdapter() {
@@ -172,7 +184,6 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 				selectControl();
 			}
 		});
-
 		comboStubby = new ComboViewer(grpSpec, SWT.READ_ONLY);
 		comboStubby.getControl().setLayoutData(layoutData);
 		comboStubby.setContentProvider(ArrayContentProvider.getInstance());
@@ -181,16 +192,21 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 		layoutData = new GridData();
 		layoutData.horizontalIndent = 25;
 		comboStubby.getCombo().setLayoutData(layoutData);
-
 		textStubby = createText(grpSpec);
+		textStubby.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				setPageStatus(false, false);
+				setInputType();
+				setExternalFile(textStubby.getText());
+			}
+		});
 		btnStubbyBrowse = createPushButton(grpSpec,
 				FedoraPackagerText.LocalFedoraPackagerPageThree_btnBrowse);
 		btnStubbyBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				int comboIndex = comboStubby.getCombo().getSelectionIndex();
-				inputType = InputType.valueOf(comboStubby.getCombo().getItem(
-						comboIndex));
+				setInputType();
 				String filter = null;
 				switch (inputType) {
 				case ECLIPSE_FEATURE:
@@ -202,10 +218,6 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 				}
 				if (filter != null) {
 					fileDialog(filter, textStubby);
-				}
-
-				if (textStubby.getText().length() != 0) {
-					setPageStatus(true, true);
 				}
 			}
 		});
@@ -295,7 +307,26 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 		String filePath = fdr.getFile();
 		if (filePath != null) {
 			text.setText(filePath);
-			this.externalFile = new File(filePath);
+			setExternalFile(filePath);
+		}
+	}
+
+	/**
+	 * Sets the external file based on the provided filePath
+	 *
+	 */
+	private void setExternalFile(String filePath) {
+		setErrorMessage(null);
+		if (filePath.length() != 0) {
+			externalFile = new File(filePath);
+			if (!externalFile.exists()) {
+				setErrorMessage(NLS.bind(
+						FedoraPackagerText.LocalFedoraPackagerPageThree_fileExistence,
+						externalFile));
+			}
+			else {
+				setPageStatus(true, true);
+			}
 		}
 	}
 
@@ -315,6 +346,17 @@ public class LocalFedoraPackagerPageThree extends WizardPage {
 	 */
 	public LocalProjectType getProjectType() {
 		return projectType;
+	}
+
+	/**
+	 * Sets InputType for stubby projects based on
+	 * the selected external file's type
+	 *
+	 */
+	private void setInputType() {
+		int comboIndex = comboStubby.getCombo().getSelectionIndex();
+		inputType = InputType.valueOf(comboStubby.getCombo().getItem(
+				comboIndex));
 	}
 
 	/**

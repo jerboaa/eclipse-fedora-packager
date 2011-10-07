@@ -127,6 +127,7 @@ public class FedoraPackagerText extends NLS {
 	/****/ public static String LocalFedoraPackagerPageThree_btnCheckPlain;
 	/****/ public static String LocalFedoraPackagerPageThree_btnTemplateSpec;
 	/****/ public static String LocalFedoraPackagerPageThree_fileDialog;
+	/****/ public static String LocalFedoraPackagerPageThree_fileExistence;
 	//Local Fedora Packager Project-api
 	/****/ public static String LocalFedoraPackagerProjectCreator_FirstCommit;
 	//Local Fedora Packager Project-api-errors
