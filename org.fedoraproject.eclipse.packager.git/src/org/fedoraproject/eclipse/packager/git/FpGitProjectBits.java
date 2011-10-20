@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.git;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -21,8 +25,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -74,12 +81,6 @@ public class FpGitProjectBits implements IFpProjectBits {
 					".*(master).*|.*(el)(\\d).*|" + //$NON-NLS-1$
 					".*(olpc)(\\d).*" //$NON-NLS-1$
 			);
-	private final String[] mappedBranchNames = {
-			"Fedora 14", "Fedora 15", //$NON-NLS-1$ //$NON-NLS-2$
-			"Fedora 16", "Fedora 17", "Fedora Rawhide", //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
-			"RHEL 4", "RHEL 5", //$NON-NLS-1$ //$NON-NLS-2$
-			"RHEL 6" }; //$NON-NLS-1$
-
 	/**
 	 * See {@link IFpProjectBits#getBranchName(String)}
 	 */
@@ -187,7 +188,8 @@ public class FpGitProjectBits implements IFpProjectBits {
 			for (String key : keyset) {
 				// use shortenRefName() to get rid of refs/*/ prefix
 				branch = Repository.shortenRefName(remotes.get(key).getName());
-				mappedBranch = mapBranchName(branch); // do the branch name mapping
+				mappedBranch = mapBranchName(branch); // do the branch name
+														// mapping
 				if (mappedBranch != null) {
 					branches.put(mappedBranch, mappedBranch);
 				} else {
@@ -235,7 +237,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	private String mapBranchName(String from) {
 		String prefix, version;
 		Matcher branchMatcher = BRANCH_PATTERN.matcher(from);
-		//loop throws exception if no matches
+		// loop throws exception if no matches
 		if (!branchMatcher.matches()) {
 			return null;
 		}
@@ -481,32 +483,43 @@ public class FpGitProjectBits implements IFpProjectBits {
 	@Override
 	public BranchConfigInstance getBranchConfig() {
 		String branchName = getCurrentBranchName();
-		if (branchName == null){
+		if (branchName == null) {
+			HashMap<String, String> branchMap = new HashMap<String, String>();
+			BufferedReader br;
+			try {
+				br = new BufferedReader(new InputStreamReader(FileLocator.find(Platform
+						.getBundle("org.fedoraproject.eclipse.packager.git"), //$NON-NLS-1$
+						new Path("resources/branchinfo.txt"), null).openStream())); //$NON-NLS-1$
+				while (br.ready()) {
+					String line = br.readLine();
+					branchMap.put(line.split(",")[1], line.split(",")[0]); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			} catch (FileNotFoundException e1) {
+				// should not occur
+				e1.printStackTrace();
+			} catch (IOException e) {
+				// should not occur
+				e.printStackTrace();
+			}
+			final String[] entries = branchMap.keySet().toArray(new String[0]);
+			Arrays.sort(entries);
 			FutureTask<String> promptTask = new FutureTask<String>(
 					new Callable<String>() {
 						@Override
 						public String call() {
 							Shell shell = new Shell(Display.getDefault());
 							ListDialog ld = new ListDialog(shell);
-							ld.setInput(mappedBranchNames);
+							ld.setInput(entries);
 							ld.setContentProvider(new ArrayContentProvider());
 							ld.setLabelProvider(new LabelProvider());
 							ld.setMessage(FedoraPackagerGitText.FpGitProjectBits_OSDialogTitle);
 							ld.open();
-							String selection = ld.getResult()[0].toString();
-							if (selection.startsWith("Fedora")){ //$NON-NLS-1$
-								if (selection.endsWith("Rawhide")){ //$NON-NLS-1$
-									return "devel"; //$NON-NLS-1$
-								} else {
-									return "F-" + selection.substring(selection.length() - 2); //$NON-NLS-1$
-								}
-							}
-							return "EL-" + selection.substring(selection.length() - 1); //$NON-NLS-1$
+							return ld.getResult()[0].toString();
 						}
 					});
 			Display.getDefault().syncExec(promptTask);
 			try {
-				branchName = promptTask.get();
+				branchName = branchMap.get(promptTask.get());
 			} catch (InterruptedException e) {
 				return null;
 			} catch (ExecutionException e) {
