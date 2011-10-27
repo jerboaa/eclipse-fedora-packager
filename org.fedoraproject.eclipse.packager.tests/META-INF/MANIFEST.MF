@@ -60,6 +60,5 @@ Import-Package: com.google.gson,
  org.fedoraproject.eclipse.packager.rpm,
  org.fedoraproject.eclipse.packager.rpm.api,
  org.fedoraproject.eclipse.packager.rpm.api.errors,
- org.fedoraproject.eclipse.packager.utils,
- org.json
+ org.fedoraproject.eclipse.packager.utils
 Eclipse-BundleShape: dir
