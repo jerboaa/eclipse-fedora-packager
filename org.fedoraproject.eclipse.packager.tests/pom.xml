@@ -5,7 +5,7 @@
   <parent>
     <artifactId>eclipse-fedorapackager-parent</artifactId>
     <groupId>org.fedoraproject.eclipse.packager</groupId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
   </parent>
   <groupId>org.fedoraproject.eclipse.packager</groupId>
   <artifactId>org.fedoraproject.eclipse.packager.tests</artifactId>
