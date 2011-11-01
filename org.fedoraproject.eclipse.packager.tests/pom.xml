@@ -15,20 +15,7 @@
   <name>Fedora Packager for Eclipse Testing Plug-in</name>
 
   <build>
-     <!-- workaround for https://issues.sonatype.org/browse/TYCHO-168 -->
-     <resources>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-source-plugin</artifactId>
-      </plugin>
+     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
@@ -42,7 +29,7 @@
         <artifactId>tycho-surefire-plugin</artifactId>
         <version>${tycho-version}</version>
         <configuration>
-       	  <useUIHarness>true</useUIHarness>
+          <useUIHarness>true</useUIHarness>
           <useUIThread>true</useUIThread>
           <product>org.eclipse.sdk.ide</product>
         </configuration>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.fedoraproject.eclipse.packager"
+      id="org.fedoraproject.eclipse.packager.feature"
       label="Fedora Packager for Eclipse"
       version="0.2.0.qualifier"
       provider-name="Fedoraproject.org">

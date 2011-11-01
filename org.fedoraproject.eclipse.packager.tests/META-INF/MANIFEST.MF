@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Fedora Packager Tests Plug-in
 Bundle-SymbolicName: org.fedoraproject.eclipse.packager.tests;singleton:=true
 Bundle-Version: 0.2.2.qualifier
-Bundle-Activator: org.fedoraproject.eclipse.packager.tests.TestsPlugin
 Bundle-Vendor: FedoraProject.org
 Require-Bundle: org.eclipse.ui,
  org.junit4;bundle-version="4.5.0",

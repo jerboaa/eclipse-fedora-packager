@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.fedoraproject.eclipse.packager_0.2.0.qualifier.jar" id="org.fedoraproject.eclipse.packager" version="0.2.0.qualifier">
+   <feature url="features/org.fedoraproject.eclipse.packager.feature_0.2.0.qualifier.jar" id="org.fedoraproject.eclipse.packager.feature" version="0.2.0.qualifier">
       <category name="fedora-packager"/>
    </feature>
    <!--<feature url="features/org.fedoraproject.eclipse.packager_0.1.12.qualifier.jar" id="org.fedoraproject.eclipse.packager" version="0.1.12.qualifier">
