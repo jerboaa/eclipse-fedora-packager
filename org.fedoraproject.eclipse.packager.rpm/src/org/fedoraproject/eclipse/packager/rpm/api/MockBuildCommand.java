@@ -30,8 +30,8 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
-import org.fedoraproject.eclipse.packager.IFpProjectBits;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerCommand;
@@ -48,7 +48,6 @@ import org.fedoraproject.eclipse.packager.rpm.internal.core.ConsoleWriter;
 import org.fedoraproject.eclipse.packager.rpm.internal.core.MockBuildCommandSuccessObserver;
 import org.fedoraproject.eclipse.packager.rpm.internal.core.MockBuildStatusObserver;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
-import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.utils.RPMUtils;
 
 /**
@@ -74,6 +73,7 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 	// path to SRPM which gets rebuild in the chrooted env.
 	private String srpmAbsPath;
 	protected String resultDir;
+	private BranchConfigInstance bci;
 
 	/**
 	 * Set the mock config.
@@ -121,6 +121,23 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		return this;
 	}
 
+	/**
+	 * @param bci
+	 *            The branch configuration for this command.
+	 * @return This instance.
+	 * @throws IllegalArgumentException
+	 *             If the config was {@code null}.
+	 */
+	public MockBuildCommand branchConfig(BranchConfigInstance bci)
+			throws IllegalArgumentException {
+		if (bci == null) {
+			throw new IllegalArgumentException(
+					RpmText.MockBuildCommand_branchConfigNullError);
+		}
+		this.bci = bci;
+		return this;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -133,6 +150,10 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		if (srpmAbsPath == null) {
 			throw new CommandMisconfiguredException(
 					RpmText.MockBuildCommand_srpmNullError);
+		}
+		if (bci == null){
+			throw new CommandMisconfiguredException(
+					RpmText.MockBuildCommand_branchConfigNullError);
 		}
 	}
 
@@ -212,7 +233,7 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		resultDir += projectRoot.getContainer().getLocation().toOSString();
 		resultDir += IPath.SEPARATOR;
 		try {
-			resultDir += RPMUtils.getNVR(projectRoot);
+			resultDir += RPMUtils.getNVR(projectRoot, bci);
 		} catch (IOException e) {
 			throw new MockBuildCommandException(e.getMessage(), e);
 		}
@@ -240,10 +261,8 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 		assert this.mockConfig == null;
 		FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		logger.logDebug(RpmText.MockBuildCommand_usingDefaultMockConfig);
-		IFpProjectBits projectBits = FedoraPackagerUtils
-				.getVcsHandler(projectRoot);
-		String distvar = projectBits.getDistVariable();
-		String distval = projectBits.getDistVal();
+		String distvar = bci.getDistVariable();
+		String distval = bci.getDistVal();
 		String mockcfg = null;
 		if (distvar.equals("rhel")) { //$NON-NLS-1$
 			mockcfg = "epel-" + distval + "-" + this.localArchitecture; //$NON-NLS-1$ //$NON-NLS-2$
@@ -254,11 +273,11 @@ public class MockBuildCommand extends FedoraPackagerCommand<MockBuildResult> {
 				mockcfg += "-core"; //$NON-NLS-1$
 			}
 
-			if (projectBits.getCurrentBranchName().equals("devel")) { //$NON-NLS-1$
+			if (bci.getEquivalentBranch().equals("devel")) { //$NON-NLS-1$
 				mockcfg = "fedora-devel-" + this.localArchitecture; //$NON-NLS-1$
 			}
 
-			if (projectBits.getCurrentBranchName().equals("devel")) { //$NON-NLS-1$
+			if (bci.getEquivalentBranch().equals("devel")) { //$NON-NLS-1$
 				if (!isSupportedMockConfig(mockcfg)) {
 					// If the mockcfg as determined from above does not exist,
 					// do something reasonable.

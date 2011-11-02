@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
+import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
@@ -32,16 +33,19 @@ public abstract class AbstractMockJob extends Job {
 	protected MockBuildResult result;
 	protected Shell shell;
 	protected IProjectRoot fpr;
+	protected BranchConfigInstance bci;
 	
 	/**
 	 * @param name
 	 * @param shell 
 	 * @param fedoraProjectRoot 
+	 * @param bci 
 	 */
-	public AbstractMockJob(String name, Shell shell, IProjectRoot fedoraProjectRoot) {
+	public AbstractMockJob(String name, Shell shell, IProjectRoot fedoraProjectRoot, BranchConfigInstance bci) {
 		super(name);
 		this.shell = shell;
 		this.fpr = fedoraProjectRoot;
+		this.bci = bci;
 	}
 	
 	/**

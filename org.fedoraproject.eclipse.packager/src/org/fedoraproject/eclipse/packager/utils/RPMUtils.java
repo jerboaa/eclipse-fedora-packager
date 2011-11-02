@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.linuxtools.rpm.core.utils.Utils;
-import org.fedoraproject.eclipse.packager.IFpProjectBits;
+import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 
 /**
@@ -52,17 +52,17 @@ public class RPMUtils {
 	 * 
 	 * @param projectRoot
 	 * @param format
+	 * @param bci
 	 * @return The result of the query.
-	 * @throws IOException If rpm command failed.
+	 * @throws IOException
+	 *             If rpm command failed.
 	 */
-	public static String rpmQuery(IProjectRoot projectRoot, String format)
-			throws IOException {
+	public static String rpmQuery(IProjectRoot projectRoot, String format,
+			BranchConfigInstance bci) throws IOException {
 		IResource parent = projectRoot.getSpecFile().getParent();
 		String dir = parent.getLocation().toString();
 		List<String> defines = getRPMDefines(dir);
-		IFpProjectBits projectBits = FedoraPackagerUtils
-				.getVcsHandler(projectRoot);
-		List<String> distDefines = getDistDefines(projectBits);
+		List<String> distDefines = getDistDefines(bci);
 
 		String result = null;
 		defines.add(0, "rpm"); //$NON-NLS-1$
@@ -84,12 +84,14 @@ public class RPMUtils {
 	 * 
 	 * @param projectRoot
 	 *            Container used for retrieving needed data.
+	 * @param bci
+	 *            Current branch configuration.
 	 * @return The tag name.
 	 * @throws IOException
 	 */
-	public static String makeTagName(IProjectRoot projectRoot)
-			throws IOException {
-		return getNVR(projectRoot).replaceAll("\\.", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+	public static String makeTagName(IProjectRoot projectRoot,
+			BranchConfigInstance bci) throws IOException {
+		return getNVR(projectRoot, bci).replaceAll("\\.", "_"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -97,32 +99,36 @@ public class RPMUtils {
 	 * 
 	 * @param projectRoot
 	 *            Container used to retrieve the needed data.
+	 * @param bci
+	 *            Current branch configuration.
 	 * @return N-V-R (Name-Version-Release) retrieved.
-	 * @throws IOException if RPM query failed.
+	 * @throws IOException
+	 *             if RPM query failed.
 	 */
-	public static String getNVR(IProjectRoot projectRoot)
-			throws IOException {
-		String name = rpmQuery(projectRoot, "NAME").replaceAll("^[0-9]+", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		String version = rpmQuery(projectRoot, "VERSION"); //$NON-NLS-1$
-		String release = rpmQuery(projectRoot, "RELEASE"); //$NON-NLS-1$
+	public static String getNVR(IProjectRoot projectRoot,
+			BranchConfigInstance bci) throws IOException {
+		String name = rpmQuery(projectRoot, "NAME", bci).replaceAll("^[0-9]+", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String version = rpmQuery(projectRoot, "VERSION", bci); //$NON-NLS-1$
+		String release = rpmQuery(projectRoot, "RELEASE", bci); //$NON-NLS-1$
 		return (name + "-" + version + "-" + release); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
 	 * Get distribution definitions required for RPM build.
 	 * 
-	 * @param projectBits
+	 * @param bci
+	 *            The BranchConfigInstance on which to base the definitions.
 	 * @return A list of required dist-defines.
 	 */
-	public static List<String> getDistDefines(IFpProjectBits projectBits) {
+	public static List<String> getDistDefines(BranchConfigInstance bci) {
 		// substitution for rhel
 		ArrayList<String> distDefines = new ArrayList<String>();
-		String distvar = projectBits.getDistVariable().equals("epel") ? "rhel" //$NON-NLS-1$//$NON-NLS-2$ 
-				: projectBits.getDistVariable();
+		String distvar = bci.getDistVariable().equals("epel") ? "rhel" //$NON-NLS-1$//$NON-NLS-2$ 
+				: bci.getDistVariable();
 		distDefines.add("--define"); //$NON-NLS-1$
-		distDefines.add("dist " + projectBits.getDist()); //$NON-NLS-1$
+		distDefines.add("dist " + bci.getDist()); //$NON-NLS-1$
 		distDefines.add("--define"); //$NON-NLS-1$
-		distDefines.add(distvar + ' ' + projectBits.getDistVal());
+		distDefines.add(distvar + ' ' + bci.getDistVal());
 		return distDefines;
 	}
 }

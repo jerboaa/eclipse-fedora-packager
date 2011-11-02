@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
+import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
@@ -75,6 +76,7 @@ public class KojiSRPMBuildJob extends KojiBuildJob {
 		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
 		final IFpProjectBits projectBits = FedoraPackagerUtils
 				.getVcsHandler(fedoraProjectRoot);
+		BranchConfigInstance bci = projectBits.getBranchConfig();
 		KojiBuildCommand kojiBuildCmd;
 		KojiUploadSRPMCommand uploadSRPMCommand;
 		subMonitor.setTaskName(KojiText.KojiSRPMBuildJob_ConfiguringClient);
@@ -169,13 +171,13 @@ public class KojiSRPMBuildJob extends KojiBuildJob {
 		kojiBuildCmd.sourceLocation(uploadPath + "/" + srpmPath.lastSegment()); //$NON-NLS-1$
 		String nvr;
 		try {
-			nvr = RPMUtils.getNVR(fedoraProjectRoot);
+			nvr = RPMUtils.getNVR(fedoraProjectRoot, bci);
 		} catch (IOException e) {
 			logger.logError(KojiText.KojiBuildHandler_errorGettingNVR, e);
 			return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
 					KojiText.KojiBuildHandler_errorGettingNVR, e);
 		}
-		kojiBuildCmd.buildTarget(projectBits.getTarget()).nvr(nvr)
+		kojiBuildCmd.buildTarget(bci.getBuildTarget()).nvr(nvr)
 				.isScratchBuild(true);
 		logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
 				KojiBuildCommand.class.getName()));

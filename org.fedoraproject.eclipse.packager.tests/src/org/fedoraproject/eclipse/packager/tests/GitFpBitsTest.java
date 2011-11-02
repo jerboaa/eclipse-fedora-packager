@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.fedoraproject.eclipse.packager.tests;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
+import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.fedoraproject.eclipse.packager.git.FpGitProjectBits;
 import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestCase;
@@ -18,7 +23,8 @@ import org.fedoraproject.eclipse.packager.tests.utils.git.GitTestProject;
 public class GitFpBitsTest extends GitTestCase {
 
 	public void testGetCurrentBranchName() throws Exception {
-		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraPackagerUtils.getVcsHandler(getFedoraprojectRoot());
+		FpGitProjectBits projectBits = (FpGitProjectBits) FedoraPackagerUtils
+				.getVcsHandler(getFedoraprojectRoot());
 		assertNotNull(projectBits);
 		// make sure we meet pre-condition (we should be on master)
 		assertEquals("devel", projectBits.getCurrentBranchName());
@@ -29,30 +35,46 @@ public class GitFpBitsTest extends GitTestCase {
 		// switch to branch fc6
 		testProject.checkoutBranch("fc6");
 		assertEquals("FC-6", projectBits.getCurrentBranchName());
-		// switch to f14 branch, which uses old naming scheme
-		testProject.checkoutBranch("f14/master");
-		assertEquals("F-14", projectBits.getCurrentBranchName());
 	}
-	
+
 	public void testGetBranchName() {
 		// this should do initialization
-		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraPackagerUtils.getVcsHandler(getFedoraprojectRoot());
+		FpGitProjectBits projectBits = (FpGitProjectBits) FedoraPackagerUtils
+				.getVcsHandler(getFedoraprojectRoot());
 		assertNotNull(projectBits);
 		assertNotNull(projectBits.getBranchName("F-7")); // should be there
-		assertNotNull(projectBits.getBranchName("devel")); // master mapped to devel
+		assertNotNull(projectBits.getBranchName("devel")); // master mapped to
+															// devel
 	}
-	
+
 	public void testGetDistVal() throws Exception {
-		FpGitProjectBits projectBits = (FpGitProjectBits)FedoraPackagerUtils.getVcsHandler(getFedoraprojectRoot());
+		FpGitProjectBits projectBits = (FpGitProjectBits) FedoraPackagerUtils
+				.getVcsHandler(getFedoraprojectRoot());
 		assertNotNull(projectBits);
 		// make sure we meet pre-condition (we should be on master)
 		assertEquals("devel", projectBits.getCurrentBranchName());
-		// ATM this will change with the next Fedora release, so expect this to fail
-		assertEquals(projectBits.getDistVal(), "16");
+		// ATM this will change with the next Fedora release, so expect this to
+		// fail
+		assertEquals(projectBits.getBranchConfig().getDistVal(), "17");
 		GitTestProject testProject = getProject();
 		// switch to remote branch f13
 		testProject.checkoutBranch("f13");
-		assertEquals(projectBits.getDistVal(), "13");
+		assertEquals(projectBits.getBranchConfig().getDistVal(), "13");
+	}
+
+	public void testNonExactNamedBranches() throws JGitInternalException,
+			RefAlreadyExistsException, RefNotFoundException,
+			InvalidRefNameException, CoreException {
+		FpGitProjectBits projectBits = (FpGitProjectBits) FedoraPackagerUtils
+				.getVcsHandler(getFedoraprojectRoot());
+		assertNotNull(projectBits);
+		GitTestProject testProject = getProject();
+		// create branch name containing f16
+		testProject.getGitRepo().branchCreate()
+				.setName("fedora_betaf16_testbranch").call();
+		// check out created branch
+		testProject.checkoutBranch("fedora_betaf16_testbranch");
+		assertEquals(projectBits.getBranchConfig().getEquivalentBranch(), "F-16");
 	}
 
 }

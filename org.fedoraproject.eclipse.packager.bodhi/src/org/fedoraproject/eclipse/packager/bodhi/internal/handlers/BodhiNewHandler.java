@@ -147,8 +147,9 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 		// This always returns "". See #49
 		final String clog = ""; //$NON-NLS-1$
 		final String bugIDs = findBug(clog);
-		final String[] builds = fedoraProjectRoot.getPackageNVRs();
 		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
+		final String[] builds = fedoraProjectRoot.getPackageNVRs(projectBits.getBranchConfig());
+		
 		
 		// open update dialog
 		final BodhiNewUpdateDialog updateDialog = new BodhiNewUpdateDialog(shell,
@@ -183,7 +184,7 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 				monitor.beginTask(BodhiText.BodhiNewHandler_createUpdateMsg,
 						IProgressMonitor.UNKNOWN);
 				try {
-					final String release = projectBits.getCurrentBranchName()
+					final String release = projectBits.getBranchConfig().getEquivalentBranch()
 							.replace("-", ""); //$NON-NLS-1$ //$NON-NLS-2$
 					update.usernamePassword(username, password);
 					update.bugs(updateDialog.getBugs());

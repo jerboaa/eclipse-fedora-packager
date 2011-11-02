@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Fedora Packager Tests Plug-in
 Bundle-SymbolicName: org.fedoraproject.eclipse.packager.tests
-Bundle-Version: 0.2.0.qualifier
 Bundle-Activator: org.fedoraproject.eclipse.packager.tests.TestsPlugin
+Bundle-Version: 0.2.2.qualifier
 Bundle-Vendor: FedoraProject.org
 Require-Bundle: org.eclipse.ui,
  org.junit4;bundle-version="4.5.0",
@@ -19,6 +19,7 @@ Import-Package: com.google.gson,
  org.apache.commons.httpclient,
  org.apache.commons.ssl,
  org.apache.http,
+ javax.servlet,
  org.apache.xmlrpc,
  org.eclipse.core.resources,
  org.eclipse.egit.core,

@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
+import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
@@ -51,10 +52,11 @@ public class MockBuildJob extends AbstractMockJob {
 	 * @param name The name of the job.
 	 * @param shell The shell the job is run in.
 	 * @param fpRoot The root of the Fedora project being built.
-	 * @param srpmPath The path to the built SRPM/
+	 * @param srpmPath The path to the built SRPM.
+	 * @param bci The configuration of the branch at time of build.
 	 */
-	public MockBuildJob(String name, Shell shell, IProjectRoot fpRoot, IPath srpmPath) {
-		super(name, shell, fpRoot);
+	public MockBuildJob(String name, Shell shell, IProjectRoot fpRoot, IPath srpmPath, BranchConfigInstance bci) {
+		super(name, shell, fpRoot, bci);
 		this.srpmPath = srpmPath;
 	}
 	/*
@@ -104,6 +106,8 @@ public class MockBuildJob extends AbstractMockJob {
 							RpmText.MockBuildHandler_srpmBuildFailed,
 							e);
 		}
+		mockBuild.branchConfig(bci);
+		
 		Job mockJob = new Job(fpr.getProductStrings().getProductName()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

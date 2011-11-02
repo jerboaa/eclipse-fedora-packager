@@ -2,35 +2,30 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <artifactId>eclipse-fedorapackager-parent</artifactId>
     <groupId>org.fedoraproject.eclipse.packager</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <groupId>org.fedoraproject.eclipse.packager</groupId>
-  <artifactId>org.fedoraproject.eclipse.packager.compatibility</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
-  <packaging>eclipse-plugin</packaging>
+  <artifactId>org.fedoraproject.eclipse.packager.tests</artifactId>
+  <version>0.2.2-SNAPSHOT</version>
+  <packaging>eclipse-test-plugin</packaging>
 
-  <name>Fedora Packager for Eclipse Compatibility Plug-in</name>
+  <name>Fedora Packager for Eclipse Testing Plug-in</name>
 
   <build>
-     <!-- workaround for https://issues.sonatype.org/browse/TYCHO-168 -->
-     <resources>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
+     <plugins>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-source-plugin</artifactId>
+        <artifactId>tycho-surefire-plugin</artifactId>
+        <version>${tycho-version}</version>
+        <configuration>
+          <useUIHarness>true</useUIHarness>
+          <useUIThread>true</useUIThread>
+          <product>org.eclipse.sdk.ide</product>
+        </configuration>
       </plugin>
     </plugins>
   </build>
-
 </project>
