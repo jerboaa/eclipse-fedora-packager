@@ -99,7 +99,6 @@
     <module>org.fedoraproject.eclipse.packager.koji</module>
     <module>org.fedoraproject.eclipse.packager.rpm</module>
     <module>org.fedoraproject.eclipse.packager.cvs</module>
-    <module>org.fedoraproject.eclipse.packager.tests</module>
     <module>org.fedoraproject.eclipse.packager-p2-repo</module>
     <!-- 
     <module>org.fedoraproject.eclipse.packager-p2-repo</module>
