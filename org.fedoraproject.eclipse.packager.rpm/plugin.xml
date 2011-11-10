@@ -122,7 +122,7 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.fedoraproject.eclipse.packager.MockCommand"
+                  commandId="org.fedoraproject.eclipse.packager.mockCommandLocal"
                   label="%command.label.10"
                   mnemonic="%command.mnemonic.10"
                   style="push">
@@ -141,6 +141,18 @@
                               definitionId="org.fedoraproject.eclipse.packager.project">
                         </reference>
                      </with>
+                     <with
+	                     variable="activeMenuSelection">
+	                     <reference
+	                          definitionId="org.fedoraproject.eclipse.packager.localproject">
+	                     </reference>
+	                 </with>
+	                 <with
+	                     variable="activeMenuEditorInput">
+	                     <reference
+	                         definitionId="org.fedoraproject.eclipse.packager.localproject">
+	                     </reference>
+	                 </with>
                   </or>
                </visibleWhen>
             </command>
@@ -195,6 +207,11 @@
       </extension>
       <extension
          point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.fedoraproject.eclipse.packager.rpm.internal.handlers.local.LocalMockBuildHandler"
+            id="org.fedoraproject.eclipse.packager.mockCommandLocal"
+            name="%command.name.5">
+      </command>
 	  <command
             defaultHandler="org.fedoraproject.eclipse.packager.rpm.internal.handlers.local.PrepHandler"
             id="org.fedoraproject.eclipse.packager.prepCommandLocal"
@@ -274,7 +291,7 @@
             sequence="M1+M3+F L">
       </key>
       <key
-            commandId="org.fedoraproject.eclipse.packager.MockCommand"
+            commandId="org.fedoraproject.eclipse.packager.mockCommandLocal"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+M3+F R">
