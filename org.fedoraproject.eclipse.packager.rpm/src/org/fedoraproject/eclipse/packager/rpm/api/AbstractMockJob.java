@@ -21,6 +21,8 @@ import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
+import org.fedoraproject.eclipse.packager.rpm.api.errors.MockNotInstalledException;
+import org.fedoraproject.eclipse.packager.rpm.api.errors.UserNotInMockGroupException;
 import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 
 /**
@@ -67,6 +69,15 @@ public abstract class AbstractMockJob extends Job {
 					FedoraHandlerUtils.showInformationDialog(shell, fpr
 							.getProductStrings().getProductName(),
 							RpmText.AbstractMockJob_mockCancelledMsg);
+					return;
+				}
+				// Handle NPE case of the result when user is not in mock group
+				// of when mock is not installed. Just return in that case, since
+				// The job will show appropriate messages to the user.
+				if (jobStatus.getSeverity() == IStatus.INFO
+						&& jobStatus.getException() != null
+						&& (jobStatus.getException() instanceof UserNotInMockGroupException || jobStatus
+								.getException() instanceof MockNotInstalledException)) {
 					return;
 				}
 				if (result.wasSuccessful()) {

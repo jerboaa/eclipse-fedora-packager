@@ -26,6 +26,7 @@ import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IProjectRoot;
+import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -133,7 +134,8 @@ public class MockBuildJob extends AbstractMockJob {
 						FedoraHandlerUtils.showInformationDialog(shell, fpr
 								.getProductStrings().getProductName(), e
 								.getMessage());
-						return Status.OK_STATUS;
+						IStatus status = new Status(IStatus.INFO, PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
+						return status;
 					} catch (CommandListenerException e) {
 						// There are no command listeners registered, so
 						// shouldn't
@@ -153,7 +155,8 @@ public class MockBuildJob extends AbstractMockJob {
 						FedoraHandlerUtils.showInformationDialog(shell, fpr
 								.getProductStrings().getProductName(), e
 								.getMessage());
-						return Status.OK_STATUS;
+						IStatus status = new Status(IStatus.INFO, PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
+						return status;
 					} catch (CoreException e) {
 						logger.logError(e.getMessage(), e);
 						return FedoraHandlerUtils.errorStatus(RPMPlugin.PLUGIN_ID,

@@ -170,7 +170,8 @@ public class SCMMockBuildJob extends AbstractMockJob {
 						FedoraHandlerUtils.showInformationDialog(shell, fpr
 								.getProductStrings().getProductName(), e
 								.getMessage());
-						return Status.OK_STATUS;
+						IStatus status = new Status(IStatus.INFO, PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
+						return status;
 					} catch (CommandListenerException e) {
 						// There are no command listeners registered, so
 						// shouldn't
@@ -190,7 +191,8 @@ public class SCMMockBuildJob extends AbstractMockJob {
 						FedoraHandlerUtils.showInformationDialog(shell, fpr
 								.getProductStrings().getProductName(), e
 								.getMessage());
-						return Status.OK_STATUS;
+						IStatus status = new Status(IStatus.INFO, PackagerPlugin.PLUGIN_ID, e.getMessage(), e);
+						return status;
 					} catch (CoreException e) {
 						logger.logError(e.getMessage(), e.getCause());
 						return FedoraHandlerUtils.errorStatus(
