@@ -79,27 +79,28 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 					.getCommandInstance(RpmBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showErrorDialog(shell,
-					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
+			FedoraHandlerUtils.showErrorDialog(shell, fedoraProjectRoot
+					.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showErrorDialog(shell,
-					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
+			FedoraHandlerUtils.showErrorDialog(shell, fedoraProjectRoot
+					.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
 		// Need to nest jobs into this job for it to show up properly in the UI
 		// in terms of progress
-		Job job = new Job(fedoraProjectRoot.getProductStrings().getProductName()) {
+		Job job = new Job(fedoraProjectRoot.getProductStrings()
+				.getProductName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// Make sure we have sources locally
 				final String downloadUrlPreference = PackagerPlugin
-				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+						.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
 				Job downloadSourcesJob = new DownloadSourcesJob(
-						RpmText.PrepHandler_downloadSourcesForPrep,
-						download, fedoraProjectRoot, shell, downloadUrlPreference, true);
+						RpmText.PrepHandler_downloadSourcesForPrep, download,
+						fedoraProjectRoot, shell, downloadUrlPreference, true);
 				downloadSourcesJob.setUser(true);
 				downloadSourcesJob.schedule();
 				try {
@@ -113,7 +114,8 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 					return downloadSourcesJob.getResult();
 				}
 				// Do the prep job
-				Job prepJob = new Job(fedoraProjectRoot.getProductStrings().getProductName()) {
+				Job prepJob = new Job(fedoraProjectRoot.getProductStrings()
+						.getProductName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
@@ -123,9 +125,17 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 							List<String> nodeps = new ArrayList<String>(1);
 							nodeps.add(RpmBuildCommand.NO_DEPS);
 							try {
-								prepCommand.buildType(BuildType.PREP)
-										.flags(nodeps).call(monitor);
-								fedoraProjectRoot.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
+								prepCommand
+										.buildType(BuildType.PREP)
+										.flags(nodeps)
+										.branchConfig(
+												FedoraPackagerUtils
+														.getVcsHandler(
+																fedoraProjectRoot)
+														.getBranchConfig())
+										.call(monitor);
+								fedoraProjectRoot.getProject().refreshLocal(
+										IResource.DEPTH_INFINITE, monitor);
 							} catch (CommandMisconfiguredException e) {
 								// This shouldn't happen, but report error
 								// anyway
@@ -168,7 +178,7 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 				}
 				return prepJob.getResult();
 			}
-			
+
 		};
 		job.setSystem(true); // suppress UI. That's done in encapsulated jobs.
 		job.schedule();
