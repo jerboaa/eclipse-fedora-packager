@@ -12,6 +12,7 @@ package org.fedoraproject.eclipse.packager.koji.internal.handlers;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -49,17 +50,23 @@ public class KojiSRPMScratchBuildHandler extends KojiBuildHandler {
 					FedoraPackagerText.invalidFedoraProjectRootError);
 			return null;
 		}
-		IPath srpmPath;
-		try {
-			srpmPath = FedoraHandlerUtils.chooseRootFileOfType(shell,
-					fedoraProjectRoot, ".src.rpm", //$NON-NLS-1$
-					KojiText.KojiSRPMBuildJob_ChooseSRPM);
-		} catch (OperationCanceledException e) {
-			return null;
-		} catch (CoreException e) {
-			logger.logError(e.getMessage(), e);
-			return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
-					e.getMessage(), e);
+		IPath srpmPath = null;
+		if (eventResource instanceof IFile
+				&& eventResource.getName().endsWith(".src.rpm")) { //$NON-NLS-1$
+			srpmPath = eventResource.getLocation();
+		}
+		if (srpmPath == null) {
+			try {
+				srpmPath = FedoraHandlerUtils.chooseRootFileOfType(shell,
+						fedoraProjectRoot, ".src.rpm", //$NON-NLS-1$
+						KojiText.KojiSRPMBuildJob_ChooseSRPM);
+			} catch (OperationCanceledException e) {
+				return null;
+			} catch (CoreException e) {
+				logger.logError(e.getMessage(), e);
+				return FedoraHandlerUtils.errorStatus(KojiPlugin.PLUGIN_ID,
+						e.getMessage(), e);
+			}
 		}
 		if (srpmPath == null) {
 			FileDialogRunable fdr = new FileDialogRunable("*.src.rpm", //$NON-NLS-1$
