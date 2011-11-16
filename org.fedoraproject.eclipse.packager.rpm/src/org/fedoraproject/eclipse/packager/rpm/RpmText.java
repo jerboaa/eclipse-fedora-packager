@@ -84,7 +84,7 @@ public class RpmText extends NLS {
 	/****/ public static String SRPMImportCommand_IOError;
 	/****/ public static String SRPMImportCommand_OverwriteError;
 	/****/ public static String SRPMImportCommand_MoveError;
-	/****/ public static String SRPMImportCommand_NonZeroExit;
+	/****/ public static String SRPMImportCommand_ImportError;
 	/****/ public static String SRPMImportCommand_NonZeroQueryExit;
 	/****/ public static String SRPMImportCommand_PathNotSet;
 	/****/ public static String SRPMImportCommand_ProjectNotSet;

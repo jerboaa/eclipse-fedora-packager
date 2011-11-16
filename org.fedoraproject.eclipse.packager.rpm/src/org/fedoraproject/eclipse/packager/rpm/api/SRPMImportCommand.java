@@ -116,8 +116,8 @@ public class SRPMImportCommand {
 				throw new SRPMImportCommandException(e.getMessage(), e);
 			} else {
 				throw new SRPMImportCommandException(NLS.bind(
-						RpmText.SRPMImportCommand_NonZeroExit, sio.getStatus()
-								.getCode()));
+						RpmText.SRPMImportCommand_ImportError, sio.getStatus()
+								.getMessage()));
 			}
 		}
 		String[] cmdList = null;
