@@ -93,7 +93,9 @@ public class LocalMockBuildHandler extends LocalHandlerDispatcher {
 			srpmPath = new Path(srpm);
 		}
 		Job job = new MockBuildJob(localFedoraProjectRoot.getProductStrings()
-				.getProductName(), shell, localFedoraProjectRoot, srpmPath);
+				.getProductName(), shell, localFedoraProjectRoot, srpmPath,
+				FedoraPackagerUtils.getVcsHandler(localFedoraProjectRoot)
+						.getBranchConfig());
 		job.setSystem(true); // Suppress UI. That's done in sub-jobs within.
 		job.schedule();
 		return null;
