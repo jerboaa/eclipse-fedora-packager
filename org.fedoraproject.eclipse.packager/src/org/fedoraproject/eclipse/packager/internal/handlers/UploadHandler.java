@@ -141,8 +141,9 @@ public class UploadHandler extends FedoraPackagerAbstractHandler implements IPre
 						uploadCmd.setUploadURL(uploadUrl);
 					}
 					uploadCmd.setFileToUpload(newUploadFile);
-					// enable SLL authentication
-					uploadCmd.setFedoraSSLEnabled(true);
+					// Set the SSL policy. We have different policies for Fedora and
+					// RHEL. This should be kept in placed as it is overridden in the Red Hat version.
+					setSSLPolicy(uploadCmd, uploadUrl);
 					uploadCmd.addCommandListener(sourcesUpdater);
 					uploadCmd.addCommandListener(vcsIgnoreFileUpdater);
 					logger.logDebug(NLS.bind(FedoraPackagerText.callingCommand,
@@ -279,6 +280,14 @@ public class UploadHandler extends FedoraPackagerAbstractHandler implements IPre
 		return false;
 	}
 
+	/**
+	 * Sets the SSL policy for this handler.
+	 */
+	protected void setSSLPolicy(UploadSourceCommand uploadCmd, String uploadUrl) {
+		// enable SLL authentication
+		uploadCmd.setFedoraSSLEnabled(true);
+	}
+	
 	@Override
 	public String getPreference() {
 		return PackagerPlugin
