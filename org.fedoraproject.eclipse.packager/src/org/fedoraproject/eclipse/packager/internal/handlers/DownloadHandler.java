@@ -24,6 +24,7 @@ import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
+import org.fedoraproject.eclipse.packager.api.IPreferenceHandler;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
@@ -33,7 +34,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
 /**
  * Handler responsible for downloading sources as listed in sources files.
  */
-public class DownloadHandler extends FedoraPackagerAbstractHandler {
+public class DownloadHandler extends FedoraPackagerAbstractHandler implements IPreferenceHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -67,13 +68,18 @@ public class DownloadHandler extends FedoraPackagerAbstractHandler {
 					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
-		final String downloadUrlPreference = PackagerPlugin
-				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+		final String downloadUrlPreference = getPreference();
 		Job downloadJob = new DownloadSourcesJob(
 				fedoraProjectRoot.getProductStrings().getProductName(), download,
 				fedoraProjectRoot, shell, downloadUrlPreference);
 		downloadJob.setUser(true);
 		downloadJob.schedule();
 		return null; // must be null
+	}
+
+	@Override
+	public String getPreference() {
+		return PackagerPlugin
+				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
 	}
 }

@@ -38,6 +38,7 @@ import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.SourcesFile;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
+import org.fedoraproject.eclipse.packager.api.IPreferenceHandler;
 import org.fedoraproject.eclipse.packager.api.SourcesFileUpdater;
 import org.fedoraproject.eclipse.packager.api.UploadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.UploadSourceResult;
@@ -62,7 +63,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  * @see VCSIgnoreFileUpdater
  * @see SourcesFileUpdater
  */
-public class UploadHandler extends FedoraPackagerAbstractHandler {
+public class UploadHandler extends FedoraPackagerAbstractHandler implements IPreferenceHandler {
 
 	/**
 	 *  Performs upload of sources (independent of VCS used), updates "sources"
@@ -137,8 +138,7 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 				
 				UploadSourceResult result = null;
 				try {
-					String uploadUrl = PackagerPlugin
-							.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL);
+					String uploadUrl = getPreference();
 					if (uploadUrl != null) {
 						// "http://upload-cgi/cgi-bin/upload.cgi"
 						uploadCmd.setUploadURL(uploadUrl);
@@ -280,5 +280,11 @@ public class UploadHandler extends FedoraPackagerAbstractHandler {
 	 */
 	protected boolean shouldReplaceSources() {
 		return false;
+	}
+
+	@Override
+	public String getPreference() {
+		return PackagerPlugin
+				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL);
 	}
 }
