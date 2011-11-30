@@ -68,7 +68,7 @@ public class FpCVSProjectBits implements IFpProjectBits {
 
 	protected IProjectRoot fedoraprojectRoot; // The underlying project root
 	private IResource container; // The underlying container
-	private HashMap<String, HashMap<String, String>> branches; // All branches
+	protected HashMap<String, HashMap<String, String>> branches; // All branches
 	private boolean initialized = false; // keep track if instance is
 											// initialized
 
