@@ -27,6 +27,7 @@ import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
+import org.fedoraproject.eclipse.packager.api.IPreferenceHandler;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandNotFoundException;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
@@ -40,7 +41,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  * Handler for the creating an SRPM
  * 
  */
-public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
+public class SRPMBuildHandler extends FedoraPackagerAbstractHandler implements IPreferenceHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -86,8 +87,7 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// Make sure we have sources locally
-				final String downloadUrlPreference = PackagerPlugin
-						.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+				final String downloadUrlPreference = getPreference();
 				Job downloadSourcesJob = new DownloadSourcesJob(
 						RpmText.SRPMBuildHandler_downloadSourcesForSRPMBuild,
 						download, fedoraProjectRoot, shell,
@@ -124,6 +124,12 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler {
 		job.setSystem(true); // avoid UI for this job
 		job.schedule();
 		return null;
+	}
+
+	@Override
+	public String getPreference() {
+		return PackagerPlugin
+				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
 	}
 
 }

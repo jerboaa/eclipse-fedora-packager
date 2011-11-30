@@ -31,6 +31,7 @@ import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
+import org.fedoraproject.eclipse.packager.api.IPreferenceHandler;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
@@ -48,7 +49,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  * Handler for building locally.
  * 
  */
-public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
+public class LocalBuildHandler extends FedoraPackagerAbstractHandler implements IPreferenceHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -91,8 +92,7 @@ public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				final String downloadUrlPreference = PackagerPlugin
-						.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+				final String downloadUrlPreference = getPreference();
 				// Make sure we have sources locally
 				Job downloadSourcesJob = new DownloadSourcesJob(
 						RpmText.LocalBuildHandler_downloadSourcesForLocalBuild,
@@ -186,6 +186,12 @@ public class LocalBuildHandler extends FedoraPackagerAbstractHandler {
 		job.setSystem(true);
 		job.schedule();
 		return null;
+	}
+
+	@Override
+	public String getPreference() {
+		return PackagerPlugin
+				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
 	}
 
 }

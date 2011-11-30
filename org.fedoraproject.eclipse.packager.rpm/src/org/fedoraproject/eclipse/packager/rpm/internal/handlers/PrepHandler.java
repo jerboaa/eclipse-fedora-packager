@@ -32,6 +32,7 @@ import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
+import org.fedoraproject.eclipse.packager.api.IPreferenceHandler;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
 import org.fedoraproject.eclipse.packager.api.errors.FedoraPackagerCommandInitializationException;
@@ -50,7 +51,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  * if patches apply propperly.
  * 
  */
-public class PrepHandler extends FedoraPackagerAbstractHandler {
+public class PrepHandler extends FedoraPackagerAbstractHandler implements IPreferenceHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -96,8 +97,7 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// Make sure we have sources locally
-				final String downloadUrlPreference = PackagerPlugin
-						.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
+				final String downloadUrlPreference = getPreference();
 				Job downloadSourcesJob = new DownloadSourcesJob(
 						RpmText.PrepHandler_downloadSourcesForPrep, download,
 						fedoraProjectRoot, shell, downloadUrlPreference, true);
@@ -183,6 +183,12 @@ public class PrepHandler extends FedoraPackagerAbstractHandler {
 		job.setSystem(true); // suppress UI. That's done in encapsulated jobs.
 		job.schedule();
 		return null;
+	}
+
+	@Override
+	public String getPreference() {
+		return PackagerPlugin
+				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_DOWNLOAD_URL);
 	}
 
 }

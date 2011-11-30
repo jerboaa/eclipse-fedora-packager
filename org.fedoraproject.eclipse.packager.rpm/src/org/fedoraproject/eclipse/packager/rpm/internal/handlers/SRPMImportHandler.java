@@ -26,6 +26,7 @@ import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
 import org.fedoraproject.eclipse.packager.api.FileDialogRunable;
+import org.fedoraproject.eclipse.packager.api.IPreferenceHandler;
 import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
 import org.fedoraproject.eclipse.packager.rpm.RpmText;
 import org.fedoraproject.eclipse.packager.rpm.api.SRPMImportCommand;
@@ -37,7 +38,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
  * Import handler for SRPMImportCommand
  * 
  */
-public class SRPMImportHandler extends FedoraPackagerAbstractHandler {
+public class SRPMImportHandler extends FedoraPackagerAbstractHandler implements IPreferenceHandler {
 	private final FedoraPackagerLogger logger = FedoraPackagerLogger
 			.getInstance();
 	@Override
@@ -68,7 +69,7 @@ public class SRPMImportHandler extends FedoraPackagerAbstractHandler {
 							SRPMImportCommand.class.getName()));
 					SRPMImportCommand srpmImport = new SRPMImportCommand(srpm,
 							fprContainer.getProject(), fprContainer,
-							getUploadUrl());
+							getPreference());
 					monitor.setTaskName(RpmText.SRPMImportJob_ExtractingSRPM);
 					SRPMImportResult importResult;
 					importResult = srpmImport.call(monitor);
@@ -91,8 +92,9 @@ public class SRPMImportHandler extends FedoraPackagerAbstractHandler {
 		job.schedule();
 		return null;
 	}
-	
-	protected String getUploadUrl() {
+
+	@Override
+	public String getPreference() {
 		return PackagerPlugin
 				.getStringPreference(FedoraPackagerPreferencesConstants.PREF_LOOKASIDE_UPLOAD_URL);
 	}
