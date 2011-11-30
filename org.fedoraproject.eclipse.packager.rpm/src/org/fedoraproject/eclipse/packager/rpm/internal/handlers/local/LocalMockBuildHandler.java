@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FileDialogRunable;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
 import org.fedoraproject.eclipse.packager.rpm.RPMPlugin;
@@ -49,12 +48,10 @@ public class LocalMockBuildHandler extends LocalHandlerDispatcher {
 		}
 		final Shell shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		final IProjectRoot localFedoraProjectRoot;
 		IResource eventResource = null;
 		try {
 			eventResource = FedoraHandlerUtils.getResource(event);
-			localFedoraProjectRoot = FedoraPackagerUtils
-					.getProjectRoot(eventResource);
+			setProjectRoot(FedoraPackagerUtils.getProjectRoot(eventResource));
 		} catch (InvalidProjectRootException e) {
 			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
@@ -71,7 +68,7 @@ public class LocalMockBuildHandler extends LocalHandlerDispatcher {
 		if (srpmPath == null) {
 			try {
 				srpmPath = FedoraHandlerUtils.chooseRootFileOfType(shell,
-						localFedoraProjectRoot, ".src.rpm", //$NON-NLS-1$
+						getProjectRoot(), ".src.rpm", //$NON-NLS-1$
 						RpmText.MockBuildHandler_RootListMessage);
 			} catch (OperationCanceledException e) {
 				return null;
@@ -92,9 +89,9 @@ public class LocalMockBuildHandler extends LocalHandlerDispatcher {
 			}
 			srpmPath = new Path(srpm);
 		}
-		Job job = new MockBuildJob(localFedoraProjectRoot.getProductStrings()
-				.getProductName(), shell, localFedoraProjectRoot, srpmPath,
-				FedoraPackagerUtils.getVcsHandler(localFedoraProjectRoot)
+		Job job = new MockBuildJob(getProjectRoot().getProductStrings()
+				.getProductName(), shell, getProjectRoot(), srpmPath,
+				FedoraPackagerUtils.getVcsHandler(getProjectRoot())
 						.getBranchConfig());
 		job.setSystem(true); // Suppress UI. That's done in sub-jobs within.
 		job.schedule();

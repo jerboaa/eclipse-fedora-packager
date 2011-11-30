@@ -11,7 +11,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
@@ -45,11 +44,10 @@ public class ConvertLocalToRemoteHandler extends FedoraPackagerAbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final Shell shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		final IProjectRoot localfedoraProjectRoot;
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(event);
-			localfedoraProjectRoot = FedoraPackagerUtils
-					.getProjectRoot(eventResource);
+			setProjectRoot(FedoraPackagerUtils
+					.getProjectRoot(eventResource));
 		} catch (InvalidProjectRootException e) {
 			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
@@ -57,8 +55,7 @@ public class ConvertLocalToRemoteHandler extends FedoraPackagerAbstractHandler {
 			return null;
 		}
 
-		final FedoraPackager packager = new FedoraPackager(
-				localfedoraProjectRoot);
+		final FedoraPackager packager = new FedoraPackager(getProjectRoot());
 
 		// Do the converting
 		Job job = new Job(
@@ -81,13 +78,13 @@ public class ConvertLocalToRemoteHandler extends FedoraPackagerAbstractHandler {
 				} catch (FedoraPackagerCommandNotFoundException e) {
 					logger.logError(e.getMessage(), e);
 					FedoraHandlerUtils.showErrorDialog(shell,
-							localfedoraProjectRoot.getProductStrings()
+							getProjectRoot().getProductStrings()
 									.getProductName(), e.getMessage());
 					return null;
 				} catch (FedoraPackagerCommandInitializationException e) {
 					logger.logError(e.getMessage(), e);
 					FedoraHandlerUtils.showErrorDialog(shell,
-							localfedoraProjectRoot.getProductStrings()
+							getProjectRoot().getProductStrings()
 									.getProductName(), e.getMessage());
 					return null;
 				}
@@ -96,7 +93,7 @@ public class ConvertLocalToRemoteHandler extends FedoraPackagerAbstractHandler {
 					String message = null;
 					message = NLS
 							.bind(FedoraPackagerGitText.ConvertLocalToRemoteHandler_information,
-									localfedoraProjectRoot.getPackageName());
+									getProjectRoot().getPackageName());
 					String finalMessage = result.getHumanReadableMessage(message);
 					FedoraHandlerUtils
 							.showInformationDialog(
@@ -120,7 +117,7 @@ public class ConvertLocalToRemoteHandler extends FedoraPackagerAbstractHandler {
 									PackagerPlugin.PLUGIN_ID,
 									NLS.bind(
 											FedoraPackagerGitText.ConvertLocalToRemoteHandler_failToConvert,
-											localfedoraProjectRoot
+											getProjectRoot()
 													.getPackageName(), e
 													.getMessage()));
 				} catch (LocalProjectConversionFailedException e) {
@@ -130,7 +127,7 @@ public class ConvertLocalToRemoteHandler extends FedoraPackagerAbstractHandler {
 									PackagerPlugin.PLUGIN_ID,
 									NLS.bind(
 											FedoraPackagerGitText.ConvertLocalToRemoteHandler_failToConvert,
-											localfedoraProjectRoot
+											getProjectRoot()
 													.getPackageName(), e
 													.getCause().getMessage()));
 				}

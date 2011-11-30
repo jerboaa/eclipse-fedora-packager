@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -59,18 +58,17 @@ public class PrepHandler extends LocalHandlerDispatcher {
 		}
 		final Shell shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		final IProjectRoot localFedoraProjectRoot;
 
 		IResource eventResource = FedoraHandlerUtils.getResource(event);
 		try {
-			localFedoraProjectRoot = FedoraPackagerUtils.getProjectRoot(eventResource);
+			setProjectRoot(FedoraPackagerUtils.getProjectRoot(eventResource));
 		} catch (InvalidProjectRootException e) {
 			logger.logError(FedoraPackagerText.invalidLocalFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
 					FedoraPackagerText.invalidLocalFedoraProjectRootError);
 			return null;
 		}
-		FedoraPackager fp = new FedoraPackager(localFedoraProjectRoot);
+		FedoraPackager fp = new FedoraPackager(getProjectRoot());
 		final RpmBuildCommand prepCommand;
 		try {
 			// get RPM build command in order to produce an SRPM
@@ -79,23 +77,23 @@ public class PrepHandler extends LocalHandlerDispatcher {
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					localFedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
+					getProjectRoot().getProductStrings().getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					localFedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
+					getProjectRoot().getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
 
 		// Need to nest jobs into this job for it to show up properly in the UI
 		// in terms of progress
-		Job job = new Job(localFedoraProjectRoot.getProductStrings().getProductName()) {
+		Job job = new Job(getProjectRoot().getProductStrings().getProductName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// Do the prep job
-				Job prepJob = new Job(localFedoraProjectRoot.getProductStrings().getProductName()) {
+				Job prepJob = new Job(getProjectRoot().getProductStrings().getProductName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
@@ -106,7 +104,7 @@ public class PrepHandler extends LocalHandlerDispatcher {
 							nodeps.add(RpmBuildCommand.NO_DEPS);
 								prepCommand.buildType(BuildType.PREP)
 										.flags(nodeps).call(monitor);
-								localFedoraProjectRoot.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
+								getProjectRoot().getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
 						} catch (CommandMisconfiguredException e) {
 							// This shouldn't happen, but report error
 							// anyway

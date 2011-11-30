@@ -24,7 +24,6 @@ import org.fedoraproject.eclipse.packager.BranchConfigInstance;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.errors.CommandListenerException;
 import org.fedoraproject.eclipse.packager.api.errors.CommandMisconfiguredException;
@@ -59,18 +58,16 @@ public class LocalBuildHandler extends LocalHandlerDispatcher {
 		}
 		final Shell shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		final IProjectRoot localFedoraProjectRoot;
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(event);
-			localFedoraProjectRoot = FedoraPackagerUtils
-					.getProjectRoot(eventResource);
+			setProjectRoot(FedoraPackagerUtils.getProjectRoot(eventResource));
 		} catch (InvalidProjectRootException e) {
 			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
 					FedoraPackagerText.invalidFedoraProjectRootError);
 			return null;
 		}
-		FedoraPackager fp = new FedoraPackager(localFedoraProjectRoot);
+		FedoraPackager fp = new FedoraPackager(getProjectRoot());
 		final RpmBuildCommand rpmBuild;
 		try {
 			// get RPM build command in order to produce an SRPM
@@ -78,23 +75,23 @@ public class LocalBuildHandler extends LocalHandlerDispatcher {
 					.getCommandInstance(RpmBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showErrorDialog(shell, localFedoraProjectRoot
+			FedoraHandlerUtils.showErrorDialog(shell, getProjectRoot()
 					.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showErrorDialog(shell, localFedoraProjectRoot
+			FedoraHandlerUtils.showErrorDialog(shell, getProjectRoot()
 					.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
-		Job job = new Job(localFedoraProjectRoot.getProductStrings()
+		Job job = new Job(getProjectRoot().getProductStrings()
 				.getProductName()) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
 				// Do the local build
-				Job rpmBuildjob = new Job(localFedoraProjectRoot
+				Job rpmBuildjob = new Job(getProjectRoot()
 						.getProductStrings().getProductName()) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
@@ -103,13 +100,13 @@ public class LocalBuildHandler extends LocalHandlerDispatcher {
 									RpmText.LocalBuildHandler_buildForLocalArch,
 									IProgressMonitor.UNKNOWN);
 							IFpProjectBits projectBits = FedoraPackagerUtils
-									.getVcsHandler(localFedoraProjectRoot);
+									.getVcsHandler(getProjectRoot());
 							BranchConfigInstance bci = projectBits
 									.getBranchConfig();
 							try {
 								rpmBuild.buildType(BuildType.BINARY)
 										.branchConfig(bci).call(monitor);
-								localFedoraProjectRoot.getProject()
+								getProjectRoot().getProject()
 										.refreshLocal(IResource.DEPTH_INFINITE,
 												monitor);
 							} catch (CommandMisconfiguredException e) {

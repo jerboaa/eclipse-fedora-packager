@@ -31,7 +31,6 @@ import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
 import org.fedoraproject.eclipse.packager.api.errors.InvalidProjectRootException;
@@ -55,7 +54,6 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 	 */
 	protected Shell shell;
 	protected URL kojiWebUrl;
-	protected IProjectRoot fedoraProjectRoot;
 	
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
@@ -63,16 +61,16 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(event);
-			fedoraProjectRoot = FedoraPackagerUtils
-					.getProjectRoot(eventResource);
+			setProjectRoot(FedoraPackagerUtils
+					.getProjectRoot(eventResource));
 		} catch (InvalidProjectRootException e) {
 			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
 					FedoraPackagerText.invalidFedoraProjectRootError);
 			return null;
 		}
-		Job job = new KojiBuildJob(fedoraProjectRoot.getProductStrings().getProductName(), 
-				getShell(event), fedoraProjectRoot, isScratchBuild());
+		Job job = new KojiBuildJob(getProjectRoot().getProductStrings().getProductName(), 
+				getShell(event), getProjectRoot(), isScratchBuild());
 		job.addJobChangeListener(getJobChangeListener());
 		job.setUser(true);
 		job.schedule();
@@ -102,7 +100,7 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 			// Web url set in preferences.
 			logger.logError(NLS.bind(
 					KojiText.KojiBuildHandler_invalidKojiWebUrl,
-					fedoraProjectRoot.getProductStrings().getBuildToolName(), webUrl), e);
+					getProjectRoot().getProductStrings().getBuildToolName(), webUrl), e);
 			try {
 				kojiWebUrl = new URL(FedoraPackagerPreferencesConstants.DEFAULT_KOJI_WEB_URL);
 			} catch (MalformedURLException ignored) {};
@@ -128,7 +126,7 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 									// koji-web URL
 									logger.logInfo(NLS
 											.bind(KojiText.KojiMessageDialog_buildResponseMsg,
-													fedoraProjectRoot.getProductStrings().getBuildToolName())
+													getProjectRoot().getProductStrings().getBuildToolName())
 											+ " " //$NON-NLS-1$
 											+ KojiUrlUtils.constructTaskUrl(
 													buildResult.getTaskId(),
@@ -161,13 +159,13 @@ public class KojiBuildHandler extends FedoraPackagerAbstractHandler {
 				.createImage();
 		KojiMessageDialog msgDialog = new KojiMessageDialog(shell, NLS.bind(
 				KojiText.KojiBuildHandler_kojiBuild,
-				fedoraProjectRoot.getProductStrings().getBuildToolName()), titleImage,
+				getProjectRoot().getProductStrings().getBuildToolName()), titleImage,
 				MessageDialog.NONE, new String[] { IDialogConstants.OK_LABEL },
 				0, kojiWebUrl, taskId, NLS.bind(
 						KojiText.KojiMessageDialog_buildResponseMsg,
-						fedoraProjectRoot.getProductStrings().getBuildToolName()),
+						getProjectRoot().getProductStrings().getBuildToolName()),
 				msgContentImage,
-				fedoraProjectRoot.getProductStrings().getBuildToolName());
+				getProjectRoot().getProductStrings().getBuildToolName());
 		return msgDialog;
 	}
 }

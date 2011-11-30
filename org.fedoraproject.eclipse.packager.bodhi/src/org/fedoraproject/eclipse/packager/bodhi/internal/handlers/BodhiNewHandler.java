@@ -36,7 +36,6 @@ import org.eclipse.ui.PlatformUI;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
 import org.fedoraproject.eclipse.packager.IFpProjectBits;
-import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.QuestionMessageDialog;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
 import org.fedoraproject.eclipse.packager.api.FedoraPackagerAbstractHandler;
@@ -72,7 +71,6 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 	private final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
 	private String username;
 	private String password;
-	private IProjectRoot fedoraProjectRoot;
 	private PushUpdateResult updateResult;
 	
 	@Override
@@ -84,8 +82,7 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 		bodhiUrl = getBodhiUrl();
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(event);
-			fedoraProjectRoot = FedoraPackagerUtils
-					.getProjectRoot(eventResource);
+			setProjectRoot(FedoraPackagerUtils.getProjectRoot(eventResource));
 		} catch (InvalidProjectRootException e) {
 			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
@@ -93,7 +90,9 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 			return null;
 		}
 		// check for unpushed changes
-		Job unpushedChangesJob = new UnpushedChangesJob(BodhiText.BodhiNewHandler_unpushedChangesJobMsg, fedoraProjectRoot);
+		Job unpushedChangesJob = new UnpushedChangesJob(
+				BodhiText.BodhiNewHandler_unpushedChangesJobMsg,
+				getProjectRoot());
 		unpushedChangesJob.setUser(true);
 		unpushedChangesJob.schedule();
 		try {
@@ -147,8 +146,8 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 		// This always returns "". See #49
 		final String clog = ""; //$NON-NLS-1$
 		final String bugIDs = findBug(clog);
-		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(fedoraProjectRoot);
-		final String[] builds = fedoraProjectRoot.getPackageNVRs(projectBits.getBranchConfig());
+		final IFpProjectBits projectBits = FedoraPackagerUtils.getVcsHandler(getProjectRoot());
+		final String[] builds = getProjectRoot().getPackageNVRs(projectBits.getBranchConfig());
 		
 		
 		// open update dialog
@@ -159,7 +158,7 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 			return null; // cancel
 		}
 		
-		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
+		FedoraPackager fp = new FedoraPackager(getProjectRoot());
 		final PushUpdateCommand update;
 		try {
 			// Get PushUpdateCommand from Fedora packager registry
@@ -168,17 +167,17 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
+					getProjectRoot().getProductStrings().getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
 			FedoraHandlerUtils.showErrorDialog(shell,
-					fedoraProjectRoot.getProductStrings().getProductName(), e.getMessage());
+					getProjectRoot().getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
 		
 		// all data gathered, push update
-		Job job = new Job(fedoraProjectRoot.getProductStrings().getProductName()) { //$NON-NLS-1$
+		Job job = new Job(getProjectRoot().getProductStrings().getProductName()) { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask(BodhiText.BodhiNewHandler_createUpdateMsg,
@@ -294,7 +293,7 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 								public void run() {
 									// show some error with details
 									FedoraHandlerUtils.showErrorDialog(shell,
-											fedoraProjectRoot
+											getProjectRoot()
 													.getProductStrings()
 													.getProductName(), msg);
 								}
@@ -393,7 +392,7 @@ public class BodhiNewHandler extends FedoraPackagerAbstractHandler {
 	 */
 	private boolean confirmIfShouldPushUpdate() {
 		QuestionMessageDialog op = new QuestionMessageDialog(BodhiText.BodhiNewHandler_unpushedChangesQuestion,
-				this.shell, this.fedoraProjectRoot);
+				this.shell, getProjectRoot());
 		Display.getDefault().syncExec(op);
 		return op.isOkPressed();
 	}

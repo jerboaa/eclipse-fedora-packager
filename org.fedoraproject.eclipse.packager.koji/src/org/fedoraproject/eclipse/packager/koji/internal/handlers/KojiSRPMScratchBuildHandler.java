@@ -42,8 +42,8 @@ public class KojiSRPMScratchBuildHandler extends KojiBuildHandler {
 		this.shell = getShell(event);
 		IResource eventResource = FedoraHandlerUtils.getResource(event);
 		try {
-			fedoraProjectRoot = FedoraPackagerUtils
-					.getProjectRoot(eventResource);
+			setProjectRoot(FedoraPackagerUtils
+					.getProjectRoot(eventResource));
 		} catch (InvalidProjectRootException e) {
 			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
@@ -58,7 +58,7 @@ public class KojiSRPMScratchBuildHandler extends KojiBuildHandler {
 		if (srpmPath == null) {
 			try {
 				srpmPath = FedoraHandlerUtils.chooseRootFileOfType(shell,
-						fedoraProjectRoot, ".src.rpm", //$NON-NLS-1$
+						getProjectRoot(), ".src.rpm", //$NON-NLS-1$
 						KojiText.KojiSRPMBuildJob_ChooseSRPM);
 			} catch (OperationCanceledException e) {
 				return null;
@@ -78,8 +78,8 @@ public class KojiSRPMScratchBuildHandler extends KojiBuildHandler {
 			}
 			srpmPath = new Path(srpm);
 		}
-		Job job = new KojiSRPMBuildJob(fedoraProjectRoot.getProductStrings()
-				.getProductName(), getShell(event), fedoraProjectRoot, srpmPath);
+		Job job = new KojiSRPMBuildJob(getProjectRoot().getProductStrings()
+				.getProductName(), getShell(event), getProjectRoot(), srpmPath);
 		job.addJobChangeListener(getJobChangeListener());
 		job.setUser(true);
 		job.schedule();

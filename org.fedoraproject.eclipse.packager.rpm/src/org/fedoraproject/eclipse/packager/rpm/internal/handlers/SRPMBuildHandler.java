@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.fedoraproject.eclipse.packager.FedoraPackagerLogger;
 import org.fedoraproject.eclipse.packager.FedoraPackagerPreferencesConstants;
 import org.fedoraproject.eclipse.packager.FedoraPackagerText;
-import org.fedoraproject.eclipse.packager.IProjectRoot;
 import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.DownloadSourcesJob;
@@ -47,18 +46,16 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler implements I
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		final Shell shell = getShell(event);
 		final FedoraPackagerLogger logger = FedoraPackagerLogger.getInstance();
-		final IProjectRoot fedoraProjectRoot;
 		try {
 			IResource eventResource = FedoraHandlerUtils.getResource(event);
-			fedoraProjectRoot = FedoraPackagerUtils
-					.getProjectRoot(eventResource);
+			setProjectRoot(FedoraPackagerUtils.getProjectRoot(eventResource));
 		} catch (InvalidProjectRootException e) {
 			logger.logError(FedoraPackagerText.invalidFedoraProjectRootError, e);
 			FedoraHandlerUtils.showErrorDialog(shell, "Error", //$NON-NLS-1$
 					FedoraPackagerText.invalidFedoraProjectRootError);
 			return null;
 		}
-		FedoraPackager fp = new FedoraPackager(fedoraProjectRoot);
+		FedoraPackager fp = new FedoraPackager(getProjectRoot());
 		final RpmBuildCommand srpmBuild;
 		final DownloadSourceCommand download;
 		try {
@@ -70,18 +67,18 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler implements I
 					.getCommandInstance(RpmBuildCommand.ID);
 		} catch (FedoraPackagerCommandNotFoundException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showErrorDialog(shell, fedoraProjectRoot
+			FedoraHandlerUtils.showErrorDialog(shell, getProjectRoot()
 					.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		} catch (FedoraPackagerCommandInitializationException e) {
 			logger.logError(e.getMessage(), e);
-			FedoraHandlerUtils.showErrorDialog(shell, fedoraProjectRoot
+			FedoraHandlerUtils.showErrorDialog(shell, getProjectRoot()
 					.getProductStrings().getProductName(), e.getMessage());
 			return null;
 		}
 		// Need to nest jobs into this job for it to show up properly in the
 		// UI
-		Job job = new Job(fedoraProjectRoot.getProductStrings()
+		Job job = new Job(getProjectRoot().getProductStrings()
 				.getProductName()) {
 
 			@Override
@@ -90,7 +87,7 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler implements I
 				final String downloadUrlPreference = getPreference();
 				Job downloadSourcesJob = new DownloadSourcesJob(
 						RpmText.SRPMBuildHandler_downloadSourcesForSRPMBuild,
-						download, fedoraProjectRoot, shell,
+						download, getProjectRoot(), shell,
 						downloadUrlPreference, true);
 				downloadSourcesJob.setUser(true);
 				downloadSourcesJob.schedule();
@@ -107,8 +104,8 @@ public class SRPMBuildHandler extends FedoraPackagerAbstractHandler implements I
 				// Kick off the SRPM job
 				SRPMBuildJob srpmBuildJob = new SRPMBuildJob(
 						RpmText.SRPMBuildHandler_buildingSRPM, srpmBuild,
-						fedoraProjectRoot, FedoraPackagerUtils.getVcsHandler(
-								fedoraProjectRoot).getBranchConfig());
+						getProjectRoot(), FedoraPackagerUtils.getVcsHandler(
+								getProjectRoot()).getBranchConfig());
 				srpmBuildJob.setUser(true);
 				srpmBuildJob.schedule();
 				try {

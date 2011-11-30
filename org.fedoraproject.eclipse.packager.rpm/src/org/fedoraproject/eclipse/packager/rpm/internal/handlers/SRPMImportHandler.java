@@ -41,6 +41,7 @@ import org.fedoraproject.eclipse.packager.utils.FedoraHandlerUtils;
 public class SRPMImportHandler extends FedoraPackagerAbstractHandler implements IPreferenceHandler {
 	private final FedoraPackagerLogger logger = FedoraPackagerLogger
 			.getInstance();
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		Shell shell = getShell(event);
