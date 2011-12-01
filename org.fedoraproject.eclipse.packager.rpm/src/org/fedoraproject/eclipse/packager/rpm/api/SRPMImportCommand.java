@@ -50,6 +50,12 @@ import org.fedoraproject.eclipse.packager.utils.FedoraPackagerUtils;
  */
 public class SRPMImportCommand {
 
+	private String srpm = null;
+	private IProject project = null;
+	private IContainer fprContainer;
+	private String uploadUrl;
+	private ISRPMImportCommandSLLPolicyCallback sslPolicyCallback;
+	
 	/**
 	 * @param srpm
 	 *            The srpm being imported.
@@ -60,19 +66,18 @@ public class SRPMImportCommand {
 	 *            imported.
 	 * @param uploadUrl
 	 *            The url of the lookaside cache.
+	 * @param sslPolicyCallback
+	 *            A callback for setting the proper SSL policy for lookaside
+	 *            uploads.
 	 */
 	public SRPMImportCommand(String srpm, IProject project,
-			IContainer fprContainer, String uploadUrl) {
+			IContainer fprContainer, String uploadUrl, ISRPMImportCommandSLLPolicyCallback sslPolicyCallback) {
 		this.srpm = srpm;
 		this.project = project;
 		this.fprContainer = fprContainer;
 		this.uploadUrl = uploadUrl;
+		this.sslPolicyCallback = sslPolicyCallback;
 	}
-
-	private String srpm = null;
-	private IProject project = null;
-	private IContainer fprContainer;
-	private String uploadUrl;
 
 	protected void checkConfiguration() throws CommandMisconfiguredException {
 		if (srpm == null) {
@@ -85,6 +90,10 @@ public class SRPMImportCommand {
 		if (project == null) {
 			throw new CommandMisconfiguredException(
 					RpmText.SRPMImportCommand_ProjectNotSet);
+		}
+		if (sslPolicyCallback == null) {
+			throw new CommandMisconfiguredException(
+					RpmText.SRPMImportCommand_CallbackNotSet);
 		}
 	}
 
@@ -247,8 +256,8 @@ public class SRPMImportCommand {
 						upload.setUploadURL(uploadUrl);
 					}
 					upload.setFileToUpload(newUploadFile);
-					// enable SLL authentication
-					upload.setFedoraSSLEnabled(true);
+					// set SSL policy via the callback
+					sslPolicyCallback.setSSLPolicy(upload, uploadUrl);
 					upload.addCommandListener(sourcesUpdater);
 					upload.addCommandListener(vcsIgnoreFileUpdater);
 					try {

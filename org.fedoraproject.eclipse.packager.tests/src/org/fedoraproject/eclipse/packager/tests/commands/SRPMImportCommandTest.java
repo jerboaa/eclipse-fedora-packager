@@ -31,6 +31,8 @@ import org.fedoraproject.eclipse.packager.PackagerPlugin;
 import org.fedoraproject.eclipse.packager.api.ChecksumValidListener;
 import org.fedoraproject.eclipse.packager.api.DownloadSourceCommand;
 import org.fedoraproject.eclipse.packager.api.FedoraPackager;
+import org.fedoraproject.eclipse.packager.api.UploadSourceCommand;
+import org.fedoraproject.eclipse.packager.rpm.api.ISRPMImportCommandSLLPolicyCallback;
 import org.fedoraproject.eclipse.packager.rpm.api.SRPMImportCommand;
 import org.fedoraproject.eclipse.packager.rpm.api.SRPMImportResult;
 import org.fedoraproject.eclipse.packager.rpm.api.errors.SRPMImportCommandException;
@@ -40,7 +42,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SRPMImportCommandTest {
+public class SRPMImportCommandTest implements ISRPMImportCommandSLLPolicyCallback {
 	// project under test
 	private IProject testProject;
 	// main interface class
@@ -92,7 +94,7 @@ public class SRPMImportCommandTest {
 	@Test
 	public void canImportSRPM() throws Exception {
 		SRPMImportCommand srpmImport = new SRPMImportCommand(srpmPath,
-				testProject, testProject, uploadURLForTesting);
+				testProject, testProject, uploadURLForTesting, this);
 		SRPMImportResult result = srpmImport.call(new NullProgressMonitor());
 		IProjectRoot fpr;
 		fpr = FedoraPackagerUtils.getProjectRoot(testProject);
@@ -151,7 +153,7 @@ public class SRPMImportCommandTest {
 	@Test
 	public void incorrectSpecFails() {
 		SRPMImportCommand srpmImport = new SRPMImportCommand(badSrpmPath,
-				testProject, testProject, uploadURLForTesting);
+				testProject, testProject, uploadURLForTesting, this);
 		try {
 			srpmImport.call(new NullProgressMonitor());
 		} catch (SRPMImportCommandException e) {
@@ -159,5 +161,11 @@ public class SRPMImportCommandTest {
 			return;
 		}
 		fail("Should not reach here.");
+	}
+
+	@Override
+	public void setSSLPolicy(UploadSourceCommand uploadCmd, String uploadUrl) {
+		// enable SLL authentication
+		uploadCmd.setFedoraSSLEnabled(true);
 	}
 }

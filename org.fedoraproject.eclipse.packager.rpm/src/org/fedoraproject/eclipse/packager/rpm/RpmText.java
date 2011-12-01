@@ -89,6 +89,7 @@ public class RpmText extends NLS {
 	/****/ public static String SRPMImportCommand_PathNotSet;
 	/****/ public static String SRPMImportCommand_ProjectNotSet;
 	/****/ public static String SRPMImportCommand_SRPMNotFound;
+	/****/ public static String SRPMImportCommand_CallbackNotSet;
 	// SRPMImportHandler
 	/****/ public static String SRPMImportHandler_FileDialogTitle;
 	/****/ public static String SRPMImportHandler_ImportingFromSRPM;
