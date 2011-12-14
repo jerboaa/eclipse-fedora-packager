@@ -78,7 +78,7 @@ public class FpGitProjectBits implements IFpProjectBits {
 	// Severin, 2011-01-11: Make '/master' postfix of branch name optional.
 	private final Pattern BRANCH_PATTERN = Pattern
 			.compile(".*(fc?)(\\d\\d?).*|" + //$NON-NLS-1$
-					".*(master).*|.*(el)(\\d).*|" + //$NON-NLS-1$
+					".*(master).*|.*(rhel)-(\\d(?:\\.\\d)?).*|.*(el)(\\d).*|" + //$NON-NLS-1$
 					".*(olpc)(\\d).*" //$NON-NLS-1$
 			);
 	/**
@@ -552,6 +552,11 @@ public class FpGitProjectBits implements IFpProjectBits {
 			distro = "rhel"; //$NON-NLS-1$
 			distroSuffix = ".el" + version; //$NON-NLS-1$
 			buildTarget = "dist-" + version + "E-epel-testing-candidate"; //$NON-NLS-1$ //$NON-NLS-2$
+		} else if (branchName.startsWith("RHEL-")) { //$NON-NLS-1$
+			// RHEL *NOT* EL specific things
+			distro = "rhel"; //$NON-NLS-1$
+			distroSuffix = ".el" + version.replace(".", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buildTarget = "rhel-" + version + "-candidate"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return new BranchConfigInstance(distroSuffix, version, distro,
 				buildTarget, branchName);
