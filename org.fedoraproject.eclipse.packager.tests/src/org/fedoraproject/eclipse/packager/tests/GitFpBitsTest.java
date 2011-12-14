@@ -76,5 +76,34 @@ public class GitFpBitsTest extends GitTestCase {
 		testProject.checkoutBranch("fedora_betaf16_testbranch");
 		assertEquals(projectBits.getBranchConfig().getEquivalentBranch(), "F-16");
 	}
-
+	
+	public void testElRhelNonExactBranches() throws JGitInternalException,
+			RefAlreadyExistsException, RefNotFoundException,
+			InvalidRefNameException, CoreException {
+		FpGitProjectBits projectBits = (FpGitProjectBits) FedoraPackagerUtils
+				.getVcsHandler(getFedoraprojectRoot());
+		assertNotNull(projectBits);
+		GitTestProject testProject = getProject();
+		// create branch name containing el6
+		testProject.getGitRepo().branchCreate()
+				.setName("something_test_el6_testbranch").call();
+		// check out created branch
+		testProject.checkoutBranch("something_test_el6_testbranch");
+		assertEquals(projectBits.getBranchConfig().getEquivalentBranch(),
+				"EL-6");
+		// create branch name containing rhel-6.2
+		testProject.getGitRepo().branchCreate()
+				.setName("my_cool_feature-hell-rhel-6.2_testbranch").call();
+		// check out created branch
+		testProject.checkoutBranch("my_cool_feature-hell-rhel-6.2_testbranch");
+		assertEquals(projectBits.getBranchConfig().getEquivalentBranch(),
+				"RHEL-6.2");
+		// create branch name containing rhel-6
+		testProject.getGitRepo().branchCreate()
+				.setName("my_cool_feature-hell-rhel-6_testbranch").call();
+		// check out created branch
+		testProject.checkoutBranch("my_cool_feature-hell-rhel-6_testbranch");
+		assertEquals(projectBits.getBranchConfig().getEquivalentBranch(),
+				"RHEL-6");
+	}
 }
